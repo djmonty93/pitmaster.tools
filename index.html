@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meat Smoking Calculator — Smoking Times, Temps &amp; Cook Timeline | SmokeCalc</title>
+<meta name="description" content="Free meat smoking calculator. Enter your cut, weight, and serving time to get a complete cook timeline, pull temperature, wood pairings, and exactly how much meat to buy. Covers brisket, pork butt, ribs, chicken, turkey, and more.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://smokecalc.com/">
+<meta property="og:title" content="Meat Smoking Calculator — Smoking Times, Temps &amp; Cook Timeline">
+<meta property="og:description" content="Free meat smoking calculator. Enter your cut, weight, and serving time to get a complete cook timeline, pull temperature, wood pairings, and exactly how much meat to buy.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://smokecalc.com/">
+<meta property="og:image" content="https://smokecalc.com/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Meat Smoking Calculator — Smoking Times, Temps &amp; Cook Timeline">
+<meta name="twitter:description" content="Free meat smoking calculator. Enter your cut, weight, and serving time to get a complete cook timeline, pull temperature, wood pairings, and exactly how much meat to buy.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23EF9F27' d='M36 4c2 10-3 15-8 21-5 6-9 11-9 19 0 10 7 16 15 16 11 0 19-8 19-19 0-12-7-19-17-37z'/%3E%3Cpath fill='%23D78108' d='M33 27c1 6-2 9-5 12-3 3-5 6-5 10 0 6 4 10 9 10 7 0 12-5 12-12 0-7-4-11-11-20z'/%3E%3C/svg%3E">
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'analytics_storage': 'denied',
+    'wait_for_update': 500
+  });
+</script>
+<!-- Google Analytics -->
+<!-- REPLACE: Google Analytics measurement ID. Loaded only after cookie consent is accepted. -->
+<!-- Google AdSense -->
+<!-- REPLACE: Google AdSense publisher ID. Loaded only after cookie consent is accepted. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "SmokeCalc — Meat Smoking Calculator",
+  "url": "https://smokecalc.com",
+  "description": "Free meat smoking calculator. Enter your cut, weight, and serving time to get a complete cook timeline, pull temperature, wood pairings, and exactly how much meat to buy.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "isAccessibleForFree": true,
+  "browserRequirements": "Requires JavaScript enabled in a modern browser.",
+  "featureList": [
+    "Smoking times chart",
+    "Cook timeline calculator",
+    "Serving size calculator",
+    "Wood pairing guide",
+    "Pull temperature reference"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How long does it take to smoke a brisket?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "At 225°F, brisket takes approximately 1.25–1.5 hours per pound. A 12-pound brisket will take 15–18 hours including the stall. Always cook to an internal temperature of 203°F and rest for at least 1 hour before slicing."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What temperature do you pull a pork shoulder?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Pull pork shoulder at 205°F internal temperature for pulled pork. At this temperature the collagen has fully broken down and the meat will pull apart easily. Rest for at least 30 minutes, ideally 1 hour, before pulling."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long do you smoke ribs?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Spare ribs take approximately 5–6 hours at 225°F. Baby back ribs take 4–5 hours. Ribs are done when they bend 45 degrees when lifted from one end and the meat has pulled back at least 1/4 inch from the bone ends. Internal temperature should reach 195–203°F."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much brisket do I need per person?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Plan for 6 ounces of cooked brisket per person for a normal serving, or 8 ounces per person for hungry adults. Since brisket loses approximately 40% of its weight during cooking, buy 1 pound of raw brisket for every 2–3 people and round up."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What wood is best for smoking brisket?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Oak is the most popular choice for brisket — it produces clean, neutral smoke that doesn't overpower the beef. Hickory adds a bolder, bacon-like flavor. Pecan offers a milder, slightly sweet smoke. Mesquite is traditional in Texas but burns hot and can turn bitter — use it sparingly or blend with oak."
+      }
+    }
+  ]
+}
+</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  background: #F5F0E8;
+  color: #1a1a1a;
+  min-height: 100vh;
+  line-height: 1.5;
+}
+:root {
+  --amber: #EF9F27;
+  --amber-dark: #C97F10;
+  --amber-light: #FDF3E0;
+  --charcoal: #1a1a1a;
+  --card-bg: #FFFFFF;
+  --card-border: #E8E0D0;
+  --green: #2D7A3A;
+  --red: #C0392B;
+  --blue: #2B6CB0;
+  --yellow-warn: #FFF3CD;
+  --yellow-warn-border: #F0AD4E;
+  --text-muted: #6B6560;
+  --radius: 8px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+header {
+  background: var(--charcoal);
+  padding: 0 1.5rem;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+.logo { font-family: Georgia,"Times New Roman",serif; font-size: 1.5rem; font-weight: 700; color: #fff; letter-spacing: -0.02em; }
+.logo span { color: var(--amber); }
+.page-hero {
+  max-width: 760px;
+  margin: 0 auto 1.75rem;
+  text-align: center;
+}
+.page-hero h1 {
+  font-family: Georgia,serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.1;
+  margin-bottom: .75rem;
+}
+.page-hero p {
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+.unit-controls { display: flex; align-items: center; gap: .5rem; }
+.unit-toggle { display: flex; background: #333; border-radius: 20px; padding: 3px; gap: 2px; }
+.unit-toggle button { background: none; border: none; color: #aaa; font-size: .75rem; font-weight: 600; padding: 4px 10px; border-radius: 16px; cursor: pointer; transition: background .15s,color .15s; letter-spacing: .03em; }
+.unit-toggle button.active { background: var(--amber); color: #fff; }
+a { color: inherit; }
+main { max-width: 960px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+.calculator-section-title {
+  font-family: Georgia,serif;
+  font-size: 1.45rem;
+  margin-bottom: .75rem;
+}
+.calculator-section-intro {
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+.section-title { font-family: Georgia,serif; font-size: 1.1rem; font-weight: 700; color: var(--charcoal); margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem; }
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--card-border); }
+.ad-slot { text-align: center; margin: 1.5rem 0; min-height: 90px; }
+.how-it-works {
+  max-width: 600px;
+  margin: 0 auto 1.75rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: .98rem;
+}
+.form-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.5rem; }
+@media (max-width:600px) { .form-grid { grid-template-columns: 1fr; } }
+.form-group { display: flex; flex-direction: column; gap: .35rem; }
+.form-group.full-width { grid-column: 1/-1; }
+.form-group label { font-size: .8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; }
+.form-group select,
+.form-group input[type="number"],
+.form-group input[type="time"] {
+  border: 1.5px solid var(--card-border); border-radius: 6px; padding: .55rem .75rem; font-size: .95rem;
+  color: var(--charcoal); background: #FAFAF8; font-family: inherit; transition: border-color .15s;
+  width: 100%; appearance: none; -webkit-appearance: none;
+}
+.form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236B6560' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right .75rem center; padding-right: 2.25rem;
+}
+.form-group select:focus, .form-group input:focus { outline: none; border-color: var(--amber); background: #fff; }
+.input-with-unit { display: flex; align-items: stretch; }
+.input-with-unit input { border-radius: 6px 0 0 6px; border-right: none; flex: 1; }
+.input-unit-label { display: flex; align-items: center; padding: 0 .75rem; background: #F0EBE3; border: 1.5px solid var(--card-border); border-left: none; border-radius: 0 6px 6px 0; font-size: .85rem; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+.serving-toggle { display: flex; border: 1.5px solid var(--card-border); border-radius: 6px; overflow: hidden; }
+.serving-toggle button { flex: 1; border: none; background: #FAFAF8; color: var(--text-muted); font-family: inherit; font-size: .875rem; font-weight: 600; padding: .55rem .5rem; cursor: pointer; transition: background .15s,color .15s; border-right: 1px solid var(--card-border); line-height: 1.2; }
+.serving-toggle button:last-child { border-right: none; }
+.serving-toggle button.active { background: var(--amber); color: #fff; }
+.serving-toggle button .sz { display: block; font-size: .7rem; font-weight: 400; opacity: .85; }
+#two-phase-section { display: none; grid-column: 1/-1; background: #FBF7F0; border: 1px solid #EDD9AA; border-radius: 6px; padding: 1rem; margin-top: .25rem; }
+#two-phase-section.visible { display: grid; }
+.tp-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width:600px) { .tp-inner { grid-template-columns: 1fr; } }
+#two-phase-section h4 { grid-column: 1/-1; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--amber-dark); margin-bottom: .25rem; }
+.calc-btn { width: 100%; margin-top: 1.25rem; padding: .875rem; background: var(--charcoal); color: #fff; border: none; border-radius: 6px; font-family: Georgia,serif; font-size: 1.05rem; font-weight: 700; letter-spacing: .02em; cursor: pointer; transition: background .15s,transform .1s; }
+.calc-btn:hover { background: #333; }
+.calc-btn:active { transform: scale(.99); }
+.vmsg { margin-top: .75rem; padding: .6rem .875rem; border-radius: 6px; font-size: .875rem; display: none; }
+.vmsg.error { background: #FDECEA; border: 1px solid #F5C6C1; color: #922B21; display: block; }
+.vmsg.warn { background: var(--yellow-warn); border: 1px solid var(--yellow-warn-border); color: #856404; display: block; }
+#results { display: none; animation: fadeUp .35s ease both; }
+#results.visible { display: block; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+.stat-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+@media (max-width:500px) { .stat-cards { grid-template-columns: 1fr; } }
+.stat-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.25rem 1rem; box-shadow: var(--shadow); text-align: center; position: relative; overflow: hidden; }
+.stat-card::before { content: ''; position: absolute; top:0; left:0; right:0; height: 3px; }
+.stat-card.c1::before { background: var(--blue); }
+.stat-card.c2::before { background: var(--amber); }
+.stat-card.c3::before { background: var(--red); }
+.sc-icon { font-size: 1.5rem; margin-bottom: .35rem; display: block; }
+.sc-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin-bottom: .4rem; }
+.sc-value { font-family: Georgia,serif; font-size: 2rem; font-weight: 700; color: var(--charcoal); line-height: 1; }
+.sc-sub { font-size: .8rem; color: var(--text-muted); margin-top: .35rem; }
+.card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.25rem 1.5rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+.srows { display: grid; gap: .5rem; margin-bottom: .75rem; }
+.srow { display: flex; justify-content: space-between; align-items: baseline; font-size: .9rem; padding-bottom: .5rem; border-bottom: 1px solid #F0EBE3; }
+.srow:last-child { border-bottom: none; padding-bottom: 0; }
+.srow .lbl { color: var(--text-muted); }
+.srow .val { font-weight: 700; color: var(--charcoal); }
+.srow .val.hi { color: var(--amber-dark); font-size: 1.05rem; }
+.mc-warn { display: none; margin-top: .75rem; padding: .75rem 1rem; background: var(--yellow-warn); border: 1px solid var(--yellow-warn-border); border-radius: 6px; font-size: .875rem; color: #6D4C00; }
+.mc-warn.visible { display: block; }
+.timeline { position: relative; padding-left: 2rem; }
+.timeline::before { content: ''; position: absolute; left: 10px; top: 8px; bottom: 8px; width: 2px; background: linear-gradient(to bottom, var(--blue), var(--amber), var(--green)); opacity: .3; }
+.tl-item { position: relative; padding: .625rem 0 .625rem 1.25rem; opacity: 0; transform: translateX(-8px); animation: tlIn .3s ease forwards; }
+@keyframes tlIn { to { opacity:1; transform:translateX(0); } }
+.tl-dot { position: absolute; left: -1.65rem; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px currentColor; }
+.tl-dot.blue  { background: var(--blue);  color: var(--blue); }
+.tl-dot.amber { background: var(--amber); color: var(--amber); }
+.tl-dot.red   { background: var(--red);   color: var(--red); }
+.tl-dot.green { background: var(--green); color: var(--green); }
+.tl-dot.gray  { background: #AAA; color: #AAA; }
+.tl-time { font-size: .78rem; font-weight: 700; color: var(--text-muted); letter-spacing: .04em; text-transform: uppercase; }
+.tl-label { font-size: .95rem; font-weight: 600; color: var(--charcoal); }
+.tl-sub { font-size: .8rem; color: var(--text-muted); margin-top: 1px; }
+.tl-item + .tl-item { border-top: 1px solid #F5F0E8; }
+.tw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+@media (max-width:640px) { .tw-grid { grid-template-columns: 1fr; } }
+.tip-card p { font-size: .9rem; line-height: 1.65; color: #333; }
+.wlist { display: flex; flex-direction: column; gap: .6rem; margin-top: .25rem; }
+.wpill { display: inline-flex; flex-direction: column; gap: 1px; }
+.wname { display: inline-block; background: var(--amber-light); border: 1px solid #EDD9AA; color: var(--amber-dark); font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 3px 10px; border-radius: 12px; margin-bottom: 1px; }
+.wflavor { font-size: .82rem; color: var(--text-muted); padding-left: 4px; }
+.print-btn { display: flex; align-items: center; gap: .5rem; padding: .7rem 1.5rem; background: none; border: 2px solid var(--charcoal); border-radius: 6px; font-family: inherit; font-size: .9rem; font-weight: 700; color: var(--charcoal); cursor: pointer; transition: background .15s,color .15s; letter-spacing: .03em; }
+.print-btn:hover { background: var(--charcoal); color: #fff; }
+.print-btn svg { width: 16px; height: 16px; }
+.share-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-top: 1.25rem;
+}
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .65rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--amber);
+  background: var(--amber-light);
+  color: var(--amber-dark);
+  font-size: .85rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.share-btn:hover,
+.share-btn:focus-visible {
+  background: var(--amber);
+  border-color: var(--amber-dark);
+  color: #fff;
+}
+.share-btn.copy-confirmed {
+  background: var(--charcoal);
+  border-color: var(--charcoal);
+  color: #fff;
+}
+.about-section {
+  max-width: 960px;
+  margin: 0 auto 2rem;
+  border: 1px solid #D9D4CC;
+  border-radius: var(--radius);
+  background: #ECE8E1;
+  color: #3F3A35;
+  font-size: 14px;
+}
+.about-section summary {
+  list-style: none;
+  cursor: pointer;
+  padding: .95rem 1.1rem;
+  font-weight: 700;
+}
+.about-section summary::-webkit-details-marker { display: none; }
+.about-section summary::after {
+  content: '+';
+  float: right;
+  font-size: 1rem;
+}
+.about-section[open] summary::after { content: '−'; }
+.about-section__content {
+  padding: 0 1.1rem 1rem;
+  line-height: 1.65;
+}
+.about-section__content p + p,
+.about-section__content p + ul,
+.about-section__content ul + p { margin-top: .75rem; }
+.about-section__content ul { padding-left: 1.1rem; }
+footer {
+  background: var(--charcoal);
+  color: #fff;
+  text-align: center;
+  padding: 2rem 1rem;
+  font-size: 13px;
+}
+footer nav {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin: .75rem 0;
+}
+footer a {
+  color: #fff;
+  text-decoration: none;
+}
+footer a:hover,
+footer a:focus-visible { text-decoration: underline; }
+.footer-small {
+  max-width: 720px;
+  margin: .75rem auto 0;
+  color: rgba(255,255,255,.85);
+  line-height: 1.6;
+}
+.cookie-banner {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 300;
+  padding: 1rem;
+  display: none;
+}
+.cookie-banner.visible { display: block; }
+.cookie-banner__inner {
+  max-width: 960px;
+  margin: 0 auto;
+  background: #1a1a1a;
+  color: #fff;
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 10px 24px rgba(0,0,0,.28);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+.cookie-banner__text {
+  flex: 1 1 360px;
+  font-size: .95rem;
+}
+.cookie-banner__text a {
+  color: var(--amber);
+  text-decoration: underline;
+}
+.cookie-banner__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+}
+.cookie-banner__actions button {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: .7rem 1rem;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.cookie-accept {
+  background: var(--amber);
+  color: #fff;
+}
+.cookie-reject {
+  background: transparent;
+  border-color: rgba(255,255,255,.28);
+  color: #fff;
+}
+.editorial-section {
+  margin: 2rem 0;
+}
+.editorial-section h2 {
+  font-family: Georgia,serif;
+  font-size: 1.55rem;
+  margin-bottom: .85rem;
+}
+.editorial-section h3 {
+  font-family: Georgia,serif;
+  font-size: 1.1rem;
+  margin: 1.1rem 0 .5rem;
+}
+.editorial-section p,
+.editorial-section li {
+  color: #332F2B;
+  line-height: 1.75;
+}
+.editorial-section p + p,
+.editorial-section p + h3,
+.editorial-section h3 + p,
+.editorial-section table + p,
+.editorial-section ul + p,
+.editorial-section ol + p,
+.editorial-section p + ul,
+.editorial-section p + ol,
+.editorial-section .editorial-table-wrap + p,
+.editorial-section .wood-grid + p,
+.editorial-section .inline-table + p,
+.editorial-section .guide-card + .guide-card {
+  margin-top: .9rem;
+}
+.editorial-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+.editorial-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+}
+.editorial-table th,
+.editorial-table td {
+  text-align: left;
+  padding: .8rem .9rem;
+  border-bottom: 1px solid #EFE7DA;
+  vertical-align: top;
+}
+.editorial-table thead th {
+  position: sticky;
+  top: 0;
+  background: #FAF5EC;
+  z-index: 1;
+}
+.editorial-table tbody tr:nth-child(even) { background: #FCFAF6; }
+.inline-table {
+  width: 100%;
+  max-width: 520px;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  background: #fff;
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow);
+}
+.inline-table th,
+.inline-table td {
+  padding: .7rem .8rem;
+  border-bottom: 1px solid #EFE7DA;
+  text-align: left;
+}
+.wood-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.wood-card,
+.guide-card,
+.embed-section {
+  background: rgba(255,255,255,.82);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.25rem 1.35rem;
+}
+.wood-card p,
+.guide-card p { margin-top: .55rem; }
+.mistakes-list {
+  display: grid;
+  gap: 1rem;
+}
+.mistakes-list li {
+  background: rgba(255,255,255,.78);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 1rem 1.15rem;
+  margin-left: 1.25rem;
+}
+.mistakes-list h3 {
+  margin-top: 0;
+}
+.embed-section textarea {
+  width: 100%;
+  min-height: 140px;
+  margin: .85rem 0;
+  padding: .9rem 1rem;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: #fff;
+  color: #1a1a1a;
+  resize: vertical;
+  font-family: Consolas, "SFMono-Regular", monospace;
+  font-size: .9rem;
+  line-height: 1.6;
+}
+.embed-note {
+  font-size: .86rem;
+  color: var(--text-muted);
+}
+.text-link {
+  color: #9A5F08;
+  text-decoration: underline;
+}
+#print-header { display: none; }
+@media (max-width:640px) {
+  .cookie-banner__inner { align-items: stretch; }
+  .cookie-banner__actions { width: 100%; }
+  .cookie-banner__actions button { flex: 1 1 180px; }
+  .wood-grid { grid-template-columns: 1fr; }
+}
+@media print {
+  body { background: #fff !important; color: #000 !important; font-size: 12px; }
+  body::before {
+    content: "SmokeCalc — smokecalc.com";
+    display: block;
+    font-family: Georgia,serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: .75rem;
+  }
+  body * { color: #000 !important; box-shadow: none !important; text-shadow: none !important; }
+  header,.form-card,.calc-btn,.vmsg,.print-btn,.ad-slot,.cookie-banner,.share-buttons,.about-section,.no-print,footer nav { display: none !important; }
+  #results { display: block !important; }
+  #print-header { display: block !important; border-bottom: 2px solid #000; padding-bottom: .5rem; margin-bottom: 1rem; }
+  #print-header .print-title { font-family: Georgia,serif; font-size: 1.4rem; font-weight: 700; margin-bottom: .2rem; }
+  #print-header .pm { font-size: .85rem; color: #444; }
+  .stat-cards { grid-template-columns: repeat(3,1fr); gap: .5rem; margin-bottom: .75rem; }
+  .stat-card { border: 1.5px solid #000; box-shadow: none; padding: .6rem; }
+  .stat-card::before { display: none; }
+  .sc-value { font-size: 1.4rem; }
+  .card,.tip-card,.woods-card { box-shadow: none; border: 1px solid #CCC; padding: .6rem .75rem; margin-bottom: .5rem; }
+  .tw-grid { gap: .5rem; }
+  .tl-item { padding: .3rem 0 .3rem 1rem; }
+  .mc-warn { background: none; border: 1.5px solid #999; }
+  main { padding: .5rem; }
+  .section-title { font-size: .9rem; }
+  footer {
+    display: block !important;
+    background: #fff !important;
+    color: #000 !important;
+    border-top: 1px solid #000;
+    padding: 1rem 0 0;
+    margin-top: 1rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Smoke<span>Calc</span></div>
+  <div class="unit-controls">
+    <div class="unit-toggle" id="tempToggle">
+      <button data-unit="F" class="active">&#xB0;F</button>
+      <button data-unit="C">&#xB0;C</button>
+    </div>
+    <div class="unit-toggle" id="weightToggle">
+      <button data-unit="lbs" class="active">lbs</button>
+      <button data-unit="kg">kg</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div id="print-header">
+    <div class="print-title" id="ptitle">SmokeCalc Results</div>
+    <div class="pm" id="pmeta"></div>
+  </div>
+
+  <section class="page-hero" aria-label="Page introduction">
+    <h1>Meat Smoking Calculator</h1>
+    <p>Plan your brisket, pork butt, ribs, chicken, turkey, and more with a calculator that works backward from your serving time and gives you a cleaner smoking timeline.</p>
+  </section>
+
+  <div class="ad-slot">
+    <!-- REPLACE: AdSense publisher and slot IDs for the top leaderboard ad. -->
+    <ins class="adsbygoogle"
+      style="display:block"
+      data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+      data-ad-slot="XXXXXXXXXX"
+      data-ad-format="auto"
+      data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <section class="how-it-works" aria-label="How SmokeCalc works">
+    <p>Enter your cut, weight, and what time you want to eat. SmokeCalc works backward to give you a complete cook timeline — including when to start your smoker, when the stall will hit, and exactly when to pull the meat.</p>
+  </section>
+
+  <section id="calculator" aria-labelledby="calculator-title">
+    <h2 class="calculator-section-title" id="calculator-title">Build your smoking timeline</h2>
+    <p class="calculator-section-intro">Choose your cut, target serving time, and smoker setup to generate a cook plan that matches how the calculator handles timing, temperatures, stall windows, and rest periods.</p>
+
+  <div class="form-card">
+    <h3 class="section-title">Cook Settings</h3>
+    <div class="form-grid">
+
+      <div class="form-group full-width">
+        <label for="meatType">Meat Type</label>
+        <select id="meatType">
+          <option value="brisket-sliced">Brisket (Sliced)</option>
+          <option value="brisket-pulled">Brisket (Pulled)</option>
+          <option value="pork-butt-sliced">Pork Butt/Shoulder (Sliced)</option>
+          <option value="pork-butt-pulled">Pork Butt/Shoulder (Pulled)</option>
+          <option value="pork-loin">Pork Loin</option>
+          <option value="baby-back-ribs">Baby Back Ribs</option>
+          <option value="competition-ribs">Competition Ribs</option>
+          <option value="spare-ribs">Spare Ribs</option>
+          <option value="beef-ribs">Beef Ribs</option>
+          <option value="prime-rib">Prime Rib Roast</option>
+          <option value="tri-tip">Tri-Tip</option>
+          <option value="whole-chicken">Whole Chicken</option>
+          <option value="whole-chicken-spatch">Whole Chicken (Spatchcocked)</option>
+          <option value="chicken-breast">Chicken Breast</option>
+          <option value="chicken-thighs">Chicken Thighs</option>
+          <option value="chicken-quarters">Chicken Quarters</option>
+          <option value="chicken-wings">Chicken Wings</option>
+          <option value="whole-turkey">Whole Turkey</option>
+          <option value="whole-turkey-spatch">Whole Turkey (Spatchcocked)</option>
+          <option value="turkey-breast">Turkey Breast</option>
+          <option value="turkey-leg">Turkey Leg</option>
+          <option value="turkey-thighs">Turkey Thighs</option>
+          <option value="turkey-wings">Turkey Wings</option>
+          <option value="lamb-shoulder">Lamb Shoulder</option>
+          <option value="lamb-chops">Lamb Chops</option>
+          <option value="lamb-loin">Lamb Loin</option>
+          <option value="pork-belly">Pork Belly</option>
+          <option value="beef-chuck">Beef Chuck Roast</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="weight">Weight</label>
+        <div class="input-with-unit">
+          <input type="number" id="weight" min="0.1" step="0.1" value="10">
+          <span class="input-unit-label" id="weightUnit">lbs</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="smokerTemp">Smoker Temperature</label>
+        <select id="smokerTemp">
+          <option value="225">225&#xB0;F</option>
+          <option value="250">250&#xB0;F</option>
+          <option value="275">275&#xB0;F</option>
+          <option value="300">300&#xB0;F</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="serveTime">Serving Time</label>
+        <input type="time" id="serveTime" value="18:00">
+      </div>
+
+      <div class="form-group">
+        <label for="wrapMethod">Wrap Method</label>
+        <select id="wrapMethod">
+          <option value="foil">Foil (Texas Crutch)</option>
+          <option value="paper">Butcher Paper</option>
+          <option value="none">No Wrap</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="boneInGroup">
+        <label for="boneIn">Bone-In?</label>
+        <select id="boneIn">
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="injected">Injected / Marinated?</label>
+        <select id="injected">
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="numPeople">Number of People</label>
+        <input type="number" id="numPeople" min="1" max="999" value="6">
+      </div>
+
+      <div class="form-group full-width">
+        <label>Serving Size</label>
+        <div class="serving-toggle" id="servingToggle">
+          <button data-size="light" class="active">Light <span class="sz" id="szLight">4 oz</span></button>
+          <button data-size="normal">Normal <span class="sz" id="szNormal">6 oz</span></button>
+          <button data-size="hungry">Hungry <span class="sz" id="szHungry">8 oz</span></button>
+        </div>
+      </div>
+
+      <div id="two-phase-section">
+        <div class="tp-inner">
+          <h4>Sear Phase</h4>
+          <div class="form-group">
+            <label for="grillType">Grill / Sear Method</label>
+            <select id="grillType">
+              <option value="charcoal">Charcoal Grill</option>
+              <option value="gas">Gas Grill</option>
+              <option value="castIron">Cast Iron Skillet</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="searTemp">Sear Temperature</label>
+            <div class="input-with-unit">
+              <input type="number" id="searTemp" value="500" min="200" max="800">
+              <span class="input-unit-label" id="searTempUnit">&#xB0;F</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="vmsg" id="vmsg"></div>
+    <button class="calc-btn" id="calcBtn">Calculate Cook</button>
+  </div>
+
+  <div class="ad-slot">
+    <!-- REPLACE: AdSense publisher and slot IDs for the mid-page responsive ad. -->
+    <ins class="adsbygoogle"
+      style="display:block"
+      data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+      data-ad-slot="XXXXXXXXXX"
+      data-ad-format="auto"
+      data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <div id="results">
+    <div class="stat-cards">
+      <div class="stat-card c1">
+        <span class="sc-icon">&#x23F1;</span>
+        <div class="sc-label">Total Cook Time</div>
+        <div class="sc-value" id="sCookTime">&#x2014;</div>
+        <div class="sc-sub">hours</div>
+      </div>
+      <div class="stat-card c2">
+        <span class="sc-icon">&#x1F525;</span>
+        <div class="sc-label">Light Smoker At</div>
+        <div class="sc-value" id="sStartTime">&#x2014;</div>
+        <div class="sc-sub" id="sStartDay"></div>
+      </div>
+      <div class="stat-card c3">
+        <span class="sc-icon">&#x1F321;</span>
+        <div class="sc-label">Pull Temperature</div>
+        <div class="sc-value" id="sPullTemp">&#x2014;</div>
+        <div class="sc-sub" id="sPullSub">internal</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="section-title">Serving Size Math</h3>
+      <div class="srows" id="srowsEl"></div>
+      <div class="mc-warn" id="mcWarn"></div>
+    </div>
+
+    <div class="card">
+      <h3 class="section-title">Cook Timeline</h3>
+      <div class="timeline" id="tlEl"></div>
+    </div>
+
+    <div class="tw-grid">
+      <div class="card tip-card" style="margin-bottom:0">
+        <h3 class="section-title">Pitmaster Tip</h3>
+        <p id="tipEl"></p>
+      </div>
+      <div class="card woods-card" style="margin-bottom:0">
+        <h3 class="section-title">Wood Pairings</h3>
+        <div class="wlist" id="woodsEl"></div>
+      </div>
+    </div>
+    <div style="margin-top:1rem">
+      <button class="print-btn" id="printBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 6 2 18 2 18 9"/>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <rect x="6" y="14" width="12" height="8"/>
+        </svg>
+        Print Timeline
+      </button>
+    </div>
+    <div class="share-buttons no-print" aria-label="Share SmokeCalc">
+      <a class="share-btn" href="https://pinterest.com/pin/create/button/?url=https://smokecalc.com&amp;description=Free+meat+smoking+calculator" target="_blank" rel="noopener noreferrer">Share on Pinterest</a>
+      <a class="share-btn" href="https://www.facebook.com/sharer/sharer.php?u=https://smokecalc.com" target="_blank" rel="noopener noreferrer">Share on Facebook</a>
+      <button class="share-btn" id="copyLinkBtn" type="button">Copy link</button>
+    </div>
+  </div>
+  </section>
+
+  <section class="editorial-section" aria-labelledby="smoking-chart-title">
+    <h2 id="smoking-chart-title">Smoking times and temperatures chart</h2>
+    <p>Use the calculator above for a personalized cook timeline, or reference this chart for quick estimates at 225–250°F.</p>
+    <div class="editorial-table-wrap">
+      <table class="editorial-table">
+        <thead>
+          <tr>
+            <th>Cut</th>
+            <th>Smoker Temp</th>
+            <th>Time Per Lb (or Flat Time)</th>
+            <th>Pull Temp</th>
+            <th>Rest Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Brisket (Sliced)</td><td>225-250°F</td><td>1.5 hr/lb</td><td>195°F</td><td>90 min</td></tr>
+          <tr><td>Brisket (Pulled)</td><td>225-250°F</td><td>1.5 hr/lb</td><td>205°F</td><td>90 min</td></tr>
+          <tr><td>Pork Butt/Shoulder (Sliced)</td><td>225-250°F</td><td>1.5 hr/lb</td><td>185°F</td><td>45 min</td></tr>
+          <tr><td>Pork Butt/Shoulder (Pulled)</td><td>225-250°F</td><td>1.5 hr/lb</td><td>203°F</td><td>60 min</td></tr>
+          <tr><td>Pork Loin</td><td>225-250°F</td><td>0.5 hr/lb</td><td>145°F</td><td>15 min</td></tr>
+          <tr><td>Baby Back Ribs</td><td>225-250°F</td><td>5.5 hr flat</td><td>195°F</td><td>20 min</td></tr>
+          <tr><td>Competition Ribs</td><td>225-250°F</td><td>5 hr flat</td><td>190°F</td><td>20 min</td></tr>
+          <tr><td>Spare Ribs</td><td>225-250°F</td><td>6.5 hr flat</td><td>198°F</td><td>20 min</td></tr>
+          <tr><td>Beef Ribs</td><td>225-250°F</td><td>0.75 hr/lb</td><td>203°F</td><td>45 min</td></tr>
+          <tr><td>Prime Rib Roast</td><td>225-250°F smoke, then sear</td><td>0.35 hr/lb</td><td>130°F</td><td>25 min</td></tr>
+          <tr><td>Tri-Tip</td><td>225-250°F smoke, then sear</td><td>0.5 hr/lb</td><td>130°F</td><td>10 min</td></tr>
+          <tr><td>Whole Chicken</td><td>225-250°F</td><td>0.75 hr/lb</td><td>165°F</td><td>15 min</td></tr>
+          <tr><td>Whole Chicken (Spatchcocked)</td><td>225-250°F</td><td>2.75 hr flat</td><td>165°F</td><td>15 min</td></tr>
+          <tr><td>Chicken Breast</td><td>225-250°F smoke, then sear</td><td>1.25 hr flat</td><td>165°F</td><td>5 min</td></tr>
+          <tr><td>Chicken Thighs</td><td>225-250°F</td><td>1.75 hr flat</td><td>175°F</td><td>10 min</td></tr>
+          <tr><td>Chicken Quarters</td><td>225-250°F</td><td>2.5 hr flat</td><td>175°F</td><td>10 min</td></tr>
+          <tr><td>Chicken Wings</td><td>225-250°F smoke, then sear</td><td>1.25 hr flat</td><td>165°F</td><td>5 min</td></tr>
+          <tr><td>Whole Turkey</td><td>225-250°F</td><td>0.6 hr/lb</td><td>165°F</td><td>35 min</td></tr>
+          <tr><td>Whole Turkey (Spatchcocked)</td><td>225-250°F</td><td>0.45 hr/lb</td><td>165°F</td><td>25 min</td></tr>
+          <tr><td>Turkey Breast</td><td>225-250°F</td><td>0.5 hr/lb</td><td>165°F</td><td>20 min</td></tr>
+          <tr><td>Turkey Leg</td><td>225-250°F</td><td>2.25 hr flat</td><td>175°F</td><td>15 min</td></tr>
+          <tr><td>Turkey Thighs</td><td>225-250°F</td><td>2.5 hr flat</td><td>175°F</td><td>15 min</td></tr>
+          <tr><td>Turkey Wings</td><td>225-250°F smoke, then sear</td><td>2 hr flat</td><td>165°F</td><td>10 min</td></tr>
+          <tr><td>Lamb Shoulder</td><td>225-250°F</td><td>1.5 hr/lb</td><td>190°F</td><td>45 min</td></tr>
+          <tr><td>Lamb Chops</td><td>225-250°F smoke, then sear</td><td>0.75 hr flat</td><td>130°F</td><td>5 min</td></tr>
+          <tr><td>Lamb Loin</td><td>225-250°F smoke, then sear</td><td>1 hr flat</td><td>130°F</td><td>8 min</td></tr>
+          <tr><td>Pork Belly</td><td>225-250°F</td><td>1.5 hr/lb</td><td>200°F</td><td>30 min</td></tr>
+          <tr><td>Beef Chuck Roast</td><td>225-250°F</td><td>1.5 hr/lb</td><td>203°F</td><td>45 min</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="editorial-section" aria-labelledby="calculate-smoking-times-title">
+    <h2 id="calculate-smoking-times-title">How to calculate smoking times</h2>
+    <p>The most reliable way to estimate a long barbecue cook is to start with a baseline rate, then adjust for the actual cut in front of you. Large roasts like brisket, pork butt, lamb shoulder, and chuck roast follow a per-pound method: multiply the cut’s average hours per pound by the raw weight, then leave margin for the stall, wrapping decisions, weather, and rest time. A 10-pound pork butt at 1.5 hours per pound is not a 15-hour promise, but it is a solid planning number.</p>
+    <p>Other meats behave differently. Ribs, wings, chicken thighs, turkey legs, and several reverse-sear cuts rely on flat cook times because the shape, thickness, and bone structure matter more than raw scale weight. Two racks of ribs may weigh differently, but they still cook in roughly the same window because heat travels through a similar thickness of meat.</p>
+    <h3>The stall explained</h3>
+    <p>The stall is the long plateau that usually appears once a large cut reaches roughly 150–170°F internal. Moisture evaporating from the surface cools the meat at nearly the same rate the smoker is heating it, while collagen is also beginning to break down into gelatin. On brisket and pork shoulder, the stall often lasts 2 to 5 hours depending on airflow, humidity, bark formation, and whether you wrap.</p>
+    <h3>Why pull temperature beats the clock</h3>
+    <p>Time gets you close, but internal temperature and feel tell you when the meat is actually done. Pull temperature matters because connective tissue finishes rendering at specific internal ranges, not at a specific clock reading. Resting matters just as much. Once you pull the meat, resting allows carryover heat to settle, juices to redistribute, and the rendered collagen to thicken so slices stay moist instead of flooding the cutting board.</p>
+  </section>
+
+  <section class="editorial-section" aria-labelledby="meat-per-person-title">
+    <h2 id="meat-per-person-title">How much meat to buy per person</h2>
+    <p>Raw weight and cooked weight are not the same thing, and that difference is why barbecue shopping trips so often go wrong. Large smoked cuts lose water, rendered fat, and trim over the course of the cook, so the number that matters for serving is cooked yield, not the raw package label. Brisket usually loses about 40% of its starting weight, pork butt lands closer to 35%, ribs around 25%, whole chicken around 25%, and turkey around 20%.</p>
+    <table class="inline-table">
+      <thead>
+        <tr>
+          <th>Cut Type</th>
+          <th>Typical Shrinkage</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Brisket</td><td>~40%</td></tr>
+        <tr><td>Pork butt</td><td>~35%</td></tr>
+        <tr><td>Ribs</td><td>~25%</td></tr>
+        <tr><td>Whole chicken</td><td>~25%</td></tr>
+        <tr><td>Turkey</td><td>~20%</td></tr>
+      </tbody>
+    </table>
+    <p>A good rule of thumb is 6 ounces cooked per person for a normal meal, 8 ounces for hungry adults, and 4 ounces when the table is loaded with sides. If you want a fast estimate, use the <a class="text-link" href="/#calculator">meat per person calculator</a> above and let the tool back into the raw-buy number automatically.</p>
+    <p>For 10 hungry adults eating brisket, you need 80oz (5 lbs) cooked. At 40% shrinkage, buy at least 8.5 lbs raw — round up to 9–10 lbs for safety. That extra cushion is smart because trimming and uneven bark loss can shave a little more off the final yield.</p>
+  </section>
+
+  <section class="editorial-section" aria-labelledby="wood-pairing-guide-title">
+    <h2 id="wood-pairing-guide-title">Best wood for smoking — pairing guide by meat</h2>
+    <p>If you want to <a class="text-link" href="/#calculator">enter your cut and get a full timeline</a>, the calculator above also surfaces wood recommendations. Use this quick guide when you just need a clean pairing fast.</p>
+    <div class="wood-grid">
+      <article class="wood-card">
+        <h3>Beef</h3>
+        <p>Oak gives beef neutral, even smoke and is the safest all-day choice. Hickory is bolder and more bacon-like, pecan is slightly sweet and rounder, and mesquite is intense enough that it works best in moderation or blended with oak.</p>
+      </article>
+      <article class="wood-card">
+        <h3>Pork</h3>
+        <p>Apple adds sweet fruit character, cherry gives mild smoke and deep mahogany color, hickory brings classic barbecue punch, and pecan lands in the middle with a rich, nutty finish that still stays balanced over long cooks.</p>
+      </article>
+      <article class="wood-card">
+        <h3>Chicken</h3>
+        <p>Apple and cherry are gentle enough for white meat, pecan gives more depth without turning harsh, and alder stays delicate when you want smoke in the background instead of dominating the bird.</p>
+      </article>
+      <article class="wood-card">
+        <h3>Turkey</h3>
+        <p>Apple keeps turkey sweet and clean, cherry improves color, maple gives a light mellow smoke that plays well with herb butter, and pecan adds just enough richness for dark meat without overpowering the breast.</p>
+      </article>
+      <article class="wood-card">
+        <h3>Lamb</h3>
+        <p>Oak is usually the best base wood for lamb, pecan adds subtle sweetness, cherry brightens the finish, and rosemary or herb sprigs over coals can add a Mediterranean accent when used lightly.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="editorial-section guide-card" aria-labelledby="brisket-guide-title">
+    <h2 id="brisket-guide-title">How long to smoke a brisket</h2>
+    <p>At 225°F, brisket usually takes about 1.5 hours per pound. At 250°F, that pace often drops closer to 1.25 hours per pound, although shape and thickness matter just as much as scale weight. A full packer almost always hits a stall somewhere between 150°F and 170°F internal, and that plateau can last several hours if you leave the meat unwrapped. Foil pushes through the stall faster and traps more moisture, while butcher paper breathes better and protects bark texture.</p>
+    <p>For sliced brisket, start checking for doneness in the high 190s and expect the sweet spot around 203°F in the thickest part of the flat. The real finish test is feel: the probe should slide in with almost no resistance. After the brisket comes off, rest it at least 1 hour and ideally 2 hours in a warm holding environment so the rendered collagen settles and the slices stay juicy. The most common brisket mistake is pulling based on the clock alone. If it is not probe-tender yet, it is not done. When in doubt, <a class="text-link" href="/#calculator">use the brisket smoking calculator above</a> to plan your start time and then let tenderness make the final call.</p>
+  </section>
+
+  <section class="editorial-section guide-card" aria-labelledby="pork-shoulder-guide-title">
+    <h2 id="pork-shoulder-guide-title">How long to smoke a pork shoulder</h2>
+    <p>Pork shoulder usually runs about 1.5 hours per pound in the 225°F range, with slightly faster cooks at 250°F. That makes it one of the easiest big barbecue cuts to plan, but the stall still matters. Expect a long plateau once the shoulder reaches the mid-150s, especially if you leave it unwrapped to build bark. Pulled pork is forgiving because the shoulder has a lot of intramuscular fat and connective tissue, so it can take a little extra heat without drying out.</p>
+    <p>For classic pulled pork, target 205°F internal and confirm that the blade bone wiggles freely or the probe slides into the money muscle and horn meat without resistance. Bone-in shoulders usually take a little longer than boneless roasts because the bone changes how heat moves through the cut, but the difference is usually modest rather than dramatic. Once done, wrap and rest the shoulder in a cooler or insulated holding box for at least an hour so the bark softens just enough and the juices redistribute. That rest also makes the money muscle easier to slice cleanly before you pull the rest of the roast.</p>
+  </section>
+
+  <section class="editorial-section guide-card" aria-labelledby="ribs-guide-title">
+    <h2 id="ribs-guide-title">How long to smoke ribs</h2>
+    <p>Ribs are the best reminder that barbecue timing is about thickness and structure, not raw weight. Baby back ribs usually finish in about 4 to 5 hours at 225°F, while spare ribs often need 5 to 6 hours because they are meatier, flatter, and loaded with more connective tissue. Competition-style ribs sit between those ranges depending on how aggressively they are trimmed. The popular 3-2-1 method describes one common approach for spare ribs: three hours unwrapped, two hours wrapped, and a final hour to set sauce. It is a useful training wheel, not a rule.</p>
+    <p>Ribs are usually done around 195°F internal, but texture matters more than a single number. The bend test is more reliable: lift the rack from one end and look for a deep flex with slight cracking in the bark on top. You also want visible pullback at the bone ends. If the rack still feels tight and stiff, keep cooking. If the bones are falling out before slicing, you pushed too far. Because ribs do not follow a per-pound formula, flat cook windows work better for planning than scale weight ever will.</p>
+  </section>
+
+  <section class="editorial-section guide-card" aria-labelledby="turkey-guide-title">
+    <h2 id="turkey-guide-title">Smoking a whole turkey — times and temperature</h2>
+    <p>Whole turkey smokes faster and more evenly when you spatchcock it because flattening the bird exposes the thighs and breasts to more even heat. A traditional whole turkey often cooks around 0.6 hours per pound at 225–250°F, while a spatchcocked bird drops closer to 0.45 hours per pound. Brining is worth the effort because turkey breast is lean and benefits from extra salt and moisture retention before it ever hits the pit.</p>
+    <p>The finishing temperature matters more than the clock. Pull the turkey when the thickest part of the thigh reaches 165°F and confirm the breast is also safely cooked. The biggest turkey complaint on a smoker is rubbery skin, which is what happens when the bird stays too long at low temperature without enough rendering power. Spatchcocking helps because the flatter shape exposes more skin to heat, but you can also solve the problem by finishing hotter late in the cook or crisping the bird briefly at higher heat before serving. Let the turkey rest long enough to settle the juices, then carve while the skin still has its best texture.</p>
+  </section>
+
+  <section class="editorial-section guide-card" aria-labelledby="chicken-guide-title">
+    <h2 id="chicken-guide-title">How long to smoke chicken</h2>
+    <p>Chicken timing depends heavily on whether you are cooking a whole bird, a spatchcocked bird, or individual pieces. A whole chicken usually runs about 45 minutes per pound at 225–250°F, while a spatchcocked chicken often lands in a faster 2.5 to 3 hour window regardless of small weight differences. Pieces behave more like flat-time cooks: breasts and wings are quick, while thighs and quarters need longer because the dark meat carries more connective tissue and benefits from extra render time.</p>
+    <p>For safety and texture, pull breast meat at 165°F and thighs closer to 175°F. Thighs are more forgiving because the extra fat and connective tissue improve with added heat, but breasts dry out quickly if you overshoot. The classic smoked-chicken problem is rubbery skin from low-and-slow cooking. The fix is simple: cook hotter from the start, finish over a grill, or use a reverse-sear style finish so the skin gets enough heat to render properly. If you want the easiest win, choose thighs over breasts. They tolerate timing mistakes better and still taste great when you need a little extra time to finish the rest of the meal.</p>
+  </section>
+
+  <section class="editorial-section" aria-labelledby="smoking-mistakes-title">
+    <h2 id="smoking-mistakes-title">Common meat smoking mistakes</h2>
+    <ol class="mistakes-list">
+      <li>
+        <h3>Relying on time instead of temperature</h3>
+        <p>Cook time estimates are planning tools, not finish lines. Meat becomes tender when collagen, fat, and muscle fibers reach the right internal state, which is why thermometers and tenderness checks matter more than the clock.</p>
+      </li>
+      <li>
+        <h3>Not accounting for the stall</h3>
+        <p>When the stall hits, impatient cooks often panic and crank the heat too far. That can scorch bark or dry the outside before the center becomes tender. Plan for the plateau instead of fighting it emotionally.</p>
+      </li>
+      <li>
+        <h3>Opening the smoker too often</h3>
+        <p>Every lid lift dumps heat, moisture, and airflow stability. The recovery time adds up, and the meat ends up taking longer than expected even though the pit looked hot when you closed it again.</p>
+      </li>
+      <li>
+        <h3>Under-resting the meat</h3>
+        <p>Cut too early and the juices rush out onto the board instead of staying in the slices. Resting gives the rendered fat and gelatin time to settle so the meat holds together and stays moist.</p>
+      </li>
+      <li>
+        <h3>Too much smoke</h3>
+        <p>Thin blue smoke is clean and gentle. Thick white smoke usually means incomplete combustion, harsh flavor, and bitter bark. More visible smoke is not better smoke.</p>
+      </li>
+      <li>
+        <h3>Not trimming fat properly</h3>
+        <p>Too much exterior fat blocks seasoning, smoke, and bark formation. Too little leaves the meat exposed and can reduce moisture protection. Trimming is about balance, not maximum removal.</p>
+      </li>
+      <li>
+        <h3>Cooking cold meat straight from the fridge</h3>
+        <p>Letting the meat temper briefly while the pit settles helps the surface dry, takes the chill off the exterior, and gives seasonings a better chance to adhere evenly before the cook starts.</p>
+      </li>
+      <li>
+        <h3>Inconsistent smoker temperature</h3>
+        <p>A stable fire matters more than chasing a perfect number. If your pit is swinging constantly, timing gets harder, bark develops unevenly, and the meat cooks less predictably from edge to center.</p>
+      </li>
+    </ol>
+  </section>
+
+  <div class="ad-slot">
+    <!-- REPLACE: AdSense publisher and slot IDs for the bottom responsive ad. -->
+    <ins class="adsbygoogle"
+      style="display:block"
+      data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+      data-ad-slot="XXXXXXXXXX"
+      data-ad-format="auto"
+      data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <section class="embed-section no-print" aria-labelledby="embed-title">
+    <h2 id="embed-title">Embed this calculator on your site</h2>
+    <p>You're welcome to embed SmokeCalc on your BBQ blog or recipe site — free, forever.</p>
+    <textarea id="embedCode" readonly><iframe src="https://smokecalc.com" width="100%" height="800" frameborder="0" title="Meat Smoking Calculator — SmokeCalc" loading="lazy"></iframe></textarea>
+    <button class="share-btn" id="copyEmbedBtn" type="button">Copy embed code</button>
+    <p class="embed-note">No attribution required, but a link back to SmokeCalc.com is appreciated.</p>
+  </section>
+
+  <details class="about-section">
+    <summary>About this calculator &amp; data sources</summary>
+    <div class="about-section__content">
+      <p>SmokeCalc estimates cook timing and serving yields using USDA food safety guidance combined with competition pitmaster consensus and field-tested barbecue reference data.</p>
+      <p>Cook times remain estimates only, and a calibrated instant-read thermometer is always the authoritative source for doneness and food safety.</p>
+      <ul>
+        <li>USDA Food Safety and Inspection Service</li>
+        <li>AmazingRibs.com</li>
+        <li>BBQ Brethren community data</li>
+        <li>National Cattlemen's Beef Association guidelines</li>
+      </ul>
+      <p>This tool is updated periodically as new data becomes available.</p>
+    </div>
+  </details>
+</main>
+
+<footer>
+  <div>© 2026 SmokeCalc. All rights reserved.</div>
+  <nav aria-label="Footer">
+    <a href="/#calculator">Meat Smoking Calculator</a>
+    <span>|</span>
+    <a href="privacy-policy.html">Privacy Policy</a>
+    <span>|</span>
+    <a href="terms-of-service.html">Terms of Service</a>
+    <span>|</span>
+    <!-- REPLACE: Contact email address. -->
+    <a href="mailto:[YOUR EMAIL]">[YOUR EMAIL]</a>
+  </nav>
+  <p class="footer-small">Cook times are estimates based on USDA guidelines and pitmaster consensus. Always verify doneness with a calibrated meat thermometer. Never rely solely on time.</p>
+  <p class="footer-small">Last updated: April 11, 2026</p>
+</footer>
+
+<div class="cookie-banner" id="cookieBanner" role="dialog" aria-live="polite" aria-label="Cookie consent">
+  <div class="cookie-banner__inner">
+    <p class="cookie-banner__text">We use cookies for analytics and personalized ads. See our <a href="privacy-policy.html">Privacy Policy</a>.</p>
+    <div class="cookie-banner__actions">
+      <button class="cookie-accept" id="acceptCookies" type="button">Accept all</button>
+      <button class="cookie-reject" id="rejectCookies" type="button">Reject non-essential</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+'use strict';
+
+var SITE_URL = 'https://smokecalc.com';
+var CONSENT_COOKIE_NAME = 'smokecalc_consent';
+var CONSENT_COOKIE_DAYS = 365;
+// REPLACE: Production Google Analytics measurement ID.
+var GA_MEASUREMENT_ID = 'GA_MEASUREMENT_ID';
+// REPLACE: Production AdSense publisher ID.
+var ADSENSE_CLIENT = 'ca-pub-XXXXXXXXXXXXXXXX';
+var analyticsLoaded = false;
+var adsLoaded = false;
+var copyLinkResetTimer = null;
+var copyEmbedResetTimer = null;
+
+function setCookie(name, value, days){
+  var expires = new Date();
+  expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+  document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires.toUTCString() + '; path=/; SameSite=Lax';
+}
+function getCookie(name){
+  var prefix = name + '=';
+  var parts = document.cookie ? document.cookie.split(';') : [];
+  for(var i = 0; i < parts.length; i++){
+    var cookie = parts[i].trim();
+    if(cookie.indexOf(prefix) === 0) return decodeURIComponent(cookie.substring(prefix.length));
+  }
+  return '';
+}
+function updateConsentGranted(){
+  gtag('consent', 'update', {
+    'ad_storage': 'granted',
+    'analytics_storage': 'granted'
+  });
+}
+function ensureThirdPartyHints(){
+  [
+    'https://www.googletagmanager.com',
+    'https://pagead2.googlesyndication.com'
+  ].forEach(function(url){
+    if(document.querySelector('link[rel="preconnect"][href="' + url + '"]')) return;
+    var link = document.createElement('link');
+    link.rel = 'preconnect';
+    link.href = url;
+    document.head.appendChild(link);
+  });
+}
+function loadAnalytics(){
+  if(analyticsLoaded || GA_MEASUREMENT_ID === 'GA_MEASUREMENT_ID') return;
+  analyticsLoaded = true;
+  var script = document.createElement('script');
+  script.async = true;
+  script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(GA_MEASUREMENT_ID);
+  document.head.appendChild(script);
+  gtag('js', new Date());
+  gtag('config', GA_MEASUREMENT_ID);
+}
+function loadAds(){
+  if(adsLoaded || ADSENSE_CLIENT === 'ca-pub-XXXXXXXXXXXXXXXX') return;
+  adsLoaded = true;
+  var script = document.createElement('script');
+  script.async = true;
+  script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + encodeURIComponent(ADSENSE_CLIENT);
+  script.crossOrigin = 'anonymous';
+  document.head.appendChild(script);
+}
+function loadGoogleServices(){
+  ensureThirdPartyHints();
+  loadAnalytics();
+  loadAds();
+}
+function setConsentState(value){
+  setCookie(CONSENT_COOKIE_NAME, value, CONSENT_COOKIE_DAYS);
+  if(value === 'accepted'){
+    updateConsentGranted();
+    loadGoogleServices();
+  }
+  hideCookieBanner();
+}
+function showCookieBanner(){
+  document.getElementById('cookieBanner').classList.add('visible');
+}
+function hideCookieBanner(){
+  document.getElementById('cookieBanner').classList.remove('visible');
+}
+function initConsentBanner(){
+  var storedConsent = getCookie(CONSENT_COOKIE_NAME);
+  document.getElementById('acceptCookies').addEventListener('click', function(){
+    setConsentState('accepted');
+  });
+  document.getElementById('rejectCookies').addEventListener('click', function(){
+    setConsentState('rejected');
+  });
+  if(storedConsent === 'accepted'){
+    updateConsentGranted();
+    loadGoogleServices();
+    hideCookieBanner();
+    return;
+  }
+  if(storedConsent === 'rejected'){
+    hideCookieBanner();
+    return;
+  }
+  showCookieBanner();
+}
+function initShareButtons(){
+  var copyBtn = document.getElementById('copyLinkBtn');
+  if(!copyBtn) return;
+  copyBtn.addEventListener('click', function(){
+    navigator.clipboard.writeText(SITE_URL).then(function(){
+      copyBtn.textContent = 'Copied!';
+      copyBtn.classList.add('copy-confirmed');
+      clearTimeout(copyLinkResetTimer);
+      copyLinkResetTimer = setTimeout(function(){
+        copyBtn.textContent = 'Copy link';
+        copyBtn.classList.remove('copy-confirmed');
+      }, 2000);
+    }).catch(function(){
+      copyBtn.textContent = 'Copy failed';
+      copyBtn.classList.add('copy-confirmed');
+      clearTimeout(copyLinkResetTimer);
+      copyLinkResetTimer = setTimeout(function(){
+        copyBtn.textContent = 'Copy link';
+        copyBtn.classList.remove('copy-confirmed');
+      }, 2000);
+    });
+  });
+}
+function initEmbedSection(){
+  var copyBtn = document.getElementById('copyEmbedBtn');
+  var textarea = document.getElementById('embedCode');
+  if(!copyBtn || !textarea) return;
+  copyBtn.addEventListener('click', function(){
+    navigator.clipboard.writeText(textarea.value).then(function(){
+      copyBtn.textContent = 'Copied!';
+      copyBtn.classList.add('copy-confirmed');
+      clearTimeout(copyEmbedResetTimer);
+      copyEmbedResetTimer = setTimeout(function(){
+        copyBtn.textContent = 'Copy embed code';
+        copyBtn.classList.remove('copy-confirmed');
+      }, 2000);
+    }).catch(function(){
+      copyBtn.textContent = 'Copy failed';
+      copyBtn.classList.add('copy-confirmed');
+      clearTimeout(copyEmbedResetTimer);
+      copyEmbedResetTimer = setTimeout(function(){
+        copyBtn.textContent = 'Copy embed code';
+        copyBtn.classList.remove('copy-confirmed');
+      }, 2000);
+    });
+  });
+}
+
+/* ============================================================
+   MEAT DATA  (all text strings use double quotes)
+   ============================================================ */
+var D = {
+  'brisket-sliced': {
+    name:'Brisket (Sliced)', phase:'low-slow', cookRate:1.5, flatHours:null,
+    pullTemp:195, restMinutes:90, stall:true, stallLo:150, stallHi:170,
+    shrinkage:0.40, boneInOk:false, maxLbs:18, tOpts:'standard',
+    sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
+    tip:"Sliced brisket lives and dies by the flat. Cook to 195\xB0F but probe both the flat and the point \u2014 the flat should feel like pushing into warm butter with zero resistance. Thick white smoke is your enemy; maintain thin blue smoke throughout. After pulling, wrap tightly in foil or butcher paper and hold in a cooler with towels for at least 1\u20132 hours \u2014 this hold window is not optional, it is where the magic happens. Slice against the grain in \xBC-inch cuts and always serve immediately after slicing.",
+    woods:[
+      {n:"Post Oak",   f:"The Texas classic \u2014 mild, earthy smoke that complements beef without overpowering it."},
+      {n:"Hickory",    f:"Bold, bacon-forward smoke; use sparingly or the bark can turn bitter."},
+      {n:"Pecan",      f:"Sweeter than hickory with a rich, nutty undertone \u2014 excellent for the full cook."},
+      {n:"Mesquite",   f:"Intense and pungent; best used in small doses for the first hour only."}
+    ]
+  },
+  'brisket-pulled': {
+    name:'Brisket (Pulled)', phase:'low-slow', cookRate:1.5, flatHours:null,
+    pullTemp:205, restMinutes:90, stall:true, stallLo:150, stallHi:170,
+    shrinkage:0.40, boneInOk:false, maxLbs:18, tOpts:'standard',
+    sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
+    tip:"Pulled brisket \u2014 typically made from the point \u2014 needs to reach 205\xB0F or higher until it literally falls apart when you try to wiggle a probe. The point's high fat content forgives overcooking far better than the flat. Pull and rest in a cooler for at least 90 minutes before shredding by hand; the fat renders fully during the rest. Separate fat deposits as you pull \u2014 you want meat strands, not globs. Mix some of the rendered tallow back in before serving for maximum juiciness.",
+    woods:[
+      {n:"Post Oak", f:"Mild, earthy, and traditional \u2014 lets the beef flavor lead."},
+      {n:"Pecan",    f:"Nutty sweetness that pairs beautifully with the fattier point muscle."},
+      {n:"Hickory",  f:"Assertive, smoky depth \u2014 use at the start and switch to oak to avoid bitterness."},
+      {n:"Cherry",   f:"Adds a subtle fruity note and beautiful mahogany color to the bark."}
+    ]
+  },
+  'pork-butt-sliced': {
+    name:'Pork Butt/Shoulder (Sliced)', phase:'low-slow', cookRate:1.5, flatHours:null,
+    pullTemp:185, restMinutes:45, stall:true, stallLo:150, stallHi:165,
+    shrinkage:0.35, boneInOk:true, maxLbs:12, tOpts:'standard',
+    sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
+    tip:"For sliced pork butt, pull at 185\xB0F \u2014 any higher and the muscle fibers break down too much to hold clean slices. The money muscle (the cylindrical chunk on the bottom of the butt) is your showpiece: separate it from the rest and slice it crosswise into medallions. Score the fat cap to \xBC inch before cooking so it renders rather than acting as a barrier. Let the bark set fully before wrapping \u2014 at least the first 3 hours unwrapped.",
+    woods:[
+      {n:"Apple",   f:"Mild, sweet fruitiness that complements pork perfectly without overpowering."},
+      {n:"Cherry",  f:"Rich color and a subtle tartness that creates stunning mahogany bark."},
+      {n:"Hickory", f:"Classic southern smokehouse flavor \u2014 pairs traditionally with pork."},
+      {n:"Pecan",   f:"Slightly sweet and nutty; milder than hickory, excellent for longer cooks."}
+    ]
+  },
+  'pork-butt-pulled': {
+    name:'Pork Butt/Shoulder (Pulled)', phase:'low-slow', cookRate:1.5, flatHours:null,
+    pullTemp:203, restMinutes:60, stall:true, stallLo:150, stallHi:165,
+    shrinkage:0.35, boneInOk:true, maxLbs:12, tOpts:'standard',
+    sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
+    tip:"Pulled pork is one of the most forgiving cooks in BBQ \u2014 but don't rush the stall. The internal temperature plateau between 150\u2013165\xB0F can last 3\u20135 hours; this is collagen converting to gelatin and it cannot be hurried. The bone-wiggle test is your best friend: when the bone rotates freely and pulls clean with zero resistance, you're done regardless of temperature. Rest a minimum of 1 hour (2 is better) before pulling. Save all accumulated juices to mix back into the pulled meat.",
+    woods:[
+      {n:"Apple",   f:"Mild, fruity sweetness \u2014 the definitive wood for pulled pork."},
+      {n:"Hickory", f:"Bold smokehouse backbone; use for the first half then switch to fruit wood."},
+      {n:"Cherry",  f:"Deep color and subtle tartness; blends beautifully with apple."},
+      {n:"Maple",   f:"Light, slightly sweet smoke \u2014 keeps the flavor profile clean and approachable."},
+      {n:"Pecan",   f:"Rich and nutty; excellent blended with hickory at a 2:1 ratio."}
+    ]
+  },
+  'pork-loin': {
+    name:'Pork Loin', phase:'low-slow', cookRate:0.5, flatHours:null,
+    pullTemp:145, restMinutes:15, stall:false, stallLo:null, stallHi:null,
+    shrinkage:0.20, boneInOk:false, maxLbs:10, tOpts:'standard',
+    sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
+    tip:"Pork loin is the most unforgiving cut on this list \u2014 it has almost no fat, so internal temperature management is critical. Pull at exactly 145\xB0F (the modern USDA safe temp for whole pork), which will leave a beautiful blush of pink in the center. A probe thermometer is non-negotiable here; guessing will result in dry, chalky meat. Brining overnight dramatically improves moisture retention. Reverse-sear technique (finish over direct heat for 2 minutes per side after smoking) creates excellent crust on this lean cut.",
+    woods:[
+      {n:"Apple",  f:"Light, clean sweetness that enhances pork without competing with its mild flavor."},
+      {n:"Cherry", f:"Beautiful rosy color on the exterior; subtle fruity smoke."},
+      {n:"Alder",  f:"Very mild, almost neutral \u2014 lets pork's natural sweetness shine."},
+      {n:"Maple",  f:"Delicate sweetness that pairs naturally with pork and glazes well."}
+    ]
+  },
+  'baby-back-ribs': {
+    name:'Baby Back Ribs', phase:'low-slow', cookRate:null, flatHours:5.5,
+    pullTemp:195, restMinutes:20, stall:false, stallLo:null, stallHi:null,
+    shrinkage:0.25, boneInOk:false, maxLbs:4, tOpts:'standard',
+    sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
+    tip:"Baby backs are smaller and leaner than spare ribs \u2014 they cook faster and dry out more easily. The classic 3-2-1 method is actually too long for baby backs; use 2-2-1 or even 2-1.5-0.5. Always remove the membrane from the bone side before cooking \u2014 slide a butter knife under it near the middle bone, grab with a dry paper towel, and peel in one clean strip. Done ribs should bend 45\xB0 at the center when held from one end, with the meat just starting to pull away from the bone tips.",
+    woods:[
+      {n:"Apple",   f:"Mild, sweet smoke that complements pork's natural flavor without bitterness."},
+      {n:"Cherry",  f:"Rich mahogany color on the bark; a slightly tart sweetness."},
+      {n:"Pecan",   f:"Nutty, mellow smoke \u2014 pairs particularly well with a mustard-based rub."},
+      {n:"Hickory", f:"Classic southern smokehouse flavor \u2014 use sparingly on the shorter cook time."}
+    ]
+  },
+  'competition-ribs': {
+    name:'Competition Ribs', phase:'low-slow', cookRate:null, flatHours:5.0,
+    pullTemp:190, restMinutes:20, stall:false, stallLo:null, stallHi:null,
+    shrinkage:0.25, boneInOk:false, maxLbs:4, tOpts:'standard',
+    sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
+    tip:"Competition ribs use a 2-2-1 format and target a lower internal (around 190\xB0F) for clean bite-through without fall-off-the-bone tenderness \u2014 judges dock points for meat that falls off. Layer your flavor: apply mustard binder, then a base rub, then a second coat of sugar-forward rub before the cook. During the wrap, add butter, brown sugar, honey, and a tablespoon of apple juice to the foil. When unwrapping for the final hour, brush with a thin, glossy sauce layer and don't add more \u2014 multiple glaze layers cause muddiness.",
+    woods:[
+      {n:"Cherry", f:"Competition-favorite for its deep color and subtle fruity sweetness."},
+      {n:"Apple",  f:"Light, clean smoke that keeps the rub flavors dominant."},
+      {n:"Pecan",  f:"Rich undertones without the aggression of hickory \u2014 excellent for 5-hour cooks."},
+      {n:"Maple",  f:"Subtle sweetness that supports caramelization of the sugar-forward rub."}
+    ]
+  },
+  'spare-ribs': {
+    name:'Spare Ribs', phase:'low-slow', cookRate:null, flatHours:6.5,
+    pullTemp:198, restMinutes:20, stall:false, stallLo:null, stallHi:null,
+    shrinkage:0.30, boneInOk:false, maxLbs:4, tOpts:'standard',
+    sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
+    tip:"Spare ribs are larger, fattier, and more flavorful than baby backs \u2014 the 3-2-1 method is made for these. Trim to St. Louis cut (remove the rib tips, sternum, and flap) for even cooking and a cleaner presentation. Remove the membrane as you would baby backs. The extra fat means these are more forgiving \u2014 but the rib tips you trimmed off make excellent finger food at the 4-hour mark. Use the toothpick test: slide a toothpick between the bones \u2014 it should glide through with no resistance when done.",
+    woods:[
+      {n:"Hickory", f:"Bold, assertive smoke perfectly matched to spare ribs' robust fat content."},
+      {n:"Apple",   f:"Balances hickory's intensity; use at a 2:1 apple-to-hickory ratio."},
+      {n:"Cherry",  f:"Deep mahogany color and fruity depth \u2014 especially good with a sweet rub."},
+      {n:"Oak",     f:"Clean, medium smoke \u2014 lets the meat speak without distraction."}
+    ]
+  },
+  'beef-ribs': {
+    name:'Beef Ribs', phase:'low-slow', cookRate:0.75, flatHours:null,
+    pullTemp:203, restMinutes:45, stall:true, stallLo:155, stallHi:170,
+    shrinkage:0.30, boneInOk:false, maxLbs:10, tOpts:'standard',
+    sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
+    tip:"Beef plate ribs (dino bones) are the king of Texas BBQ. Source USDA Choice or Prime beef ribs \u2014 select grade will disappoint. Season aggressively with only salt, coarse black pepper, and garlic powder (SPG): the fat and the smoke do all the work. Never wrap beef ribs if you want traditional results \u2014 the bark formation is the entire point. Pull at 203\xB0F but verify with the probe test: push into the thickest meat between bones and feel for zero resistance, like pushing into room-temperature butter. Rest a minimum of 45 minutes uncovered.",
+    woods:[
+      {n:"Post Oak", f:"The Texas gold standard \u2014 earthy, clean smoke that amplifies beef flavor."},
+      {n:"Mesquite", f:"Intense, bold, and traditional; use only for the first 2 hours."},
+      {n:"Pecan",    f:"Nutty richness that pairs beautifully with beef's deep savoriness."},
+      {n:"Hickory",  f:"Classic American smokehouse character \u2014 robust but not overwhelming."}
+    ]
+  },
+  'prime-rib': {
+    name:'Prime Rib Roast', phase:'two-phase', cookRate:0.35, flatHours:null,
+    pullTemp:130, restMinutes:25, stall:false, stallLo:null, stallHi:null,
+    shrinkage:0.15, boneInOk:true, maxLbs:20, tOpts:'quicksmoke',
+    sPhaseTemp:115, searTempF:550, searSec:{charcoal:90,gas:75,castIron:60}, searRest:25,
+    tip:"Prime rib smokes low until 115\xB0F internal, then gets a blistering reverse sear at 550\xB0F+ for the crust. This method produces edge-to-edge medium-rare without a gray band. Tie the roast every 1.5 inches with butcher twine to maintain its shape. Season with salt at least 1 hour ahead (overnight is better) and dry-brine uncovered in the fridge for the deepest crust. The final pull temp for medium-rare is 130\xB0F; carryover cooking during the 25-minute rest will bring it to 133\u2013135\xB0F. Slice between the ribs for bone-in presentation, or remove the bones first for easier carving.",
+    woods:[
+      {n:"Post Oak", f:"Mild, clean beef-forward smoke \u2014 doesn't compete with the roast's natural richness."},
+      {n:"Pecan",    f:"Slightly sweet and nutty; adds complexity without bitterness on the shorter smoke."},
+      {n:"Cherry",   f:"Beautiful mahogany color on the crust; subtle fruity note."},
+      {n:"Hickory",  f:"Bold smokehouse depth \u2014 use a small amount for the 1\u20132 hour smoke phase."}
+    ]
+  },
+  'tri-tip': {
+    name:'Tri-Tip', phase:'two-phase', cookRate:0.5, flatHours:null,
+    pullTemp:130, restMinutes:10, stall:false, stallLo:null, stallHi:null,
+    shrinkage:0.15, boneInOk:false, maxLbs:6, tOpts:'quicksmoke',
+    sPhaseTemp:115, searTempF:500, searSec:{charcoal:90,gas:75,castIron:60}, searRest:10,
+    tip:"Tri-tip is a California BBQ icon. The Santa Maria method calls for direct oak grilling, but the reverse-sear smoke approach produces superior results. The grain direction changes at the center of the tri-tip \u2014 one side runs one way, the other side the other. If you slice straight through, half the slices will be tough. Identify the grain direction on each half and slice each side separately, always against the grain. Smoke until 115\xB0F internal then transfer directly to a screaming-hot grill for the sear. 500\u2013550\xB0F is your target grill surface temp.",
+    woods:[
+      {n:"Red Oak",  f:"The Santa Maria classic \u2014 earthy, medium smoke that defines California BBQ."},
+      {n:"Post Oak", f:"Clean, mild, and beef-friendly \u2014 a Texas complement to the California cut."},
+      {n:"Pecan",    f:"Nutty undertones that add complexity on this shorter smoke cook."},
+      {n:"Hickory",  f:"Bold punch for the short smoke window \u2014 use very sparingly."}
+    ]
+  },
+  'whole-chicken': {
+    name:'Whole Chicken', phase:'low-slow', cookRate:0.75, flatHours:null,
+    pullTemp:165, restMinutes:15, stall:false, stallLo:null, stallHi:null,
+    shrinkage:0.25, boneInOk:false, maxLbs:8, tOpts:'standard',
+    sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
+    tip:"Whole smoked chicken is quick and rewarding but the skin is the challenge. At 225\xB0F the skin turns rubbery; bump to 275\u2013300\xB0F for the last 30\u201345 minutes to crisp it up. Dry-brine the bird uncovered in the refrigerator for 4\u201324 hours before cooking \u2014 this seasons the meat and dries the skin, which is essential for crispiness. Season under the skin, not just on top. Probe the thickest part of the thigh (not touching bone) \u2014 thighs are done at 175\xB0F even though the USDA minimum is 165\xB0F; thigh meat at 165\xB0F is still unpleasantly texturey.",
+    woods:[
+      {n:"Apple",  f:"Mild, sweet, and clean \u2014 the go-to for poultry of any kind."},
+      {n:"Cherry", f:"Gorgeous mahogany skin color and a subtle tartness."},
+      {n:"Pecan",  f:"Rich and nutty without overpowering the delicate chicken flavor."},
+      {n:"Alder",  f:"Very mild and slightly sweet \u2014 nearly neutral, great with herb rubs."}
+    ]
+  },
+  'whole-chicken-spatch': {
+    name:'Whole Chicken (Spatchcocked)', phase:'low-slow', cookRate:null, flatHours:2.75,
+    pullTemp:165, restMinutes:15, stall:false, stallLo:null, stallHi:null,
+    shrinkage:0.25, boneInOk:false, maxLbs:8, tOpts:'standard',
+    sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
+    tip:"Spatchcocking (butterflying) is the single biggest improvement you can make to smoked whole chicken. Removing the backbone flattens the bird so the dark meat and white meat finish at nearly the same time, and the skin crisps evenly all over. Use kitchen shears, cut along both sides of the backbone, and press firmly on the breastbone until it cracks flat. Cook breast-side up at 275\xB0F the whole way through \u2014 no flipping needed. The skin will be significantly crispier than a standard whole bird at the same temperature.",
+    woods:[
+      {n:"Apple",  f:"Light, fruity smoke \u2014 classic and approachable for poultry."},
+      {n:"Cherry", f:"Rich color on the skin; sweet smoke that complements the flat, even cook."},
+      {n:"Pecan",  f:"Mild nuttiness that works beautifully with crispy spatchcocked skin."},
+      {n:"Maple",  f:"Subtle, slightly sweet smoke that pairs naturally with poultry."}
+    ]
+  },
+  'chicken-breast': {
+    name:'Chicken Breast', phase:'two-phase', cookRate:null, flatHours:1.25,
+    pullTemp:165, restMinutes:5, stall:false, stallLo:null, stallHi:null,
+    shrinkage:0.20, boneInOk:false, maxLbs:6, tOpts:'quicksmoke',
+    sPhaseTemp:150, searTempF:400, searSec:{charcoal:45,gas:45,castIron:30}, searRest:5,
+    tip:"Chicken breast is the leanest, most punishing cut to smoke \u2014 there is no fat margin for error. Brine for at least 2 hours (4 cups water + \xBC cup salt + 2 tbsp sugar) to dramatically improve moisture. Smoke to 150\xB0F internal, then sear both sides over high heat to caramelize the exterior and bring the internal to 165\xB0F. This reverse-sear approach gives you both smoke penetration and a caramelized crust without drying the breast out. Butterfly (pound or cut) breasts thicker than 1 inch for even cooking throughout.",
+    woods:[
+      {n:"Apple",  f:"Delicate sweetness that complements the mild chicken flavor without overpowering."},
+      {n:"Alder",  f:"Very mild, almost neutral smoke \u2014 keeps the focus on the meat."},
+      {n:"Cherry", f:"Subtle fruity note and beautiful color on the seared surface."},
+      {n:"Maple",  f:"Light, clean sweetness \u2014 pairs naturally with any herb-forward rub."}
+    ]
+  },
+  'chicken-thighs': {
+    name:'Chicken Thighs', phase:'low-slow', cookRate:null, flatHours:1.75,
+    pullTemp:175, restMinutes:10, stall:false, stallLo:null, stallHi:null,
+    shrinkage:0.20, boneInOk:true, maxLbs:6, tOpts:'standard',
+    sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
+    tip:"Chicken thighs are the easiest, most forgiving piece of chicken to smoke. Unlike breasts, thighs contain enough fat and connective tissue to withstand higher temperatures and longer cook times without drying out. Pull at 175\u2013185\xB0F \u2014 the higher temp renders all the connective tissue and fat, producing incredibly juicy, pull-apart meat. Trim excess fat and loose skin before cooking to prevent flare-ups and ensure the skin crisps. Scoring the skin with a knife helps render the fat beneath. Cook at 275\xB0F or higher for the last 30 minutes for crispy results.",
+    woods:[
+      {n:"Apple",   f:"Sweet, mild smoke that pairs perfectly with thighs' natural richness."},
+      {n:"Cherry",  f:"Deep color and a fruity backdrop that makes thighs look as good as they taste."},
+      {n:"Hickory", f:"Bold smoke character that stands up to the richer dark meat."},
+      {n:"Pecan",   f:"Nutty sweetness that complements a brown-sugar-forward rub beautifully."}
+    ]
+  },
+  'chicken-quarters': {
+    name:'Chicken Quarters', phase:'low-slow', cookRate:null, flatHours:2.5,
+    pullTemp:175, restMinutes:10, stall:false, stallLo:null, stallHi:null,
+    shrinkage:0.22, boneInOk:false, maxLbs:6, tOpts:'standard',
+    sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
+    tip:"Leg quarters (thigh + drumstick attached) are the best value in all of BBQ. Probe the thickest part of the thigh, not the drumstick \u2014 the thigh is the last part to finish. Season under the skin aggressively and get dry rub packed under there. At 275\xB0F the skin can render and crisp nicely; at 225\xB0F you'll need a quick blast of high heat to finish. Consider finishing these skin-side down directly over hot coals for 3\u20134 minutes after the smoke phase \u2014 the difference in texture is extraordinary.",
+    woods:[
+      {n:"Apple",  f:"The classic poultry pairing \u2014 mild, sweet, and clean."},
+      {n:"Cherry", f:"Rich color and fruity depth; pairs well with a honey glaze."},
+      {n:"Pecan",  f:"Nutty and slightly sweet, excellent with quarters' generous fat content."},
+      {n:"Oak",    f:"Clean, medium smoke that lets the chicken's natural flavor shine."}
+    ]
+  },
+  'chicken-wings': {
+    name:'Chicken Wings', phase:'two-phase', cookRate:null, flatHours:1.25,
+    pullTemp:165, restMinutes:5, stall:false, stallLo:null, stallHi:null,
+    shrinkage:0.20, boneInOk:false, maxLbs:5, tOpts:'quicksmoke',
+    sPhaseTemp:150, searTempF:400, searSec:{charcoal:45,gas:45,castIron:30}, searRest:5,
+    tip:"Crispy smoked wings require smoke flavor and dry heat \u2014 two things that usually conflict. The solution is a two-phase approach: low smoke to 150\xB0F internal for deep smoke penetration, then blast them over ripping-hot direct heat (400\xB0F+) to render the skin and create crunch. The secret to crispy skin is drying: after patting dry, dust with a thin layer of baking powder in your rub (\xBD tsp per pound of wings) \u2014 it raises the pH of the skin surface and dramatically accelerates Maillard browning. Sauce after the sear, not before.",
+    woods:[
+      {n:"Apple",   f:"Mild, sweet smoke that infuses deeply during the low-smoke phase."},
+      {n:"Cherry",  f:"Beautiful color and fruity smoke \u2014 excellent for buffalo-style wings."},
+      {n:"Pecan",   f:"Mild nuttiness that pairs with almost any wing sauce style."},
+      {n:"Hickory", f:"Bold smoke for the adventurous \u2014 use sparingly given the short cook time."}
+    ]
+  },
+  'whole-turkey': {
+    name:'Whole Turkey', phase:'low-slow', cookRate:0.6, flatHours:null,
+    pullTemp:165, restMinutes:35, stall:false, stallLo:null, stallHi:null,
+    shrinkage:0.25, boneInOk:false, maxLbs:24, tOpts:'standard',
+    sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
+    tip:"A whole turkey on the smoker is a holiday showstopper but it requires planning. Dry-brine the turkey uncovered in the refrigerator for 24\u201348 hours minimum \u2014 this is critical for juicy meat and crispy skin. Tuck the wing tips under the body, and consider a high-smoke temp (300\xB0F) to keep the cook manageable and help with skin crispness. Probe in the thickest part of the breast (not touching the breastbone) and check the thigh separately \u2014 the thigh should reach 175\xB0F. Never stuff a smoked turkey; it slows the cook dangerously and creates food safety issues.",
+    woods:[
+      {n:"Apple",  f:"Mild, clean sweetness \u2014 the traditional holiday choice for turkey."},
+      {n:"Cherry", f:"Gorgeous mahogany skin and a festive fruity note."},
+      {n:"Pecan",  f:"Nutty richness that pairs wonderfully with turkey's savory depth."},
+      {n:"Maple",  f:"Light and slightly sweet; supports caramelization of a butter glaze."},
+      {n:"Alder",  f:"Very mild smoke \u2014 nearly neutral, excellent if you want pure poultry flavor."}
+    ]
+  },
+  'whole-turkey-spatch': {
+    name:'Whole Turkey (Spatchcocked)', phase:'low-slow', cookRate:0.45, flatHours:null,
+    pullTemp:165, restMinutes:25, stall:false, stallLo:null, stallHi:null,
+    shrinkage:0.25, boneInOk:false, maxLbs:24, tOpts:'standard',
+    sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
+    tip:"Spatchcocked turkey is faster, more even-cooking, and produces dramatically crispier skin than a whole bird. Remove the backbone with heavy-duty kitchen shears (it takes real effort on a turkey), press the bird flat, then tuck the wings. Cook at 300\u2013325\xB0F breast-side up on a rack \u2014 elevated so air circulates under the bird. The breast and thigh finish much closer in temperature than a traditional bird, which is the entire point of spatchcocking. Dry-brine 24\u201348 hours ahead; the extra surface area means the brine penetrates faster and the skin dries more thoroughly.",
+    woods:[
+      {n:"Apple",  f:"Classic poultry pairing \u2014 mild and sweet without bitterness."},
+      {n:"Cherry", f:"Rich skin color and a subtle tartness that pairs beautifully with poultry."},
+      {n:"Pecan",  f:"Nutty warmth that complements turkey's savory richness."},
+      {n:"Maple",  f:"Clean sweetness \u2014 supports a honey-butter glaze applied in the last 30 minutes."}
+    ]
+  },
+  'turkey-breast': {
+    name:'Turkey Breast', phase:'low-slow', cookRate:0.5, flatHours:null,
+    pullTemp:165, restMinutes:20, stall:false, stallLo:null, stallHi:null,
+    shrinkage:0.20, boneInOk:true, maxLbs:10, tOpts:'standard',
+    sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
+    tip:"Turkey breast is leaner than most poultry cuts \u2014 treat it more like pork loin than a whole bird. Brine is nearly mandatory: a simple wet brine (1 gallon water, 1 cup salt, \xBD cup sugar, aromatics) for 8\u201312 hours makes the difference between moist and dry. Pull at exactly 165\xB0F \u2014 the breast has zero fat buffer and goes from perfect to dry within a few degrees. If buying a bone-in split breast, the bone protects the underside, making it significantly more forgiving. Slather with herb butter under and over the skin before cooking.",
+    woods:[
+      {n:"Apple",  f:"Light, sweet, and clean \u2014 perfect for lean turkey breast."},
+      {n:"Cherry", f:"Subtle tartness and beautiful skin color."},
+      {n:"Alder",  f:"Extremely mild \u2014 preserves the clean flavor of a brined breast."},
+      {n:"Pecan",  f:"Gentle nuttiness that adds depth without overpowering lean white meat."}
+    ]
+  },
+  'turkey-leg': {
+    name:'Turkey Leg', phase:'low-slow', cookRate:null, flatHours:2.25,
+    pullTemp:175, restMinutes:15, stall:false, stallLo:null, stallHi:null,
+    shrinkage:0.20, boneInOk:false, maxLbs:6, tOpts:'standard',
+    sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
+    tip:"Smoked turkey legs are county-fair iconic. The leg is all dark meat, so you can push internal temperature to 175\u2013180\xB0F for the best texture \u2014 the connective tissue breaks down and the meat becomes succulent and pull-apart tender. Brine for at least 4 hours; the dense dark meat benefits enormously. Score the skin around the bone end to allow rendering. For the fall-off-the-bone style, wrap in foil with a tablespoon of butter and apple juice at 165\xB0F and continue to 180\xB0F \u2014 texture transforms dramatically.",
+    woods:[
+      {n:"Hickory", f:"Bold, assertive smoke that pairs with dark turkey meat's rich flavor."},
+      {n:"Apple",   f:"Balances hickory's punch; keeps the smoke profile approachable."},
+      {n:"Cherry",  f:"Deep color and fruity character \u2014 great for fair-style presentation."},
+      {n:"Pecan",   f:"Nutty richness that complements the leg's natural fat content."}
+    ]
+  },
+  'turkey-thighs': {
+    name:'Turkey Thighs', phase:'low-slow', cookRate:null, flatHours:2.5,
+    pullTemp:175, restMinutes:15, stall:false, stallLo:null, stallHi:null,
+    shrinkage:0.20, boneInOk:true, maxLbs:6, tOpts:'standard',
+    sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
+    tip:"Turkey thighs are an underrated BBQ cut \u2014 more flavorful than turkey breast, faster than a whole bird, and extremely forgiving. Like chicken thighs, they benefit from cooking to higher internal temps (175\u2013185\xB0F) where the connective tissue fully breaks down. Score the skin deeply and season generously under the skin. The bone-in version cooks more evenly and retains moisture better than boneless. Crisp the skin at the end by blasting at 300\xB0F+ for the final 20 minutes \u2014 this is what separates good from great.",
+    woods:[
+      {n:"Apple",   f:"Light sweetness that lifts the rich, savory dark turkey meat."},
+      {n:"Cherry",  f:"Deep color and a fruity finish \u2014 excellent with a cranberry glaze."},
+      {n:"Pecan",   f:"Nutty richness that matches turkey thighs' full-flavored profile."},
+      {n:"Hickory", f:"Bold smoke that complements the assertive dark meat flavor."}
+    ]
+  },
+  'turkey-wings': {
+    name:'Turkey Wings', phase:'two-phase', cookRate:null, flatHours:2.0,
+    pullTemp:165, restMinutes:10, stall:false, stallLo:null, stallHi:null,
+    shrinkage:0.20, boneInOk:false, maxLbs:5, tOpts:'quicksmoke',
+    sPhaseTemp:155, searTempF:400, searSec:{charcoal:45,gas:45,castIron:30}, searRest:10,
+    tip:"Turkey wings are the unsung hero of the smoker \u2014 massive, meaty, and deeply flavorful. They take longer than chicken wings due to their size but are more forgiving. Smoke low to build smoke ring and render the thick layer of subcutaneous fat, then sear at high heat for crispy skin. Separate the wing at the joint before cooking for even rendering. The skin on turkey wings is thick \u2014 it needs both time at low heat to render the fat underneath and high heat to crisp. Season aggressively: the meat is dense and needs penetrating flavor.",
+    woods:[
+      {n:"Hickory", f:"Bold, assertive smoke that complements turkey wings' meaty richness."},
+      {n:"Apple",   f:"Mild sweetness that balances hickory and softens the overall smoke profile."},
+      {n:"Cherry",  f:"Deep color and fruity character \u2014 excellent for glazed wings."},
+      {n:"Pecan",   f:"Nutty depth without overpowering the naturally rich dark meat."}
+    ]
+  },
+  'lamb-shoulder': {
+    name:'Lamb Shoulder', phase:'low-slow', cookRate:1.5, flatHours:null,
+    pullTemp:190, restMinutes:45, stall:true, stallLo:150, stallHi:165,
+    shrinkage:0.35, boneInOk:true, maxLbs:10, tOpts:'standard',
+    sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
+    tip:"Lamb shoulder is the pork butt of the lamb world \u2014 full of connective tissue, fat, and extraordinary flavor. The gaminess of lamb is a feature, not a bug; lean into it with bold spices (cumin, coriander, harissa). Pull at 190\xB0F for sliceable, or 195\u2013200\xB0F for shreddable. The stall on lamb shoulder is real and can last as long as on pork \u2014 do not rush it. A good overnight dry rub with salt, garlic, and za'atar creates a phenomenal bark. Serve with yogurt sauce and flatbread; the fat content of lamb shoulder smoked low and slow is extraordinary.",
+    woods:[
+      {n:"Oak",               f:"Clean, medium smoke that stands up to lamb without competing with its bold flavor."},
+      {n:"Rosemary (chunks)", f:"Herbal, aromatic smoke \u2014 a Mediterranean pairing that's genuinely stunning."},
+      {n:"Cherry",            f:"Subtle fruit notes that balance lamb's richness."},
+      {n:"Hickory",           f:"Bold smoke that matches lamb's assertive flavor profile."}
+    ]
+  },
+  'lamb-chops': {
+    name:'Lamb Chops', phase:'two-phase', cookRate:null, flatHours:0.75,
+    pullTemp:130, restMinutes:5, stall:false, stallLo:null, stallHi:null,
+    shrinkage:0.15, boneInOk:false, maxLbs:4, tOpts:'quicksmoke',
+    sPhaseTemp:110, searTempF:500, searSec:{charcoal:90,gas:75,castIron:60}, searRest:5,
+    tip:"Lamb lollipop chops are quick, premium, and benefit enormously from the reverse-sear smoke method. The smoke time is short \u2014 45 minutes to an hour \u2014 just enough to infuse smoke flavor without overpowering lamb's natural character. Frenched rib chops (with the bone cleaned) make for spectacular presentation. Smoke to 110\xB0F internal, then sear over extremely high heat (500\xB0F+) for 60\u201390 seconds per side \u2014 no more. Pull at 130\xB0F (medium-rare); lamb chops lose their appeal quickly past medium. Serve immediately after the 5-minute rest; the thin muscle cools fast.",
+    woods:[
+      {n:"Oak",               f:"Mild and clean \u2014 brief exposure creates elegant smoke without dominating."},
+      {n:"Cherry",            f:"Subtle fruity note that pairs with lamb's natural sweetness."},
+      {n:"Rosemary (sprigs)", f:"Classic Mediterranean herb smoke \u2014 a small handful on coals is transformative."},
+      {n:"Pecan",             f:"Gentle nuttiness for a subtle, refined smoke profile."}
+    ]
+  },
+  'lamb-loin': {
+    name:'Lamb Loin', phase:'two-phase', cookRate:null, flatHours:1.0,
+    pullTemp:130, restMinutes:8, stall:false, stallLo:null, stallHi:null,
+    shrinkage:0.15, boneInOk:false, maxLbs:5, tOpts:'quicksmoke',
+    sPhaseTemp:110, searTempF:500, searSec:{charcoal:90,gas:75,castIron:60}, searRest:8,
+    tip:"Lamb loin is extremely lean and commands precision. A saddle of lamb (double loin) makes a stunning centerpiece; individual loin chops are easier to manage. Smoke at 225\xB0F until 110\xB0F internal \u2014 this typically takes about an hour for a 2\u20133 lb loin roast. The smoke phase should be subtle: lamb loin has a delicate flavor that can be overwhelmed. After smoking, rest 5 minutes then sear hard and fast \u2014 90 seconds per side over blazing coals. Internal temp at serve should be 130\u2013133\xB0F. Herbed crusts (mustard + breadcrumbs + herbs) applied before the sear create a magnificent crust.",
+    woods:[
+      {n:"Oak",    f:"The most restrained choice \u2014 clean, medium smoke for a delicate cut."},
+      {n:"Cherry", f:"Subtle fruit notes that complement lamb without overwhelming it."},
+      {n:"Pecan",  f:"Gentle nutty undertones \u2014 excellent for the shorter smoke window."},
+      {n:"Alder",  f:"Nearly neutral, very mild smoke that protects lamb loin's delicate character."}
+    ]
+  },
+  'pork-belly': {
+    name:'Pork Belly', phase:'low-slow', cookRate:1.5, flatHours:null,
+    pullTemp:200, restMinutes:30, stall:true, stallLo:155, stallHi:165,
+    shrinkage:0.40, boneInOk:false, maxLbs:10, tOpts:'standard',
+    sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
+    tip:"Whole pork belly on the smoker produces the most luxurious BBQ experience possible. Score the fat cap in a crosshatch pattern (1-inch diamonds, \xBD-inch deep) before cooking \u2014 this allows the fat to render properly and creates extraordinary presentation. Pull at 200\xB0F for sliceable belly that holds its shape; push to 205\xB0F for maximum softness. The stall is significant on belly due to the enormous fat content \u2014 expect it to last 2\u20134 hours. After resting, slice thick (\xBE inch) and either serve as-is or finish slices in a hot pan for crispy edges \u2014 pork belly chashu style is worth the extra step.",
+    woods:[
+      {n:"Apple",   f:"Sweet, mild smoke that pairs perfectly with belly's intense richness."},
+      {n:"Cherry",  f:"Beautiful color on the scored fat cap; fruity contrast to the fattiness."},
+      {n:"Maple",   f:"Clean sweetness that enhances the natural sweetness of pork belly fat."},
+      {n:"Hickory", f:"Bold, assertive smokehouse character \u2014 excellent for bacon-style belly."},
+      {n:"Pecan",   f:"Nutty richness that adds depth without overwhelming the delicate fat layers."}
+    ]
+  },
+  'beef-chuck': {
+    name:'Beef Chuck Roast', phase:'low-slow', cookRate:1.5, flatHours:null,
+    pullTemp:203, restMinutes:45, stall:true, stallLo:150, stallHi:170,
+    shrinkage:0.35, boneInOk:false, maxLbs:10, tOpts:'standard',
+    sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
+    tip:"Beef chuck roast \u2014 nicknamed \"poor man's brisket\" \u2014 is one of the most underrated cuts in BBQ. It has similar collagen-rich connective tissue to brisket but cooks faster due to its smaller size and more irregular fat distribution. Season like a brisket: salt, black pepper, garlic (SPG). The stall on chuck is as real as brisket's \u2014 hold steady and resist wrapping early. Pull at 203\xB0F and probe test: it should feel like pushing into soft butter. The meat pulls beautifully and makes incredible tacos, sandwiches, or sliced servings. The liquid that accumulates in the wrap is liquid gold \u2014 pour it back over before serving.",
+    woods:[
+      {n:"Post Oak", f:"The brisket wood \u2014 earthy, clean, and classically Texas."},
+      {n:"Hickory",  f:"Bold smokehouse depth that complements beef's richness."},
+      {n:"Pecan",    f:"Nutty sweetness \u2014 an excellent alternative to oak for chuck."},
+      {n:"Cherry",   f:"Beautiful color on the bark and subtle fruity contrast."}
+    ]
+  }
+};
+
+/* ============================================================
+   CONSTANTS
+   ============================================================ */
+var TM  = {225:1.0, 250:0.85, 275:0.75, 300:0.65};
+var SOZ = {light:4,   normal:6,   hungry:8};
+var SG  = {light:113, normal:170, hungry:227};
+
+/* ============================================================
+   STATE
+   ============================================================ */
+var state = {tu:'F', wu:'lbs', sz:'light'};
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function fC(f){ return Math.round((f-32)*5/9*10)/10; }
+function lK(v){ return Math.round(v*0.453592*100)/100; }
+function kL(v){ return Math.round(v/0.453592*100)/100; }
+function dT(f){ return state.tu==='C' ? fC(f)+'\xB0C' : f+'\xB0F'; }
+function tLbl(f){ return state.tu==='C' ? Math.round((f-32)*5/9)+'\xB0C' : f+'\xB0F'; }
+function dW(lbs,dec){
+  dec = dec!==undefined ? dec : 1;
+  return state.wu==='kg' ? lK(lbs).toFixed(dec)+' kg' : lbs.toFixed(dec)+' lbs';
+}
+function fmt(d){
+  var h=d.getHours(), m=d.getMinutes(), ap=h>=12?'PM':'AM';
+  h=h%12||12;
+  return h+':'+(m<10?'0':'')+m+' '+ap;
+}
+function dayLbl(d, ref){
+  var diff=Math.round((d-ref)/86400000);
+  if(!diff) return '';
+  if(diff===-1) return 'day before';
+  if(diff===1)  return 'next day';
+  return (diff<0?Math.abs(diff)+' days before':diff+' days later');
+}
+
+/* ============================================================
+   COOK TIME
+   ============================================================ */
+function cookHrs(cut, wLbs, temp, boneIn, inj, wrap){
+  var h = cut.cookRate!==null ? cut.cookRate*wLbs : cut.flatHours;
+  h *= (TM[temp]||1);
+  if(boneIn && cut.boneInOk) h*=1.10;
+  if(inj)           h*=0.95;
+  if(wrap==='none')  h*=1.10;
+  else if(wrap==='paper') h*=1.05;
+  return h;
+}
+
+/* ============================================================
+   TIMELINE
+   ============================================================ */
+function buildTL(cut, serve, hrs, wrap, grill){
+  var ev=[], restMs=cut.restMinutes*60000;
+  var stv = parseInt(document.getElementById('smokerTemp').value);
+
+  if(cut.phase==='low-slow'){
+    var cMs=hrs*3600000;
+    var on=new Date(serve-restMs-cMs);
+    var ls=new Date(on-30*60000);
+    ev.push({t:ls, l:'Light smoker / preheat',   s:'Target: '+dT(stv), c:'blue'});
+    ev.push({t:on, l:'Meat goes on smoker',       s:'',                 c:'amber'});
+    if(cut.stall){
+      var sb=new Date(on.getTime()+cMs*0.40);
+      var se=new Date(on.getTime()+cMs*0.65);
+      var sn=cut.stallLo ? 'Internal reaches '+dT(cut.stallLo)+'\u2013'+dT(cut.stallHi)+' \u2014 temperature plateau begins' : '';
+      var wn= wrap==='foil'  ? ' \u2014 wrap in foil now (Texas Crutch)'
+            : wrap==='paper' ? ' \u2014 wrap in butcher paper now' : '';
+      ev.push({t:sb, l:'Stall begins', s:sn+wn, c:'red'});
+      ev.push({t:se, l:wrap!=='none'?'Stall ends / unwrap':'Stall ends', s:'Temperature climbs again', c:'amber'});
+    }
+    var pull=new Date(serve-restMs);
+    ev.push({t:pull, l:'Pull from smoker', s:'Target internal: '+dT(cut.pullTemp), c:'amber'});
+    ev.push({t:pull, l:'Rest begins',      s:'Rest '+cut.restMinutes+' min loosely tented', c:'gray'});
+    ev.push({t:serve, l:'Serve', s:'', c:'green'});
+
+  } else {
+    var phMs = hrs*3600000;
+    var sd   = cut.searSec||{charcoal:90,gas:75,castIron:60};
+    var sds  = sd[grill]||90;
+    var stMs = sds*2*1000;
+    var srMs = (cut.searRest||5)*60000;
+    var sOn  = new Date(serve-srMs-stMs-phMs);
+    var ls2  = new Date(sOn-30*60000);
+    var pfs  = new Date(sOn.getTime()+phMs);
+    var sc   = new Date(pfs.getTime()+stMs);
+    var gLbl = {charcoal:'Charcoal grill',gas:'Gas grill',castIron:'Cast iron skillet'}[grill]||'Grill';
+    var srV  = parseInt(document.getElementById('searTemp').value)||cut.searTempF;
+    var sTD  = state.tu==='C' ? Math.round((srV-32)*5/9)+'\xB0C' : srV+'\xB0F';
+    ev.push({t:ls2, l:'Light smoker / preheat',         s:'Target: '+dT(stv), c:'blue'});
+    ev.push({t:sOn, l:'Meat goes on (smoke phase)',      s:cut.sPhaseTemp?'Smoke to '+dT(cut.sPhaseTemp)+' internal':'', c:'amber'});
+    ev.push({t:pfs, l:'Pull from smoker \u2014 begin sear', s:'Internal ~'+dT(cut.sPhaseTemp||cut.pullTemp-15), c:'amber'});
+    ev.push({t:pfs, l:'Sear phase begins',               s:gLbl+' at '+sTD+' \u2014 '+Math.round(sds)+'s per side', c:'red'});
+    ev.push({t:sc,  l:'Sear complete \u2014 rest',       s:'Pull at '+dT(cut.pullTemp)+' internal \u2014 rest '+(cut.searRest||5)+' min', c:'gray'});
+    ev.push({t:serve, l:'Serve', s:'', c:'green'});
+  }
+  return ev;
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function render(cut, inp){
+  var h = cookHrs(cut, inp.wLbs, inp.temp, inp.boneIn, inp.inj, inp.wrap);
+
+  /* stat cards */
+  document.getElementById('sCookTime').textContent = h.toFixed(1);
+
+  var lst;
+  if(cut.phase==='low-slow'){
+    var on2=new Date(inp.serve - cut.restMinutes*60000 - h*3600000);
+    lst=new Date(on2-30*60000);
+  } else {
+    var sd2=cut.searSec||{charcoal:90,gas:75,castIron:60};
+    var sOn2=new Date(inp.serve-(cut.searRest||5)*60000-(sd2[inp.grill]||90)*2*1000-h*3600000);
+    lst=new Date(sOn2-30*60000);
+  }
+  document.getElementById('sStartTime').textContent = fmt(lst);
+  document.getElementById('sStartDay').textContent  = dayLbl(lst,inp.serve)||'same day as serve';
+  document.getElementById('sPullTemp').textContent  = dT(cut.pullTemp);
+  document.getElementById('sPullSub').textContent   = cut.phase==='two-phase'?'final internal temp':'internal temp';
+
+  /* serving math */
+  var oz = SOZ[state.sz], g = SG[state.sz];
+  var cLbs = inp.np*oz/16;
+  var rMin = cLbs/(1-cut.shrinkage);
+  var rMax = rMin*1.25;
+  var isMet = state.wu==='kg';
+  var rows =
+    '<div class="srow"><span class="lbl">Serving size</span><span class="val">'+(isMet?g+'g':oz+'oz')+' per person</span></div>'+
+    '<div class="srow"><span class="lbl">Number of people</span><span class="val">'+inp.np+'</span></div>'+
+    '<div class="srow"><span class="lbl">Total cooked meat needed</span><span class="val">'+(isMet?lK(cLbs).toFixed(2)+' kg':cLbs.toFixed(1)+' lbs')+'</span></div>'+
+    '<div class="srow"><span class="lbl">Shrinkage ('+cut.name+')</span><span class="val">'+Math.round(cut.shrinkage*100)+'% weight loss during cooking</span></div>'+
+    '<div class="srow"><span class="lbl">Raw weight to buy</span><span class="val hi">'+(isMet?lK(rMin).toFixed(2)+' kg':rMin.toFixed(1)+' lbs')+' \u2013 '+(isMet?lK(rMax).toFixed(2)+' kg':rMax.toFixed(1)+' lbs')+'</span></div>';
+  document.getElementById('srowsEl').innerHTML = rows;
+
+  var warnEl=document.getElementById('mcWarn');
+  if(rMin>cut.maxLbs){
+    var n=Math.ceil(rMin/cut.maxLbs);
+    warnEl.textContent='\u26A0 This cook may require '+n+' cuts/pieces. Multiple pieces in one smoker may affect airflow and add 10\u201320% cook time.';
+    warnEl.classList.add('visible');
+  } else { warnEl.classList.remove('visible'); }
+
+  /* timeline */
+  var evs=buildTL(cut,inp.serve,h,inp.wrap,inp.grill);
+  var tlEl=document.getElementById('tlEl');
+  tlEl.innerHTML='';
+  evs.forEach(function(ev,i){
+    var item=document.createElement('div');
+    item.className='tl-item';
+    item.style.animationDelay=(i*60)+'ms';
+    var dl=dayLbl(ev.t,inp.serve);
+    item.innerHTML=
+      '<div class="tl-dot '+ev.c+'"></div>'+
+      '<div class="tl-time">'+fmt(ev.t)+(dl?' ('+dl+')':'')+' </div>'+
+      '<div class="tl-label">'+ev.l+'</div>'+
+      (ev.s?'<div class="tl-sub">'+ev.s+'</div>':'');
+    tlEl.appendChild(item);
+  });
+
+  /* tip + woods */
+  document.getElementById('tipEl').textContent = cut.tip;
+  document.getElementById('woodsEl').innerHTML = cut.woods.map(function(w){
+    return '<div class="wpill"><span class="wname">'+w.n+'</span><span class="wflavor">'+w.f+'</span></div>';
+  }).join('');
+
+  /* print header */
+  var stv2=parseInt(document.getElementById('smokerTemp').value);
+  document.getElementById('ptitle').textContent='SmokeCalc \u2014 '+cut.name;
+  document.getElementById('pmeta').textContent=dW(inp.wLbs)+' \xB7 '+tLbl(stv2)+' smoker \xB7 Serve at '+fmt(inp.serve);
+
+  document.getElementById('results').classList.add('visible');
+}
+
+/* ============================================================
+   FORM
+   ============================================================ */
+function wLbs(){
+  var v=parseFloat(document.getElementById('weight').value);
+  if(isNaN(v)||v<=0) return null;
+  return state.wu==='kg'?kL(v):v;
+}
+function serveDate(){
+  var v=document.getElementById('serveTime').value;
+  if(!v) return null;
+  var p=v.split(':'), d=new Date();
+  d.setHours(+p[0],+p[1],0,0);
+  return d;
+}
+function setMsg(txt,cls){
+  var el=document.getElementById('vmsg');
+  el.textContent=txt; el.className='vmsg'+(cls?' '+cls:'');
+}
+function updTempOpts(cut){
+  var sel=document.getElementById('smokerTemp'), cur=sel.value;
+  var ts=cut.tOpts==='quicksmoke'?[225,250]:[225,250,275,300];
+  sel.innerHTML=ts.map(function(t){return '<option value="'+t+'">'+tLbl(t)+'</option>';}).join('');
+  var ok=false;
+  for(var i=0;i<sel.options.length;i++) if(sel.options[i].value===cur){ok=true;break;}
+  if(ok) sel.value=cur;
+}
+function updTP(cut){
+  var s=document.getElementById('two-phase-section');
+  if(cut.phase==='two-phase'){
+    s.classList.add('visible');
+    document.getElementById('searTemp').value=state.tu==='C'?Math.round((cut.searTempF-32)*5/9):cut.searTempF;
+  } else { s.classList.remove('visible'); }
+}
+function updBI(key){
+  document.getElementById('boneInGroup').style.display=D[key].boneInOk?'':'none';
+}
+function updSzLabels(){
+  document.getElementById('szLight').textContent =state.wu==='kg'?'113g':'4 oz';
+  document.getElementById('szNormal').textContent=state.wu==='kg'?'170g':'6 oz';
+  document.getElementById('szHungry').textContent=state.wu==='kg'?'227g':'8 oz';
+}
+function onMeatChange(){
+  var k=document.getElementById('meatType').value, c=D[k];
+  updTempOpts(c); updTP(c); updBI(k);
+}
+function calc(){
+  var k=document.getElementById('meatType').value, c=D[k];
+  var w=wLbs(), np=parseInt(document.getElementById('numPeople').value);
+  if(!w||w<=0){ setMsg('Please enter a weight greater than 0.','error'); return; }
+  if(!np||np<1){ setMsg('Please enter at least 1 person.','error'); return; }
+  if(w>30)        setMsg('\u26A0 '+dW(w)+' is very large. Double-check your entry.','warn');
+  else if(np>100) setMsg('\u26A0 '+np+' people is a large crowd cook.','warn');
+  else            setMsg('');
+  var sd=serveDate();
+  if(!sd){ setMsg('Please enter a serving time.','error'); return; }
+  render(c,{
+    wLbs:w, temp:parseInt(document.getElementById('smokerTemp').value),
+    serve:sd, wrap:document.getElementById('wrapMethod').value,
+    boneIn:document.getElementById('boneIn').value==='yes',
+    inj:document.getElementById('injected').value==='yes',
+    np:np, grill:document.getElementById('grillType').value
+  });
+}
+
+/* ============================================================
+   EVENTS
+   ============================================================ */
+document.getElementById('calcBtn').addEventListener('click',calc);
+document.getElementById('printBtn').addEventListener('click',function(){window.print();});
+document.getElementById('meatType').addEventListener('change',onMeatChange);
+
+document.getElementById('tempToggle').addEventListener('click',function(e){
+  var btn=e.target.closest('button'); if(!btn) return;
+  state.tu=btn.dataset.unit;
+  document.querySelectorAll('#tempToggle button').forEach(function(b){b.classList.toggle('active',b===btn);});
+  document.getElementById('searTempUnit').textContent=state.tu==='C'?'\xB0C':'\xB0F';
+  var k=document.getElementById('meatType').value, c=D[k];
+  updTempOpts(c);
+  if(c.phase==='two-phase') document.getElementById('searTemp').value=state.tu==='C'?Math.round((c.searTempF-32)*5/9):c.searTempF;
+  if(document.getElementById('results').classList.contains('visible')) calc();
+});
+
+document.getElementById('weightToggle').addEventListener('click',function(e){
+  var btn=e.target.closest('button'); if(!btn) return;
+  var old=state.wu; state.wu=btn.dataset.unit;
+  document.querySelectorAll('#weightToggle button').forEach(function(b){b.classList.toggle('active',b===btn);});
+  var inp=document.getElementById('weight'), v=parseFloat(inp.value);
+  if(!isNaN(v)&&v>0){
+    if(old==='lbs'&&state.wu==='kg') inp.value=lK(v).toFixed(2);
+    else if(old==='kg'&&state.wu==='lbs') inp.value=kL(v).toFixed(1);
+  }
+  document.getElementById('weightUnit').textContent=state.wu==='kg'?'kg':'lbs';
+  updSzLabels();
+  if(document.getElementById('results').classList.contains('visible')) calc();
+});
+
+document.getElementById('servingToggle').addEventListener('click',function(e){
+  var btn=e.target.closest('button'); if(!btn) return;
+  state.sz=btn.dataset.size;
+  document.querySelectorAll('#servingToggle button').forEach(function(b){b.classList.toggle('active',b===btn);});
+  if(document.getElementById('results').classList.contains('visible')) calc();
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+(function init(){
+  try{
+    var lang=navigator.language||'en-US';
+    if(lang.indexOf('en')!==0){
+      state.tu='C'; state.wu='kg';
+      document.querySelectorAll('#tempToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.unit==='C');});
+      document.querySelectorAll('#weightToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.unit==='kg');});
+      document.getElementById('weightUnit').textContent='kg';
+      document.getElementById('searTempUnit').textContent='\xB0C';
+      updSzLabels();
+    }
+  }catch(e){}
+  onMeatChange();
+  initConsentBanner();
+  initShareButtons();
+  initEmbedSection();
+})();
+
+})();
+</script>
+</body>
+</html>
