@@ -113,6 +113,7 @@ body {
   min-height: 100vh;
   line-height: 1.5;
 }
+body.modal-open { overflow: hidden; }
 :root {
   --amber: #EF9F27;
   --amber-dark: #C97F10;
@@ -169,20 +170,9 @@ main { max-width: 960px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
   font-size: 1.45rem;
   margin-bottom: .75rem;
 }
-.calculator-section-intro {
-  color: var(--text-muted);
-  margin-bottom: 1rem;
-}
 .section-title { font-family: Georgia,serif; font-size: 1.1rem; font-weight: 700; color: var(--charcoal); margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem; }
 .section-title::after { content: ''; flex: 1; height: 1px; background: var(--card-border); }
 .ad-slot { text-align: center; margin: 1.5rem 0; min-height: 90px; }
-.how-it-works {
-  max-width: 600px;
-  margin: 0 auto 1.75rem;
-  text-align: center;
-  color: var(--text-muted);
-  font-size: .98rem;
-}
 .form-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.5rem; }
 @media (max-width:600px) { .form-grid { grid-template-columns: 1fr; } }
@@ -220,9 +210,49 @@ main { max-width: 960px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
 .vmsg { margin-top: .75rem; padding: .6rem .875rem; border-radius: 6px; font-size: .875rem; display: none; }
 .vmsg.error { background: #FDECEA; border: 1px solid #F5C6C1; color: #922B21; display: block; }
 .vmsg.warn { background: var(--yellow-warn); border: 1px solid var(--yellow-warn-border); color: #856404; display: block; }
-#results { display: none; animation: fadeUp .35s ease both; }
+#results {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  padding: 1.5rem;
+  background: rgba(26,26,26,.68);
+  overflow-y: auto;
+}
 #results.visible { display: block; }
 @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+.results-modal {
+  max-width: 960px;
+  margin: 0 auto;
+  background: #F5F0E8;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 24px 48px rgba(0,0,0,.28);
+  animation: fadeUp .35s ease both;
+}
+.results-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.results-modal__title {
+  font-family: Georgia,serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+.results-close {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 999px;
+  background: var(--charcoal);
+  color: #fff;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
 .stat-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 1.5rem; }
 @media (max-width:500px) { .stat-cards { grid-template-columns: 1fr; } }
 .stat-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.25rem 1rem; box-shadow: var(--shadow); text-align: center; position: relative; overflow: hidden; }
@@ -498,19 +528,45 @@ footer a:focus-visible { text-decoration: underline; }
 }
 .wood-card p,
 .guide-card p { margin-top: .55rem; }
-.mistakes-list {
+.faq-group {
   display: grid;
   gap: 1rem;
 }
-.mistakes-list li {
+.faq-item {
   background: rgba(255,255,255,.78);
   border: 1px solid var(--card-border);
   border-radius: var(--radius);
-  padding: 1rem 1.15rem;
-  margin-left: 1.25rem;
+  box-shadow: var(--shadow);
 }
-.mistakes-list h3 {
-  margin-top: 0;
+.faq-item summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 1rem 1.15rem;
+  font-family: Georgia,serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: '+';
+  float: right;
+  font-size: 1rem;
+}
+.faq-item[open] summary::after { content: '−'; }
+.faq-answer {
+  padding: 0 1.15rem 1rem;
+}
+.faq-answer p + p {
+  margin-top: .9rem;
+}
+.faq-numbered {
+  counter-reset: faq-item;
+}
+.faq-numbered .faq-item summary {
+  counter-increment: faq-item;
+}
+.faq-numbered .faq-item summary::before {
+  content: counter(faq-item) '. ';
 }
 .embed-section textarea {
   width: 100%;
@@ -540,6 +596,8 @@ footer a:focus-visible { text-decoration: underline; }
   .cookie-banner__actions { width: 100%; }
   .cookie-banner__actions button { flex: 1 1 180px; }
   .wood-grid { grid-template-columns: 1fr; }
+  #results { padding: .75rem; }
+  .results-modal { padding: 1rem; }
 }
 @media print {
   body { background: #fff !important; color: #000 !important; font-size: 12px; }
@@ -553,7 +611,25 @@ footer a:focus-visible { text-decoration: underline; }
   }
   body * { color: #000 !important; box-shadow: none !important; text-shadow: none !important; }
   header,.form-card,.calc-btn,.vmsg,.print-btn,.ad-slot,.cookie-banner,.share-buttons,.about-section,.no-print,footer nav { display: none !important; }
-  #results { display: block !important; }
+  #results {
+    display: block !important;
+    position: static !important;
+    inset: auto !important;
+    padding: 0 !important;
+    background: transparent !important;
+    overflow: visible !important;
+  }
+  .results-modal {
+    max-width: none !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    animation: none !important;
+  }
+  .results-modal__header,
+  .results-close { display: none !important; }
   #print-header { display: block !important; border-bottom: 2px solid #000; padding-bottom: .5rem; margin-bottom: 1rem; }
   #print-header .print-title { font-family: Georgia,serif; font-size: 1.4rem; font-weight: 700; margin-bottom: .2rem; }
   #print-header .pm { font-size: .85rem; color: #444; }
@@ -616,14 +692,8 @@ footer a:focus-visible { text-decoration: underline; }
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
   </div>
 
-  <section class="how-it-works" aria-label="How SmokeCalc works">
-    <p>Enter your cut, weight, and what time you want to eat. SmokeCalc works backward to give you a complete cook timeline — including when to start your smoker, when the stall will hit, and exactly when to pull the meat.</p>
-  </section>
-
   <section id="calculator" aria-labelledby="calculator-title">
     <h2 class="calculator-section-title" id="calculator-title">Build your smoking timeline</h2>
-    <p class="calculator-section-intro">Choose your cut, target serving time, and smoker setup to generate a cook plan that matches how the calculator handles timing, temperatures, stall windows, and rest periods.</p>
-
   <div class="form-card">
     <h3 class="section-title">Cook Settings</h3>
     <div class="form-grid">
@@ -761,7 +831,12 @@ footer a:focus-visible { text-decoration: underline; }
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
   </div>
 
-  <div id="results">
+  <div id="results" role="dialog" aria-modal="true" aria-labelledby="resultsModalTitle">
+    <div class="results-modal">
+      <div class="results-modal__header no-print">
+        <div class="results-modal__title" id="resultsModalTitle">Your smoking timeline</div>
+        <button class="results-close" id="closeResultsBtn" type="button" aria-label="Close results">×</button>
+      </div>
     <div class="stat-cards">
       <div class="stat-card c1">
         <span class="sc-icon">&#x23F1;</span>
@@ -818,6 +893,7 @@ footer a:focus-visible { text-decoration: underline; }
       <a class="share-btn" href="https://pinterest.com/pin/create/button/?url=https://smokecalc.com&amp;description=Free+meat+smoking+calculator" target="_blank" rel="noopener noreferrer">Share on Pinterest</a>
       <a class="share-btn" href="https://www.facebook.com/sharer/sharer.php?u=https://smokecalc.com" target="_blank" rel="noopener noreferrer">Share on Facebook</a>
       <button class="share-btn" id="copyLinkBtn" type="button">Copy link</button>
+    </div>
     </div>
   </div>
   </section>
@@ -929,72 +1005,99 @@ footer a:focus-visible { text-decoration: underline; }
     </div>
   </section>
 
-  <section class="editorial-section guide-card" aria-labelledby="brisket-guide-title">
-    <h2 id="brisket-guide-title">How long to smoke a brisket</h2>
-    <p>At 225°F, brisket usually takes about 1.5 hours per pound. At 250°F, that pace often drops closer to 1.25 hours per pound, although shape and thickness matter just as much as scale weight. A full packer almost always hits a stall somewhere between 150°F and 170°F internal, and that plateau can last several hours if you leave the meat unwrapped. Foil pushes through the stall faster and traps more moisture, while butcher paper breathes better and protects bark texture.</p>
-    <p>For sliced brisket, start checking for doneness in the high 190s and expect the sweet spot around 203°F in the thickest part of the flat. The real finish test is feel: the probe should slide in with almost no resistance. After the brisket comes off, rest it at least 1 hour and ideally 2 hours in a warm holding environment so the rendered collagen settles and the slices stay juicy. The most common brisket mistake is pulling based on the clock alone. If it is not probe-tender yet, it is not done. When in doubt, <a class="text-link" href="/#calculator">use the brisket smoking calculator above</a> to plan your start time and then let tenderness make the final call.</p>
-  </section>
-
-  <section class="editorial-section guide-card" aria-labelledby="pork-shoulder-guide-title">
-    <h2 id="pork-shoulder-guide-title">How long to smoke a pork shoulder</h2>
-    <p>Pork shoulder usually runs about 1.5 hours per pound in the 225°F range, with slightly faster cooks at 250°F. That makes it one of the easiest big barbecue cuts to plan, but the stall still matters. Expect a long plateau once the shoulder reaches the mid-150s, especially if you leave it unwrapped to build bark. Pulled pork is forgiving because the shoulder has a lot of intramuscular fat and connective tissue, so it can take a little extra heat without drying out.</p>
-    <p>For classic pulled pork, target 205°F internal and confirm that the blade bone wiggles freely or the probe slides into the money muscle and horn meat without resistance. Bone-in shoulders usually take a little longer than boneless roasts because the bone changes how heat moves through the cut, but the difference is usually modest rather than dramatic. Once done, wrap and rest the shoulder in a cooler or insulated holding box for at least an hour so the bark softens just enough and the juices redistribute. That rest also makes the money muscle easier to slice cleanly before you pull the rest of the roast.</p>
-  </section>
-
-  <section class="editorial-section guide-card" aria-labelledby="ribs-guide-title">
-    <h2 id="ribs-guide-title">How long to smoke ribs</h2>
-    <p>Ribs are the best reminder that barbecue timing is about thickness and structure, not raw weight. Baby back ribs usually finish in about 4 to 5 hours at 225°F, while spare ribs often need 5 to 6 hours because they are meatier, flatter, and loaded with more connective tissue. Competition-style ribs sit between those ranges depending on how aggressively they are trimmed. The popular 3-2-1 method describes one common approach for spare ribs: three hours unwrapped, two hours wrapped, and a final hour to set sauce. It is a useful training wheel, not a rule.</p>
-    <p>Ribs are usually done around 195°F internal, but texture matters more than a single number. The bend test is more reliable: lift the rack from one end and look for a deep flex with slight cracking in the bark on top. You also want visible pullback at the bone ends. If the rack still feels tight and stiff, keep cooking. If the bones are falling out before slicing, you pushed too far. Because ribs do not follow a per-pound formula, flat cook windows work better for planning than scale weight ever will.</p>
-  </section>
-
-  <section class="editorial-section guide-card" aria-labelledby="turkey-guide-title">
-    <h2 id="turkey-guide-title">Smoking a whole turkey — times and temperature</h2>
-    <p>Whole turkey smokes faster and more evenly when you spatchcock it because flattening the bird exposes the thighs and breasts to more even heat. A traditional whole turkey often cooks around 0.6 hours per pound at 225–250°F, while a spatchcocked bird drops closer to 0.45 hours per pound. Brining is worth the effort because turkey breast is lean and benefits from extra salt and moisture retention before it ever hits the pit.</p>
-    <p>The finishing temperature matters more than the clock. Pull the turkey when the thickest part of the thigh reaches 165°F and confirm the breast is also safely cooked. The biggest turkey complaint on a smoker is rubbery skin, which is what happens when the bird stays too long at low temperature without enough rendering power. Spatchcocking helps because the flatter shape exposes more skin to heat, but you can also solve the problem by finishing hotter late in the cook or crisping the bird briefly at higher heat before serving. Let the turkey rest long enough to settle the juices, then carve while the skin still has its best texture.</p>
-  </section>
-
-  <section class="editorial-section guide-card" aria-labelledby="chicken-guide-title">
-    <h2 id="chicken-guide-title">How long to smoke chicken</h2>
-    <p>Chicken timing depends heavily on whether you are cooking a whole bird, a spatchcocked bird, or individual pieces. A whole chicken usually runs about 45 minutes per pound at 225–250°F, while a spatchcocked chicken often lands in a faster 2.5 to 3 hour window regardless of small weight differences. Pieces behave more like flat-time cooks: breasts and wings are quick, while thighs and quarters need longer because the dark meat carries more connective tissue and benefits from extra render time.</p>
-    <p>For safety and texture, pull breast meat at 165°F and thighs closer to 175°F. Thighs are more forgiving because the extra fat and connective tissue improve with added heat, but breasts dry out quickly if you overshoot. The classic smoked-chicken problem is rubbery skin from low-and-slow cooking. The fix is simple: cook hotter from the start, finish over a grill, or use a reverse-sear style finish so the skin gets enough heat to render properly. If you want the easiest win, choose thighs over breasts. They tolerate timing mistakes better and still taste great when you need a little extra time to finish the rest of the meal.</p>
+  <section class="editorial-section" aria-labelledby="cut-guides-title">
+    <h2 id="cut-guides-title">Popular smoking guides</h2>
+    <div class="faq-group">
+      <details class="faq-item">
+        <summary>How long to smoke a brisket</summary>
+        <div class="faq-answer">
+          <p>At 225°F, brisket usually takes about 1.5 hours per pound. At 250°F, that pace often drops closer to 1.25 hours per pound, although shape and thickness matter just as much as scale weight. A full packer almost always hits a stall somewhere between 150°F and 170°F internal, and that plateau can last several hours if you leave the meat unwrapped. Foil pushes through the stall faster and traps more moisture, while butcher paper breathes better and protects bark texture.</p>
+          <p>For sliced brisket, start checking for doneness in the high 190s and expect the sweet spot around 203°F in the thickest part of the flat. The real finish test is feel: the probe should slide in with almost no resistance. After the brisket comes off, rest it at least 1 hour and ideally 2 hours in a warm holding environment so the rendered collagen settles and the slices stay juicy. The most common brisket mistake is pulling based on the clock alone. If it is not probe-tender yet, it is not done. When in doubt, <a class="text-link" href="/#calculator">use the brisket smoking calculator above</a> to plan your start time and then let tenderness make the final call.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>How long to smoke a pork shoulder</summary>
+        <div class="faq-answer">
+          <p>Pork shoulder usually runs about 1.5 hours per pound in the 225°F range, with slightly faster cooks at 250°F. That makes it one of the easiest big barbecue cuts to plan, but the stall still matters. Expect a long plateau once the shoulder reaches the mid-150s, especially if you leave it unwrapped to build bark. Pulled pork is forgiving because the shoulder has a lot of intramuscular fat and connective tissue, so it can take a little extra heat without drying out.</p>
+          <p>For classic pulled pork, target 205°F internal and confirm that the blade bone wiggles freely or the probe slides into the money muscle and horn meat without resistance. Bone-in shoulders usually take a little longer than boneless roasts because the bone changes how heat moves through the cut, but the difference is usually modest rather than dramatic. Once done, wrap and rest the shoulder in a cooler or insulated holding box for at least an hour so the bark softens just enough and the juices redistribute. That rest also makes the money muscle easier to slice cleanly before you pull the rest of the roast.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>How long to smoke ribs</summary>
+        <div class="faq-answer">
+          <p>Ribs are the best reminder that barbecue timing is about thickness and structure, not raw weight. Baby back ribs usually finish in about 4 to 5 hours at 225°F, while spare ribs often need 5 to 6 hours because they are meatier, flatter, and loaded with more connective tissue. Competition-style ribs sit between those ranges depending on how aggressively they are trimmed. The popular 3-2-1 method describes one common approach for spare ribs: three hours unwrapped, two hours wrapped, and a final hour to set sauce. It is a useful training wheel, not a rule.</p>
+          <p>Ribs are usually done around 195°F internal, but texture matters more than a single number. The bend test is more reliable: lift the rack from one end and look for a deep flex with slight cracking in the bark on top. You also want visible pullback at the bone ends. If the rack still feels tight and stiff, keep cooking. If the bones are falling out before slicing, you pushed too far. Because ribs do not follow a per-pound formula, flat cook windows work better for planning than scale weight ever will.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Smoking a whole turkey — times and temperature</summary>
+        <div class="faq-answer">
+          <p>Whole turkey smokes faster and more evenly when you spatchcock it because flattening the bird exposes the thighs and breasts to more even heat. A traditional whole turkey often cooks around 0.6 hours per pound at 225–250°F, while a spatchcocked bird drops closer to 0.45 hours per pound. Brining is worth the effort because turkey breast is lean and benefits from extra salt and moisture retention before it ever hits the pit.</p>
+          <p>The finishing temperature matters more than the clock. Pull the turkey when the thickest part of the thigh reaches 165°F and confirm the breast is also safely cooked. The biggest turkey complaint on a smoker is rubbery skin, which is what happens when the bird stays too long at low temperature without enough rendering power. Spatchcocking helps because the flatter shape exposes more skin to heat, but you can also solve the problem by finishing hotter late in the cook or crisping the bird briefly at higher heat before serving. Let the turkey rest long enough to settle the juices, then carve while the skin still has its best texture.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>How long to smoke chicken</summary>
+        <div class="faq-answer">
+          <p>Chicken timing depends heavily on whether you are cooking a whole bird, a spatchcocked bird, or individual pieces. A whole chicken usually runs about 45 minutes per pound at 225–250°F, while a spatchcocked chicken often lands in a faster 2.5 to 3 hour window regardless of small weight differences. Pieces behave more like flat-time cooks: breasts and wings are quick, while thighs and quarters need longer because the dark meat carries more connective tissue and benefits from extra render time.</p>
+          <p>For safety and texture, pull breast meat at 165°F and thighs closer to 175°F. Thighs are more forgiving because the extra fat and connective tissue improve with added heat, but breasts dry out quickly if you overshoot. The classic smoked-chicken problem is rubbery skin from low-and-slow cooking. The fix is simple: cook hotter from the start, finish over a grill, or use a reverse-sear style finish so the skin gets enough heat to render properly. If you want the easiest win, choose thighs over breasts. They tolerate timing mistakes better and still taste great when you need a little extra time to finish the rest of the meal.</p>
+        </div>
+      </details>
+    </div>
   </section>
 
   <section class="editorial-section" aria-labelledby="smoking-mistakes-title">
     <h2 id="smoking-mistakes-title">Common meat smoking mistakes</h2>
-    <ol class="mistakes-list">
-      <li>
-        <h3>Relying on time instead of temperature</h3>
-        <p>Cook time estimates are planning tools, not finish lines. Meat becomes tender when collagen, fat, and muscle fibers reach the right internal state, which is why thermometers and tenderness checks matter more than the clock.</p>
-      </li>
-      <li>
-        <h3>Not accounting for the stall</h3>
-        <p>When the stall hits, impatient cooks often panic and crank the heat too far. That can scorch bark or dry the outside before the center becomes tender. Plan for the plateau instead of fighting it emotionally.</p>
-      </li>
-      <li>
-        <h3>Opening the smoker too often</h3>
-        <p>Every lid lift dumps heat, moisture, and airflow stability. The recovery time adds up, and the meat ends up taking longer than expected even though the pit looked hot when you closed it again.</p>
-      </li>
-      <li>
-        <h3>Under-resting the meat</h3>
-        <p>Cut too early and the juices rush out onto the board instead of staying in the slices. Resting gives the rendered fat and gelatin time to settle so the meat holds together and stays moist.</p>
-      </li>
-      <li>
-        <h3>Too much smoke</h3>
-        <p>Thin blue smoke is clean and gentle. Thick white smoke usually means incomplete combustion, harsh flavor, and bitter bark. More visible smoke is not better smoke.</p>
-      </li>
-      <li>
-        <h3>Not trimming fat properly</h3>
-        <p>Too much exterior fat blocks seasoning, smoke, and bark formation. Too little leaves the meat exposed and can reduce moisture protection. Trimming is about balance, not maximum removal.</p>
-      </li>
-      <li>
-        <h3>Cooking cold meat straight from the fridge</h3>
-        <p>Letting the meat temper briefly while the pit settles helps the surface dry, takes the chill off the exterior, and gives seasonings a better chance to adhere evenly before the cook starts.</p>
-      </li>
-      <li>
-        <h3>Inconsistent smoker temperature</h3>
-        <p>A stable fire matters more than chasing a perfect number. If your pit is swinging constantly, timing gets harder, bark develops unevenly, and the meat cooks less predictably from edge to center.</p>
-      </li>
-    </ol>
+    <div class="faq-group faq-numbered">
+      <details class="faq-item">
+        <summary>Relying on time instead of temperature</summary>
+        <div class="faq-answer">
+          <p>Cook time estimates are planning tools, not finish lines. Meat becomes tender when collagen, fat, and muscle fibers reach the right internal state, which is why thermometers and tenderness checks matter more than the clock.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Not accounting for the stall</summary>
+        <div class="faq-answer">
+          <p>When the stall hits, impatient cooks often panic and crank the heat too far. That can scorch bark or dry the outside before the center becomes tender. Plan for the plateau instead of fighting it emotionally.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Opening the smoker too often</summary>
+        <div class="faq-answer">
+          <p>Every lid lift dumps heat, moisture, and airflow stability. The recovery time adds up, and the meat ends up taking longer than expected even though the pit looked hot when you closed it again.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Under-resting the meat</summary>
+        <div class="faq-answer">
+          <p>Cut too early and the juices rush out onto the board instead of staying in the slices. Resting gives the rendered fat and gelatin time to settle so the meat holds together and stays moist.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Too much smoke</summary>
+        <div class="faq-answer">
+          <p>Thin blue smoke is clean and gentle. Thick white smoke usually means incomplete combustion, harsh flavor, and bitter bark. More visible smoke is not better smoke.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Not trimming fat properly</summary>
+        <div class="faq-answer">
+          <p>Too much exterior fat blocks seasoning, smoke, and bark formation. Too little leaves the meat exposed and can reduce moisture protection. Trimming is about balance, not maximum removal.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Cooking cold meat straight from the fridge</summary>
+        <div class="faq-answer">
+          <p>Letting the meat temper briefly while the pit settles helps the surface dry, takes the chill off the exterior, and gives seasonings a better chance to adhere evenly before the cook starts.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Inconsistent smoker temperature</summary>
+        <div class="faq-answer">
+          <p>A stable fire matters more than chasing a perfect number. If your pit is swinging constantly, timing gets harder, bark develops unevenly, and the meat cooks less predictably from edge to center.</p>
+        </div>
+      </details>
+    </div>
   </section>
 
   <div class="ad-slot">
@@ -1143,6 +1246,14 @@ function showCookieBanner(){
 }
 function hideCookieBanner(){
   document.getElementById('cookieBanner').classList.remove('visible');
+}
+function openResultsModal(){
+  document.getElementById('results').classList.add('visible');
+  document.body.classList.add('modal-open');
+}
+function closeResultsModal(){
+  document.getElementById('results').classList.remove('visible');
+  document.body.classList.remove('modal-open');
 }
 function initConsentBanner(){
   var storedConsent = getCookie(CONSENT_COOKIE_NAME);
@@ -1757,7 +1868,7 @@ function render(cut, inp){
   document.getElementById('ptitle').textContent='SmokeCalc \u2014 '+cut.name;
   document.getElementById('pmeta').textContent=dW(inp.wLbs)+' \xB7 '+tLbl(stv2)+' smoker \xB7 Serve at '+fmt(inp.serve);
 
-  document.getElementById('results').classList.add('visible');
+  openResultsModal();
 }
 
 /* ============================================================
@@ -1830,7 +1941,16 @@ function calc(){
    ============================================================ */
 document.getElementById('calcBtn').addEventListener('click',calc);
 document.getElementById('printBtn').addEventListener('click',function(){window.print();});
+document.getElementById('closeResultsBtn').addEventListener('click',closeResultsModal);
 document.getElementById('meatType').addEventListener('change',onMeatChange);
+document.getElementById('results').addEventListener('click',function(e){
+  if(e.target === this) closeResultsModal();
+});
+document.addEventListener('keydown',function(e){
+  if(e.key === 'Escape' && document.getElementById('results').classList.contains('visible')){
+    closeResultsModal();
+  }
+});
 
 document.getElementById('tempToggle').addEventListener('click',function(e){
   var btn=e.target.closest('button'); if(!btn) return;
