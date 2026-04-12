@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brisket Smoking Calculator — How Long to Smoke a Brisket | Pitmaster Tools</title>
+<meta name="description" content="Free brisket smoking calculator. Enter your brisket weight, smoker temperature, and serve time to get exact cook times, start times, and a full smoking timeline for sliced or pulled brisket.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://pitmaster.tools/brisket-calculator.html">
+<meta property="og:title" content="Brisket Smoking Calculator — How Long to Smoke a Brisket">
+<meta property="og:description" content="Free brisket smoking calculator. Enter your brisket weight, smoker temperature, and serve time to get exact cook times, start times, and a full smoking timeline for sliced or pulled brisket.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://pitmaster.tools/brisket-calculator.html">
+<meta property="og:image" content="https://pitmaster.tools/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Brisket Smoking Calculator — How Long to Smoke a Brisket">
+<meta name="twitter:description" content="Free brisket smoking calculator. Enter your brisket weight, smoker temperature, and serve time to get exact cook times, start times, and a full smoking timeline for sliced or pulled brisket.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23EF9F27' d='M36 4c2 10-3 15-8 21-5 6-9 11-9 19 0 10 7 16 15 16 11 0 19-8 19-19 0-12-7-19-17-37z'/%3E%3Cpath fill='%23D78108' d='M33 27c1 6-2 9-5 12-3 3-5 6-5 10 0 6 4 10 9 10 7 0 12-5 12-12 0-7-4-11-11-20z'/%3E%3C/svg%3E">
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {'ad_storage':'denied','analytics_storage':'denied','wait_for_update':500});
+  (function(){
+    var prefix = 'pitmaster_consent=';
+    var cookies = document.cookie ? document.cookie.split(';') : [];
+    for(var i=0;i<cookies.length;i++){
+      var c=cookies[i].trim();
+      if(c.indexOf(prefix)!==0) continue;
+      if(decodeURIComponent(c.substring(prefix.length))!=='accepted') break;
+      gtag('consent','update',{'ad_storage':'granted','analytics_storage':'granted'});
+      var s=document.createElement('script'); s.async=true;
+      s.src='https://www.googletagmanager.com/gtag/js?id=G-SJJVV37EWE';
+      document.head.appendChild(s);
+      gtag('js',new Date()); gtag('config','G-SJJVV37EWE');
+      window._gtagLoaded=true; break;
+    }
+  })();
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Pitmaster Tools — Brisket Smoking Calculator",
+  "url": "https://pitmaster.tools/brisket-calculator.html",
+  "description": "Free brisket smoking calculator. Enter your brisket weight, smoker temperature, and serve time to get exact cook times, start times, and a full smoking timeline for sliced or pulled brisket.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "isAccessibleForFree": true,
+  "browserRequirements": "Requires JavaScript enabled in a modern browser.",
+  "featureList": [
+    "Brisket cook time calculator",
+    "Full smoking timeline working backward from serve time",
+    "Stall prediction with wrap-method adjustment",
+    "Sliced vs. pulled brisket pull temperatures",
+    "Foil, butcher paper, and no-wrap timing factors",
+    "Reference table for multiple weights and temperatures"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How long does it take to smoke a brisket?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "At 250°F, a 12-pound brisket takes approximately 15 hours of active cook time before a 90-minute rest. The exact time depends on the smoker temperature, wrap method, and the brisket's thickness. Always cook to internal temperature — never to time alone. A probe thermometer is mandatory."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What temperature do you pull a brisket?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Pull brisket for slicing at 195°F internal temperature. Pull brisket for pulling (shredding) at 205°F. At both temperatures, test with a probe — it should slide in with zero resistance, like pushing into warm butter. Do not rely on temperature alone if the probe still meets resistance."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the brisket stall?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The brisket stall is a plateau that occurs between 150°F and 170°F internal temperature, where the meat stops rising in temperature for several hours. This is caused by evaporative cooling — moisture evaporating from the meat's surface at the same rate that the smoker adds heat. Collagen is also breaking down into gelatin during this period. The stall can last 3–6 hours. Do not panic and do not raise the smoker temperature. Wrapping in foil (Texas Crutch) or butcher paper will shorten or eliminate the stall."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should you wrap a brisket in foil or butcher paper?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Wrapping in foil (the Texas Crutch) speeds the brisket through the stall fastest by trapping steam, but it softens the bark. Butcher paper allows the bark to breathe while still reducing stall time by roughly half — it is the preferred method for competition pitmasters who want both speed and bark quality. No wrap produces the hardest, most developed bark but adds significant cook time and requires more fuel management. All three methods produce excellent brisket when executed well."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long should brisket rest before slicing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Brisket should rest a minimum of 90 minutes before slicing. A 2–4 hour rest is ideal and will noticeably improve juiciness and sliceability. For large events, a faux Cambro — wrapping the foiled brisket in towels and placing it in a cooler — can hold a brisket safely at temperature for 6 hours or more, giving you tremendous flexibility on serve time."
+      }
+    }
+  ]
+}
+</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --amber: #EF9F27;
+  --amber-dark: #C97F10;
+  --amber-light: #FEF3DE;
+  --charcoal: #1a1a1a;
+  --card-bg: #FFFFFF;
+  --card-border: #E8E0D0;
+  --text-muted: #6B6560;
+  --radius: 8px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --blue: #3B82F6;
+  --red: #EF4444;
+  --green: #22C55E;
+}
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  background: #F5F0E8;
+  color: #1a1a1a;
+  line-height: 1.6;
+}
+body.modal-open { overflow: hidden; }
+header {
+  background: var(--charcoal);
+  padding: 0 1.5rem;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo { font-family: Georgia,"Times New Roman",serif; font-size: 1.5rem; font-weight: 700; color: #fff; letter-spacing: -0.02em; text-decoration: none; }
+.logo span { color: var(--amber); }
+.header-nav { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+.header-nav a { color: #ccc; text-decoration: none; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; }
+.header-nav a:hover, .header-nav a:focus-visible { color: var(--amber); }
+.header-nav a[aria-current="page"] { color: var(--amber); font-weight: 700; }
+.unit-controls { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
+.unit-toggle { display: flex; background: #333; border-radius: 20px; padding: 3px; gap: 2px; }
+.unit-toggle button { background: none; border: none; color: #aaa; font-size: .75rem; font-weight: 600; padding: 4px 10px; border-radius: 16px; cursor: pointer; transition: background .15s,color .15s; letter-spacing: .03em; }
+.unit-toggle button.active { background: var(--amber); color: #fff; }
+.unit-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+main { max-width: 960px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+.page-hero { max-width: 760px; margin: 0 auto 1.5rem; text-align: center; }
+.page-hero h1 { font-family: Georgia,serif; font-size: clamp(1.8rem,4vw,2.8rem); line-height: 1.1; margin-bottom: .75rem; }
+.page-hero p { color: var(--text-muted); font-size: 1rem; }
+.section-title { font-family: Georgia,serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 1rem; color: var(--charcoal); display: flex; align-items: center; gap: .5rem; }
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--card-border); }
+.ad-slot { text-align: center; margin: 1.5rem 0; min-height: 90px; }
+.form-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.5rem; }
+.form-group { display: flex; flex-direction: column; gap: .35rem; }
+.form-group.full-width { grid-column: 1/-1; }
+.form-group label { font-size: .8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; }
+.form-group select,
+.form-group input[type="number"],
+.form-group input[type="time"] {
+  border: 1.5px solid var(--card-border); border-radius: 6px; padding: .55rem .75rem; font-size: .95rem;
+  color: var(--charcoal); background: #FAFAF8; font-family: inherit; transition: border-color .15s;
+  width: 100%; appearance: none; -webkit-appearance: none;
+}
+.form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236B6560' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right .75rem center; padding-right: 2.25rem;
+}
+.form-group select:focus:not(:focus-visible),
+.form-group input:focus:not(:focus-visible) { outline: none; border-color: var(--amber); background: #fff; }
+.form-group select:focus-visible,
+.form-group input:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; border-color: var(--amber); background: #fff; }
+.input-with-unit { display: flex; align-items: stretch; }
+.input-with-unit input { border-radius: 6px 0 0 6px; border-right: none; flex: 1; }
+.input-unit-label { display: flex; align-items: center; padding: 0 .75rem; background: #F0EBE3; border: 1.5px solid var(--card-border); border-left: none; border-radius: 0 6px 6px 0; font-size: .85rem; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+/* Brisket style toggle */
+.style-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: .25rem; }
+.style-btn { border: 2px solid var(--card-border); border-radius: 8px; padding: .875rem 1rem; background: #FAFAF8; text-align: center; cursor: pointer; font-family: inherit; transition: border-color .15s, background .15s; }
+.style-btn.active { border-color: var(--amber); background: var(--amber-light); }
+.style-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.sb-icon { font-size: 1.35rem; display: block; margin-bottom: .25rem; }
+.sb-name { font-weight: 700; font-size: .95rem; display: block; margin-bottom: .1rem; }
+.sb-desc { font-size: .76rem; color: var(--text-muted); line-height: 1.4; }
+/* Wrap method toggle */
+.wrap-toggle { display: flex; border: 1.5px solid var(--card-border); border-radius: 6px; overflow: hidden; }
+.wrap-toggle button { flex: 1; border: none; background: #FAFAF8; color: var(--text-muted); font-family: inherit; font-size: .875rem; font-weight: 600; padding: .55rem .5rem; cursor: pointer; transition: background .15s,color .15s; border-right: 1px solid var(--card-border); line-height: 1.2; }
+.wrap-toggle button:last-child { border-right: none; }
+.wrap-toggle button.active { background: var(--amber); color: #fff; }
+.wrap-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.calc-btn { width: 100%; margin-top: 1.25rem; padding: .875rem; background: var(--charcoal); color: #fff; border: none; border-radius: 6px; font-family: Georgia,serif; font-size: 1.05rem; font-weight: 700; letter-spacing: .02em; cursor: pointer; transition: background .15s,transform .1s; }
+.calc-btn:hover { background: #333; }
+.calc-btn:active { transform: scale(.99); }
+.calc-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.vmsg { margin-top: .75rem; padding: .6rem .875rem; border-radius: 6px; font-size: .875rem; display: none; }
+.vmsg.error { background: #FDECEA; border: 1px solid #F5C6C1; color: #922B21; display: block; }
+/* Modal */
+#results {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  padding: 1.5rem;
+  background: rgba(26,26,26,.68);
+  overflow-y: auto;
+}
+#results.visible { display: block; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+.results-modal {
+  max-width: 960px;
+  margin: 0 auto;
+  background: #F5F0E8;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 24px 48px rgba(0,0,0,.28);
+  animation: fadeUp .35s ease both;
+}
+.results-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.results-modal__title { font-family: Georgia,serif; font-size: 1.4rem; font-weight: 700; }
+.results-close {
+  width: 40px; height: 40px; border: none; border-radius: 999px;
+  background: var(--charcoal); color: #fff; font-size: 1.35rem; line-height: 1; cursor: pointer;
+}
+.results-close:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.stat-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+.stat-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.25rem 1rem; box-shadow: var(--shadow); text-align: center; position: relative; overflow: hidden; }
+.stat-card::before { content: ''; position: absolute; top:0; left:0; right:0; height: 3px; }
+.stat-card.c1::before { background: var(--blue); }
+.stat-card.c2::before { background: var(--amber); }
+.stat-card.c3::before { background: var(--red); }
+.sc-icon { font-size: 1.5rem; margin-bottom: .35rem; display: block; }
+.sc-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin-bottom: .4rem; }
+.sc-value { font-family: Georgia,serif; font-size: 2rem; font-weight: 700; color: var(--charcoal); line-height: 1; }
+.sc-sub { font-size: .8rem; color: var(--text-muted); margin-top: .35rem; }
+.card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.25rem 1.5rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+/* Timeline */
+.tl-list { list-style: none; padding: 0; margin-bottom: 1rem; }
+.tl-item { display: flex; gap: .75rem; padding: .6rem 0; border-bottom: 1px solid #F0EBE3; align-items: flex-start; }
+.tl-item:last-child { border-bottom: none; }
+.tl-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: .35rem; }
+.tl-dot.blue { background: var(--blue); }
+.tl-dot.amber { background: var(--amber); }
+.tl-dot.red { background: var(--red); }
+.tl-dot.green { background: var(--green); }
+.tl-time { font-weight: 700; font-size: .9rem; min-width: 90px; font-variant-numeric: tabular-nums; }
+.tl-day { font-size: .72rem; color: var(--text-muted); }
+.tl-label { font-weight: 600; font-size: .9rem; }
+.tl-sub { font-size: .8rem; color: var(--text-muted); margin-top: .1rem; }
+.print-btn { display: flex; align-items: center; gap: .5rem; padding: .7rem 1.5rem; background: none; border: 2px solid var(--charcoal); border-radius: 6px; font-family: inherit; font-size: .9rem; font-weight: 700; color: var(--charcoal); cursor: pointer; transition: background .15s,color .15s; letter-spacing: .03em; }
+.print-btn:hover { background: var(--charcoal); color: #fff; }
+.print-btn svg { width: 16px; height: 16px; }
+.print-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+/* Editorial */
+.editorial-section { margin: 2rem 0; }
+.editorial-section h2 { font-family: Georgia,serif; font-size: 1.55rem; margin-bottom: .85rem; }
+.editorial-section h3 { font-family: Georgia,serif; font-size: 1.1rem; margin: 1.25rem 0 .5rem; }
+.editorial-section p, .editorial-section li { color: #332F2B; line-height: 1.75; }
+.editorial-section p + p, .editorial-section p + h3, .editorial-section h3 + p,
+.editorial-section ul + p, .editorial-section p + ul { margin-top: .9rem; }
+.editorial-section ul { padding-left: 1.25rem; margin-top: .5rem; }
+.editorial-section li + li { margin-top: .3rem; }
+/* Reference table */
+.ref-table-wrap { overflow-x: auto; border: 1px solid var(--card-border); border-radius: var(--radius); background: #fff; box-shadow: var(--shadow); margin: 1rem 0; }
+.ref-table { width: 100%; border-collapse: collapse; min-width: 480px; }
+.ref-table th, .ref-table td { text-align: center; padding: .7rem .8rem; border-bottom: 1px solid #EFE7DA; font-size: .9rem; }
+.ref-table th:first-child, .ref-table td:first-child { text-align: left; font-weight: 700; }
+.ref-table thead th { background: #FAF5EC; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); position: sticky; top: 0; }
+.ref-table tbody tr:nth-child(even) { background: #FCFAF6; }
+/* FAQ */
+.faq-section { margin: 2rem 0; }
+.faq-section h2 { font-family: Georgia,serif; font-size: 1.55rem; margin-bottom: 1rem; }
+.faq-group { display: grid; gap: 1rem; }
+.faq-item { background: rgba(255,255,255,.78); border: 1px solid var(--card-border); border-radius: var(--radius); box-shadow: var(--shadow); }
+.faq-item summary { list-style: none; cursor: pointer; padding: 1rem 1.15rem; font-family: Georgia,serif; font-size: 1rem; font-weight: 700; }
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after { content: '+'; float: right; font-size: 1rem; }
+.faq-item[open] summary::after { content: '\2212'; }
+.faq-body { padding: 0 1.15rem 1rem; color: #332F2B; line-height: 1.75; font-size: .95rem; }
+/* Related tools */
+.related-tools { margin: 2rem 0; }
+.related-tools h2 { font-family: Georgia,serif; font-size: 1.35rem; margin-bottom: 1rem; }
+.tool-links { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.tool-link { display: flex; align-items: flex-start; gap: .85rem; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1rem 1.15rem; box-shadow: var(--shadow); text-decoration: none; color: inherit; transition: border-color .15s, box-shadow .15s; }
+.tool-link:hover, .tool-link:focus-visible { border-color: var(--amber); box-shadow: 0 4px 16px rgba(239,159,39,.18); }
+.tool-link-icon { font-size: 1.5rem; flex-shrink: 0; }
+.tool-link-name { font-weight: 700; font-size: .95rem; color: var(--charcoal); margin-bottom: .2rem; }
+.tool-link-desc { font-size: .82rem; color: var(--text-muted); line-height: 1.45; }
+/* Footer */
+footer { background: var(--charcoal); color: #fff; text-align: center; padding: 2rem 1rem; font-size: 13px; }
+footer nav { display: flex; justify-content: center; flex-wrap: wrap; gap: .75rem; margin: .75rem 0; }
+footer a { color: #fff; text-decoration: none; }
+footer a:hover, footer a:focus-visible { text-decoration: underline; }
+.footer-small { max-width: 720px; margin: .75rem auto 0; color: rgba(255,255,255,.85); line-height: 1.6; }
+/* Cookie banner */
+.cookie-banner { position: fixed; left: 0; right: 0; bottom: 0; z-index: 300; padding: 1rem; display: none; }
+.cookie-banner.visible { display: block; }
+.cookie-banner__inner { max-width: 960px; margin: 0 auto; background: #1a1a1a; color: #fff; border-radius: 12px; padding: 1rem 1.1rem; box-shadow: 0 10px 24px rgba(0,0,0,.28); display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; }
+.cookie-banner__text { flex: 1 1 360px; font-size: .95rem; }
+.cookie-banner__text a { color: var(--amber); text-decoration: underline; }
+.cookie-banner__actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+.cookie-banner__actions button { border: 1px solid transparent; border-radius: 999px; padding: .7rem 1rem; font: inherit; font-weight: 700; cursor: pointer; }
+.cookie-accept { background: var(--amber); color: #fff; }
+.cookie-reject { background: transparent; border-color: rgba(255,255,255,.28); color: #fff; }
+#print-header { display: none; }
+a { color: inherit; }
+@media (max-width:640px) {
+  header { padding: .75rem 1rem; }
+  .header-nav { display: none; }
+  .form-grid { grid-template-columns: 1fr; }
+  .style-toggle { grid-template-columns: 1fr; }
+  .stat-cards { grid-template-columns: 1fr; }
+  .tool-links { grid-template-columns: 1fr; }
+  .cookie-banner__inner { align-items: stretch; }
+  .cookie-banner__actions { width: 100%; }
+  .cookie-banner__actions button { flex: 1 1 140px; }
+  #results { padding: .75rem; }
+  .results-modal { padding: 1rem; }
+}
+@media print {
+  body { background: #fff !important; color: #000 !important; font-size: 12px; }
+  body * { color: #000 !important; box-shadow: none !important; text-shadow: none !important; }
+  header, .form-card, .calc-btn, .vmsg, .print-btn, .ad-slot, .cookie-banner, .no-print, footer nav { display: none !important; }
+  #results {
+    display: block !important;
+    position: static !important;
+    inset: auto !important;
+    padding: 0 !important;
+    background: transparent !important;
+    overflow: visible !important;
+  }
+  .results-modal {
+    max-width: none !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    animation: none !important;
+  }
+  .results-modal__header, .results-close { display: none !important; }
+  #print-header { display: block !important; border-bottom: 2px solid #000; padding-bottom: .5rem; margin-bottom: 1rem; }
+  #print-header .print-title { font-family: Georgia,serif; font-size: 1.4rem; font-weight: 700; margin-bottom: .2rem; }
+  #print-header .pm { font-size: .85rem; color: #444; }
+  .stat-cards { grid-template-columns: repeat(3,1fr); gap: .5rem; margin-bottom: .75rem; }
+  .stat-card { border: 1.5px solid #000; padding: .6rem; }
+  .stat-card::before { display: none; }
+  .sc-value { font-size: 1.4rem; }
+  .card { border: 1px solid #ccc; padding: .6rem .75rem; margin-bottom: .5rem; }
+  .tl-item { padding: .3rem 0; }
+  main { padding: .5rem; }
+  footer { display: block !important; background: #fff !important; color: #000 !important; border-top: 1px solid #000; padding: 1rem 0 0; margin-top: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">Pitmaster<span> Tools</span></a>
+  <nav class="header-nav" aria-label="Site navigation">
+    <a href="/">Smoking Calculator</a>
+    <a href="brisket-calculator.html" aria-current="page">Brisket</a>
+    <a href="pork-shoulder-calculator.html">Pork Shoulder</a>
+    <a href="charcoal-calculator.html">Charcoal</a>
+    <a href="cook-time-coordinator.html">Coordinator</a>
+  </nav>
+  <div class="unit-controls">
+    <div class="unit-toggle" id="tempToggle" role="group" aria-label="Temperature unit">
+      <button data-unit="F" class="active" type="button">&#xB0;F</button>
+      <button data-unit="C" type="button">&#xB0;C</button>
+    </div>
+    <div class="unit-toggle" id="weightToggle" role="group" aria-label="Weight unit">
+      <button data-unit="lbs" class="active" type="button">lbs</button>
+      <button data-unit="kg" type="button">kg</button>
+    </div>
+  </div>
+</header>
+
+<div class="ad-slot" aria-hidden="true">
+  <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4265262608577453" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+</div>
+
+<main>
+  <div id="print-header">
+    <div class="print-title" id="ptitle">Brisket Smoking Timeline</div>
+    <div class="pm" id="pmeta"></div>
+  </div>
+
+  <section class="page-hero" aria-label="Page introduction">
+    <h1>Brisket Smoking Calculator</h1>
+    <p>Enter your brisket details and serve time to get a complete cook timeline — including exactly when to light the smoker, when the stall hits, and when to pull.</p>
+  </section>
+
+  <div class="form-card">
+    <p class="section-title">Brisket Style</p>
+    <div class="style-toggle" role="group" aria-label="Brisket style">
+      <button class="style-btn active" data-style="sliced" type="button" aria-pressed="true">
+        <span class="sb-icon">&#x1F969;</span>
+        <span class="sb-name">Sliced Brisket</span>
+        <span class="sb-desc">Pull at 195&#xB0;F. Ideal for Texas-style brisket with clean slices from the flat.</span>
+      </button>
+      <button class="style-btn" data-style="pulled" type="button" aria-pressed="false">
+        <span class="sb-icon">&#x1F356;</span>
+        <span class="sb-name">Pulled Brisket</span>
+        <span class="sb-desc">Pull at 205&#xB0;F. Fully rendered collagen for pulled or chopped brisket from the point.</span>
+      </button>
+    </div>
+
+    <div class="form-grid" style="margin-top:1.25rem">
+      <div class="form-group">
+        <label for="weight">Brisket Weight</label>
+        <div class="input-with-unit">
+          <input type="number" id="weight" min="1" max="100" step="0.5" value="12" aria-label="Brisket weight">
+          <span class="input-unit-label" id="weightUnitLbl">lbs</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="smokerTemp">Smoker Temperature</label>
+        <select id="smokerTemp" aria-label="Smoker temperature">
+          <option value="225">225&#xB0;F (107&#xB0;C)</option>
+          <option value="250" selected>250&#xB0;F (121&#xB0;C)</option>
+          <option value="275">275&#xB0;F (135&#xB0;C)</option>
+          <option value="300">300&#xB0;F (149&#xB0;C)</option>
+        </select>
+      </div>
+
+      <div class="form-group full-width">
+        <label>Wrap Method</label>
+        <div class="wrap-toggle" role="group" aria-label="Wrap method">
+          <button data-wrap="foil" class="active" type="button" aria-pressed="true">Foil<br><small style="font-weight:400;font-size:.72rem">Texas Crutch</small></button>
+          <button data-wrap="paper" type="button" aria-pressed="false">Butcher Paper<br><small style="font-weight:400;font-size:.72rem">Best bark</small></button>
+          <button data-wrap="none" type="button" aria-pressed="false">No Wrap<br><small style="font-weight:400;font-size:.72rem">Maximum bark</small></button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="serveTime">Serve Time</label>
+        <input type="time" id="serveTime" value="14:00" aria-label="Serve time">
+      </div>
+    </div>
+
+    <button class="calc-btn" id="calcBtn" type="button">Calculate Brisket Timeline</button>
+    <div class="vmsg" id="vmsg" role="alert" aria-live="polite"></div>
+  </div>
+
+  <div class="ad-slot" aria-hidden="true">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4265262608577453" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+  </div>
+
+  <!-- Results modal -->
+  <div id="results" role="dialog" aria-modal="true" aria-labelledby="resultsModalTitle">
+    <div class="results-modal" tabindex="-1">
+      <div class="results-modal__header no-print">
+        <h2 class="results-modal__title" id="resultsModalTitle">Your Brisket Timeline</h2>
+        <button class="results-close" id="resultsClose" type="button" aria-label="Close results">&#x00D7;</button>
+      </div>
+
+      <div class="stat-cards">
+        <div class="stat-card c1">
+          <span class="sc-icon">&#x1F550;</span>
+          <div class="sc-label">Cook Time</div>
+          <div class="sc-value" id="sCookTime">&#x2014;</div>
+          <div class="sc-sub" id="sCookSub">hours</div>
+        </div>
+        <div class="stat-card c2">
+          <span class="sc-icon">&#x1F525;</span>
+          <div class="sc-label">Light Smoker</div>
+          <div class="sc-value" id="sLightTime">&#x2014;</div>
+          <div class="sc-sub" id="sLightDay"></div>
+        </div>
+        <div class="stat-card c3">
+          <span class="sc-icon">&#x1F321;&#xFE0F;</span>
+          <div class="sc-label">Pull Temp</div>
+          <div class="sc-value" id="sPullTemp">&#x2014;</div>
+          <div class="sc-sub">internal temp</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="section-title">Cook Timeline</h3>
+        <ul class="tl-list" id="tlList" aria-label="Cook timeline"></ul>
+      </div>
+
+      <div style="margin-top:1rem" class="no-print">
+        <button class="print-btn" id="printBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <polyline points="6 9 6 2 18 2 18 9"/>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+            <rect x="6" y="14" width="12" height="8"/>
+          </svg>
+          Print Timeline
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Editorial content -->
+  <section class="editorial-section" aria-labelledby="editorial-title">
+    <h2 id="editorial-title">How Long to Smoke a Brisket</h2>
+
+    <p>Brisket is the most rewarding — and most demanding — cook in low-and-slow BBQ. The general rule of thumb is <strong>1.25 to 1.5 hours per pound at 225&#xB0;F</strong>. A full packer brisket weighing 14 to 16 pounds will take 17 to 22 hours from smoker on to pull. At 250&#xB0;F, that same brisket comes in closer to 14 to 18 hours. These numbers are averages; your actual time will depend on the thickness of the flat, your smoker's temperature consistency, and how you manage the stall.</p>
+
+    <p>The single most important rule: <strong>cook to temperature, not to time.</strong> A meat thermometer is not optional equipment for brisket — it is the cook. Pull brisket for slicing at 195&#xB0;F internal, or 205&#xB0;F if you are pulling or chopping. Use the probe test to confirm: when a thermometer probe slides into the thickest part of the flat with zero resistance — like pushing into warm butter — the brisket is done regardless of what the thermometer reads.</p>
+
+    <h3>The Brisket Stall</h3>
+
+    <p>Every pitmaster who has cooked a brisket has encountered the stall: a maddening plateau that begins around 150&#xB0;F and can hold for three to six hours. The internal temperature stops climbing or even drops a degree or two, and panic sets in. Do not raise the smoker temperature. The brisket is fine.</p>
+
+    <p>The stall occurs because brisket contains a significant amount of surface moisture that evaporates at the same rate the smoker adds heat — a process called evaporative cooling. Your brisket is essentially sweating, and as long as that evaporation is happening, the temperature will not rise. Simultaneously, collagen in the connective tissue is beginning its conversion into gelatin — the process that makes brisket tender. The stall ends naturally when enough moisture has evaporated and the collagen conversion is complete, at which point the internal temperature begins climbing again.</p>
+
+    <p>The stall typically begins at around 40% of total cook time and ends near 65%. For a 16-hour cook, that means a stall window of roughly hours 6 through 10. This calculator estimates your stall window and builds it into the timeline automatically.</p>
+
+    <h3>Wrapping Decisions: Foil vs. Butcher Paper vs. No Wrap</h3>
+
+    <p>How you wrap — or choose not to wrap — is one of the most consequential decisions of the cook. Each method produces a different result.</p>
+
+    <ul>
+      <li><strong>Foil (Texas Crutch):</strong> Wrapping tightly in heavy-duty aluminum foil eliminates the stall almost entirely by trapping steam around the meat. The brisket essentially braises in its own juices for the remainder of the cook. Cook time is reduced by roughly 10%. The downside is bark: the steam softens the crust. If you wrap in foil, unwrap during the rest to let the bark firm up. Most backyard cooks and competition teams on a schedule use foil.</li>
+      <li><strong>Butcher Paper (Pink / Peach Paper):</strong> Butcher paper is breathable, which means it reduces the stall without the bark-destroying steam environment of foil. It slows moisture loss and stabilizes the cook without fully trapping humidity. Cook time is reduced by about 5% compared to foil. The bark is noticeably better — this is the method used by Franklin Barbecue and most serious Texas pitmasters. Wrap when the bark is fully set and the surface is deep mahogany, typically at the onset of the stall.</li>
+      <li><strong>No Wrap:</strong> The purist approach. The stall runs its full course, the bark gets maximum time exposed to smoke and airflow, and the result is the hardest, most developed crust you can achieve. Cook time is 10% longer than foil-wrapped. Fuel management matters more with no wrap because temperature spikes will dry out the flat faster. It is the highest-risk approach and the most rewarding when executed well.</li>
+    </ul>
+
+    <h3>The Rest Is Not Optional</h3>
+
+    <p>Resting brisket is not a suggestion — it is a step as important as the cook itself. When brisket comes off the smoker, the muscle fibers are tightly contracted from hours of heat. During the rest, those fibers relax and reabsorb the juices that were pushed to the center during cooking. Slice too early, and the cutting board fills with juice that should have stayed in the meat.</p>
+
+    <p>The minimum rest is 90 minutes, loosely tented in foil. Two to four hours is ideal. For large events or catering situations, the faux Cambro method — wrapping the brisket tightly in foil, then in a thick beach towel, and placing it in a dry cooler — will safely hold a brisket at serving temperature for four to six hours, sometimes more. This technique gives you enormous flexibility on timing and is used at competition cook sites worldwide.</p>
+
+    <p>Do not skip the rest because the brisket probed done an hour early. That extra hour in the cooler makes it better, not worse. The calculator builds in a 90-minute rest by default and works backward from your serve time accordingly.</p>
+
+    <h3>Sliced vs. Pulled Brisket</h3>
+
+    <p>A full packer brisket consists of two muscles: the flat and the point. The flat is the leaner, thinner muscle used for classic sliced brisket. The point (also called the deckle or nose) is heavily marbled and is typically used for burnt ends or pulled brisket.</p>
+
+    <ul>
+      <li><strong>Sliced brisket (195&#xB0;F):</strong> The flat holds its structure for clean slices. Pull at 195&#xB0;F internal, rest, and slice against the grain to 1/4-inch thickness — the width of a pencil. Going thicker or thinner makes it either chewy or crumbly.</li>
+      <li><strong>Pulled brisket (205&#xB0;F):</strong> Cooking to 205&#xB0;F breaks down more collagen and renders more intramuscular fat, producing meat that pulls apart easily. The point is ideal for this treatment. At 205&#xB0;F, the flat will be very tender but may not hold together for slices — plan accordingly and separate the flat and point before pulling.</li>
+    </ul>
+
+    <p>Neither style is superior — they serve different occasions. Sliced brisket is the centerpiece of a Texas-style plate. Pulled brisket works beautifully in sandwiches, tacos, and hash. If you are cooking a whole packer, you can serve both by pulling the point while slicing the flat.</p>
+
+    <!-- Reference table -->
+    <h3>Brisket Smoke Time Reference (foil wrap)</h3>
+    <p>Estimated cook times at each temperature using foil wrap. Add 5% for butcher paper and 10% for no wrap. All times include cook only — rest is not included.</p>
+    <div class="ref-table-wrap">
+      <table class="ref-table">
+        <thead>
+          <tr>
+            <th>Temp</th>
+            <th>8 lbs</th>
+            <th>10 lbs</th>
+            <th>12 lbs</th>
+            <th>14 lbs</th>
+            <th>16 lbs</th>
+            <th>18 lbs</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>225&#xB0;F</td>
+            <td>12.0 hrs</td>
+            <td>15.0 hrs</td>
+            <td>18.0 hrs</td>
+            <td>21.0 hrs</td>
+            <td>24.0 hrs</td>
+            <td>27.0 hrs</td>
+          </tr>
+          <tr>
+            <td>250&#xB0;F</td>
+            <td>10.2 hrs</td>
+            <td>12.8 hrs</td>
+            <td>15.3 hrs</td>
+            <td>17.9 hrs</td>
+            <td>20.4 hrs</td>
+            <td>23.0 hrs</td>
+          </tr>
+          <tr>
+            <td>275&#xB0;F</td>
+            <td>9.0 hrs</td>
+            <td>11.3 hrs</td>
+            <td>13.5 hrs</td>
+            <td>15.8 hrs</td>
+            <td>18.0 hrs</td>
+            <td>20.3 hrs</td>
+          </tr>
+          <tr>
+            <td>300&#xB0;F</td>
+            <td>7.8 hrs</td>
+            <td>9.8 hrs</td>
+            <td>11.7 hrs</td>
+            <td>13.7 hrs</td>
+            <td>15.6 hrs</td>
+            <td>17.6 hrs</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="ad-slot" aria-hidden="true">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4265262608577453" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+  </div>
+
+  <!-- FAQ -->
+  <section class="faq-section" aria-labelledby="faq-title">
+    <h2 id="faq-title">Frequently Asked Questions</h2>
+    <div class="faq-group">
+      <details class="faq-item">
+        <summary>How long does it take to smoke a brisket?</summary>
+        <div class="faq-body">At 250&#xB0;F, a 12-pound brisket takes approximately 15 hours of active cook time before a 90-minute rest. The exact time depends on the smoker temperature, wrap method, and the brisket's thickness. Always cook to internal temperature — never to time alone. A probe thermometer is mandatory.</div>
+      </details>
+      <details class="faq-item">
+        <summary>What temperature do you pull a brisket?</summary>
+        <div class="faq-body">Pull brisket for slicing at 195&#xB0;F internal temperature. Pull brisket for pulling (shredding) at 205&#xB0;F. At both temperatures, test with a probe — it should slide in with zero resistance, like pushing into warm butter. Do not rely on temperature alone if the probe still meets resistance.</div>
+      </details>
+      <details class="faq-item">
+        <summary>What is the brisket stall?</summary>
+        <div class="faq-body">The brisket stall is a plateau that occurs between 150&#xB0;F and 170&#xB0;F internal temperature, where the meat stops rising in temperature for several hours. This is caused by evaporative cooling — moisture evaporating from the meat's surface at the same rate that the smoker adds heat. Collagen is also breaking down into gelatin during this period. The stall can last 3 to 6 hours. Do not panic and do not raise the smoker temperature. Wrapping in foil (Texas Crutch) or butcher paper will shorten or eliminate the stall.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Should you wrap a brisket in foil or butcher paper?</summary>
+        <div class="faq-body">Wrapping in foil (the Texas Crutch) speeds the brisket through the stall fastest by trapping steam, but it softens the bark. Butcher paper allows the bark to breathe while still reducing stall time — it is the preferred method for pitmasters who want both speed and bark quality. No wrap produces the hardest, most developed bark but adds significant cook time and requires more fuel management. All three methods produce excellent brisket when executed well.</div>
+      </details>
+      <details class="faq-item">
+        <summary>How long should brisket rest before slicing?</summary>
+        <div class="faq-body">Brisket should rest a minimum of 90 minutes before slicing. A 2 to 4 hour rest is ideal and will noticeably improve juiciness and sliceability. For large events, a faux Cambro — wrapping the foiled brisket in towels and placing it in a cooler — can hold a brisket safely at temperature for 6 hours or more, giving you tremendous flexibility on serve time.</div>
+      </details>
+    </div>
+  </section>
+
+  <!-- Related tools -->
+  <section class="related-tools" aria-labelledby="related-title">
+    <h2 id="related-title">More Pitmaster Tools</h2>
+    <div class="tool-links">
+      <a class="tool-link" href="/">
+        <span class="tool-link-icon">&#x1F321;&#xFE0F;</span>
+        <div>
+          <div class="tool-link-name">Meat Smoking Calculator</div>
+          <div class="tool-link-desc">Cook times for 28 cuts with full timeline, wood pairings, and serving size math.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="pork-shoulder-calculator.html">
+        <span class="tool-link-icon">&#x1F416;</span>
+        <div>
+          <div class="tool-link-name">Pork Shoulder Calculator</div>
+          <div class="tool-link-desc">Dedicated cook timeline for pulled pork and sliced pork shoulder.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="charcoal-calculator.html">
+        <span class="tool-link-icon">&#x26B0;&#xFE0F;</span>
+        <div>
+          <div class="tool-link-name">Charcoal Calculator</div>
+          <div class="tool-link-desc">Exact charcoal amounts for Minion, Snake, or direct-heat cooks.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="cook-time-coordinator.html">
+        <span class="tool-link-icon">&#x1F4CB;</span>
+        <div>
+          <div class="tool-link-name">Cook Time Coordinator</div>
+          <div class="tool-link-desc">Smoke multiple meats and sync all finish times to the same table.</div>
+        </div>
+      </a>
+    </div>
+  </section>
+</main>
+
+<!-- Cookie consent banner -->
+<div class="cookie-banner" id="cookieBanner" role="dialog" aria-live="polite" aria-label="Cookie consent">
+  <div class="cookie-banner__inner">
+    <p class="cookie-banner__text">We use cookies for analytics and advertising. See our <a href="privacy-policy.html">Privacy Policy</a> for details.</p>
+    <div class="cookie-banner__actions">
+      <button class="cookie-accept" id="cookieAccept" type="button">Accept</button>
+      <button class="cookie-reject" id="cookieReject" type="button">Reject</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>&#169; 2026 Pitmaster Tools. All rights reserved.</div>
+  <nav aria-label="Footer">
+    <a href="/">Calculator</a>
+    <span>|</span>
+    <a href="privacy-policy.html">Privacy Policy</a>
+    <span>|</span>
+    <a href="terms-of-service.html">Terms of Service</a>
+    <span>|</span>
+    <a href="mailto:contact@pitmaster.tools">contact@pitmaster.tools</a>
+  </nav>
+  <p class="footer-small">Cook times are estimates based on USDA guidelines and pitmaster consensus. Always verify doneness with a calibrated meat thermometer. Never rely solely on time.</p>
+  <p class="footer-small">Last updated: April 12, 2026</p>
+</footer>
+
+<script>
+var SITE_URL = 'https://pitmaster.tools';
+var CONSENT_COOKIE_NAME = 'pitmaster_consent';
+var GA_MEASUREMENT_ID = 'G-SJJVV37EWE';
+var ADSENSE_CLIENT = 'ca-pub-4265262608577453';
+
+var CUTS = {
+  sliced: { name: 'Brisket (Sliced)', cookRate: 1.5, pullTemp: 195, restMinutes: 90, stallLo: 150, stallHi: 170 },
+  pulled: { name: 'Brisket (Pulled)', cookRate: 1.5, pullTemp: 205, restMinutes: 90, stallLo: 150, stallHi: 170 }
+};
+
+var TM = { 225: 1.0, 250: 0.85, 275: 0.75, 300: 0.65 };
+
+function cookHrs(wLbs, temp, wrap) {
+  var h = 1.5 * wLbs * (TM[temp] || 1.0);
+  if (wrap === 'none') h *= 1.10;
+  else if (wrap === 'paper') h *= 1.05;
+  return h;
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+var state = { style: 'sliced', wrap: 'foil', tu: 'F', wu: 'lbs' };
+var analyticsLoaded = false;
+var adsLoaded = false;
+var _modalPrevFocus = null;
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function shouldDefaultMetric(lang) {
+  var normalized = (lang || '').replace('_', '-');
+  if (!normalized) return false;
+  if (normalized.toLowerCase() === 'en') return false;
+  var parts = normalized.split('-');
+  var region = parts.length > 1 ? parts[parts.length - 1].toUpperCase() : '';
+  if (region) return ['US', 'LR', 'MM'].indexOf(region) === -1;
+  return parts[0].toLowerCase() !== 'en';
+}
+
+function fmtTime(date) {
+  var h = date.getHours(), m = date.getMinutes();
+  var ampm = h >= 12 ? 'PM' : 'AM';
+  var h12 = h % 12 || 12;
+  return h12 + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
+}
+
+function dayLabel(base, target) {
+  var bd = new Date(base.getFullYear(), base.getMonth(), base.getDate());
+  var td = new Date(target.getFullYear(), target.getMonth(), target.getDate());
+  var diff = Math.round((td - bd) / 86400000);
+  if (diff === 0) return '';
+  if (diff === -1) return 'yesterday';
+  if (diff === -2) return '2 days ago';
+  if (diff === 1) return 'tomorrow';
+  var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  return days[target.getDay()];
+}
+
+function fmtTemp(f) {
+  if (state.tu === 'C') return Math.round((f - 32) * 5 / 9) + '\u00B0C';
+  return f + '\u00B0F';
+}
+
+function fmtSmokerTemp(f) {
+  if (state.tu === 'C') return Math.round((f - 32) * 5 / 9) + '\u00B0C';
+  return f + '\u00B0F';
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function openResultsModal() {
+  _modalPrevFocus = document.activeElement;
+  document.getElementById('results').classList.add('visible');
+  document.body.classList.add('modal-open');
+  var modal = document.querySelector('.results-modal');
+  setTimeout(function(){ modal.focus(); }, 0);
+}
+
+function closeResultsModal() {
+  document.getElementById('results').classList.remove('visible');
+  document.body.classList.remove('modal-open');
+  if (_modalPrevFocus) _modalPrevFocus.focus();
+}
+
+function _trapModalFocus(e) {
+  var modal = document.querySelector('.results-modal');
+  if (!document.getElementById('results').classList.contains('visible')) return;
+  var focusable = modal.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])');
+  var first = focusable[0], last = focusable[focusable.length - 1];
+  if (e.key === 'Tab') {
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+  if (e.key === 'Escape') closeResultsModal();
+}
+
+// ── Calculate ─────────────────────────────────────────────────────────────────
+function calculate() {
+  var vmsg = document.getElementById('vmsg');
+  vmsg.className = 'vmsg';
+  vmsg.textContent = '';
+
+  var rawWeight = parseFloat(document.getElementById('weight').value);
+  if (!rawWeight || rawWeight <= 0) {
+    vmsg.textContent = 'Please enter a brisket weight greater than zero.';
+    vmsg.classList.add('error');
+    document.getElementById('weight').focus();
+    return;
+  }
+
+  var weightLbs = state.wu === 'kg' ? rawWeight / 0.453592 : rawWeight;
+  var temp = parseInt(document.getElementById('smokerTemp').value, 10);
+  var wrap = state.wrap;
+  var serveVal = document.getElementById('serveTime').value;
+
+  if (!serveVal) {
+    vmsg.textContent = 'Please enter a serve time.';
+    vmsg.classList.add('error');
+    document.getElementById('serveTime').focus();
+    return;
+  }
+
+  var cut = CUTS[state.style];
+  var totalCookHrs = cookHrs(weightLbs, temp, wrap);
+  var cookMs = totalCookHrs * 3600000;
+  var restMs = cut.restMinutes * 60000;
+
+  // Build serve date from today, rolling past times to tomorrow.
+  var now = new Date();
+  var parts = serveVal.split(':');
+  var serve = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+  var nowMinute = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), 0, 0);
+  if (serve < nowMinute) serve.setDate(serve.getDate() + 1);
+
+  var pull = new Date(serve.getTime() - restMs);
+  var meatOn = new Date(pull.getTime() - cookMs);
+  var light = new Date(meatOn.getTime() - 30 * 60000);
+
+  // Stall window
+  var stallBase = wrap === 'none' ? cookMs / 1.10 : wrap === 'paper' ? cookMs / 1.05 : cookMs;
+  var stallStart = new Date(meatOn.getTime() + stallBase * 0.40);
+  var stallEnd   = new Date(meatOn.getTime() + cookMs * 0.65);
+
+  var lightDay = dayLabel(serve, light);
+  var meatOnDay = dayLabel(serve, meatOn);
+  var stallStartDay = dayLabel(serve, stallStart);
+  var stallEndDay = dayLabel(serve, stallEnd);
+  var pullDay = dayLabel(serve, pull);
+
+  // Stall wrap note
+  var stallNote = '';
+  if (wrap === 'foil') stallNote = 'Internal reaches ' + fmtTemp(cut.stallLo) + '\u2013' + fmtTemp(cut.stallHi) + ' \u2014 temperature plateau begins. Wrap tightly in foil now (Texas Crutch).';
+  else if (wrap === 'paper') stallNote = 'Internal reaches ' + fmtTemp(cut.stallLo) + '\u2013' + fmtTemp(cut.stallHi) + ' \u2014 temperature plateau begins. Wrap in butcher paper now.';
+  else stallNote = 'Internal reaches ' + fmtTemp(cut.stallLo) + '\u2013' + fmtTemp(cut.stallHi) + ' \u2014 temperature plateau begins. Hold steady \u2014 no wrap, trust the process.';
+
+  var stallEndNote = wrap === 'none' ? 'Temperature climbs again' : 'Temperature climbs again \u2014 leave wrapped until pull temp';
+
+  // Build timeline
+  var events = [
+    { dot: 'blue',  time: light,      day: lightDay,      label: 'Light smoker / preheat',       sub: 'Target: ' + fmtSmokerTemp(temp) + ' stable before meat goes on' },
+    { dot: 'amber', time: meatOn,     day: meatOnDay,     label: 'Meat goes on smoker',           sub: weightLbs.toFixed(1) + ' lbs brisket \u2014 fat side up or down per your setup' },
+    { dot: 'red',   time: stallStart, day: stallStartDay, label: 'Stall begins',                  sub: stallNote },
+    { dot: 'amber', time: stallEnd,   day: stallEndDay,   label: wrap === 'none' ? 'Stall ends' : 'Stall ends / unwrap', sub: stallEndNote },
+    { dot: 'amber', time: pull,       day: pullDay,       label: 'Pull from smoker \u2014 begin rest', sub: 'Target internal: ' + fmtTemp(cut.pullTemp) + ' \u2014 rest 90 min loosely tented' },
+    { dot: 'green', time: serve,      day: '',            label: 'Serve',                          sub: 'Slice against the grain 1/4\u201D thick \u2014 enjoy' }
+  ];
+
+  var tlList = document.getElementById('tlList');
+  tlList.innerHTML = '';
+  events.forEach(function(ev) {
+    var li = document.createElement('li');
+    li.className = 'tl-item';
+    li.innerHTML =
+      '<span class="tl-dot ' + ev.dot + '" aria-hidden="true"></span>' +
+      '<div style="flex:1">' +
+        '<div class="tl-time">' + fmtTime(ev.time) + (ev.day ? '<span class="tl-day"> (' + ev.day + ')</span>' : '') + '</div>' +
+        '<div class="tl-label">' + ev.label + '</div>' +
+        '<div class="tl-sub">' + ev.sub + '</div>' +
+      '</div>';
+    tlList.appendChild(li);
+  });
+
+  // Stat cards
+  document.getElementById('sCookTime').textContent = totalCookHrs.toFixed(1);
+  document.getElementById('sCookSub').textContent = 'hours at ' + fmtSmokerTemp(temp);
+  document.getElementById('sLightTime').textContent = fmtTime(light);
+  document.getElementById('sLightDay').textContent = lightDay ? lightDay : 'today';
+  document.getElementById('sPullTemp').textContent = fmtTemp(cut.pullTemp);
+
+  // Print header
+  document.getElementById('ptitle').textContent = cut.name + ' Smoking Timeline';
+  document.getElementById('pmeta').textContent = weightLbs.toFixed(1) + ' lbs \u2014 ' + temp + '\u00B0F \u2014 serve ' + fmtTime(serve);
+
+  openResultsModal();
+}
+
+// ── Style toggle ──────────────────────────────────────────────────────────────
+document.querySelectorAll('.style-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    if (state.style === this.dataset.style) return;
+    state.style = this.dataset.style;
+    document.querySelectorAll('.style-btn').forEach(function(b) {
+      b.classList.toggle('active', b.dataset.style === state.style);
+      b.setAttribute('aria-pressed', b.dataset.style === state.style ? 'true' : 'false');
+    });
+    if (document.getElementById('results').classList.contains('visible')) calculate();
+  });
+});
+
+// ── Wrap toggle ───────────────────────────────────────────────────────────────
+document.querySelector('.wrap-toggle').addEventListener('click', function(e) {
+  var btn = e.target.closest('button');
+  if (!btn || !btn.dataset.wrap) return;
+  if (btn.dataset.wrap === state.wrap) return;
+  state.wrap = btn.dataset.wrap;
+  this.querySelectorAll('button').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.wrap === state.wrap);
+    b.setAttribute('aria-pressed', b.dataset.wrap === state.wrap ? 'true' : 'false');
+  });
+  if (document.getElementById('results').classList.contains('visible')) calculate();
+});
+
+// ── Unit toggles ──────────────────────────────────────────────────────────────
+document.getElementById('tempToggle').addEventListener('click', function(e) {
+  var btn = e.target.closest('button');
+  if (!btn) return;
+  var val = btn.dataset.unit;
+  if (val === state.tu) return;
+  state.tu = val;
+  this.querySelectorAll('button').forEach(function(b) { b.classList.toggle('active', b.dataset.unit === val); });
+  try { localStorage.setItem('pitmaster_tu', val); } catch(err){}
+  if (document.getElementById('results').classList.contains('visible')) calculate();
+});
+
+document.getElementById('weightToggle').addEventListener('click', function(e) {
+  var btn = e.target.closest('button');
+  if (!btn) return;
+  var val = btn.dataset.unit;
+  if (val === state.wu) return;
+  var input = document.getElementById('weight');
+  var cur = parseFloat(input.value);
+  if (!isNaN(cur)) {
+    input.value = val === 'kg'
+      ? Math.round(cur * 0.453592 * 10) / 10
+      : Math.round(cur / 0.453592 * 10) / 10;
+  }
+  state.wu = val;
+  document.getElementById('weightUnitLbl').textContent = val;
+  this.querySelectorAll('button').forEach(function(b) { b.classList.toggle('active', b.dataset.unit === val); });
+  try { localStorage.setItem('pitmaster_wu', val); } catch(err){}
+  if (document.getElementById('results').classList.contains('visible')) calculate();
+});
+
+// ── Calculate button ──────────────────────────────────────────────────────────
+document.getElementById('calcBtn').addEventListener('click', calculate);
+document.getElementById('weight').addEventListener('keydown', function(e) { if (e.key === 'Enter') calculate(); });
+document.getElementById('serveTime').addEventListener('keydown', function(e) { if (e.key === 'Enter') calculate(); });
+
+// ── Modal close ───────────────────────────────────────────────────────────────
+document.getElementById('resultsClose').addEventListener('click', closeResultsModal);
+document.getElementById('results').addEventListener('click', function(e) { if (e.target === this) closeResultsModal(); });
+document.addEventListener('keydown', _trapModalFocus);
+document.getElementById('printBtn').addEventListener('click', function() { window.print(); });
+
+// ── Analytics & Ads ───────────────────────────────────────────────────────────
+function loadAnalytics() {
+  if (analyticsLoaded || window._gtagLoaded) return;
+  analyticsLoaded = true;
+  gtag('consent', 'update', {'ad_storage':'granted','analytics_storage':'granted'});
+  var s = document.createElement('script'); s.async = true;
+  s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID;
+  document.head.appendChild(s);
+  gtag('js', new Date()); gtag('config', GA_MEASUREMENT_ID);
+}
+function loadAds() {
+  if (adsLoaded) return; adsLoaded = true;
+  var s = document.createElement('script'); s.async = true; s.crossOrigin = 'anonymous';
+  s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + ADSENSE_CLIENT;
+  document.head.appendChild(s);
+  (window.adsbygoogle = window.adsbygoogle || []).push({});
+}
+function loadGoogleServices() { loadAnalytics(); loadAds(); }
+
+// ── Cookie consent ────────────────────────────────────────────────────────────
+function setCookie(name, value, days) {
+  var d = new Date(); d.setTime(d.getTime() + days * 86400000);
+  document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+}
+function getCookie(name) {
+  var prefix = name + '=', parts = document.cookie ? document.cookie.split(';') : [];
+  for (var i = 0; i < parts.length; i++) {
+    var c = parts[i].trim();
+    if (c.indexOf(prefix) === 0) return decodeURIComponent(c.substring(prefix.length));
+  }
+  return null;
+}
+function initConsentBanner() {
+  var consent = getCookie(CONSENT_COOKIE_NAME);
+  if (consent === 'accepted') { loadGoogleServices(); return; }
+  if (consent === 'rejected') return;
+  document.getElementById('cookieBanner').classList.add('visible');
+}
+document.getElementById('cookieAccept').addEventListener('click', function() {
+  setCookie(CONSENT_COOKIE_NAME, 'accepted', 365);
+  document.getElementById('cookieBanner').classList.remove('visible');
+  loadGoogleServices();
+});
+document.getElementById('cookieReject').addEventListener('click', function() {
+  setCookie(CONSENT_COOKIE_NAME, 'rejected', 365);
+  document.getElementById('cookieBanner').classList.remove('visible');
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(function init() {
+  try {
+    var savedTu = localStorage.getItem('pitmaster_tu');
+    var savedWu = localStorage.getItem('pitmaster_wu');
+    if (!savedTu && !savedWu) {
+      var lang = navigator.language || 'en-US';
+      if (shouldDefaultMetric(lang)) { savedTu = 'C'; savedWu = 'kg'; }
+    }
+    if (savedTu) {
+      state.tu = savedTu;
+      document.querySelectorAll('#tempToggle button').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.unit === savedTu);
+      });
+    }
+    if (savedWu) {
+      state.wu = savedWu;
+      document.getElementById('weightUnitLbl').textContent = savedWu;
+      // Convert default weight value if kg
+      if (savedWu === 'kg') {
+        var inp = document.getElementById('weight');
+        inp.value = Math.round(parseFloat(inp.value) * 0.453592 * 10) / 10;
+      }
+      document.querySelectorAll('#weightToggle button').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.unit === savedWu);
+      });
+    }
+  } catch(err){}
+
+  initConsentBanner();
+})();
+</script>
+</body>
+</html>
