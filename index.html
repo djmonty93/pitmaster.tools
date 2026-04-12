@@ -2015,6 +2015,7 @@ document.addEventListener('keydown',function(e){
 document.getElementById('tempToggle').addEventListener('click',function(e){
   var btn=e.target.closest('button'); if(!btn) return;
   state.tu=btn.dataset.unit;
+  try{localStorage.setItem('pitmaster_tu',state.tu);}catch(e){}
   document.querySelectorAll('#tempToggle button').forEach(function(b){b.classList.toggle('active',b===btn);});
   document.getElementById('searTempUnit').textContent=state.tu==='C'?'\xB0C':'\xB0F';
   var k=document.getElementById('meatType').value, c=D[k];
@@ -2026,6 +2027,7 @@ document.getElementById('tempToggle').addEventListener('click',function(e){
 document.getElementById('weightToggle').addEventListener('click',function(e){
   var btn=e.target.closest('button'); if(!btn) return;
   var old=state.wu; state.wu=btn.dataset.unit;
+  try{localStorage.setItem('pitmaster_wu',state.wu);}catch(e){}
   document.querySelectorAll('#weightToggle button').forEach(function(b){b.classList.toggle('active',b===btn);});
   var inp=document.getElementById('weight'), v=parseFloat(inp.value);
   if(!isNaN(v)&&v>0){
@@ -2049,14 +2051,22 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
    ============================================================ */
 (function init(){
   try{
-    var lang=navigator.language||'en-US';
-    /* Respect explicit region defaults while keeping generic "en" on imperial */
-    if(shouldDefaultMetric(lang)){
-      state.tu='C'; state.wu='kg';
-      document.querySelectorAll('#tempToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.unit==='C');});
-      document.querySelectorAll('#weightToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.unit==='kg');});
-      document.getElementById('weightUnit').textContent='kg';
-      document.getElementById('searTempUnit').textContent='\xB0C';
+    var savedTu=localStorage.getItem('pitmaster_tu');
+    var savedWu=localStorage.getItem('pitmaster_wu');
+    if(!savedTu&&!savedWu){
+      /* No saved preference — fall back to locale detection */
+      var lang=navigator.language||'en-US';
+      if(shouldDefaultMetric(lang)){ savedTu='C'; savedWu='kg'; }
+    }
+    if(savedTu){
+      state.tu=savedTu;
+      document.querySelectorAll('#tempToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.unit===savedTu);});
+      document.getElementById('searTempUnit').textContent=savedTu==='C'?'\xB0C':'\xB0F';
+    }
+    if(savedWu){
+      state.wu=savedWu;
+      document.querySelectorAll('#weightToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.unit===savedWu);});
+      document.getElementById('weightUnit').textContent=savedWu==='kg'?'kg':'lbs';
       updSzLabels();
     }
   }catch(e){}

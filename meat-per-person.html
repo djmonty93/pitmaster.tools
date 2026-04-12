@@ -239,32 +239,11 @@ main {
 .serving-toggle button + button { border-left: 1.5px solid var(--card-border); }
 .serving-toggle button.active { background: var(--charcoal); color: #fff; }
 .serving-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
-.unit-toggle-row {
-  display: flex;
-  align-items: center;
-  gap: .75rem;
-  margin-top: .25rem;
-}
-.unit-toggle {
-  display: flex;
-  border: 1.5px solid var(--card-border);
-  border-radius: 6px;
-  overflow: hidden;
-}
-.unit-toggle button {
-  padding: .45rem .9rem;
-  border: none;
-  background: #FAFAF8;
-  font-family: inherit;
-  font-size: .875rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: background .15s, color .15s;
-}
-.unit-toggle button + button { border-left: 1.5px solid var(--card-border); }
-.unit-toggle button.active { background: var(--charcoal); color: #fff; }
-.unit-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
+.unit-controls { display: flex; align-items: center; gap: .5rem; }
+.unit-toggle { display: flex; background: #333; border-radius: 20px; padding: 3px; gap: 2px; }
+.unit-toggle button { background: none; border: none; color: #aaa; font-size: .75rem; font-weight: 600; padding: 4px 10px; border-radius: 16px; cursor: pointer; transition: background .15s, color .15s; letter-spacing: .03em; font-family: inherit; }
+.unit-toggle button.active { background: var(--amber); color: #fff; }
+.unit-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .calc-btn {
   display: flex;
   align-items: center;
@@ -590,6 +569,16 @@ footer a:focus-visible { text-decoration: underline; }
     <a href="dry-rub-calculator.html">Dry Rub</a>
     <a href="brine-calculator.html">Brine</a>
   </nav>
+  <div class="unit-controls">
+    <div class="unit-toggle" id="tempToggle" role="group" aria-label="Temperature unit">
+      <button data-unit="F" class="active" type="button">&#xB0;F</button>
+      <button data-unit="C" type="button">&#xB0;C</button>
+    </div>
+    <div class="unit-toggle" id="weightToggle" role="group" aria-label="Weight unit">
+      <button data-unit="lbs" class="active" type="button">lbs</button>
+      <button data-unit="kg" type="button">kg</button>
+    </div>
+  </div>
 </header>
 
 <div class="ad-slot" aria-hidden="true">
@@ -662,16 +651,6 @@ footer a:focus-visible { text-decoration: underline; }
         <label for="numPeople">Number of People</label>
         <input type="number" id="numPeople" min="1" max="500" value="10" aria-describedby="numPeopleHint">
         <span id="numPeopleHint" class="sr-only">Enter a number between 1 and 500</span>
-      </div>
-
-      <div class="form-group">
-        <label>Units</label>
-        <div class="unit-toggle-row">
-          <div class="unit-toggle" id="weightToggle" role="group" aria-label="Weight unit">
-            <button data-unit="lbs" class="active" type="button">lbs</button>
-            <button data-unit="kg" type="button">kg</button>
-          </div>
-        </div>
       </div>
 
       <div class="form-group full-width">
@@ -1210,15 +1189,45 @@ function bindToggle(groupId, stateKey, buttons){
    INIT
    ============================================================ */
 (function init(){
+  /* Restore saved unit preferences from localStorage */
+  try {
+    var savedTu = localStorage.getItem('pitmaster_tu');
+    var savedWu = localStorage.getItem('pitmaster_wu');
+    if(savedTu){
+      document.querySelectorAll('#tempToggle button').forEach(function(b){
+        b.classList.toggle('active', b.dataset.unit === savedTu);
+      });
+    }
+    if(savedWu){
+      state.wu = savedWu;
+      document.querySelectorAll('#weightToggle button').forEach(function(b){
+        b.classList.toggle('active', b.dataset.unit === savedWu);
+      });
+    }
+  } catch(e){}
+
+  /* Temp toggle — persists preference for other pages; not used in this calc */
+  document.getElementById('tempToggle').addEventListener('click', function(e){
+    var btn = e.target.closest('button');
+    if(!btn) return;
+    var val = btn.dataset.unit;
+    document.querySelectorAll('#tempToggle button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.unit === val);
+    });
+    try { localStorage.setItem('pitmaster_tu', val); } catch(e){}
+  });
+
   /* Weight toggle */
-  var wtBtns = Array.prototype.slice.call(document.querySelectorAll('#weightToggle button'));
   document.getElementById('weightToggle').addEventListener('click', function(e){
     var btn = e.target.closest('button');
     if(!btn) return;
     var val = btn.dataset.unit;
     if(!val || state.wu === val) return;
     state.wu = val;
-    wtBtns.forEach(function(b){ b.classList.toggle('active', b.dataset.unit === val); });
+    document.querySelectorAll('#weightToggle button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.unit === val);
+    });
+    try { localStorage.setItem('pitmaster_wu', val); } catch(e){}
   });
 
   /* Serving toggle */
