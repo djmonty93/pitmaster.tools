@@ -1149,8 +1149,7 @@ footer a:focus-visible { text-decoration: underline; }
     <span>|</span>
     <a href="terms-of-service.html">Terms of Service</a>
     <span>|</span>
-    <!-- REPLACE: Contact email address. -->
-    <a href="mailto:[YOUR EMAIL]" class="no-print">[YOUR EMAIL]</a>
+    <a href="mailto:contact@pitmaster.tools">contact@pitmaster.tools</a>
   </nav>
   <p class="footer-small">Cook times are estimates based on USDA guidelines and pitmaster consensus. Always verify doneness with a calibrated meat thermometer. Never rely solely on time.</p>
   <p class="footer-small">Last updated: April 11, 2026</p>
@@ -1923,13 +1922,24 @@ function wLbs(){
   if(isNaN(v)||v<=0) return null;
   return state.wu==='kg'?kL(v):v;
 }
+function shouldDefaultMetric(lang){
+  var normalized=(lang||'').replace('_','-');
+  if(!normalized) return false;
+  if(normalized.toLowerCase()==='en') return false;
+  var parts=normalized.split('-');
+  var region=parts.length>1 ? parts[parts.length-1].toUpperCase() : '';
+  if(region) return ['US','LR','MM'].indexOf(region)===-1;
+  return parts[0].toLowerCase()!=='en';
+}
 function serveDate(){
   var v=document.getElementById('serveTime').value;
   if(!v) return null;
   var p=v.split(':'), d=new Date();
   d.setHours(+p[0],+p[1],0,0);
-  /* If the serve time has already passed today, advance to tomorrow so overnight cooks compute correctly */
-  if(d<new Date()) d.setDate(d.getDate()+1);
+  /* Compare against the current minute so a same-minute selection still means "today" */
+  var now=new Date();
+  now.setSeconds(0,0);
+  if(d<now) d.setDate(d.getDate()+1);
   return d;
 }
 function setMsg(txt,cls){
@@ -2036,8 +2046,8 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
 (function init(){
   try{
     var lang=navigator.language||'en-US';
-    /* Only en-US uses imperial; all other locales (including en-AU, en-CA, etc.) default to metric */
-    if(lang!=='en-US'){
+    /* Respect explicit region defaults while keeping generic "en" on imperial */
+    if(shouldDefaultMetric(lang)){
       state.tu='C'; state.wu='kg';
       document.querySelectorAll('#tempToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.unit==='C');});
       document.querySelectorAll('#weightToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.unit==='kg');});
