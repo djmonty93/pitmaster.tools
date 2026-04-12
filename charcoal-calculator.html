@@ -736,13 +736,6 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
           <div class="tool-link-desc">Cook times, temperatures, and wood pairings for 28 cuts.</div>
         </div>
       </a>
-      <a class="tool-link" href="brine-calculator.html">
-        <span class="tool-link-icon">&#x1F9C2;</span>
-        <div>
-          <div class="tool-link-name">Brine Calculator</div>
-          <div class="tool-link-desc">Wet and dry brine ratios for any meat weight and salt type.</div>
-        </div>
-      </a>
       <a class="tool-link" href="dry-rub-calculator.html">
         <span class="tool-link-icon">&#x1F9C2;</span>
         <div>
@@ -868,6 +861,16 @@ function fmtRate(lbsHr, wu) {
   if (lbsHr === 0) return 'None needed';
   if (wu === 'kg') { return (lbsHr * 0.453592).toFixed(2) + ' kg/hr'; }
   return lbsHr.toFixed(2) + ' lbs/hr';
+}
+
+function shouldDefaultMetric(lang) {
+  var normalized = (lang || '').replace('_', '-');
+  if (!normalized) return false;
+  if (normalized.toLowerCase() === 'en') return false;
+  var parts = normalized.split('-');
+  var region = parts.length > 1 ? parts[parts.length - 1].toUpperCase() : '';
+  if (region) return ['US', 'LR', 'MM'].indexOf(region) === -1;
+  return parts[0].toLowerCase() !== 'en';
 }
 
 // ── Temp select labels ────────────────────────────────────────────────────────
@@ -1005,6 +1008,7 @@ document.getElementById('tempToggle').addEventListener('click', function(e) {
   });
   updateTempOptions();
   try { localStorage.setItem('pitmaster_tu', val); } catch(err){}
+  if (document.getElementById('results').classList.contains('visible')) calculate();
 });
 
 document.getElementById('weightToggle').addEventListener('click', function(e) {
@@ -1017,6 +1021,7 @@ document.getElementById('weightToggle').addEventListener('click', function(e) {
     b.classList.toggle('active', b.dataset.unit === val);
   });
   try { localStorage.setItem('pitmaster_wu', val); } catch(err){}
+  if (document.getElementById('results').classList.contains('visible')) calculate();
 });
 
 // ── Method cards ──────────────────────────────────────────────────────────────
@@ -1027,6 +1032,7 @@ document.querySelectorAll('.method-card input[type="radio"]').forEach(function(r
       card.classList.remove('selected');
     });
     this.closest('.method-card').classList.add('selected');
+    if (document.getElementById('results').classList.contains('visible')) calculate();
   });
 });
 
@@ -1046,10 +1052,12 @@ document.querySelectorAll('.method-card').forEach(function(card) {
 document.querySelector('.coal-toggle').addEventListener('click', function(e) {
   var btn = e.target.closest('button');
   if (!btn) return;
+  if (btn.dataset.coal === state.coal) return;
   state.coal = btn.dataset.coal;
   this.querySelectorAll('button').forEach(function(b) {
     b.classList.toggle('active', b.dataset.coal === state.coal);
   });
+  if (document.getElementById('results').classList.contains('visible')) calculate();
 });
 
 // ── Calculate button ──────────────────────────────────────────────────────────
@@ -1129,9 +1137,8 @@ document.getElementById('cookieReject').addEventListener('click', function() {
     var savedTu = localStorage.getItem('pitmaster_tu');
     var savedWu = localStorage.getItem('pitmaster_wu');
     if (!savedTu && !savedWu) {
-      var lang = (navigator.language || 'en-US').toLowerCase();
-      var metricLocales = ['en-gb','en-au','en-nz','en-za','en-ie','fr','de','es','it','pt','nl','sv','da','fi','nb','pl','ru','zh','ja','ko','ar','hi'];
-      if (metricLocales.some(function(l){ return lang.startsWith(l); })) {
+      var lang = navigator.language || 'en-US';
+      if (shouldDefaultMetric(lang)) {
         savedTu = 'C'; savedWu = 'kg';
       }
     }
