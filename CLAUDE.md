@@ -20,7 +20,7 @@ Every HTML file must include **all** of the following in `<head>`, in this order
 <meta name="twitter:title" content="…">
 <meta name="twitter:description" content="…">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,…">  <!-- same SVG favicon on every page -->
-<script>  <!-- Google Consent Mode v2 default — MUST come before the GA4 async tag -->
+<script>  <!-- Google Consent Mode v2 default -->
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('consent', 'default', {
@@ -29,19 +29,16 @@ Every HTML file must include **all** of the following in `<head>`, in this order
     'wait_for_update': 500
   });
 </script>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-SJJVV37EWE"></script>
-<script>
-  gtag('js', new Date());
-  gtag('config', 'G-SJJVV37EWE');
-</script>
+<!-- Load gtag.js only after consent is accepted or an existing accepted consent cookie is detected -->
 <!-- Schema ld+json (tool pages only — WebApplication + FAQPage) -->
 <style>…</style>
 ```
 
 **Rules:**
-- The consent-default `<script>` block must appear **before** the GA4 async `<script>` tag.
-- Both blocks must appear **before** the `<style>` block.
+- The consent-default `<script>` block must appear before any consent-gated analytics loader.
+- Do not include a static `<script async src="https://www.googletagmanager.com/gtag/js?...">` tag in HTML. Load GA dynamically only after consent is accepted, or when an existing `pitmaster_consent=accepted` cookie is detected.
+- Do not load AdSense before consent for the same reason.
+- Keep any consent-gated analytics loader before the main `<style>` block only if it does not fetch external resources until consent has been granted.
 - `og:image` always points to `/og-image.png` — do not vary per page.
 - Schema (`WebApplication` + `FAQPage`) is required on tool pages; omit on legal pages.
 - Never omit OG or Twitter tags even on `noindex` pages.

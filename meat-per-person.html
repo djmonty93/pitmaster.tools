@@ -566,8 +566,6 @@ footer a:focus-visible { text-decoration: underline; }
   <nav class="header-nav" aria-label="Site navigation">
     <a href="/">Smoking Calculator</a>
     <a href="meat-per-person.html" aria-current="page">Serving Sizes</a>
-    <a href="dry-rub-calculator.html">Dry Rub</a>
-    <a href="brine-calculator.html">Brine</a>
   </nav>
   <div class="unit-controls">
     <div class="unit-toggle" id="tempToggle" role="group" aria-label="Temperature unit">
@@ -868,27 +866,6 @@ footer a:focus-visible { text-decoration: underline; }
           <div class="tool-link-desc">Full cook timeline, pull temps, and wood pairings for 28 cuts — backward from your serve time.</div>
         </div>
       </a>
-      <a class="tool-link" href="dry-rub-calculator.html">
-        <span class="tool-link-icon" aria-hidden="true">🧂</span>
-        <div class="tool-link-body">
-          <div class="tool-link-name">Dry Rub Calculator</div>
-          <div class="tool-link-desc">Scale any rub recipe to your meat weight with light, standard, or heavy coverage options.</div>
-        </div>
-      </a>
-      <a class="tool-link" href="brine-calculator.html">
-        <span class="tool-link-icon" aria-hidden="true">💧</span>
-        <div class="tool-link-body">
-          <div class="tool-link-name">Brine Calculator</div>
-          <div class="tool-link-desc">Wet and dry brine amounts by meat weight, salt type, and duration.</div>
-        </div>
-      </a>
-      <a class="tool-link" href="cook-time-coordinator.html">
-        <span class="tool-link-icon" aria-hidden="true">🗓️</span>
-        <div class="tool-link-body">
-          <div class="tool-link-name">Cook Time Coordinator</div>
-          <div class="tool-link-desc">Smoke multiple meats with staggered start times so everything hits the table at once.</div>
-        </div>
-      </a>
     </div>
   </section>
 
@@ -1063,8 +1040,8 @@ function calculate(){
   var warn = document.getElementById('mcWarn');
   warn.textContent = '';
   warn.classList.remove('visible');
-  if(rMin > cut.maxLbs){
-    var pieces = Math.ceil(rMax / cut.maxLbs);
+  var pieces = Math.ceil(rMax / cut.maxLbs);
+  if(pieces > 1){
     warn.textContent = '\u26a0\ufe0f ' + cut.name + ' typically maxes out around ' + cut.maxLbs + ' lbs per piece. For ' + numPeople + ' people you\u2019ll need ' + pieces + ' pieces (or ' + pieces + ' smoker runs). Plan your cook time and smoker capacity accordingly.';
     warn.classList.add('visible');
   }
@@ -1228,6 +1205,7 @@ function bindToggle(groupId, stateKey, buttons){
       b.classList.toggle('active', b.dataset.unit === val);
     });
     try { localStorage.setItem('pitmaster_wu', val); } catch(e){}
+    if(document.getElementById('results').classList.contains('visible')) calculate();
   });
 
   /* Serving toggle */
@@ -1239,6 +1217,7 @@ function bindToggle(groupId, stateKey, buttons){
     if(!val || state.sz === val) return;
     state.sz = val;
     szBtns.forEach(function(b){ b.classList.toggle('active', b.dataset.sz === val); });
+    if(document.getElementById('results').classList.contains('visible')) calculate();
   });
 
   /* Calculate button */

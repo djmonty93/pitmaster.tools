@@ -24,12 +24,26 @@
     'analytics_storage': 'denied',
     'wait_for_update': 500
   });
-</script>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-SJJVV37EWE"></script>
-<script>
-  gtag('js', new Date());
-  gtag('config', 'G-SJJVV37EWE');
+  (function(){
+    var prefix = 'pitmaster_consent=';
+    var cookies = document.cookie ? document.cookie.split(';') : [];
+    for(var i = 0; i < cookies.length; i++){
+      var cookie = cookies[i].trim();
+      if(cookie.indexOf(prefix) !== 0) continue;
+      if(decodeURIComponent(cookie.substring(prefix.length)) !== 'accepted') break;
+      gtag('consent', 'update', {
+        'ad_storage': 'granted',
+        'analytics_storage': 'granted'
+      });
+      var script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://www.googletagmanager.com/gtag/js?id=G-SJJVV37EWE';
+      document.head.appendChild(script);
+      gtag('js', new Date());
+      gtag('config', 'G-SJJVV37EWE');
+      break;
+    }
+  })();
 </script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
