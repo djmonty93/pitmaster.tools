@@ -716,6 +716,16 @@ function fmtWeight(lbs, wu) {
   return lbs.toFixed(1) + ' lbs';
 }
 
+function shouldDefaultMetric(lang) {
+  var normalized = (lang || '').replace('_', '-');
+  if (!normalized) return false;
+  if (normalized.toLowerCase() === 'en') return false;
+  var parts = normalized.split('-');
+  var region = parts.length > 1 ? parts[parts.length - 1].toUpperCase() : '';
+  if (region) return ['US', 'LR', 'MM'].indexOf(region) === -1;
+  return parts[0].toLowerCase() !== 'en';
+}
+
 // ── Modal ─────────────────────────────────────────────────────────────────────
 function openResultsModal() {
   _modalPrevFocus = document.activeElement;
@@ -909,6 +919,7 @@ function calculate() {
 // ── Brine type toggle ─────────────────────────────────────────────────────────
 document.querySelectorAll('.brine-type-btn').forEach(function(btn) {
   btn.addEventListener('click', function() {
+    if (state.brineType === this.dataset.brine) return;
     state.brineType = this.dataset.brine;
     document.querySelectorAll('.brine-type-btn').forEach(function(b) {
       b.classList.toggle('active', b.dataset.brine === state.brineType);
@@ -916,6 +927,7 @@ document.querySelectorAll('.brine-type-btn').forEach(function(btn) {
     });
     document.getElementById('wetOptions').style.display = state.brineType === 'wet' ? '' : 'none';
     document.getElementById('dryOptions').style.display = state.brineType === 'dry' ? '' : 'none';
+    if (document.getElementById('results').classList.contains('visible')) calculate();
   });
 });
 
@@ -923,10 +935,12 @@ document.querySelectorAll('.brine-type-btn').forEach(function(btn) {
 document.querySelector('.strength-toggle').addEventListener('click', function(e) {
   var btn = e.target.closest('button');
   if (!btn) return;
+  if (btn.dataset.strength === state.strength) return;
   state.strength = btn.dataset.strength;
   this.querySelectorAll('button').forEach(function(b) {
     b.classList.toggle('active', b.dataset.strength === state.strength);
   });
+  if (document.getElementById('results').classList.contains('visible')) calculate();
 });
 
 // ── Unit toggles ──────────────────────────────────────────────────────────────
@@ -938,6 +952,7 @@ document.getElementById('tempToggle').addEventListener('click', function(e) {
   state.tu = val;
   this.querySelectorAll('button').forEach(function(b) { b.classList.toggle('active', b.dataset.unit === val); });
   try { localStorage.setItem('pitmaster_tu', val); } catch(err){}
+  if (document.getElementById('results').classList.contains('visible')) calculate();
 });
 
 document.getElementById('weightToggle').addEventListener('click', function(e) {
@@ -957,6 +972,7 @@ document.getElementById('weightToggle').addEventListener('click', function(e) {
   document.getElementById('weightUnitLbl').textContent = val;
   this.querySelectorAll('button').forEach(function(b) { b.classList.toggle('active', b.dataset.unit === val); });
   try { localStorage.setItem('pitmaster_wu', val); } catch(err){}
+  if (document.getElementById('results').classList.contains('visible')) calculate();
 });
 
 // ── Calculate button ──────────────────────────────────────────────────────────
@@ -1023,9 +1039,8 @@ document.getElementById('cookieReject').addEventListener('click', function() {
     var savedTu = localStorage.getItem('pitmaster_tu');
     var savedWu = localStorage.getItem('pitmaster_wu');
     if (!savedTu && !savedWu) {
-      var lang = (navigator.language || 'en-US').toLowerCase();
-      var metricLocales = ['en-gb','en-au','en-nz','en-za','en-ie','fr','de','es','it','pt','nl','sv','da','fi','nb','pl','ru','zh','ja','ko','ar','hi'];
-      if (metricLocales.some(function(l){ return lang.startsWith(l); })) { savedTu = 'C'; savedWu = 'kg'; }
+      var lang = navigator.language || 'en-US';
+      if (shouldDefaultMetric(lang)) { savedTu = 'C'; savedWu = 'kg'; }
     }
     if (savedTu) {
       state.tu = savedTu;
