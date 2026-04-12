@@ -56,6 +56,20 @@ Every HTML file must include **all** of the following in `<head>`, in this order
 - Cookie name: `pitmaster_consent`
 - Contact email: `contact@pitmaster.tools`
 - Governing law: Virginia, USA
+- Root favicon file: `favicon.ico`
+
+## Validation
+
+- Run `powershell -ExecutionPolicy Bypass -File .\validate.ps1` before merging changes that touch HTML, `sitemap.xml`, `wrangler.jsonc`, or local asset links.
+- `validate.ps1` is the repo-standard check for:
+  - `favicon.ico` presence
+  - `sitemap.xml` XML validity
+  - `wrangler.jsonc` JSON validity
+  - local `href` and `src` target resolution across the main HTML pages
+
+## Policy consistency
+
+- If site behavior adds or changes first-party storage such as cookies or `localStorage`, update `privacy-policy.html` in the same change.
 
 ## Git workflow
 
