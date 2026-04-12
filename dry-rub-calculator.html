@@ -1250,6 +1250,7 @@ function initConsentBanner(){
       b.classList.toggle('active', b.dataset.unit === val);
     });
     try { localStorage.setItem('pitmaster_wu', val); } catch(e){}
+    if(document.getElementById('results').classList.contains('visible')) calculate();
   });
 
   /* Coverage toggle */
@@ -1257,11 +1258,12 @@ function initConsentBanner(){
     var btn = e.target.closest('button');
     if(!btn) return;
     var val = btn.dataset.cov;
-    if(!val) return;
+    if(!val || val === state.coverage) return;
     state.coverage = val;
     document.querySelectorAll('#coverageToggle button').forEach(function(b){
       b.classList.toggle('active', b.dataset.cov === val);
     });
+    if(document.getElementById('results').classList.contains('visible')) calculate();
   });
 
   /* Add row button */
