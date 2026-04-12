@@ -113,13 +113,19 @@ footer a:focus-visible { text-decoration: underline; }
   header { padding: .9rem 1rem; align-items: flex-start; flex-direction: column; }
 }
 </style>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-SJJVV37EWE"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'analytics_storage': 'denied',
+    'wait_for_update': 500
+  });
+</script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SJJVV37EWE"></script>
+<script>
   gtag('js', new Date());
-
   gtag('config', 'G-SJJVV37EWE');
 </script>
 </head>
