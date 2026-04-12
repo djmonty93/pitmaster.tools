@@ -625,6 +625,26 @@ function tempLabel(f) {
     : f + '\u00B0F';
 }
 
+function shouldDefaultMetric(lang) {
+  var normalized = (lang || '').replace('_', '-');
+  if (!normalized) return false;
+  if (normalized.toLowerCase() === 'en') return false;
+  var parts = normalized.split('-');
+  var region = parts.length > 1 ? parts[parts.length - 1].toUpperCase() : '';
+  if (region) return ['US', 'LR', 'MM'].indexOf(region) === -1;
+  return parts[0].toLowerCase() !== 'en';
+}
+
+function serveDate(serveStr) {
+  if (!serveStr) return null;
+  var parts = serveStr.split(':');
+  var now = new Date();
+  var serve = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+  var currentMinute = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), 0, 0);
+  if (serve < currentMinute) serve.setDate(serve.getDate() + 1);
+  return serve;
+}
+
 // ── Build cut select HTML ─────────────────────────────────────────────────────
 function buildCutOptions() {
   var html = '';
@@ -733,10 +753,7 @@ function calculate() {
     return;
   }
 
-  // Build serve Date (use today's date)
-  var now = new Date();
-  var parts = serveStr.split(':');
-  var serve = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+  var serve = serveDate(serveStr);
 
   // Parse each row
   var meats = [];
@@ -1013,9 +1030,8 @@ document.getElementById('cookieReject').addEventListener('click', function() {
     var savedTu = localStorage.getItem('pitmaster_tu');
     var savedWu = localStorage.getItem('pitmaster_wu');
     if (!savedTu && !savedWu) {
-      var lang = (navigator.language || 'en-US').toLowerCase();
-      var metricLocales = ['en-gb','en-au','en-nz','en-za','en-ie','fr','de','es','it','pt','nl','sv','da','fi','nb','pl','ru','zh','ja','ko','ar','hi'];
-      if (metricLocales.some(function(l){ return lang.startsWith(l); })) { savedTu = 'C'; savedWu = 'kg'; }
+      var lang = navigator.language || 'en-US';
+      if (shouldDefaultMetric(lang)) { savedTu = 'C'; savedWu = 'kg'; }
     }
     if (savedTu) {
       state.tu = savedTu;
