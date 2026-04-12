@@ -66,10 +66,15 @@ Every HTML file must include **all** of the following in `<head>`, in this order
   - `sitemap.xml` XML validity
   - `wrangler.jsonc` JSON validity
   - local `href` and `src` target resolution across the main HTML pages
+- Do not ship links to planned tools or placeholder local pages. Any internal `href` added to production HTML must resolve to a file that already exists in the branch being merged.
 
 ## Policy consistency
 
 - If site behavior adds or changes first-party storage such as cookies or `localStorage`, update `privacy-policy.html` in the same change.
+
+## Cross-tool consistency
+
+- Reuse the same locale-aware first-visit unit default behavior across calculators. If there is no saved `pitmaster_tu` / `pitmaster_wu` preference, metric locales should default to `°C` and `kg`, matching `index.html`.
 
 ## Git workflow
 

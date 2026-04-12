@@ -569,7 +569,6 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
     <a href="/">Smoking Calculator</a>
     <a href="meat-per-person.html">Serving Sizes</a>
     <a href="dry-rub-calculator.html" aria-current="page">Dry Rub</a>
-    <a href="brine-calculator.html">Brine</a>
   </nav>
   <div class="unit-controls">
     <div class="unit-toggle" id="tempToggle" role="group" aria-label="Temperature unit">
@@ -835,20 +834,6 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
           <div class="tool-link-desc">Raw weight to buy for any crowd size, with shrinkage factored in for all 28 cuts.</div>
         </div>
       </a>
-      <a class="tool-link" href="brine-calculator.html">
-        <span class="tool-link-icon" aria-hidden="true">&#x1F4A7;</span>
-        <div class="tool-link-body">
-          <div class="tool-link-name">Brine Calculator</div>
-          <div class="tool-link-desc">Wet and dry brine amounts by meat weight, salt type, and duration.</div>
-        </div>
-      </a>
-      <a class="tool-link" href="cook-time-coordinator.html">
-        <span class="tool-link-icon" aria-hidden="true">&#x1F5D3;&#xFE0F;</span>
-        <div class="tool-link-body">
-          <div class="tool-link-name">Cook Time Coordinator</div>
-          <div class="tool-link-desc">Stagger multiple meats so everything hits the table at the same time.</div>
-        </div>
-      </a>
     </div>
   </section>
 
@@ -928,6 +913,15 @@ var state = { wu: 'lbs', coverage: 'standard' };
    ============================================================ */
 function lK(v){ return Math.round(v * 0.453592 * 100) / 100; }
 function kL(v){ return Math.round(v / 0.453592 * 100) / 100; }
+function shouldDefaultMetric(lang){
+  var normalized = (lang || '').replace('_', '-');
+  if(!normalized) return false;
+  if(normalized.toLowerCase() === 'en') return false;
+  var parts = normalized.split('-');
+  var region = parts.length > 1 ? parts[parts.length - 1].toUpperCase() : '';
+  if(region) return ['US', 'LR', 'MM'].indexOf(region) === -1;
+  return parts[0].toLowerCase() !== 'en';
+}
 
 function fmtAmt(n){
   if(n >= 100) return Math.round(n).toString();
@@ -1207,6 +1201,13 @@ function initConsentBanner(){
   try {
     var savedTu = localStorage.getItem('pitmaster_tu');
     var savedWu = localStorage.getItem('pitmaster_wu');
+    if(!savedTu && !savedWu){
+      var lang = navigator.language || 'en-US';
+      if(shouldDefaultMetric(lang)){
+        savedTu = 'C';
+        savedWu = 'kg';
+      }
+    }
     if(savedTu){
       document.querySelectorAll('#tempToggle button').forEach(function(b){
         b.classList.toggle('active', b.dataset.unit === savedTu);
