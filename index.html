@@ -15,6 +15,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Meat Smoking Calculator — Smoking Times, Temps &amp; Cook Timeline">
 <meta name="twitter:description" content="Free meat smoking calculator. Enter your cut, weight, and serving time to get a complete cook timeline, pull temperature, wood pairings, and exactly how much meat to buy.">
+<link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23EF9F27' d='M36 4c2 10-3 15-8 21-5 6-9 11-9 19 0 10 7 16 15 16 11 0 19-8 19-19 0-12-7-19-17-37z'/%3E%3Cpath fill='%23D78108' d='M33 27c1 6-2 9-5 12-3 3-5 6-5 10 0 6 4 10 9 10 7 0 12-5 12-12 0-7-4-11-11-20z'/%3E%3C/svg%3E">
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -24,12 +25,6 @@
     'analytics_storage': 'denied',
     'wait_for_update': 500
   });
-</script>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-SJJVV37EWE"></script>
-<script>
-  gtag('js', new Date());
-  gtag('config', 'G-SJJVV37EWE');
 </script>
 <!-- Google AdSense -->
 <!-- REPLACE: Google AdSense publisher ID. Loaded only after cookie consent is accepted. -->
@@ -1176,9 +1171,8 @@ footer a:focus-visible { text-decoration: underline; }
 var SITE_URL = 'https://pitmaster.tools';
 var CONSENT_COOKIE_NAME = 'pitmaster_consent';
 var CONSENT_COOKIE_DAYS = 365;
-// REPLACE: Production Google Analytics measurement ID.
-var GA_MEASUREMENT_ID = 'GA_MEASUREMENT_ID';
-// REPLACE: Production AdSense publisher ID.
+var GA_MEASUREMENT_ID = 'G-SJJVV37EWE';
+// REPLACE: Production AdSense publisher ID if this changes.
 var ADSENSE_CLIENT = 'ca-pub-4265262608577453';
 var analyticsLoaded = false;
 var adsLoaded = false;
@@ -2015,6 +2009,7 @@ document.addEventListener('keydown',function(e){
 document.getElementById('tempToggle').addEventListener('click',function(e){
   var btn=e.target.closest('button'); if(!btn) return;
   state.tu=btn.dataset.unit;
+  try{localStorage.setItem('pitmaster_tu',state.tu);}catch(e){}
   document.querySelectorAll('#tempToggle button').forEach(function(b){b.classList.toggle('active',b===btn);});
   document.getElementById('searTempUnit').textContent=state.tu==='C'?'\xB0C':'\xB0F';
   var k=document.getElementById('meatType').value, c=D[k];
@@ -2026,6 +2021,7 @@ document.getElementById('tempToggle').addEventListener('click',function(e){
 document.getElementById('weightToggle').addEventListener('click',function(e){
   var btn=e.target.closest('button'); if(!btn) return;
   var old=state.wu; state.wu=btn.dataset.unit;
+  try{localStorage.setItem('pitmaster_wu',state.wu);}catch(e){}
   document.querySelectorAll('#weightToggle button').forEach(function(b){b.classList.toggle('active',b===btn);});
   var inp=document.getElementById('weight'), v=parseFloat(inp.value);
   if(!isNaN(v)&&v>0){
@@ -2049,14 +2045,22 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
    ============================================================ */
 (function init(){
   try{
-    var lang=navigator.language||'en-US';
-    /* Respect explicit region defaults while keeping generic "en" on imperial */
-    if(shouldDefaultMetric(lang)){
-      state.tu='C'; state.wu='kg';
-      document.querySelectorAll('#tempToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.unit==='C');});
-      document.querySelectorAll('#weightToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.unit==='kg');});
-      document.getElementById('weightUnit').textContent='kg';
-      document.getElementById('searTempUnit').textContent='\xB0C';
+    var savedTu=localStorage.getItem('pitmaster_tu');
+    var savedWu=localStorage.getItem('pitmaster_wu');
+    if(!savedTu&&!savedWu){
+      /* No saved preference — fall back to locale detection */
+      var lang=navigator.language||'en-US';
+      if(shouldDefaultMetric(lang)){ savedTu='C'; savedWu='kg'; }
+    }
+    if(savedTu){
+      state.tu=savedTu;
+      document.querySelectorAll('#tempToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.unit===savedTu);});
+      document.getElementById('searTempUnit').textContent=savedTu==='C'?'\xB0C':'\xB0F';
+    }
+    if(savedWu){
+      state.wu=savedWu;
+      document.querySelectorAll('#weightToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.unit===savedWu);});
+      document.getElementById('weightUnit').textContent=savedWu==='kg'?'kg':'lbs';
       updSzLabels();
     }
   }catch(e){}

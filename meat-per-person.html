@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Much Meat Per Person — BBQ Serving Size Calculator | Pitmaster Tools</title>
+<meta name="description" content="Free BBQ serving size calculator. Enter your cut, headcount, and appetite level to find exactly how much raw meat to buy — accounting for shrinkage on every cut.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://pitmaster.tools/meat-per-person.html">
+<meta property="og:title" content="How Much Meat Per Person — BBQ Serving Size Calculator">
+<meta property="og:description" content="Free BBQ serving size calculator. Enter your cut, headcount, and appetite level to find exactly how much raw meat to buy — accounting for shrinkage on every cut.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://pitmaster.tools/meat-per-person.html">
+<meta property="og:image" content="https://pitmaster.tools/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="How Much Meat Per Person — BBQ Serving Size Calculator">
+<meta name="twitter:description" content="Free BBQ serving size calculator. Enter your cut, headcount, and appetite level to find exactly how much raw meat to buy — accounting for shrinkage on every cut.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23EF9F27' d='M36 4c2 10-3 15-8 21-5 6-9 11-9 19 0 10 7 16 15 16 11 0 19-8 19-19 0-12-7-19-17-37z'/%3E%3Cpath fill='%23D78108' d='M33 27c1 6-2 9-5 12-3 3-5 6-5 10 0 6 4 10 9 10 7 0 12-5 12-12 0-7-4-11-11-20z'/%3E%3C/svg%3E">
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'analytics_storage': 'denied',
+    'wait_for_update': 500
+  });
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Pitmaster Tools — BBQ Serving Size Calculator",
+  "url": "https://pitmaster.tools/meat-per-person.html",
+  "description": "Calculate exactly how much raw BBQ meat to buy per person, with shrinkage factored in for 28 cuts.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "featureList": [
+    "28 BBQ cuts supported",
+    "Light, Normal, and Hungry serving size options",
+    "Raw weight to buy including shrinkage buffer",
+    "Cooked weight calculation",
+    "Pounds and kilograms toggle",
+    "Large-group warning when a single piece cannot feed the crowd"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How much brisket per person?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Plan on buying ⅝ lb (0.63 lbs) of raw brisket per person for a normal 6 oz serving. Brisket loses roughly 40% of its weight during a long smoke due to moisture loss and fat rendering. For a crowd of 10, buy 6–8 lbs of raw brisket. For a hungry crowd, buy closer to ¾ lb per person."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much pulled pork per person?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Buy approximately 0.58 lbs of raw pork butt per person for a normal serving. Pork shoulder shrinks around 35% during smoking. For 10 people, plan on purchasing 6–7.5 lbs of raw pork butt. Pulled pork is easy to stretch with sides, so a normal serving estimate is usually sufficient."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much chicken per person at a BBQ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Whole chicken, spatchcocked chicken, and chicken quarters need about ½ lb of raw weight per person at a normal serving — chicken shrinks about 25%. Boneless cuts like chicken breast and thighs shrink less (around 20%), so plan on about 0.47 lbs raw per person. Wings shrink similarly; figure 4–5 whole wings per person."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much meat do I need for ribs per person?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ribs are sold bone-in, which changes the math. For baby back ribs, plan on about 3–4 bones per person (roughly half a rack). For spare ribs, 3 bones per person. For beef dino ribs, 1–2 bones per person due to their large size. In raw weight terms, buy about 0.50 lbs raw per person for baby backs and 0.54 lbs for spare ribs."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between light, normal, and hungry serving sizes?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Light (4 oz cooked) is appropriate when you are serving many sides, appetizers, or multiple meats. Normal (6 oz cooked) is the standard catering estimate used by most pitmasters. Hungry (8 oz cooked) applies to meat-forward events, competitions, or crowds of big eaters. The raw weight to buy scales proportionally since shrinkage is the same regardless of serving size."
+      }
+    }
+  ]
+}
+</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --amber: #EF9F27;
+  --amber-dark: #C97F10;
+  --amber-light: #FEF3DE;
+  --charcoal: #1a1a1a;
+  --card-bg: #FFFFFF;
+  --card-border: #E8E0D0;
+  --text-muted: #6B6560;
+  --radius: 8px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --blue: #3B82F6;
+  --red: #EF4444;
+  --green: #22C55E;
+  --yellow-warn: #FFFBEB;
+  --yellow-warn-border: #FDE68A;
+}
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  background: #F5F0E8;
+  color: #1a1a1a;
+  line-height: 1.6;
+}
+header {
+  background: var(--charcoal);
+  padding: 0 1.5rem;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+.logo {
+  font-family: Georgia,"Times New Roman",serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+}
+.logo span { color: var(--amber); }
+.header-nav {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.header-nav a {
+  color: rgba(255,255,255,.85);
+  text-decoration: none;
+  font-size: .875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.header-nav a:hover,
+.header-nav a:focus-visible { color: #fff; text-decoration: underline; }
+main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1.25rem 4rem;
+}
+.page-hero {
+  padding: 2rem 0 1.5rem;
+}
+.page-hero h1 {
+  font-family: Georgia,serif;
+  font-size: clamp(1.6rem,4vw,2.2rem);
+  font-weight: 700;
+  margin-bottom: .5rem;
+  line-height: 1.2;
+}
+.page-hero p {
+  color: var(--text-muted);
+  max-width: 640px;
+  font-size: 1.05rem;
+}
+.form-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.section-title {
+  font-family: Georgia,serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+  color: var(--charcoal);
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 1.5rem;
+}
+.form-group { display: flex; flex-direction: column; gap: .4rem; }
+.form-group.full-width { grid-column: 1 / -1; }
+.form-group label {
+  font-size: .82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text-muted);
+}
+.form-group select,
+.form-group input[type="number"] {
+  width: 100%;
+  padding: .6rem .75rem;
+  border: 1.5px solid var(--card-border);
+  border-radius: 6px;
+  background: #FAFAF8;
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--charcoal);
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color .15s;
+}
+.form-group select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B6560' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right .75rem center; padding-right: 2rem; }
+.form-group select:focus:not(:focus-visible),
+.form-group input:focus:not(:focus-visible) { outline: none; border-color: var(--amber); background: #fff; }
+.form-group select:focus-visible,
+.form-group input:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; border-color: var(--amber); background: #fff; }
+.serving-toggle {
+  display: flex;
+  border: 1.5px solid var(--card-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.serving-toggle button {
+  flex: 1;
+  padding: .6rem .25rem;
+  border: none;
+  background: #FAFAF8;
+  font-family: inherit;
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.serving-toggle button + button { border-left: 1.5px solid var(--card-border); }
+.serving-toggle button.active { background: var(--charcoal); color: #fff; }
+.serving-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
+.unit-controls { display: flex; align-items: center; gap: .5rem; }
+.unit-toggle { display: flex; background: #333; border-radius: 20px; padding: 3px; gap: 2px; }
+.unit-toggle button { background: none; border: none; color: #aaa; font-size: .75rem; font-weight: 600; padding: 4px 10px; border-radius: 16px; cursor: pointer; transition: background .15s, color .15s; letter-spacing: .03em; font-family: inherit; }
+.unit-toggle button.active { background: var(--amber); color: #fff; }
+.unit-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.calc-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  width: 100%;
+  padding: .9rem 1.5rem;
+  margin-top: 1.25rem;
+  background: var(--amber);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: .02em;
+  transition: background .15s;
+}
+.calc-btn:hover { background: var(--amber-dark); }
+.calc-btn:focus-visible { outline: 2px solid var(--amber-dark); outline-offset: 2px; }
+.vmsg {
+  display: none;
+  margin-top: .75rem;
+  padding: .65rem .9rem;
+  background: #FEE2E2;
+  border: 1px solid #FECACA;
+  border-radius: 6px;
+  font-size: .875rem;
+  color: #991B1B;
+}
+.vmsg.visible { display: block; }
+body.modal-open { overflow: hidden; }
+#results {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  padding: 1.5rem;
+  background: rgba(26,26,26,.68);
+  overflow-y: auto;
+}
+#results.visible { display: block; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+.results-modal {
+  max-width: 960px;
+  margin: 0 auto;
+  background: #F5F0E8;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 24px 48px rgba(0,0,0,.28);
+  animation: fadeUp .35s ease both;
+}
+.results-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.results-modal__title {
+  font-family: Georgia,serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+.results-close {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 999px;
+  background: var(--charcoal);
+  color: #fff;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.results-close:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.stat-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 1rem; }
+@media (max-width:500px) { .stat-cards { grid-template-columns: 1fr; } }
+.stat-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.25rem 1rem; box-shadow: var(--shadow); text-align: center; position: relative; overflow: hidden; }
+.stat-card::before { content: ''; position: absolute; top:0; left:0; right:0; height: 3px; }
+.stat-card.c1::before { background: var(--blue); }
+.stat-card.c2::before { background: var(--amber); }
+.stat-card.c3::before { background: var(--red); }
+.sc-icon { font-size: 1.5rem; margin-bottom: .35rem; display: block; }
+.sc-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin-bottom: .4rem; }
+.sc-value { font-family: Georgia,serif; font-size: 1.75rem; font-weight: 700; color: var(--charcoal); line-height: 1.1; }
+.sc-sub { font-size: .8rem; color: var(--text-muted); margin-top: .35rem; }
+.detail-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.25rem 1.5rem; box-shadow: var(--shadow); margin-bottom: 1rem; }
+.srows { display: grid; gap: .5rem; }
+.srow { display: flex; justify-content: space-between; align-items: baseline; font-size: .9rem; padding-bottom: .5rem; border-bottom: 1px solid #F0EBE3; }
+.srow:last-child { border-bottom: none; padding-bottom: 0; }
+.srow .lbl { color: var(--text-muted); }
+.srow .val { font-weight: 700; color: var(--charcoal); }
+.srow .val.hi { color: var(--amber-dark); font-size: 1.05rem; }
+.mc-warn { display: none; margin-top: .75rem; padding: .75rem 1rem; background: var(--yellow-warn); border: 1px solid var(--yellow-warn-border); border-radius: 6px; font-size: .875rem; color: #6D4C00; }
+.mc-warn.visible { display: block; }
+.ad-slot {
+  text-align: center;
+  min-height: 90px;
+  background: transparent;
+  margin: 1.5rem auto;
+  max-width: 960px;
+  padding: 0 1.25rem;
+}
+.editorial-section { margin-top: 2.5rem; }
+.editorial-section h2 {
+  font-family: Georgia,serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+.editorial-section h3 {
+  font-family: Georgia,serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 1.5rem 0 .6rem;
+}
+.editorial-section p { margin-bottom: .85rem; line-height: 1.7; font-size: .95rem; color: #333; }
+.editorial-section p:last-child { margin-bottom: 0; }
+.editorial-section ul { padding-left: 1.25rem; margin-bottom: .85rem; }
+.editorial-section li { margin-bottom: .4rem; font-size: .95rem; line-height: 1.6; color: #333; }
+.ref-table-wrap { margin-top: 2.5rem; overflow-x: auto; }
+.ref-table-wrap h2 {
+  font-family: Georgia,serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+.ref-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .88rem;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--card-border);
+}
+.ref-table th {
+  background: var(--charcoal);
+  color: #fff;
+  text-align: left;
+  padding: .65rem .9rem;
+  font-size: .78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  white-space: nowrap;
+}
+.ref-table td {
+  padding: .6rem .9rem;
+  border-bottom: 1px solid #F0EBE3;
+  vertical-align: middle;
+}
+.ref-table tr:last-child td { border-bottom: none; }
+.ref-table tr:nth-child(even) td { background: #FAFAF8; }
+.ref-table td:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+.ref-table .cut-name { font-weight: 600; color: var(--charcoal); }
+.ref-table .shrinkage-hi { color: #991B1B; font-weight: 700; }
+.ref-table .shrinkage-mid { color: #92400E; font-weight: 700; }
+.ref-table .shrinkage-lo { color: #166534; font-weight: 700; }
+.faq-section { margin-top: 2.5rem; }
+.faq-section h2 {
+  font-family: Georgia,serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+.faq-item {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: .75rem;
+  overflow: hidden;
+}
+.faq-item summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 1rem 1.25rem;
+  font-weight: 700;
+  font-size: .95rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after { content: '+'; font-size: 1.1rem; flex-shrink: 0; color: var(--text-muted); }
+.faq-item[open] summary::after { content: '−'; }
+.faq-item summary:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
+.faq-body { padding: 0 1.25rem 1rem; font-size: .9rem; line-height: 1.7; color: #333; }
+.related-tools { margin-top: 2.5rem; }
+.related-tools h2 {
+  font-family: Georgia,serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+.tool-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px,1fr));
+  gap: 1rem;
+}
+.tool-link {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.1rem 1.25rem;
+  text-decoration: none;
+  color: var(--charcoal);
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  transition: box-shadow .15s, border-color .15s;
+}
+.tool-link:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); border-color: var(--amber); }
+.tool-link:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.tool-link-icon { font-size: 1.4rem; flex-shrink: 0; }
+.tool-link-body { }
+.tool-link-name { font-weight: 700; font-size: .95rem; margin-bottom: .15rem; }
+.tool-link-desc { font-size: .8rem; color: var(--text-muted); line-height: 1.4; }
+footer {
+  background: var(--charcoal);
+  color: #fff;
+  text-align: center;
+  padding: 2rem 1rem;
+  font-size: 13px;
+}
+footer nav {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin: .75rem 0;
+}
+footer a { color: #fff; text-decoration: none; }
+footer a:hover,
+footer a:focus-visible { text-decoration: underline; }
+.footer-small {
+  max-width: 720px;
+  margin: .75rem auto 0;
+  color: rgba(255,255,255,.85);
+  line-height: 1.6;
+}
+.cookie-banner {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 300;
+  padding: 1rem;
+  display: none;
+}
+.cookie-banner.visible { display: block; }
+.cookie-banner__inner {
+  max-width: 960px;
+  margin: 0 auto;
+  background: #1a1a1a;
+  color: #fff;
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 10px 24px rgba(0,0,0,.28);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+.cookie-banner__text {
+  flex: 1 1 360px;
+  font-size: .95rem;
+}
+.cookie-banner__text a { color: var(--amber); }
+.cookie-banner__actions {
+  display: flex;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+.cookie-banner__actions button {
+  padding: .55rem 1.1rem;
+  border-radius: 6px;
+  border: none;
+  font-family: inherit;
+  font-size: .9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.cookie-accept { background: var(--amber); color: #fff; }
+.cookie-reject { background: transparent; color: rgba(255,255,255,.8); border: 1px solid rgba(255,255,255,.25) !important; }
+.cookie-accept:hover { background: var(--amber-dark); }
+.cookie-reject:hover { color: #fff; border-color: rgba(255,255,255,.5) !important; }
+.cookie-accept:focus-visible,
+.cookie-reject:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+@media (max-width:640px) {
+  header { padding: .9rem 1rem; flex-wrap: wrap; }
+  .header-nav { gap: .75rem; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-group.full-width { grid-column: auto; }
+  .cookie-banner__inner { align-items: stretch; }
+  .cookie-banner__actions { width: 100%; }
+  .cookie-banner__actions button { flex: 1 1 140px; }
+}
+@media print {
+  header, .ad-slot, .cookie-banner, footer nav, .calc-btn, .vmsg,
+  .form-card, .related-tools, .faq-section { display: none !important; }
+  #results { display: block !important; position: static !important; background: none !important; padding: 0 !important; }
+  .results-modal { box-shadow: none !important; padding: 0 !important; }
+  .results-modal__header, .results-close { display: none !important; }
+  body { background: #fff; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">Pitmaster<span> Tools</span></a>
+  <nav class="header-nav" aria-label="Site navigation">
+    <a href="/">Smoking Calculator</a>
+    <a href="meat-per-person.html" aria-current="page">Serving Sizes</a>
+  </nav>
+  <div class="unit-controls">
+    <div class="unit-toggle" id="tempToggle" role="group" aria-label="Temperature unit">
+      <button data-unit="F" class="active" type="button">&#xB0;F</button>
+      <button data-unit="C" type="button">&#xB0;C</button>
+    </div>
+    <div class="unit-toggle" id="weightToggle" role="group" aria-label="Weight unit">
+      <button data-unit="lbs" class="active" type="button">lbs</button>
+      <button data-unit="kg" type="button">kg</button>
+    </div>
+  </div>
+</header>
+
+<div class="ad-slot" aria-hidden="true">
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-4265262608577453"
+       data-ad-slot="XXXXXXXXXX"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+
+<main>
+
+  <section class="page-hero" aria-label="Page introduction">
+    <h1>How Much Meat Per Person</h1>
+    <p>Enter your cut, headcount, and appetite level. The calculator accounts for shrinkage and gives you the raw weight to buy — so you never run short or over-buy.</p>
+  </section>
+
+  <div class="form-card" role="form" aria-label="Serving size calculator">
+    <h2 class="section-title">Calculator</h2>
+    <div class="form-grid">
+
+      <div class="form-group full-width">
+        <label for="meatType">Meat Cut</label>
+        <select id="meatType" aria-describedby="meatTypeHint">
+          <optgroup label="Beef">
+            <option value="brisket-sliced">Brisket (Sliced)</option>
+            <option value="brisket-pulled">Brisket (Pulled)</option>
+            <option value="beef-ribs">Beef Ribs</option>
+            <option value="prime-rib">Prime Rib Roast</option>
+            <option value="tri-tip">Tri-Tip</option>
+            <option value="beef-chuck">Beef Chuck Roast</option>
+          </optgroup>
+          <optgroup label="Pork">
+            <option value="pork-butt-sliced">Pork Butt/Shoulder (Sliced)</option>
+            <option value="pork-butt-pulled">Pork Butt/Shoulder (Pulled)</option>
+            <option value="pork-loin">Pork Loin</option>
+            <option value="baby-back-ribs">Baby Back Ribs</option>
+            <option value="competition-ribs">Competition Ribs</option>
+            <option value="spare-ribs">Spare Ribs</option>
+            <option value="pork-belly">Pork Belly</option>
+          </optgroup>
+          <optgroup label="Chicken">
+            <option value="whole-chicken">Whole Chicken</option>
+            <option value="whole-chicken-spatch">Whole Chicken (Spatchcocked)</option>
+            <option value="chicken-breast">Chicken Breast</option>
+            <option value="chicken-thighs">Chicken Thighs</option>
+            <option value="chicken-quarters">Chicken Quarters</option>
+            <option value="chicken-wings">Chicken Wings</option>
+          </optgroup>
+          <optgroup label="Turkey">
+            <option value="whole-turkey">Whole Turkey</option>
+            <option value="whole-turkey-spatch">Whole Turkey (Spatchcocked)</option>
+            <option value="turkey-breast">Turkey Breast</option>
+            <option value="turkey-leg">Turkey Leg</option>
+            <option value="turkey-thighs">Turkey Thighs</option>
+            <option value="turkey-wings">Turkey Wings</option>
+          </optgroup>
+          <optgroup label="Lamb">
+            <option value="lamb-shoulder">Lamb Shoulder</option>
+            <option value="lamb-chops">Lamb Chops</option>
+            <option value="lamb-loin">Lamb Loin</option>
+          </optgroup>
+        </select>
+        <span id="meatTypeHint" class="sr-only">Select the cut of meat you are serving</span>
+      </div>
+
+      <div class="form-group">
+        <label for="numPeople">Number of People</label>
+        <input type="number" id="numPeople" min="1" max="500" value="10" aria-describedby="numPeopleHint">
+        <span id="numPeopleHint" class="sr-only">Enter a number between 1 and 500</span>
+      </div>
+
+      <div class="form-group full-width">
+        <label>Serving Size</label>
+        <div class="serving-toggle" id="servingToggle" role="group" aria-label="Appetite level">
+          <button data-sz="light" type="button">Light &mdash; 4 oz</button>
+          <button data-sz="normal" class="active" type="button">Normal &mdash; 6 oz</button>
+          <button data-sz="hungry" type="button">Hungry &mdash; 8 oz</button>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="calc-btn" id="calcBtn" type="button" aria-label="Calculate serving size">
+      Calculate
+    </button>
+    <div class="vmsg" id="vmsg" role="alert" aria-live="polite"></div>
+  </div>
+
+  <div class="ad-slot" aria-hidden="true">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-4265262608577453"
+         data-ad-slot="XXXXXXXXXX"
+         data-ad-format="rectangle"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <div id="results" role="dialog" aria-modal="true" aria-labelledby="resultsModalTitle">
+    <div class="results-modal" tabindex="-1">
+      <div class="results-modal__header">
+        <div class="results-modal__title" id="resultsModalTitle">Results</div>
+        <button class="results-close" id="closeResultsBtn" type="button" aria-label="Close results">&times;</button>
+      </div>
+      <div class="stat-cards">
+        <div class="stat-card c1">
+          <span class="sc-icon" aria-hidden="true">🛒</span>
+          <div class="sc-label">Raw Weight to Buy</div>
+          <div class="sc-value" id="statRaw">—</div>
+          <div class="sc-sub" id="statRawSub"></div>
+        </div>
+        <div class="stat-card c2">
+          <span class="sc-icon" aria-hidden="true">🍖</span>
+          <div class="sc-label">Cooked Weight Needed</div>
+          <div class="sc-value" id="statCooked">—</div>
+          <div class="sc-sub" id="statCookedSub"></div>
+        </div>
+        <div class="stat-card c3">
+          <span class="sc-icon" aria-hidden="true">📉</span>
+          <div class="sc-label">Shrinkage</div>
+          <div class="sc-value" id="statShrink">—</div>
+          <div class="sc-sub" id="statShrinkSub"></div>
+        </div>
+      </div>
+      <div class="detail-card">
+        <div class="srows" id="detailRows"></div>
+        <div class="mc-warn" id="mcWarn" role="alert"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       EDITORIAL CONTENT
+  ============================================================ -->
+  <section class="editorial-section">
+    <h2>Why Raw Weight Is Never the Same as Serving Weight</h2>
+
+    <p>The most common BBQ planning mistake is buying the same weight of meat you intend to serve. A brisket loses 35–40% of its raw weight during a 12–16 hour smoke. A whole chicken gives back 25% to moisture and rendered fat. Spare ribs carry a lot of bone. If you buy 6 oz of raw brisket per person, you will serve closer to 3–4 oz after cooking — not enough for anyone to leave satisfied.</p>
+
+    <p>Every cut on this calculator has a different shrinkage percentage. The calculator multiplies your cooked serving target by a shrinkage factor to give you the actual raw weight you need to purchase, then adds a 25% buffer on top of the minimum to account for individual variation in your smoker, the quality of the cut, and the reality that some pieces will have more bone or fat waste than expected.</p>
+
+    <h3>Light, Normal, and Hungry Serving Sizes</h3>
+
+    <p>The three serving size options correspond to 4 oz, 6 oz, and 8 oz of cooked meat per person.</p>
+
+    <ul>
+      <li><strong>Light (4 oz cooked):</strong> Appropriate when you are serving multiple meats, abundant sides, or a heavy appetizer spread. Four ounces is roughly the size of a deck of cards — satisfying for most guests when paired with baked beans, coleslaw, cornbread, and potato salad.</li>
+      <li><strong>Normal (6 oz cooked):</strong> The standard catering estimate used by professional pitmasters and caterers. Most guests at a BBQ will be happy with 6 oz of a single meat plus a few sides. This is the default for a reason.</li>
+      <li><strong>Hungry (8 oz cooked):</strong> Use this for a meat-forward spread, Super Bowl parties, competition events, or any crowd you expect to be eating seriously. Eight ounces is half a pound of cooked meat — substantial by any measure.</li>
+    </ul>
+
+    <h3>Ribs Are Different</h3>
+
+    <p>Bone-in ribs are the exception to the per-ounce framing that works for every other cut. When you calculate raw weight for ribs, you are buying a significant amount of bone that will never be eaten. The rule of thumb:</p>
+
+    <ul>
+      <li><strong>Baby back ribs:</strong> Plan on 3–4 bones per person, or about half a rack of 13 bones. One rack of baby backs typically feeds 2–3 people.</li>
+      <li><strong>Spare ribs (St. Louis cut):</strong> 3 bones per person. A full rack of 12 bones feeds 3–4 people.</li>
+      <li><strong>Competition ribs:</strong> Same as baby backs — half a rack per person.</li>
+      <li><strong>Beef plate ribs (dino bones):</strong> 1–2 bones per person. Each plate rib can weigh 1–1.5 lbs, so this is a generous serving.</li>
+    </ul>
+
+    <p>The shrinkage percentages in the calculator already account for the bone weight that doesn't get eaten, but the per-person raw weight output for ribs is best interpreted as a planning guide rather than a precise butcher order. Buy whole racks and cut or serve at the bone.</p>
+
+    <h3>Whole Birds Serve More Than You Think</h3>
+
+    <p>A whole chicken or turkey appears large but has significant bone weight. A 5 lb whole chicken typically serves 3–4 people once the carcass is removed. A 12 lb whole turkey will serve 10–12 people with sides. When cooking whole birds for a crowd, it is often easier to plan in number of birds rather than total pounds. Use the calculator to get a raw pound figure, then round up to the nearest whole bird that meets or exceeds that weight.</p>
+
+    <h3>The 25% Buffer and Why It Matters</h3>
+
+    <p>The "raw weight to buy" displayed by this calculator is a range — minimum to maximum. The minimum is the theoretical exact weight you need based on shrinkage math. The maximum adds a 25% buffer on top of the minimum. Always buy closer to the maximum for three reasons:</p>
+
+    <ul>
+      <li>Shrinkage varies by cut quality, fat content, and cooking method. A Choice brisket may lose 35%; a heavily marbled Prime brisket may lose 40%.</li>
+      <li>People take more than their "serving size" when the meat is exceptional. This is the point of good BBQ.</li>
+      <li>Leftover smoked meat is not a problem. Pulled pork burritos, brisket hash, smoked chicken salad — the leftovers are half the reward.</li>
+    </ul>
+
+    <h3>Multi-Cut Events</h3>
+
+    <p>When you are smoking multiple cuts for the same event — say, brisket, pulled pork, and ribs — reduce each per-person estimate by about 30–40%. If you would buy 0.63 lbs of brisket for 10 people as a single meat, buy closer to 0.40 lbs when you are also serving pulled pork and ribs. The three-meat spread is a satisfying format precisely because each serving is smaller but guests get variety.</p>
+  </section>
+
+  <!-- ============================================================
+       REFERENCE TABLE
+  ============================================================ -->
+  <section class="ref-table-wrap">
+    <h2>BBQ Shrinkage &amp; Raw Weight Reference — All Cuts</h2>
+    <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:1rem;">Raw lbs per person at normal serving (6 oz cooked). Add 25% for a safe buffer.</p>
+    <table class="ref-table" aria-label="Raw weight per person by cut and shrinkage">
+      <thead>
+        <tr>
+          <th scope="col">Cut</th>
+          <th scope="col">Shrinkage</th>
+          <th scope="col">Raw lbs / person</th>
+          <th scope="col">Raw kg / person</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="cut-name">Brisket (Sliced)</td><td class="shrinkage-hi">40%</td><td>0.63</td><td>0.28</td></tr>
+        <tr><td class="cut-name">Brisket (Pulled)</td><td class="shrinkage-hi">40%</td><td>0.63</td><td>0.28</td></tr>
+        <tr><td class="cut-name">Beef Ribs</td><td class="shrinkage-mid">30%</td><td>0.54</td><td>0.24</td></tr>
+        <tr><td class="cut-name">Prime Rib Roast</td><td class="shrinkage-lo">15%</td><td>0.44</td><td>0.20</td></tr>
+        <tr><td class="cut-name">Tri-Tip</td><td class="shrinkage-lo">15%</td><td>0.44</td><td>0.20</td></tr>
+        <tr><td class="cut-name">Beef Chuck Roast</td><td class="shrinkage-mid">35%</td><td>0.58</td><td>0.26</td></tr>
+        <tr><td class="cut-name">Pork Butt/Shoulder (Sliced)</td><td class="shrinkage-mid">35%</td><td>0.58</td><td>0.26</td></tr>
+        <tr><td class="cut-name">Pork Butt/Shoulder (Pulled)</td><td class="shrinkage-mid">35%</td><td>0.58</td><td>0.26</td></tr>
+        <tr><td class="cut-name">Pork Loin</td><td class="shrinkage-lo">20%</td><td>0.47</td><td>0.21</td></tr>
+        <tr><td class="cut-name">Baby Back Ribs</td><td class="shrinkage-mid">25%</td><td>0.50</td><td>0.23</td></tr>
+        <tr><td class="cut-name">Competition Ribs</td><td class="shrinkage-mid">25%</td><td>0.50</td><td>0.23</td></tr>
+        <tr><td class="cut-name">Spare Ribs</td><td class="shrinkage-mid">30%</td><td>0.54</td><td>0.24</td></tr>
+        <tr><td class="cut-name">Pork Belly</td><td class="shrinkage-hi">40%</td><td>0.63</td><td>0.28</td></tr>
+        <tr><td class="cut-name">Whole Chicken</td><td class="shrinkage-mid">25%</td><td>0.50</td><td>0.23</td></tr>
+        <tr><td class="cut-name">Whole Chicken (Spatchcocked)</td><td class="shrinkage-mid">25%</td><td>0.50</td><td>0.23</td></tr>
+        <tr><td class="cut-name">Chicken Breast</td><td class="shrinkage-lo">20%</td><td>0.47</td><td>0.21</td></tr>
+        <tr><td class="cut-name">Chicken Thighs</td><td class="shrinkage-lo">20%</td><td>0.47</td><td>0.21</td></tr>
+        <tr><td class="cut-name">Chicken Quarters</td><td class="shrinkage-lo">22%</td><td>0.48</td><td>0.22</td></tr>
+        <tr><td class="cut-name">Chicken Wings</td><td class="shrinkage-lo">20%</td><td>0.47</td><td>0.21</td></tr>
+        <tr><td class="cut-name">Whole Turkey</td><td class="shrinkage-mid">25%</td><td>0.50</td><td>0.23</td></tr>
+        <tr><td class="cut-name">Whole Turkey (Spatchcocked)</td><td class="shrinkage-mid">25%</td><td>0.50</td><td>0.23</td></tr>
+        <tr><td class="cut-name">Turkey Breast</td><td class="shrinkage-lo">20%</td><td>0.47</td><td>0.21</td></tr>
+        <tr><td class="cut-name">Turkey Leg</td><td class="shrinkage-lo">20%</td><td>0.47</td><td>0.21</td></tr>
+        <tr><td class="cut-name">Turkey Thighs</td><td class="shrinkage-lo">20%</td><td>0.47</td><td>0.21</td></tr>
+        <tr><td class="cut-name">Turkey Wings</td><td class="shrinkage-lo">20%</td><td>0.47</td><td>0.21</td></tr>
+        <tr><td class="cut-name">Lamb Shoulder</td><td class="shrinkage-mid">35%</td><td>0.58</td><td>0.26</td></tr>
+        <tr><td class="cut-name">Lamb Chops</td><td class="shrinkage-lo">15%</td><td>0.44</td><td>0.20</td></tr>
+        <tr><td class="cut-name">Lamb Loin</td><td class="shrinkage-lo">15%</td><td>0.44</td><td>0.20</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============================================================
+       FAQ
+  ============================================================ -->
+  <section class="faq-section">
+    <h2>Frequently Asked Questions</h2>
+
+    <details class="faq-item">
+      <summary>How much brisket per person?</summary>
+      <div class="faq-body">
+        <p>Plan on buying <strong>⅝ lb (0.63 lbs) of raw brisket per person</strong> for a normal 6 oz serving. Brisket loses roughly 40% of its weight during a long smoke due to moisture loss and fat rendering. For a crowd of 10, that means 6–8 lbs of raw brisket. For a hungry crowd, budget closer to ¾ lb per person. Always buy toward the top of the range — cold leftover brisket sliced thin makes an exceptional breakfast hash.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>How much pulled pork per person?</summary>
+      <div class="faq-body">
+        <p>Buy approximately <strong>0.58 lbs of raw pork butt per person</strong> for a normal serving. Pork shoulder shrinks around 35% during smoking. For 10 people, plan on 5.8–7.2 lbs of raw pork butt. Pulled pork stretches well with sides, so it's one of the most crowd-friendly BBQ proteins. A single 8–10 lb bone-in pork butt feeds 12–15 people comfortably at a cookout with sides.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>How much chicken per person at a BBQ?</summary>
+      <div class="faq-body">
+        <p>For whole chicken or quarters, plan on <strong>½ lb (0.50 lbs) of raw weight per person</strong> — chicken shrinks about 25%. Boneless cuts like chicken breast and thighs shrink less (around 20%), so figure about 0.47 lbs raw per person. For wings, most guests eat 6–8 whole wings; at about 2 oz of meat per wing after cooking, that tracks to roughly 0.47 lbs raw. A 5 lb whole chicken will serve 3–4 people; a 5 lb bag of bone-in thighs serves 4–5 people.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>How many ribs per person?</summary>
+      <div class="faq-body">
+        <p>Ribs are the one cut where bone count is more intuitive than weight. For baby back ribs and competition ribs, plan on <strong>3–4 bones per person</strong> — roughly half a rack. For spare ribs, 3 bones per person is standard. For beef plate ribs (dino bones), each bone can weigh over 1 lb and serves 1–2 people on its own. A full rack of 13 baby backs serves 2–3 people; a full rack of 12 St. Louis spare ribs serves 3–4 people.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>What is the difference between light, normal, and hungry serving sizes?</summary>
+      <div class="faq-body">
+        <p>The three options correspond to <strong>4 oz, 6 oz, and 8 oz of cooked meat per person</strong>. Light (4 oz) is for events with multiple meats, heavy sides, or appetizers. Normal (6 oz) is the standard caterer's estimate — one moderate plate of a single meat. Hungry (8 oz) applies to meat-focused events or big eaters. When serving multiple proteins at a cookout, reduce each estimate by 30–40% and total them up so the combined cooked weight still reaches your target per person.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ============================================================
+       RELATED TOOLS
+  ============================================================ -->
+  <section class="related-tools">
+    <h2>More Pitmaster Tools</h2>
+    <div class="tool-links">
+      <a class="tool-link" href="/">
+        <span class="tool-link-icon" aria-hidden="true">⏱️</span>
+        <div class="tool-link-body">
+          <div class="tool-link-name">Meat Smoking Calculator</div>
+          <div class="tool-link-desc">Full cook timeline, pull temps, and wood pairings for 28 cuts — backward from your serve time.</div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<div class="ad-slot" aria-hidden="true">
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-4265262608577453"
+       data-ad-slot="XXXXXXXXXX"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+
+<div class="cookie-banner" id="cookieBanner" role="dialog" aria-live="polite" aria-label="Cookie consent">
+  <div class="cookie-banner__inner">
+    <p class="cookie-banner__text">We use cookies for analytics and personalized ads. See our <a href="privacy-policy.html">Privacy Policy</a>.</p>
+    <div class="cookie-banner__actions">
+      <button class="cookie-accept" id="acceptCookies" type="button">Accept all</button>
+      <button class="cookie-reject" id="rejectCookies" type="button">Reject non-essential</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>&copy; 2026 Pitmaster Tools. All rights reserved.</div>
+  <nav aria-label="Footer">
+    <a href="/">Meat Smoking Calculator</a>
+    <span>|</span>
+    <a href="privacy-policy.html">Privacy Policy</a>
+    <span>|</span>
+    <a href="terms-of-service.html">Terms of Service</a>
+    <span>|</span>
+    <a href="mailto:contact@pitmaster.tools">contact@pitmaster.tools</a>
+  </nav>
+  <p class="footer-small">Serving estimates are based on USDA guidelines and pitmaster consensus. Always account for bone weight, fat trim, and your crowd's appetite. Calculator outputs are estimates only.</p>
+  <p class="footer-small">Last updated: April 11, 2026</p>
+</footer>
+
+<script>
+(function(){
+'use strict';
+
+/* ============================================================
+   CONSTANTS & STATE
+   ============================================================ */
+var CONSENT_COOKIE_NAME = 'pitmaster_consent';
+var CONSENT_COOKIE_DAYS = 365;
+var GA_MEASUREMENT_ID = 'G-SJJVV37EWE';
+var ADSENSE_CLIENT = 'ca-pub-4265262608577453';
+var analyticsLoaded = false;
+var adsLoaded = false;
+
+var state = { tu: 'F', wu: 'lbs', sz: 'normal' };
+
+/* ============================================================
+   MEAT DATA
+   ============================================================ */
+var CUTS = {
+  'brisket-sliced':       { name: 'Brisket (Sliced)',               shrinkage: 0.40, maxLbs: 18 },
+  'brisket-pulled':       { name: 'Brisket (Pulled)',               shrinkage: 0.40, maxLbs: 18 },
+  'beef-ribs':            { name: 'Beef Ribs',                      shrinkage: 0.30, maxLbs: 10 },
+  'prime-rib':            { name: 'Prime Rib Roast',                shrinkage: 0.15, maxLbs: 20 },
+  'tri-tip':              { name: 'Tri-Tip',                        shrinkage: 0.15, maxLbs: 6  },
+  'beef-chuck':           { name: 'Beef Chuck Roast',               shrinkage: 0.35, maxLbs: 10 },
+  'pork-butt-sliced':     { name: 'Pork Butt/Shoulder (Sliced)',    shrinkage: 0.35, maxLbs: 12 },
+  'pork-butt-pulled':     { name: 'Pork Butt/Shoulder (Pulled)',    shrinkage: 0.35, maxLbs: 12 },
+  'pork-loin':            { name: 'Pork Loin',                      shrinkage: 0.20, maxLbs: 10 },
+  'baby-back-ribs':       { name: 'Baby Back Ribs',                 shrinkage: 0.25, maxLbs: 4  },
+  'competition-ribs':     { name: 'Competition Ribs',               shrinkage: 0.25, maxLbs: 4  },
+  'spare-ribs':           { name: 'Spare Ribs',                     shrinkage: 0.30, maxLbs: 4  },
+  'pork-belly':           { name: 'Pork Belly',                     shrinkage: 0.40, maxLbs: 10 },
+  'whole-chicken':        { name: 'Whole Chicken',                  shrinkage: 0.25, maxLbs: 8  },
+  'whole-chicken-spatch': { name: 'Whole Chicken (Spatchcocked)',   shrinkage: 0.25, maxLbs: 8  },
+  'chicken-breast':       { name: 'Chicken Breast',                 shrinkage: 0.20, maxLbs: 6  },
+  'chicken-thighs':       { name: 'Chicken Thighs',                 shrinkage: 0.20, maxLbs: 6  },
+  'chicken-quarters':     { name: 'Chicken Quarters',               shrinkage: 0.22, maxLbs: 6  },
+  'chicken-wings':        { name: 'Chicken Wings',                  shrinkage: 0.20, maxLbs: 5  },
+  'whole-turkey':         { name: 'Whole Turkey',                   shrinkage: 0.25, maxLbs: 24 },
+  'whole-turkey-spatch':  { name: 'Whole Turkey (Spatchcocked)',    shrinkage: 0.25, maxLbs: 24 },
+  'turkey-breast':        { name: 'Turkey Breast',                  shrinkage: 0.20, maxLbs: 10 },
+  'turkey-leg':           { name: 'Turkey Leg',                     shrinkage: 0.20, maxLbs: 6  },
+  'turkey-thighs':        { name: 'Turkey Thighs',                  shrinkage: 0.20, maxLbs: 6  },
+  'turkey-wings':         { name: 'Turkey Wings',                   shrinkage: 0.20, maxLbs: 5  },
+  'lamb-shoulder':        { name: 'Lamb Shoulder',                  shrinkage: 0.35, maxLbs: 10 },
+  'lamb-chops':           { name: 'Lamb Chops',                     shrinkage: 0.15, maxLbs: 4  },
+  'lamb-loin':            { name: 'Lamb Loin',                      shrinkage: 0.15, maxLbs: 5  }
+};
+
+var SOZ = { light: 4, normal: 6, hungry: 8 };
+
+/* ============================================================
+   UNIT HELPERS
+   ============================================================ */
+function lK(v){ return Math.round(v * 0.453592 * 100) / 100; }
+function kL(v){ return Math.round(v / 0.453592 * 100) / 100; }
+function dW(lbs, dec){
+  dec = dec !== undefined ? dec : 2;
+  return state.wu === 'kg' ? lK(lbs).toFixed(dec) + ' kg' : lbs.toFixed(dec) + ' lbs';
+}
+function shouldDefaultMetric(lang){
+  var normalized = (lang || '').replace('_', '-');
+  if(!normalized) return false;
+  if(normalized.toLowerCase() === 'en') return false;
+  var parts = normalized.split('-');
+  var region = parts.length > 1 ? parts[parts.length - 1].toUpperCase() : '';
+  if(region) return ['US', 'LR', 'MM'].indexOf(region) === -1;
+  return parts[0].toLowerCase() !== 'en';
+}
+
+/* ============================================================
+   CALCULATE
+   ============================================================ */
+function calculate(){
+  var vmsg = document.getElementById('vmsg');
+  var results = document.getElementById('results');
+
+  vmsg.textContent = '';
+  vmsg.classList.remove('visible');
+
+  var cutKey = document.getElementById('meatType').value;
+  var numPeopleRaw = document.getElementById('numPeople').value.trim();
+  var numPeople = parseInt(numPeopleRaw, 10);
+
+  if(!numPeopleRaw || isNaN(numPeople) || numPeople < 1 || numPeople > 500){
+    vmsg.textContent = 'Please enter a number of people between 1 and 500.';
+    vmsg.classList.add('visible');
+    results.classList.remove('visible');
+    return;
+  }
+
+  var cut = CUTS[cutKey];
+  if(!cut){
+    vmsg.textContent = 'Unknown cut selected. Please refresh and try again.';
+    vmsg.classList.add('visible');
+    results.classList.remove('visible');
+    return;
+  }
+
+  var oz = SOZ[state.sz];
+  var cLbs = numPeople * oz / 16;          /* cooked lbs needed */
+  var rMin = cLbs / (1 - cut.shrinkage);   /* minimum raw lbs to buy */
+  var rMax = rMin * 1.25;                  /* 25% buffer */
+
+  /* Render stat cards */
+  var rawRange = dW(rMin) + ' \u2013 ' + dW(rMax);
+  document.getElementById('statRaw').textContent = rawRange;
+  document.getElementById('statRawSub').textContent = 'min \u2013 max (25% buffer)';
+  document.getElementById('statCooked').textContent = dW(cLbs);
+  document.getElementById('statCookedSub').textContent = oz + ' oz \u00d7 ' + numPeople + ' people';
+  document.getElementById('statShrink').textContent = Math.round(cut.shrinkage * 100) + '%';
+  document.getElementById('statShrinkSub').textContent = cut.name;
+
+  /* Render detail rows */
+  var rows = [
+    { lbl: 'Cut', val: cut.name },
+    { lbl: 'People', val: numPeople.toLocaleString() },
+    { lbl: 'Serving size', val: oz + ' oz cooked per person' },
+    { lbl: 'Cooked weight needed', val: dW(cLbs) },
+    { lbl: 'Minimum raw to buy', val: dW(rMin), hi: false },
+    { lbl: 'Recommended (with buffer)', val: dW(rMax), hi: true }
+  ];
+  var rowsEl = document.getElementById('detailRows');
+  rowsEl.innerHTML = '';
+  rows.forEach(function(r){
+    var row = document.createElement('div');
+    row.className = 'srow';
+    var lbl = document.createElement('span');
+    lbl.className = 'lbl';
+    lbl.textContent = r.lbl;
+    var val = document.createElement('span');
+    val.className = r.hi ? 'val hi' : 'val';
+    val.textContent = r.val;
+    row.appendChild(lbl);
+    row.appendChild(val);
+    rowsEl.appendChild(row);
+  });
+
+  /* Multi-piece warning */
+  var warn = document.getElementById('mcWarn');
+  warn.textContent = '';
+  warn.classList.remove('visible');
+  var pieces = Math.ceil(rMax / cut.maxLbs);
+  if(pieces > 1){
+    warn.textContent = '\u26a0\ufe0f ' + cut.name + ' typically maxes out around ' + cut.maxLbs + ' lbs per piece. For ' + numPeople + ' people you\u2019ll need ' + pieces + ' pieces (or ' + pieces + ' smoker runs). Plan your cook time and smoker capacity accordingly.';
+    warn.classList.add('visible');
+  }
+
+  /* Results title */
+  document.getElementById('resultsModalTitle').textContent = cut.name + ' for ' + numPeople.toLocaleString() + ' People';
+
+  openResultsModal();
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+var _modalPrevFocus = null;
+function openResultsModal(){
+  _modalPrevFocus = document.activeElement;
+  document.getElementById('results').classList.add('visible');
+  document.body.classList.add('modal-open');
+  var modal = document.querySelector('.results-modal');
+  setTimeout(function(){ modal.focus(); }, 0);
+}
+function closeResultsModal(){
+  document.getElementById('results').classList.remove('visible');
+  document.body.classList.remove('modal-open');
+  if(_modalPrevFocus) _modalPrevFocus.focus();
+}
+function _trapModalFocus(e){
+  if(!document.getElementById('results').classList.contains('visible')) return;
+  if(e.key !== 'Tab') return;
+  var modal = document.querySelector('.results-modal');
+  var focusable = Array.prototype.slice.call(modal.querySelectorAll(
+    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  ));
+  if(!focusable.length) return;
+  var first = focusable[0], last = focusable[focusable.length - 1];
+  if(e.shiftKey){
+    if(document.activeElement === first || document.activeElement === modal){ e.preventDefault(); last.focus(); }
+  } else {
+    if(document.activeElement === last){ e.preventDefault(); first.focus(); }
+  }
+}
+document.addEventListener('keydown', _trapModalFocus);
+
+/* ============================================================
+   COOKIE / CONSENT
+   ============================================================ */
+function setCookie(name, value, days){
+  var expires = new Date();
+  expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+  document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires.toUTCString() + '; path=/; SameSite=Lax';
+}
+function getCookie(name){
+  var prefix = name + '=';
+  var parts = document.cookie ? document.cookie.split(';') : [];
+  for(var i = 0; i < parts.length; i++){
+    var c = parts[i].trim();
+    if(c.indexOf(prefix) === 0) return decodeURIComponent(c.substring(prefix.length));
+  }
+  return '';
+}
+function updateConsentGranted(){
+  gtag('consent', 'update', { 'ad_storage': 'granted', 'analytics_storage': 'granted' });
+}
+function ensureThirdPartyHints(){
+  ['https://www.googletagmanager.com','https://pagead2.googlesyndication.com'].forEach(function(url){
+    if(document.querySelector('link[rel="preconnect"][href="' + url + '"]')) return;
+    var link = document.createElement('link');
+    link.rel = 'preconnect';
+    link.href = url;
+    document.head.appendChild(link);
+  });
+}
+function loadAnalytics(){
+  if(analyticsLoaded || GA_MEASUREMENT_ID === 'GA_MEASUREMENT_ID') return;
+  analyticsLoaded = true;
+  var script = document.createElement('script');
+  script.async = true;
+  script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(GA_MEASUREMENT_ID);
+  document.head.appendChild(script);
+  gtag('js', new Date());
+  gtag('config', GA_MEASUREMENT_ID);
+}
+function loadAds(){
+  if(adsLoaded) return;
+  adsLoaded = true;
+  var script = document.createElement('script');
+  script.async = true;
+  script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + encodeURIComponent(ADSENSE_CLIENT);
+  script.crossOrigin = 'anonymous';
+  document.head.appendChild(script);
+}
+function loadGoogleServices(){ ensureThirdPartyHints(); loadAnalytics(); loadAds(); }
+function setConsentState(value){
+  setCookie(CONSENT_COOKIE_NAME, value, CONSENT_COOKIE_DAYS);
+  if(value === 'accepted'){ updateConsentGranted(); loadGoogleServices(); }
+  document.getElementById('cookieBanner').classList.remove('visible');
+}
+function initConsentBanner(){
+  document.getElementById('acceptCookies').addEventListener('click', function(){ setConsentState('accepted'); });
+  document.getElementById('rejectCookies').addEventListener('click', function(){ setConsentState('rejected'); });
+  var stored = getCookie(CONSENT_COOKIE_NAME);
+  if(stored === 'accepted'){ updateConsentGranted(); loadGoogleServices(); return; }
+  if(stored === 'rejected'){ return; }
+  document.getElementById('cookieBanner').classList.add('visible');
+}
+
+/* ============================================================
+   UI — TOGGLES
+   ============================================================ */
+function bindToggle(groupId, stateKey, buttons){
+  document.getElementById(groupId).addEventListener('click', function(e){
+    var btn = e.target.closest('button');
+    if(!btn) return;
+    var val = btn.dataset[stateKey === 'wu' ? 'unit' : 'sz'];
+    if(!val || state[stateKey] === val) return;
+    state[stateKey] = val;
+    buttons.forEach(function(b){ b.classList.toggle('active', b.dataset[stateKey === 'wu' ? 'unit' : 'sz'] === val); });
+  });
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+(function init(){
+  /* Restore saved unit preferences from localStorage */
+  try {
+    var savedTu = localStorage.getItem('pitmaster_tu');
+    var savedWu = localStorage.getItem('pitmaster_wu');
+    if(!savedTu && !savedWu){
+      var lang = navigator.language || 'en-US';
+      if(shouldDefaultMetric(lang)){
+        savedTu = 'C';
+        savedWu = 'kg';
+      }
+    }
+    if(savedTu){
+      state.tu = savedTu;
+      document.querySelectorAll('#tempToggle button').forEach(function(b){
+        b.classList.toggle('active', b.dataset.unit === savedTu);
+      });
+    }
+    if(savedWu){
+      state.wu = savedWu;
+      document.querySelectorAll('#weightToggle button').forEach(function(b){
+        b.classList.toggle('active', b.dataset.unit === savedWu);
+      });
+    }
+  } catch(e){}
+
+  /* Temp toggle — persists preference for other pages; not used in this calc */
+  document.getElementById('tempToggle').addEventListener('click', function(e){
+    var btn = e.target.closest('button');
+    if(!btn) return;
+    var val = btn.dataset.unit;
+    document.querySelectorAll('#tempToggle button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.unit === val);
+    });
+    try { localStorage.setItem('pitmaster_tu', val); } catch(e){}
+  });
+
+  /* Weight toggle */
+  document.getElementById('weightToggle').addEventListener('click', function(e){
+    var btn = e.target.closest('button');
+    if(!btn) return;
+    var val = btn.dataset.unit;
+    if(!val || state.wu === val) return;
+    state.wu = val;
+    document.querySelectorAll('#weightToggle button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.unit === val);
+    });
+    try { localStorage.setItem('pitmaster_wu', val); } catch(e){}
+    if(document.getElementById('results').classList.contains('visible')) calculate();
+  });
+
+  /* Serving toggle */
+  var szBtns = Array.prototype.slice.call(document.querySelectorAll('#servingToggle button'));
+  document.getElementById('servingToggle').addEventListener('click', function(e){
+    var btn = e.target.closest('button');
+    if(!btn) return;
+    var val = btn.dataset.sz;
+    if(!val || state.sz === val) return;
+    state.sz = val;
+    szBtns.forEach(function(b){ b.classList.toggle('active', b.dataset.sz === val); });
+    if(document.getElementById('results').classList.contains('visible')) calculate();
+  });
+
+  /* Calculate button */
+  document.getElementById('calcBtn').addEventListener('click', calculate);
+
+  /* Enter key on number input */
+  document.getElementById('numPeople').addEventListener('keydown', function(e){
+    if(e.key === 'Enter') calculate();
+  });
+
+  /* Modal close */
+  document.getElementById('closeResultsBtn').addEventListener('click', closeResultsModal);
+  document.getElementById('results').addEventListener('click', function(e){
+    if(e.target === this) closeResultsModal();
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && document.getElementById('results').classList.contains('visible')){
+      closeResultsModal();
+    }
+  });
+
+  initConsentBanner();
+})();
+
+})();
+</script>
+
+</body>
+</html>
