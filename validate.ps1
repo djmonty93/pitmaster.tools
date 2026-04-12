@@ -69,13 +69,16 @@ function Test-LocalLinks {
 }
 
 $htmlFiles = @(
+  'brisket-calculator.html',
   'brine-calculator.html',
   'cook-time-coordinator.html',
+  'pork-shoulder-calculator.html',
   'index.html',
   'charcoal-calculator.html',
   'dry-rub-calculator.html',
   'meat-per-person.html',
   'privacy-policy.html',
+  'rib-calculator.html',
   'terms-of-service.html'
 )
 

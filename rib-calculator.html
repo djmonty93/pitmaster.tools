@@ -916,6 +916,20 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
     return 'baby-back';
   }
 
+  function shouldDefaultMetric(lang) {
+    var normalized = (lang || '').replace('_', '-');
+    if (!normalized) return false;
+    if (normalized.toLowerCase() === 'en') return false;
+    var parts = normalized.split('-');
+    var region = parts.length > 1 ? parts[parts.length - 1].toUpperCase() : '';
+    if (region) return ['US', 'LR', 'MM'].indexOf(region) === -1;
+    return parts[0].toLowerCase() !== 'en';
+  }
+
+  function refreshVisibleResults() {
+    if (resultsEl.classList.contains('visible')) calculate();
+  }
+
   /* ---- Unit display ---- */
   function applyUnits() {
     // temp toggle buttons
@@ -943,15 +957,14 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
   }
 
   function initUnits() {
-    // default metric locales to C/kg
-    var lang = navigator.language || '';
-    if (!localStorage.getItem('pitmaster_tu')) {
-      var metricLocales = ['en-GB','en-AU','en-CA','en-NZ','en-IE','fr','de','es','it','pt','nl','sv','no','da','fi','pl','ru','ja','ko','zh'];
-      var isMetric = metricLocales.some(function(l) { return lang.toLowerCase().indexOf(l.toLowerCase()) === 0; });
-      if (isMetric) { tempUnit = 'C'; weightUnit = 'kg'; }
+    var savedTu = localStorage.getItem('pitmaster_tu');
+    var savedWu = localStorage.getItem('pitmaster_wu');
+    if (!savedTu && !savedWu && shouldDefaultMetric(navigator.language || 'en-US')) {
+      tempUnit = 'C';
+      weightUnit = 'kg';
     } else {
-      tempUnit = localStorage.getItem('pitmaster_tu') || 'F';
-      weightUnit = localStorage.getItem('pitmaster_wu') || 'lbs';
+      tempUnit = savedTu || 'F';
+      weightUnit = savedWu || 'lbs';
     }
     applyUnits();
   }
@@ -962,6 +975,7 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
     tempUnit = btn.dataset.unit;
     localStorage.setItem('pitmaster_tu', tempUnit);
     applyUnits();
+    refreshVisibleResults();
   });
 
   weightToggle.addEventListener('click', function(e) {
@@ -970,6 +984,7 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
     weightUnit = btn.dataset.unit;
     localStorage.setItem('pitmaster_wu', weightUnit);
     applyUnits();
+    refreshVisibleResults();
   });
 
   /* ---- Rib type change ---- */
@@ -990,6 +1005,7 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
         btn321.disabled = false;
         beefWeightRow.classList.remove('visible');
       }
+      refreshVisibleResults();
     });
   });
 
@@ -999,6 +1015,7 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
     btnStandard.classList.add('active');
     btn321.classList.remove('active');
     methodNote.classList.remove('visible');
+    refreshVisibleResults();
   });
 
   btn321.addEventListener('click', function() {
@@ -1007,6 +1024,7 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
     btn321.classList.add('active');
     btnStandard.classList.remove('active');
     methodNote.classList.add('visible');
+    refreshVisibleResults();
   });
 
   /* ---- Format helpers ---- */
@@ -1094,6 +1112,8 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
     }
     var now = new Date();
     var serve = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(serveParts[0], 10), parseInt(serveParts[1], 10));
+    var nowMinute = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), 0, 0);
+    if (serve < nowMinute) serve.setDate(serve.getDate() + 1);
 
     // Beef ribs: get weight
     var weightLbs = 8;

@@ -836,10 +836,12 @@ function calculate() {
   var cookMs = totalCookHrs * 3600000;
   var restMs = cut.restMinutes * 60000;
 
-  // Build serve date from today
+  // Build serve date from today, rolling past times to tomorrow.
   var now = new Date();
   var parts = serveVal.split(':');
   var serve = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+  var nowMinute = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), 0, 0);
+  if (serve < nowMinute) serve.setDate(serve.getDate() + 1);
 
   var pull = new Date(serve.getTime() - restMs);
   var meatOn = new Date(pull.getTime() - cookMs);

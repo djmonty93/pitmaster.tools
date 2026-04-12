@@ -633,9 +633,19 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
   };
   var TM = { 225: 1.0, 250: 0.85, 275: 0.75, 300: 0.65 };
 
+  function shouldDefaultMetric(lang){
+    var normalized = (lang || '').replace('_', '-');
+    if(!normalized) return false;
+    if(normalized.toLowerCase() === 'en') return false;
+    var parts = normalized.split('-');
+    var region = parts.length > 1 ? parts[parts.length - 1].toUpperCase() : '';
+    if(region) return ['US', 'LR', 'MM'].indexOf(region) === -1;
+    return parts[0].toLowerCase() !== 'en';
+  }
+
   /* ── Unit state ── */
-  var tempUnit = localStorage.getItem('pitmaster_tu') || 'F';
-  var weightUnit = localStorage.getItem('pitmaster_wu') || 'lbs';
+  var tempUnit = 'F';
+  var weightUnit = 'lbs';
 
   /* ── DOM refs ── */
   var tempToggle = document.getElementById('tempToggle');
@@ -710,15 +720,46 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
     }
   }
 
+  function initUnitState(){
+    var savedTu = localStorage.getItem('pitmaster_tu');
+    var savedWu = localStorage.getItem('pitmaster_wu');
+    if(!savedTu && !savedWu && shouldDefaultMetric(navigator.language || 'en-US')){
+      tempUnit = 'C';
+      weightUnit = 'kg';
+      return;
+    }
+    tempUnit = savedTu || 'F';
+    weightUnit = savedWu || 'lbs';
+  }
+
+  function refreshVisibleResults(){
+    if(resultsEl.classList.contains('visible')) calcBtn.click();
+  }
+
+  initUnitState();
   applyTempUnit(tempUnit);
   applyWeightUnit(weightUnit, false);
 
   tempToggle.querySelectorAll('button').forEach(function(btn){
-    btn.addEventListener('click', function(){ applyTempUnit(btn.dataset.unit); });
+    btn.addEventListener('click', function(){
+      applyTempUnit(btn.dataset.unit);
+      refreshVisibleResults();
+    });
   });
   weightToggle.querySelectorAll('button').forEach(function(btn){
-    btn.addEventListener('click', function(){ applyWeightUnit(btn.dataset.unit, true); });
+    btn.addEventListener('click', function(){
+      applyWeightUnit(btn.dataset.unit, true);
+      refreshVisibleResults();
+    });
   });
+  wrapToggle.querySelectorAll('button').forEach(function(btn){
+    btn.addEventListener('click', refreshVisibleResults);
+  });
+  document.querySelectorAll('input[name="style"]').forEach(function(input){
+    input.addEventListener('change', refreshVisibleResults);
+  });
+  boneInCheck.addEventListener('change', refreshVisibleResults);
+  smokerTempSel.addEventListener('change', refreshVisibleResults);
 
   /* ── Helpers ── */
   function fmtHrs(h){
@@ -840,6 +881,8 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
     var today = new Date();
     var parts = serveVal.split(':');
     var serve = new Date(today.getFullYear(), today.getMonth(), today.getDate(), parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+    var nowMinute = new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours(), today.getMinutes(), 0, 0);
+    if(serve < nowMinute) serve.setDate(serve.getDate() + 1);
 
     var hrs = cookHrs(style, wLbs, temp, boneIn, wrap);
     var restMs = style.restMinutes * 60000;
