@@ -190,7 +190,12 @@ main { max-width: 960px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236B6560' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
   background-repeat: no-repeat; background-position: right .75rem center; padding-right: 2.25rem;
 }
-.form-group select:focus, .form-group input:focus { outline: none; border-color: var(--amber); background: #fff; }
+/* Mouse/touch users: suppress native outline, show amber border */
+.form-group select:focus:not(:focus-visible),
+.form-group input:focus:not(:focus-visible) { outline: none; border-color: var(--amber); background: #fff; }
+/* Keyboard users: visible focus ring that meets WCAG 2.1 SC 2.4.7 */
+.form-group select:focus-visible,
+.form-group input:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; border-color: var(--amber); background: #fff; }
 .input-with-unit { display: flex; align-items: stretch; }
 .input-with-unit input { border-radius: 6px 0 0 6px; border-right: none; flex: 1; }
 .input-unit-label { display: flex; align-items: center; padding: 0 .75rem; background: #F0EBE3; border: 1.5px solid var(--card-border); border-left: none; border-radius: 0 6px 6px 0; font-size: .85rem; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
@@ -821,7 +826,7 @@ footer a:focus-visible { text-decoration: underline; }
   </div>
 
   <div id="results" role="dialog" aria-modal="true" aria-labelledby="resultsModalTitle">
-    <div class="results-modal">
+    <div class="results-modal" tabindex="-1">
       <div class="results-modal__header no-print">
         <div class="results-modal__title" id="resultsModalTitle">Your smoking timeline</div>
         <button class="results-close" id="closeResultsBtn" type="button" aria-label="Close results">×</button>
@@ -1145,7 +1150,7 @@ footer a:focus-visible { text-decoration: underline; }
     <a href="terms-of-service.html">Terms of Service</a>
     <span>|</span>
     <!-- REPLACE: Contact email address. -->
-    <a href="mailto:[YOUR EMAIL]">[YOUR EMAIL]</a>
+    <a href="mailto:[YOUR EMAIL]" class="no-print">[YOUR EMAIL]</a>
   </nav>
   <p class="footer-small">Cook times are estimates based on USDA guidelines and pitmaster consensus. Always verify doneness with a calibrated meat thermometer. Never rely solely on time.</p>
   <p class="footer-small">Last updated: April 11, 2026</p>
@@ -1247,14 +1252,38 @@ function showCookieBanner(){
 function hideCookieBanner(){
   document.getElementById('cookieBanner').classList.remove('visible');
 }
+var _modalPrevFocus = null;
 function openResultsModal(){
+  _modalPrevFocus = document.activeElement;
   document.getElementById('results').classList.add('visible');
   document.body.classList.add('modal-open');
+  /* Defer focus until after the browser applies display:block, otherwise focus() is silently ignored */
+  var modal = document.querySelector('.results-modal');
+  setTimeout(function(){ modal.focus(); }, 0);
 }
 function closeResultsModal(){
   document.getElementById('results').classList.remove('visible');
   document.body.classList.remove('modal-open');
+  /* Restore focus to the element that opened the modal */
+  if(_modalPrevFocus) _modalPrevFocus.focus();
 }
+function _trapModalFocus(e){
+  if(!document.getElementById('results').classList.contains('visible')) return;
+  if(e.key !== 'Tab') return;
+  var modal = document.querySelector('.results-modal');
+  /* Exclude disabled elements — focus() on them is silently ignored, breaking the trap */
+  var focusable = Array.prototype.slice.call(modal.querySelectorAll(
+    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  ));
+  if(!focusable.length) return;
+  var first = focusable[0], last = focusable[focusable.length-1];
+  if(e.shiftKey){
+    if(document.activeElement === first || document.activeElement === modal){ e.preventDefault(); last.focus(); }
+  } else {
+    if(document.activeElement === last){ e.preventDefault(); first.focus(); }
+  }
+}
+document.addEventListener('keydown', _trapModalFocus);
 function initConsentBanner(){
   var storedConsent = getCookie(CONSENT_COOKIE_NAME);
   document.getElementById('acceptCookies').addEventListener('click', function(){
@@ -1435,7 +1464,7 @@ var D = {
   'beef-ribs': {
     name:'Beef Ribs', phase:'low-slow', cookRate:0.75, flatHours:null,
     pullTemp:203, restMinutes:45, stall:true, stallLo:155, stallHi:170,
-    shrinkage:0.30, boneInOk:false, maxLbs:10, tOpts:'standard',
+    shrinkage:0.30, boneInOk:false /* beef ribs are always bone-in; no boneless variant exists so the toggle is intentionally hidden */, maxLbs:10, tOpts:'standard',
     sPhaseTemp:null, searTempF:null, searSec:null, searRest:null,
     tip:"Beef plate ribs (dino bones) are the king of Texas BBQ. Source USDA Choice or Prime beef ribs \u2014 select grade will disappoint. Season aggressively with only salt, coarse black pepper, and garlic powder (SPG): the fat and the smoke do all the work. Never wrap beef ribs if you want traditional results \u2014 the bark formation is the entire point. Pull at 203\xB0F but verify with the probe test: push into the thickest meat between bones and feel for zero resistance, like pushing into room-temperature butter. Rest a minimum of 45 minutes uncovered.",
     woods:[
@@ -1726,7 +1755,10 @@ function fmt(d){
   return h+':'+(m<10?'0':'')+m+' '+ap;
 }
 function dayLbl(d, ref){
-  var diff=Math.round((d-ref)/86400000);
+  /* Compare calendar dates at midnight to avoid rounding errors on early-morning same-day cooks */
+  var dMid=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  var rMid=new Date(ref.getFullYear(),ref.getMonth(),ref.getDate());
+  var diff=Math.round((dMid-rMid)/86400000);
   if(!diff) return '';
   if(diff===-1) return 'day before';
   if(diff===1)  return 'next day';
@@ -1760,7 +1792,10 @@ function buildTL(cut, serve, hrs, wrap, grill){
     ev.push({t:ls, l:'Light smoker / preheat',   s:'Target: '+dT(stv), c:'blue'});
     ev.push({t:on, l:'Meat goes on smoker',       s:'',                 c:'amber'});
     if(cut.stall){
-      var sb=new Date(on.getTime()+cMs*0.40);
+      /* Stall onset depends on internal temp (~150°F), not wrap strategy — compute from un-wrapped base hours.
+         Wrap affects stall duration, not onset, so stall-end still uses total adjusted cook time. */
+      var baseMs=wrap==='none'?cMs/1.10:wrap==='paper'?cMs/1.05:cMs;
+      var sb=new Date(on.getTime()+baseMs*0.40);
       var se=new Date(on.getTime()+cMs*0.65);
       var sn=cut.stallLo ? 'Internal reaches '+dT(cut.stallLo)+'\u2013'+dT(cut.stallHi)+' \u2014 temperature plateau begins' : '';
       var wn= wrap==='foil'  ? ' \u2014 wrap in foil now (Texas Crutch)'
@@ -1769,8 +1804,7 @@ function buildTL(cut, serve, hrs, wrap, grill){
       ev.push({t:se, l:wrap!=='none'?'Stall ends / unwrap':'Stall ends', s:'Temperature climbs again', c:'amber'});
     }
     var pull=new Date(serve-restMs);
-    ev.push({t:pull, l:'Pull from smoker', s:'Target internal: '+dT(cut.pullTemp), c:'amber'});
-    ev.push({t:pull, l:'Rest begins',      s:'Rest '+cut.restMinutes+' min loosely tented', c:'gray'});
+    ev.push({t:pull, l:'Pull from smoker \u2014 begin rest', s:'Target internal: '+dT(cut.pullTemp)+' \u2014 rest '+cut.restMinutes+' min loosely tented', c:'amber'});
     ev.push({t:serve, l:'Serve', s:'', c:'green'});
 
   } else {
@@ -1788,8 +1822,7 @@ function buildTL(cut, serve, hrs, wrap, grill){
     var sTD  = state.tu==='C' ? Math.round((srV-32)*5/9)+'\xB0C' : srV+'\xB0F';
     ev.push({t:ls2, l:'Light smoker / preheat',         s:'Target: '+dT(stv), c:'blue'});
     ev.push({t:sOn, l:'Meat goes on (smoke phase)',      s:cut.sPhaseTemp?'Smoke to '+dT(cut.sPhaseTemp)+' internal':'', c:'amber'});
-    ev.push({t:pfs, l:'Pull from smoker \u2014 begin sear', s:'Internal ~'+dT(cut.sPhaseTemp||cut.pullTemp-15), c:'amber'});
-    ev.push({t:pfs, l:'Sear phase begins',               s:gLbl+' at '+sTD+' \u2014 '+Math.round(sds)+'s per side', c:'red'});
+    ev.push({t:pfs, l:'Pull from smoker \u2014 begin sear', s:'Internal ~'+dT(cut.sPhaseTemp||cut.pullTemp-15)+' \u2014 '+gLbl+' at '+sTD+', '+Math.round(sds)+'s per side', c:'red'});
     ev.push({t:sc,  l:'Sear complete \u2014 rest',       s:'Pull at '+dT(cut.pullTemp)+' internal \u2014 rest '+(cut.searRest||5)+' min', c:'gray'});
     ev.push({t:serve, l:'Serve', s:'', c:'green'});
   }
@@ -1802,18 +1835,12 @@ function buildTL(cut, serve, hrs, wrap, grill){
 function render(cut, inp){
   var h = cookHrs(cut, inp.wLbs, inp.temp, inp.boneIn, inp.inj, inp.wrap);
 
+  /* Build timeline first so stat card derives start time from the same source of truth */
+  var evs = buildTL(cut, inp.serve, h, inp.wrap, inp.grill);
+  var lst = evs[0].t; /* first event is always "Light smoker / preheat" */
+
   /* stat cards */
   document.getElementById('sCookTime').textContent = h.toFixed(1);
-
-  var lst;
-  if(cut.phase==='low-slow'){
-    var on2=new Date(inp.serve - cut.restMinutes*60000 - h*3600000);
-    lst=new Date(on2-30*60000);
-  } else {
-    var sd2=cut.searSec||{charcoal:90,gas:75,castIron:60};
-    var sOn2=new Date(inp.serve-(cut.searRest||5)*60000-(sd2[inp.grill]||90)*2*1000-h*3600000);
-    lst=new Date(sOn2-30*60000);
-  }
   document.getElementById('sStartTime').textContent = fmt(lst);
   document.getElementById('sStartDay').textContent  = dayLbl(lst,inp.serve)||'same day as serve';
   document.getElementById('sPullTemp').textContent  = dT(cut.pullTemp);
@@ -1840,20 +1867,37 @@ function render(cut, inp){
     warnEl.classList.add('visible');
   } else { warnEl.classList.remove('visible'); }
 
-  /* timeline */
-  var evs=buildTL(cut,inp.serve,h,inp.wrap,inp.grill);
+  /* timeline — evs already computed above; use DOM construction to avoid XSS */
+  var SAFE_DOT_CLASSES = {blue:1, amber:1, red:1, green:1, gray:1};
   var tlEl=document.getElementById('tlEl');
   tlEl.innerHTML='';
   evs.forEach(function(ev,i){
     var item=document.createElement('div');
     item.className='tl-item';
     item.style.animationDelay=(i*60)+'ms';
+
+    var dot=document.createElement('div');
+    dot.className='tl-dot '+(SAFE_DOT_CLASSES[ev.c]?ev.c:'gray');
+
     var dl=dayLbl(ev.t,inp.serve);
-    item.innerHTML=
-      '<div class="tl-dot '+ev.c+'"></div>'+
-      '<div class="tl-time">'+fmt(ev.t)+(dl?' ('+dl+')':'')+' </div>'+
-      '<div class="tl-label">'+ev.l+'</div>'+
-      (ev.s?'<div class="tl-sub">'+ev.s+'</div>':'');
+    var timeDiv=document.createElement('div');
+    timeDiv.className='tl-time';
+    timeDiv.textContent=fmt(ev.t)+(dl?' ('+dl+')':'');
+
+    var labelDiv=document.createElement('div');
+    labelDiv.className='tl-label';
+    labelDiv.textContent=ev.l;
+
+    item.appendChild(dot);
+    item.appendChild(timeDiv);
+    item.appendChild(labelDiv);
+
+    if(ev.s){
+      var subDiv=document.createElement('div');
+      subDiv.className='tl-sub';
+      subDiv.textContent=ev.s;
+      item.appendChild(subDiv);
+    }
     tlEl.appendChild(item);
   });
 
@@ -1884,6 +1928,8 @@ function serveDate(){
   if(!v) return null;
   var p=v.split(':'), d=new Date();
   d.setHours(+p[0],+p[1],0,0);
+  /* If the serve time has already passed today, advance to tomorrow so overnight cooks compute correctly */
+  if(d<new Date()) d.setDate(d.getDate()+1);
   return d;
 }
 function setMsg(txt,cls){
@@ -1896,7 +1942,7 @@ function updTempOpts(cut){
   sel.innerHTML=ts.map(function(t){return '<option value="'+t+'">'+tLbl(t)+'</option>';}).join('');
   var ok=false;
   for(var i=0;i<sel.options.length;i++) if(sel.options[i].value===cur){ok=true;break;}
-  if(ok) sel.value=cur;
+  sel.value=ok?cur:String(ts[0]);
 }
 function updTP(cut){
   var s=document.getElementById('two-phase-section');
@@ -1990,7 +2036,8 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
 (function init(){
   try{
     var lang=navigator.language||'en-US';
-    if(lang.indexOf('en')!==0){
+    /* Only en-US uses imperial; all other locales (including en-AU, en-CA, etc.) default to metric */
+    if(lang!=='en-US'){
       state.tu='C'; state.wu='kg';
       document.querySelectorAll('#tempToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.unit==='C');});
       document.querySelectorAll('#weightToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.unit==='kg');});
