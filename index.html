@@ -822,7 +822,7 @@ footer a:focus-visible { text-decoration: underline; }
     <!-- REPLACE: AdSense publisher and slot IDs for the mid-page responsive ad. -->
     <ins class="adsbygoogle"
       style="display:block"
-      data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+      data-ad-client="ca-pub-4265262608577453"
       data-ad-slot="XXXXXXXXXX"
       data-ad-format="auto"
       data-full-width-responsive="true"></ins>
@@ -900,7 +900,7 @@ footer a:focus-visible { text-decoration: underline; }
     <!-- REPLACE: AdSense publisher and slot IDs for the top leaderboard ad. -->
     <ins class="adsbygoogle"
       style="display:block"
-      data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+      data-ad-client="ca-pub-4265262608577453"
       data-ad-slot="XXXXXXXXXX"
       data-ad-format="auto"
       data-full-width-responsive="true"></ins>
@@ -1113,7 +1113,7 @@ footer a:focus-visible { text-decoration: underline; }
     <!-- REPLACE: AdSense publisher and slot IDs for the bottom responsive ad. -->
     <ins class="adsbygoogle"
       style="display:block"
-      data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+      data-ad-client="ca-pub-4265262608577453"
       data-ad-slot="XXXXXXXXXX"
       data-ad-format="auto"
       data-full-width-responsive="true"></ins>
@@ -1179,7 +1179,7 @@ var CONSENT_COOKIE_DAYS = 365;
 // REPLACE: Production Google Analytics measurement ID.
 var GA_MEASUREMENT_ID = 'GA_MEASUREMENT_ID';
 // REPLACE: Production AdSense publisher ID.
-var ADSENSE_CLIENT = 'ca-pub-XXXXXXXXXXXXXXXX';
+var ADSENSE_CLIENT = 'ca-pub-4265262608577453';
 var analyticsLoaded = false;
 var adsLoaded = false;
 var copyLinkResetTimer = null;
@@ -1228,7 +1228,7 @@ function loadAnalytics(){
   gtag('config', GA_MEASUREMENT_ID);
 }
 function loadAds(){
-  if(adsLoaded || ADSENSE_CLIENT === 'ca-pub-XXXXXXXXXXXXXXXX') return;
+  if(adsLoaded) return;
   adsLoaded = true;
   var script = document.createElement('script');
   script.async = true;
