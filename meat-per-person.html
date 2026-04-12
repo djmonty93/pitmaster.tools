@@ -920,7 +920,7 @@ var ADSENSE_CLIENT = 'ca-pub-4265262608577453';
 var analyticsLoaded = false;
 var adsLoaded = false;
 
-var state = { wu: 'lbs', sz: 'normal' };
+var state = { tu: 'F', wu: 'lbs', sz: 'normal' };
 
 /* ============================================================
    MEAT DATA
@@ -966,6 +966,15 @@ function kL(v){ return Math.round(v / 0.453592 * 100) / 100; }
 function dW(lbs, dec){
   dec = dec !== undefined ? dec : 2;
   return state.wu === 'kg' ? lK(lbs).toFixed(dec) + ' kg' : lbs.toFixed(dec) + ' lbs';
+}
+function shouldDefaultMetric(lang){
+  var normalized = (lang || '').replace('_', '-');
+  if(!normalized) return false;
+  if(normalized.toLowerCase() === 'en') return false;
+  var parts = normalized.split('-');
+  var region = parts.length > 1 ? parts[parts.length - 1].toUpperCase() : '';
+  if(region) return ['US', 'LR', 'MM'].indexOf(region) === -1;
+  return parts[0].toLowerCase() !== 'en';
 }
 
 /* ============================================================
@@ -1170,7 +1179,15 @@ function bindToggle(groupId, stateKey, buttons){
   try {
     var savedTu = localStorage.getItem('pitmaster_tu');
     var savedWu = localStorage.getItem('pitmaster_wu');
+    if(!savedTu && !savedWu){
+      var lang = navigator.language || 'en-US';
+      if(shouldDefaultMetric(lang)){
+        savedTu = 'C';
+        savedWu = 'kg';
+      }
+    }
     if(savedTu){
+      state.tu = savedTu;
       document.querySelectorAll('#tempToggle button').forEach(function(b){
         b.classList.toggle('active', b.dataset.unit === savedTu);
       });
