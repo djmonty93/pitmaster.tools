@@ -69,6 +69,7 @@ function Test-LocalLinks {
 }
 
 $htmlFiles = @(
+  'brine-calculator.html',
   'index.html',
   'charcoal-calculator.html',
   'dry-rub-calculator.html',
