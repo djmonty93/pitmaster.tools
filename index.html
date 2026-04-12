@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Meat Smoking Calculator — Smoking Times, Temps &amp; Cook Timeline | SmokeCalc</title>
+<title>Meat Smoking Calculator — Smoking Times, Temps &amp; Cook Timeline | Pitmaster Tools</title>
 <meta name="description" content="Free meat smoking calculator. Enter your cut, weight, and serving time to get a complete cook timeline, pull temperature, wood pairings, and exactly how much meat to buy. Covers brisket, pork butt, ribs, chicken, turkey, and more.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://pitmaster.tools/">
@@ -33,7 +33,7 @@
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "SmokeCalc — Meat Smoking Calculator",
+  "name": "Pitmaster Tools — Meat Smoking Calculator",
   "url": "https://pitmaster.tools",
   "description": "Free meat smoking calculator. Enter your cut, weight, and serving time to get a complete cook timeline, pull temperature, wood pairings, and exactly how much meat to buy.",
   "applicationCategory": "UtilitiesApplication",
@@ -607,7 +607,7 @@ footer a:focus-visible { text-decoration: underline; }
 @media print {
   body { background: #fff !important; color: #000 !important; font-size: 12px; }
   body::before {
-    content: "SmokeCalc — pitmaster.tools";
+    content: "Pitmaster Tools — pitmaster.tools";
     display: block;
     font-family: Georgia,serif;
     font-size: 1rem;
@@ -662,7 +662,7 @@ footer a:focus-visible { text-decoration: underline; }
 <body>
 
 <header>
-  <div class="logo">Smoke<span>Calc</span></div>
+  <div class="logo">Pitmaster<span> Tools</span></div>
   <div class="unit-controls">
     <div class="unit-toggle" id="tempToggle">
       <button data-unit="F" class="active">&#xB0;F</button>
@@ -677,7 +677,7 @@ footer a:focus-visible { text-decoration: underline; }
 
 <main>
   <div id="print-header">
-    <div class="print-title" id="ptitle">SmokeCalc Results</div>
+    <div class="print-title" id="ptitle">Pitmaster Tools Results</div>
     <div class="pm" id="pmeta"></div>
   </div>
 
@@ -883,7 +883,7 @@ footer a:focus-visible { text-decoration: underline; }
         Print Timeline
       </button>
     </div>
-    <div class="share-buttons no-print" aria-label="Share SmokeCalc">
+    <div class="share-buttons no-print" aria-label="Share Pitmaster Tools">
       <a class="share-btn" href="https://pinterest.com/pin/create/button/?url=https://pitmaster.tools&amp;description=Free+meat+smoking+calculator" target="_blank" rel="noopener noreferrer">Share on Pinterest</a>
       <a class="share-btn" href="https://www.facebook.com/sharer/sharer.php?u=https://pitmaster.tools" target="_blank" rel="noopener noreferrer">Share on Facebook</a>
       <button class="share-btn" id="copyLinkBtn" type="button">Copy link</button>
@@ -1118,16 +1118,16 @@ footer a:focus-visible { text-decoration: underline; }
 
   <section class="embed-section no-print" aria-labelledby="embed-title">
     <h2 id="embed-title">Embed this calculator on your site</h2>
-    <p>You're welcome to embed SmokeCalc on your BBQ blog or recipe site — free, forever.</p>
-    <textarea id="embedCode" readonly><iframe src="https://pitmaster.tools" width="100%" height="800" frameborder="0" title="Meat Smoking Calculator — SmokeCalc" loading="lazy"></iframe></textarea>
+    <p>You're welcome to embed Pitmaster Tools on your BBQ blog or recipe site — free, forever.</p>
+    <textarea id="embedCode" readonly><iframe src="https://pitmaster.tools" width="100%" height="800" frameborder="0" title="Meat Smoking Calculator — Pitmaster Tools" loading="lazy"></iframe></textarea>
     <button class="share-btn" id="copyEmbedBtn" type="button">Copy embed code</button>
-    <p class="embed-note">No attribution required, but a link back to SmokeCalc.com is appreciated.</p>
+    <p class="embed-note">No attribution required, but a link back to pitmaster.tools is appreciated.</p>
   </section>
 
   <details class="about-section">
     <summary>About this calculator &amp; data sources</summary>
     <div class="about-section__content">
-      <p>SmokeCalc estimates cook timing and serving yields using USDA food safety guidance combined with competition pitmaster consensus and field-tested barbecue reference data.</p>
+      <p>Pitmaster Tools estimates cook timing and serving yields using USDA food safety guidance combined with competition pitmaster consensus and field-tested barbecue reference data.</p>
       <p>Cook times remain estimates only, and a calibrated instant-read thermometer is always the authoritative source for doneness and food safety.</p>
       <ul>
         <li>USDA Food Safety and Inspection Service</li>
@@ -1141,7 +1141,7 @@ footer a:focus-visible { text-decoration: underline; }
 </main>
 
 <footer>
-  <div>© 2026 SmokeCalc. All rights reserved.</div>
+  <div>© 2026 Pitmaster Tools. All rights reserved.</div>
   <nav aria-label="Footer">
     <a href="/#calculator">Meat Smoking Calculator</a>
     <span>|</span>
@@ -1170,7 +1170,7 @@ footer a:focus-visible { text-decoration: underline; }
 'use strict';
 
 var SITE_URL = 'https://pitmaster.tools';
-var CONSENT_COOKIE_NAME = 'smokecalc_consent';
+var CONSENT_COOKIE_NAME = 'pitmaster_consent';
 var CONSENT_COOKIE_DAYS = 365;
 // REPLACE: Production Google Analytics measurement ID.
 var GA_MEASUREMENT_ID = 'GA_MEASUREMENT_ID';
@@ -1908,7 +1908,7 @@ function render(cut, inp){
 
   /* print header */
   var stv2=parseInt(document.getElementById('smokerTemp').value);
-  document.getElementById('ptitle').textContent='SmokeCalc \u2014 '+cut.name;
+  document.getElementById('ptitle').textContent='Pitmaster Tools \u2014 '+cut.name;
   document.getElementById('pmeta').textContent=dW(inp.wLbs)+' \xB7 '+tLbl(stv2)+' smoker \xB7 Serve at '+fmt(inp.serve);
 
   openResultsModal();
