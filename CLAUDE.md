@@ -19,7 +19,8 @@ Every HTML file must include **all** of the following in `<head>`, in this order
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="…">
 <meta name="twitter:description" content="…">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,…">  <!-- same SVG favicon on every page -->
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,…">  <!-- same SVG favicon fallback on every page -->
 <script>  <!-- Google Consent Mode v2 default -->
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
