@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dry Rub Calculator — Scale Any BBQ Rub Recipe by Meat Weight | Pitmaster Tools</title>
+<meta name="description" content="Free BBQ dry rub calculator. Enter your meat weight and recipe ingredients to get exact scaled amounts for light, standard, or heavy coverage — for any cut, any crowd size.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://pitmaster.tools/dry-rub-calculator.html">
+<meta property="og:title" content="Dry Rub Calculator — Scale Any BBQ Rub Recipe by Meat Weight">
+<meta property="og:description" content="Free BBQ dry rub calculator. Enter your meat weight and recipe ingredients to get exact scaled amounts for light, standard, or heavy coverage — for any cut, any crowd size.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://pitmaster.tools/dry-rub-calculator.html">
+<meta property="og:image" content="https://pitmaster.tools/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Dry Rub Calculator — Scale Any BBQ Rub Recipe by Meat Weight">
+<meta name="twitter:description" content="Free BBQ dry rub calculator. Enter your meat weight and recipe ingredients to get exact scaled amounts for light, standard, or heavy coverage — for any cut, any crowd size.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23EF9F27' d='M36 4c2 10-3 15-8 21-5 6-9 11-9 19 0 10 7 16 15 16 11 0 19-8 19-19 0-12-7-19-17-37z'/%3E%3Cpath fill='%23D78108' d='M33 27c1 6-2 9-5 12-3 3-5 6-5 10 0 6 4 10 9 10 7 0 12-5 12-12 0-7-4-11-11-20z'/%3E%3C/svg%3E">
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'analytics_storage': 'denied',
+    'wait_for_update': 500
+  });
+  (function(){
+    var prefix = 'pitmaster_consent=';
+    var cookies = document.cookie ? document.cookie.split(';') : [];
+    for(var i = 0; i < cookies.length; i++){
+      var c = cookies[i].trim();
+      if(c.indexOf(prefix) !== 0) continue;
+      if(decodeURIComponent(c.substring(prefix.length)) !== 'accepted') break;
+      gtag('consent', 'update', {'ad_storage':'granted','analytics_storage':'granted'});
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-SJJVV37EWE';
+      document.head.appendChild(s);
+      gtag('js', new Date());
+      gtag('config', 'G-SJJVV37EWE');
+      window._gtagLoaded = true;
+      break;
+    }
+  })();
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Pitmaster Tools — Dry Rub Calculator",
+  "url": "https://pitmaster.tools/dry-rub-calculator.html",
+  "description": "Scale any BBQ dry rub recipe to the exact amount needed for your meat weight, with light, standard, or heavy coverage options.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "offers": {"@type":"Offer","price":"0","priceCurrency":"USD"},
+  "featureList": [
+    "Scale any rub recipe to meat weight",
+    "Light (4%), Standard (6%), and Heavy (8%) coverage presets",
+    "Up to 8 custom ingredients with tsp / tbsp / cup / oz / g units",
+    "Pre-loaded classic BBQ rub recipe",
+    "Pounds and kilograms support",
+    "Total rub weight output in oz and grams"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How much dry rub per pound of meat?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A standard BBQ dry rub uses about 6% of the meat's raw weight — roughly 1 tablespoon per pound for a typical rub blend. For a 10 lb brisket that is about 10 tablespoons or ⅔ cup of rub. Light coverage is 4% (about ½ to ¾ tablespoon per pound) and heavy competition-style coverage is 8% (about 1¼ tablespoons per pound)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I rub meat overnight or right before cooking?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For large cuts like brisket and pork butt, applying the rub 12–24 hours ahead allows salt to draw moisture out and then reabsorb, deeply seasoning the meat. For smaller cuts like chicken thighs, ribs, and steaks, 1–4 hours is sufficient. Applying rub right before cooking still produces good bark — moisture that draws to the surface forms a paste that ultimately creates the crust."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much salt should be in a dry rub?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Salt should make up roughly 25–35% of a dry rub by weight. For a standard 1 tablespoon per pound application, that works out to about ¼ to ⅓ teaspoon of salt per pound of meat — close to the general seasoning guideline of ½ teaspoon of kosher salt per pound. If you are brining or injecting with a salty solution, reduce the salt in your rub to avoid over-salting."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use the same dry rub on different meats?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes — a good all-purpose BBQ rub works on most meats. The main difference is coverage: beef benefits from a bolder, pepper-forward rub applied heavily; pork handles sweetness better and benefits from a brown-sugar rub; chicken is best with a lighter hand since the skin is thin. The calculator lets you adjust coverage level while keeping your ingredient ratios fixed."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between a wet rub and a dry rub?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A dry rub is applied as a powder blend and forms a bark as it dehydrates and caramelizes during the cook. A wet rub (sometimes called a paste rub) adds a liquid binder — mustard, oil, hot sauce, or Worcestershire — that helps the spices adhere and can add flavor complexity. Dry rubs produce a crispier bark; wet rubs tend to stay moister and can char more quickly at high heat."
+      }
+    }
+  ]
+}
+</script>
+<!-- INJECT:site-header.css -->
+<!-- INJECT:site-base.css -->
+<style>
+.unit-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.weight-wrap {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.weight-wrap input {
+  flex: 1;
+  padding: .6rem .75rem;
+  border: 1.5px solid var(--card-border);
+  border-radius: 6px;
+  background: #FAFAF8;
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--charcoal);
+  transition: border-color .15s;
+}
+.weight-wrap input:focus:not(:focus-visible) { outline: none; border-color: var(--amber); background: #fff; }
+.weight-wrap input:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; border-color: var(--amber); background: #fff; }
+.weight-unit-lbl {
+  font-weight: 700;
+  font-size: .95rem;
+  color: var(--text-muted);
+  min-width: 2rem;
+}
+.coverage-toggle {
+  display: flex;
+  border: 1.5px solid var(--card-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.coverage-toggle button {
+  flex: 1;
+  padding: .6rem .25rem;
+  border: none;
+  background: #FAFAF8;
+  font-family: inherit;
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.coverage-toggle button + button { border-left: 1.5px solid var(--card-border); }
+.coverage-toggle button.active { background: var(--charcoal); color: #fff; }
+.coverage-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
+.ingr-section { margin-bottom: 1.25rem; }
+.ingr-label-row {
+  display: grid;
+  grid-template-columns: 1fr 6rem 5rem 2rem;
+  gap: .5rem;
+  padding: 0 0 .4rem;
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text-muted);
+}
+#ingredientRows { display: flex; flex-direction: column; gap: .5rem; }
+.ingr-row {
+  display: grid;
+  grid-template-columns: 1fr 6rem 5rem 2rem;
+  gap: .5rem;
+  align-items: center;
+}
+.ingr-row input,
+.ingr-row select {
+  width: 100%;
+  padding: .5rem .6rem;
+  border: 1.5px solid var(--card-border);
+  border-radius: 6px;
+  background: #FAFAF8;
+  font-family: inherit;
+  font-size: .9rem;
+  color: var(--charcoal);
+  transition: border-color .15s;
+}
+.ingr-row select { appearance: none; -webkit-appearance: none; }
+.ingr-row input:focus:not(:focus-visible),
+.ingr-row select:focus:not(:focus-visible) { outline: none; border-color: var(--amber); }
+.ingr-row input:focus-visible,
+.ingr-row select:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.ingr-del {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: #F0EBE3;
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, color .15s;
+}
+.ingr-del:hover { background: #FECACA; color: #991B1B; }
+.ingr-del:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.ingr-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: .75rem;
+}
+.add-row-btn {
+  background: none;
+  border: 1.5px dashed var(--card-border);
+  border-radius: 6px;
+  padding: .5rem 1rem;
+  font-family: inherit;
+  font-size: .875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.add-row-btn:hover { border-color: var(--amber); color: var(--amber-dark); }
+.add-row-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.add-row-btn:disabled { opacity: .45; cursor: not-allowed; }
+.reset-btn {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: .8rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+.reset-btn:hover { color: var(--charcoal); }
+.calc-btn:focus-visible { outline: 2px solid var(--amber-dark); outline-offset: 2px; }
+.vmsg.visible { display: block; }
+.results-close:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.rub-table-wrap {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.rub-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .9rem;
+}
+.rub-table th {
+  background: var(--charcoal);
+  color: #fff;
+  text-align: left;
+  padding: .6rem 1rem;
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.rub-table th:not(:first-child) { text-align: right; }
+.rub-table td { padding: .6rem 1rem; border-bottom: 1px solid #F0EBE3; vertical-align: middle; }
+.rub-table tr:last-child td { border-bottom: none; }
+.rub-table tr:nth-child(even) td { background: #FAFAF8; }
+.rub-table td:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+.rub-table .ingr-name-cell { font-weight: 600; }
+.rub-table tfoot td { font-weight: 700; background: var(--amber-light) !important; border-top: 2px solid var(--card-border); }
+.rub-density-note { font-size: .78rem; color: var(--text-muted); margin-top: .5rem; }
+.editorial-section p { margin-bottom: .85rem; line-height: 1.7; font-size: .95rem; color: #333; }
+.editorial-section p:last-child { margin-bottom: 0; }
+.editorial-section ul { padding-left: 1.25rem; margin-bottom: .85rem; }
+.editorial-section li { margin-bottom: .4rem; font-size: .95rem; line-height: 1.6; color: #333; }
+.ref-table-wrap { margin-top: 2.5rem; overflow-x: auto; }
+.ref-table-wrap h2 { font-family: Georgia,serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; }
+.ref-table { width: 100%; border-collapse: collapse; font-size: .88rem; background: var(--card-bg); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--card-border); }
+.ref-table th { background: var(--charcoal); color: #fff; text-align: left; padding: .65rem .9rem; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.ref-table td { padding: .6rem .9rem; border-bottom: 1px solid #F0EBE3; vertical-align: middle; font-size: .88rem; }
+.ref-table tr:last-child td { border-bottom: none; }
+.ref-table tr:nth-child(even) td { background: #FAFAF8; }
+.ref-table td:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+.faq-section { margin-top: 2.5rem; }
+.faq-section h2 { font-family: Georgia,serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; }
+.faq-item summary:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
+.faq-body { padding: 0 1.25rem 1rem; font-size: .9rem; line-height: 1.7; color: #333; }
+.related-tools h2 { font-family: Georgia,serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; }
+.tool-link:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); border-color: var(--amber); }
+.tool-link:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.cookie-accept:hover { background: var(--amber-dark); }
+.cookie-reject:hover { color: #fff; border-color: rgba(255,255,255,.5) !important; }
+.cookie-accept:focus-visible, .cookie-reject:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">Pitmaster<span> Tools</span></a>
+  <nav class="header-nav" aria-label="Site navigation">
+    <div class="nav-dropdown">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="tools.html">All Tools</a></li>
+        <li><a href="/">Meat Smoking Calculator</a></li>
+        <li><a href="brisket-calculator.html">Brisket Calculator</a></li>
+        <li><a href="pork-shoulder-calculator.html">Pork Shoulder Calculator</a></li>
+        <li><a href="rib-calculator.html">Rib Calculator</a></li>
+        <li><a href="turkey-smoking-calculator.html">Turkey Calculator</a></li>
+        <li><a href="meat-per-person.html">Meat Per Person</a></li>
+        <li><a href="cook-time-coordinator.html">Cook Time Coordinator</a></li>
+        <li><a href="charcoal-calculator.html">Charcoal Calculator</a></li>
+        <li><a href="brine-calculator.html">Brine Calculator</a></li>
+        <li><a href="dry-rub-calculator.html" aria-current="page">Dry Rub Calculator</a></li>
+        <li><a href="bbq-cost-calculator.html">BBQ Cost Calculator</a></li>
+        <li><a href="catering-calculator.html">Catering Calculator</a></li>
+        <li><a href="brisket-yield-calculator.html">Brisket Yield Calculator</a></li>
+      </ul>
+    </div>
+    <a href="about.html">About</a>
+  </nav>
+  <div class="unit-controls">
+    <div class="unit-toggle" id="tempToggle" role="group" aria-label="Temperature unit">
+      <button data-unit="F" class="active" type="button">&#xB0;F</button>
+      <button data-unit="C" type="button">&#xB0;C</button>
+    </div>
+    <div class="unit-toggle" id="weightToggle" role="group" aria-label="Weight unit">
+      <button data-unit="lbs" class="active" type="button">lbs</button>
+      <button data-unit="kg" type="button">kg</button>
+    </div>
+  </div>
+</header>
+
+<div class="ad-slot" aria-hidden="true">
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-4265262608577453"
+       data-ad-slot="XXXXXXXXXX"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+
+<main>
+
+  <section class="page-hero" aria-label="Page introduction">
+    <h1>Dry Rub Calculator</h1>
+    <p>Enter your meat weight and rub ingredients to get exact scaled amounts. Adjust coverage for light seasoning, standard bark, or heavy competition-style crust.</p>
+  </section>
+
+  <div class="form-card" role="form" aria-label="Dry rub calculator">
+    <h2 class="section-title">Calculator</h2>
+    <div class="form-grid">
+
+      <div class="form-group">
+        <label for="meatWeight">Meat Weight</label>
+        <div class="weight-wrap">
+          <input type="number" id="meatWeight" min="0.1" step="0.1" value="10" aria-label="Meat weight">
+          <span class="weight-unit-lbl" id="weightUnit" aria-live="polite">lbs</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Coverage</label>
+        <div class="coverage-toggle" id="coverageToggle" role="group" aria-label="Rub coverage level">
+          <button data-cov="light" type="button">Light &mdash; 4%</button>
+          <button data-cov="standard" class="active" type="button">Standard &mdash; 6%</button>
+          <button data-cov="heavy" type="button">Heavy &mdash; 8%</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="ingr-section">
+      <div class="ingr-label-row" aria-hidden="true">
+        <span>Ingredient</span>
+        <span style="text-align:right">Amount</span>
+        <span>Unit</span>
+        <span></span>
+      </div>
+      <div id="ingredientRows" role="list" aria-label="Ingredients"></div>
+      <div class="ingr-actions">
+        <button class="add-row-btn" id="addRowBtn" type="button">+ Add ingredient</button>
+        <button class="reset-btn" id="resetBtn" type="button">Reset to default rub</button>
+      </div>
+    </div>
+
+    <button class="calc-btn" id="calcBtn" type="button">Calculate Rub</button>
+    <div class="vmsg" id="vmsg" role="alert" aria-live="polite"></div>
+  </div>
+
+  <div class="ad-slot" aria-hidden="true">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-4265262608577453"
+         data-ad-slot="XXXXXXXXXX"
+         data-ad-format="rectangle"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <div id="results" role="dialog" aria-modal="true" aria-labelledby="resultsModalTitle">
+    <div class="results-modal" tabindex="-1">
+      <div class="results-modal__header">
+        <div class="results-modal__title" id="resultsModalTitle">Dry Rub Results</div>
+        <button class="results-close" id="closeResultsBtn" type="button" aria-label="Close results">&times;</button>
+      </div>
+      <div class="stat-cards">
+        <div class="stat-card c1">
+          <span class="sc-icon" aria-hidden="true">&#x2696;&#xFE0F;</span>
+          <div class="sc-label">Total Rub Needed</div>
+          <div class="sc-value" id="statTotal">—</div>
+          <div class="sc-sub" id="statTotalSub"></div>
+        </div>
+        <div class="stat-card c2">
+          <span class="sc-icon" aria-hidden="true">&#x1F9C2;</span>
+          <div class="sc-label">Coverage Ratio</div>
+          <div class="sc-value" id="statCoverage">—</div>
+          <div class="sc-sub" id="statCoverageSub"></div>
+        </div>
+        <div class="stat-card c3">
+          <span class="sc-icon" aria-hidden="true">&#x1F4CB;</span>
+          <div class="sc-label">Ingredients</div>
+          <div class="sc-value" id="statIngredients">—</div>
+          <div class="sc-sub" id="statIngredientsSub"></div>
+        </div>
+      </div>
+      <div class="rub-table-wrap">
+        <table class="rub-table" id="rubTable" aria-label="Scaled rub ingredients">
+          <thead>
+            <tr>
+              <th scope="col">Ingredient</th>
+              <th scope="col">Amount</th>
+              <th scope="col">Unit</th>
+            </tr>
+          </thead>
+          <tbody id="rubTableBody"></tbody>
+          <tfoot id="rubTableFoot"></tfoot>
+        </table>
+      </div>
+      <p class="rub-density-note">Amounts are scaled by volume ratio. Actual weight varies by ingredient density.</p>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       EDITORIAL CONTENT
+  ============================================================ -->
+  <section class="editorial-section">
+    <h2>How to Use a Dry Rub Calculator</h2>
+
+    <p>A dry rub calculator solves the most tedious part of competition and backyard BBQ: scaling a rub recipe to fit whatever weight of meat you happen to be cooking. A recipe written for a 10 lb brisket is useless without math if you are cooking a 14 lb brisket — and doing that conversion in your head while running a smoker at 5 AM is not ideal. If that brisket still needs its timeline, the <a href="brisket-calculator.html">Brisket Calculator</a> handles the cook schedule.</p>
+
+    <p>This calculator works from a single principle: your rub should be a fixed percentage of your meat's raw weight. Enter that weight, choose a coverage level, and input your ingredient list. The calculator determines the total rub mass needed, then scales every ingredient proportionally so the ratios stay exactly right.</p>
+
+    <h3>Coverage Levels Explained</h3>
+
+    <p>The three coverage presets correspond to widely used industry benchmarks:</p>
+
+    <ul>
+      <li><strong>Light (4%):</strong> About &frac12; tablespoon per pound. Use this for delicate cuts — fish, chicken breast, pork loin — where the meat's natural flavor should lead and the rub is a background note. Also appropriate when the rub contains a very high proportion of salt or strong spices like cayenne, since a light hand prevents overpowering.</li>
+      <li><strong>Standard (6%):</strong> About 1 tablespoon per pound. The default for most BBQ applications — brisket, pork butt, chicken thighs, spare ribs. This coverage builds the bark that defines slow-smoked BBQ without overwhelming the meat's flavor.</li>
+      <li><strong>Heavy (8%):</strong> About 1&frac14; tablespoons per pound. Competition pitmasters and bark fanatics use this level. The extra rub creates a thick, dark, deeply caramelized crust. Best suited for cuts with enough fat to prevent the heavier crust from drying out the exterior — pork butt and beef ribs are naturals here.</li>
+    </ul>
+
+    <h3>Building a Balanced Dry Rub</h3>
+
+    <p>A well-balanced BBQ rub hits four flavor zones: salty, sweet, savory/umami, and heat. Salt and sugar are the foundation; everything else is layering. A rough proportion guide for a standard BBQ rub:</p>
+
+    <ul>
+      <li><strong>Salt (25–35% of rub by weight):</strong> Kosher salt is the most common choice. It penetrates deeply and its coarser crystals create a pleasant crust. Table salt is finer and saltier by volume — if substituting, use about half the volume called for.</li>
+      <li><strong>Sugar (20–30%):</strong> Brown sugar is standard for its molasses content and color. White sugar caramelizes more cleanly but with less depth. Sugar is what drives crust formation — it browns and hardens at smoking temperatures to create the signature bark.</li>
+      <li><strong>Paprika (15–25%):</strong> More color than flavor in most applications, but smoked paprika adds a genuine smokiness. It is also the bulking agent of the rub — it dilutes the salt and sugar so they don't overpower.</li>
+      <li><strong>Savory aromatics (10–20%):</strong> Garlic powder, onion powder, and black pepper. These are the backbone of the umami profile. Black pepper is particularly important for brisket — the classic Central Texas rub is nothing but salt and coarse black pepper.</li>
+      <li><strong>Heat (2–8%):</strong> Cayenne, chipotle, or chili powder. A little goes a long way. For family cooking, 2–3% cayenne is noticeable but not overwhelming. Competition cooks often push to 5–8% for a rub with genuine heat.</li>
+      <li><strong>Accent spices (5–10%):</strong> Dry mustard, cumin, coriander, celery salt, dried herbs. These differentiate your rub from a generic blend. Dry mustard acts as an emulsifier and gives a subtle sharpness; cumin adds depth to beef rubs.</li>
+    </ul>
+
+    <h3>When to Apply the Rub</h3>
+
+    <p>Timing matters as much as coverage. Salt begins drawing moisture from the meat immediately. That moisture dissolves the salt and then gets reabsorbed — a process called osmosis — which seasons the meat from inside rather than just the surface. This process benefits from time:</p>
+
+    <ul>
+      <li><strong>Large cuts (<a href="brisket-calculator.html">brisket</a>, <a href="pork-shoulder-calculator.html">pork butt</a>, <a href="turkey-smoking-calculator.html">whole turkey</a>):</strong> Apply 12–24 hours ahead. Wrap loosely and refrigerate. The dry surface you see when you pull it from the fridge is ideal — it will form bark faster in the smoker.</li>
+      <li><strong>Medium cuts (chicken quarters, <a href="rib-calculator.html">ribs</a>, pork loin):</strong> 2–4 hours minimum, overnight is better. Ribs benefit from overnight dry-brining especially when you want competition-style bite-through texture.</li>
+      <li><strong>Small cuts (chicken wings, steaks, chops):</strong> 30 minutes to 2 hours is enough. Longer can make the surface too salty, especially with table salt rubs.</li>
+    </ul>
+
+    <h3>Binding Agents</h3>
+
+    <p>Dry rubs adhere naturally to raw meat because the surface is slightly moist. But some pitmasters use a binder — a thin coat of mustard, olive oil, hot sauce, or Worcestershire — to help the rub stick more reliably, especially on very lean or very cold cuts. The binder burns off completely during cooking and does not meaningfully affect flavor. Yellow mustard is the most common; it adds negligible mustard flavor to the final product despite its strong smell raw. If you are salting in advance rather than seasoning right before the cook, the <a href="brine-calculator.html">Brine Calculator</a> will help you set up a dry brine or wet brine correctly.</p>
+  </section>
+
+  <!-- ============================================================
+       REFERENCE TABLE
+  ============================================================ -->
+  <section class="ref-table-wrap">
+    <h2>BBQ Dry Rub Coverage Guide by Cut</h2>
+    <table class="ref-table" aria-label="Recommended rub coverage by meat cut">
+      <thead>
+        <tr>
+          <th scope="col">Cut</th>
+          <th scope="col">Coverage</th>
+          <th scope="col">Approx. per lb</th>
+          <th scope="col">Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Brisket</td><td>6–8%</td><td>1–1¼ tbsp</td><td>Coarse pepper-forward rub; heavy bark is the goal</td></tr>
+        <tr><td>Pork Butt / Shoulder</td><td>6%</td><td>1 tbsp</td><td>Brown-sugar rub; apply overnight for deep penetration</td></tr>
+        <tr><td>Spare Ribs</td><td>6–8%</td><td>1–1¼ tbsp</td><td>Heavy side suits competition-style caramelized crust</td></tr>
+        <tr><td>Baby Back Ribs</td><td>4–6%</td><td>½–1 tbsp</td><td>Leaner than spare ribs; lighter hand prevents drying</td></tr>
+        <tr><td>Beef Ribs</td><td>6–8%</td><td>1–1¼ tbsp</td><td>SPG (salt-pepper-garlic) is traditional; no sugar</td></tr>
+        <tr><td>Whole Chicken</td><td>4–6%</td><td>½–1 tbsp</td><td>Season under the skin as well as over</td></tr>
+        <tr><td>Chicken Thighs</td><td>6%</td><td>1 tbsp</td><td>Dark meat tolerates heavier seasoning</td></tr>
+        <tr><td>Chicken Wings</td><td>4%</td><td>½ tbsp</td><td>Small surface area; light rub keeps skin crispier</td></tr>
+        <tr><td>Pork Loin</td><td>4%</td><td>½ tbsp</td><td>Very lean; over-seasoning masks the delicate flavor</td></tr>
+        <tr><td>Whole Turkey</td><td>4–6%</td><td>½–1 tbsp</td><td>Apply under and over skin; dry-brine 24–48 hrs ahead</td></tr>
+        <tr><td>Lamb Shoulder</td><td>6%</td><td>1 tbsp</td><td>Bold spices (cumin, coriander) complement lamb's flavor</td></tr>
+        <tr><td>Prime Rib</td><td>4%</td><td>½ tbsp</td><td>Simple salt, pepper, and garlic; let the beef lead</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============================================================
+       FAQ
+  ============================================================ -->
+  <section class="faq-section">
+    <h2>Frequently Asked Questions</h2>
+
+    <details class="faq-item">
+      <summary>How much dry rub per pound of meat?</summary>
+      <div class="faq-body">
+        <p>A standard dry rub uses about <strong>6% of the meat's raw weight</strong> — roughly 1 tablespoon per pound for a typical spice blend. For a 10 lb brisket that is about 10 tablespoons (just under &frac23; cup). Light coverage is 4% (~&frac12; tablespoon per pound) for delicate cuts; heavy competition coverage is 8% (~1¼ tablespoons per pound) for maximum bark formation.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Should I rub meat overnight or right before cooking?</summary>
+      <div class="faq-body">
+        <p>For large cuts like brisket and pork butt, <strong>applying rub 12–24 hours ahead</strong> allows salt to penetrate deeply and draw moisture back in, seasoning the meat throughout. For smaller cuts like chicken thighs and ribs, 2–4 hours is sufficient. Applying right before cooking still works — the surface moisture creates a paste that eventually forms bark — but overnight is always better for flavor depth and bark development.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>How much salt should be in a dry rub?</summary>
+      <div class="faq-body">
+        <p>Salt should make up roughly <strong>25–35% of your rub by weight</strong>. At standard coverage (1 tablespoon per pound), that translates to about ¼–⅓ teaspoon of kosher salt per pound of meat — close to the general seasoning guideline of ½ teaspoon per pound. If you are wet-brining, injecting with a salty solution, or using a salt-heavy marinade, reduce your rub's salt content to avoid over-salting.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Can I use the same dry rub on different meats?</summary>
+      <div class="faq-body">
+        <p>Yes — a well-balanced all-purpose BBQ rub works across beef, pork, and poultry. The main variables to adjust are coverage level (lighter for delicate cuts, heavier for fatty cuts) and whether you include sugar (avoid on fish and very high-heat cooks where sugar burns). The calculator lets you keep your ingredient ratios fixed while changing the coverage to suit the cut.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>What is the difference between a wet rub and a dry rub?</summary>
+      <div class="faq-body">
+        <p>A <strong>dry rub</strong> is applied as a powder blend and dehydrates on the meat surface during the cook, forming the hard caramelized bark that defines slow-smoked BBQ. A <strong>wet rub</strong> (or paste rub) adds a liquid binder — mustard, oil, hot sauce, Worcestershire, or even fruit juice — to the spices before applying. Wet rubs adhere more reliably on very lean or smooth-skinned cuts. Both produce excellent results; the choice is largely personal preference and the specific cut.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ============================================================
+       RELATED TOOLS
+  ============================================================ -->
+  <section class="related-tools">
+    <h2>More Pitmaster Tools</h2>
+    <div class="tool-links">
+      <a class="tool-link" href="/">
+        <span class="tool-link-icon" aria-hidden="true">&#x23F1;&#xFE0F;</span>
+        <div class="tool-link-body">
+          <div class="tool-link-name">Meat Smoking Calculator</div>
+          <div class="tool-link-desc">Full cook timeline, pull temps, and wood pairings for 28 cuts — backward from your serve time.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="meat-per-person.html">
+        <span class="tool-link-icon" aria-hidden="true">&#x1F356;</span>
+        <div class="tool-link-body">
+          <div class="tool-link-name">Meat Per Person Calculator</div>
+          <div class="tool-link-desc">Raw weight to buy for any crowd size, with shrinkage factored in for all 28 cuts.</div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<div class="ad-slot" aria-hidden="true">
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-4265262608577453"
+       data-ad-slot="XXXXXXXXXX"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+
+<div class="cookie-banner" id="cookieBanner" role="dialog" aria-live="polite" aria-label="Cookie consent">
+  <div class="cookie-banner__inner">
+    <p class="cookie-banner__text">We use cookies for analytics and personalized ads. See our <a href="privacy-policy.html">Privacy Policy</a>.</p>
+    <div class="cookie-banner__actions">
+      <button class="cookie-accept" id="acceptCookies" type="button">Accept all</button>
+      <button class="cookie-reject" id="rejectCookies" type="button">Reject non-essential</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>&copy; 2026 Pitmaster Tools. All rights reserved.</div>
+  <nav aria-label="Footer">
+    <a href="/">Meat Smoking Calculator</a>
+    <span>|</span>
+    <a href="tools.html">All Tools</a>
+    <span>|</span>
+    <a href="privacy-policy.html">Privacy Policy</a>
+    <span>|</span>
+    <a href="terms-of-service.html">Terms of Service</a>
+    <span>|</span>
+    <a href="mailto:contact@pitmaster.tools">contact@pitmaster.tools</a>
+  </nav>
+  <p class="footer-small">Rub amounts are estimates based on standard pitmaster coverage ratios. Adjust to taste, cut, and personal preference.</p>
+  <p class="footer-small">Last updated: April 12, 2026</p>
+</footer>
+
+<!-- INJECT:site-utils.js:script -->
+<script>
+(function(){
+'use strict';
+
+/* ============================================================
+   CONSTANTS
+   ============================================================ */
+var GA_ID = 'G-SJJVV37EWE';
+
+/* Oz per unit (for scaling) */
+var TO_OZ = { tsp: 1/6, tbsp: 0.5, cup: 8, oz: 1, g: 1/28.3495 };
+/* Approx grams per unit (uses average spice density ~3 g/tsp for volume) */
+var TO_G = { tsp: 3, tbsp: 9, cup: 144, oz: 28.3495, g: 1 };
+/* Coverage multipliers */
+var COVERAGE = { light: 0.04, standard: 0.06, heavy: 0.08 };
+
+var DEFAULT_RUB = [
+  { name: 'Brown Sugar',    amount: 3,   unit: 'tbsp' },
+  { name: 'Paprika',        amount: 2,   unit: 'tbsp' },
+  { name: 'Black Pepper',   amount: 1,   unit: 'tbsp' },
+  { name: 'Kosher Salt',    amount: 1,   unit: 'tbsp' },
+  { name: 'Garlic Powder',  amount: 1,   unit: 'tsp'  },
+  { name: 'Onion Powder',   amount: 1,   unit: 'tsp'  },
+  { name: 'Cayenne Pepper', amount: 0.5, unit: 'tsp'  },
+  { name: 'Dry Mustard',    amount: 0.5, unit: 'tsp'  }
+];
+
+var state = { wu: 'lbs', coverage: 'standard' };
+
+/* ============================================================
+   UNIT HELPERS
+   ============================================================ */
+function lK(v){ return Math.round(v * 0.453592 * 100) / 100; }
+function kL(v){ return Math.round(v / 0.453592 * 100) / 100; }
+function fmtAmt(n){
+  if(n >= 100) return Math.round(n).toString();
+  if(n >= 10)  return parseFloat(n.toFixed(1)).toString();
+  if(n >= 1)   return parseFloat(n.toFixed(2)).toString();
+  return parseFloat(n.toFixed(2)).toString();
+}
+
+/* ============================================================
+   INGREDIENT ROWS
+   ============================================================ */
+function addRow(name, amount, unit){
+  var container = document.getElementById('ingredientRows');
+  if(container.children.length >= 8) return;
+
+  var row = document.createElement('div');
+  row.className = 'ingr-row';
+  row.setAttribute('role', 'listitem');
+
+  var nameInp = document.createElement('input');
+  nameInp.type = 'text';
+  nameInp.className = 'ingr-name';
+  nameInp.placeholder = 'Ingredient name';
+  nameInp.value = name || '';
+  nameInp.setAttribute('aria-label', 'Ingredient name');
+
+  var amtInp = document.createElement('input');
+  amtInp.type = 'number';
+  amtInp.className = 'ingr-amount';
+  amtInp.min = '0.01';
+  amtInp.step = '0.01';
+  amtInp.value = amount !== undefined ? String(amount) : '';
+  amtInp.setAttribute('aria-label', 'Amount');
+
+  var unitSel = document.createElement('select');
+  unitSel.className = 'ingr-unit';
+  unitSel.setAttribute('aria-label', 'Unit');
+  ['tsp', 'tbsp', 'cup', 'oz', 'g'].forEach(function(u){
+    var opt = document.createElement('option');
+    opt.value = u;
+    opt.textContent = u;
+    if(u === (unit || 'tsp')) opt.selected = true;
+    unitSel.appendChild(opt);
+  });
+
+  var delBtn = document.createElement('button');
+  delBtn.type = 'button';
+  delBtn.className = 'ingr-del';
+  delBtn.setAttribute('aria-label', 'Remove ' + (name || 'ingredient'));
+  delBtn.textContent = '\xD7';
+  delBtn.addEventListener('click', function(){
+    row.remove();
+    syncAddBtn();
+  });
+
+  row.appendChild(nameInp);
+  row.appendChild(amtInp);
+  row.appendChild(unitSel);
+  row.appendChild(delBtn);
+  container.appendChild(row);
+  syncAddBtn();
+}
+
+function syncAddBtn(){
+  var count = document.getElementById('ingredientRows').children.length;
+  var btn = document.getElementById('addRowBtn');
+  btn.disabled = count >= 8;
+  btn.textContent = count >= 8 ? 'Maximum 8 ingredients' : '+ Add ingredient';
+}
+
+function loadDefaultRub(){
+  document.getElementById('ingredientRows').innerHTML = '';
+  DEFAULT_RUB.forEach(function(r){ addRow(r.name, r.amount, r.unit); });
+}
+
+/* ============================================================
+   CALCULATE
+   ============================================================ */
+function calculate(){
+  var vmsg = document.getElementById('vmsg');
+  vmsg.textContent = '';
+  vmsg.classList.remove('visible');
+
+  var rawWeight = parseFloat(document.getElementById('meatWeight').value);
+  if(isNaN(rawWeight) || rawWeight <= 0){
+    vmsg.textContent = 'Enter a valid meat weight greater than zero.';
+    vmsg.classList.add('visible');
+    return;
+  }
+  var weightLbs = state.wu === 'kg' ? rawWeight * 2.20462 : rawWeight;
+
+  var rows = document.querySelectorAll('.ingr-row');
+  if(!rows.length){
+    vmsg.textContent = 'Add at least one ingredient before calculating.';
+    vmsg.classList.add('visible');
+    return;
+  }
+
+  var ingredients = [];
+  var baseTotalOz = 0;
+  var hasError = false;
+
+  rows.forEach(function(row){
+    var name   = row.querySelector('.ingr-name').value.trim() || 'Ingredient';
+    var amount = parseFloat(row.querySelector('.ingr-amount').value);
+    var unit   = row.querySelector('.ingr-unit').value;
+    if(isNaN(amount) || amount <= 0){ hasError = true; return; }
+    baseTotalOz += amount * TO_OZ[unit];
+    ingredients.push({ name: name, amount: amount, unit: unit });
+  });
+
+  if(hasError){
+    vmsg.textContent = 'All ingredient amounts must be a number greater than zero.';
+    vmsg.classList.add('visible');
+    return;
+  }
+  if(!ingredients.length){
+    vmsg.textContent = 'No valid ingredients found.';
+    vmsg.classList.add('visible');
+    return;
+  }
+
+  var targetRubOz  = weightLbs * COVERAGE[state.coverage];
+  var scaleFactor  = targetRubOz / baseTotalOz;
+  var totalG       = targetRubOz * 28.3495;
+  var coveragePct  = Math.round(COVERAGE[state.coverage] * 100);
+
+  /* Stat cards */
+  var totalDisplay = state.wu === 'kg'
+    ? (lK(targetRubOz / 16)).toFixed(0) + ' g'
+    : parseFloat((targetRubOz).toFixed(1)) + ' oz';
+
+  document.getElementById('statTotal').textContent    = totalDisplay;
+  document.getElementById('statTotalSub').textContent = Math.round(totalG) + ' g \u2248 ' + parseFloat((targetRubOz).toFixed(1)) + ' oz';
+  document.getElementById('statCoverage').textContent = coveragePct + '%';
+  document.getElementById('statCoverageSub').textContent =
+    (state.wu === 'kg' ? parseFloat((rawWeight).toFixed(2)) + ' kg' : parseFloat((weightLbs).toFixed(1)) + ' lb') + ' of meat';
+  document.getElementById('statIngredients').textContent  = ingredients.length;
+  document.getElementById('statIngredientsSub').textContent = 'in your rub blend';
+
+  /* Ingredient table */
+  var tbody = document.getElementById('rubTableBody');
+  tbody.innerHTML = '';
+  var totalApproxG = 0;
+  ingredients.forEach(function(ing){
+    var scaledAmt = ing.amount * scaleFactor;
+    var approxG   = scaledAmt * TO_G[ing.unit];
+    totalApproxG += approxG;
+    var tr = document.createElement('tr');
+    var tdName = document.createElement('td');
+    tdName.className = 'ingr-name-cell';
+    tdName.textContent = ing.name;
+    var tdAmt = document.createElement('td');
+    tdAmt.textContent = fmtAmt(scaledAmt);
+    var tdUnit = document.createElement('td');
+    tdUnit.textContent = ing.unit;
+    tr.appendChild(tdName);
+    tr.appendChild(tdAmt);
+    tr.appendChild(tdUnit);
+    tbody.appendChild(tr);
+  });
+
+  /* Footer row */
+  var tfoot = document.getElementById('rubTableFoot');
+  tfoot.innerHTML = '';
+  var tr = document.createElement('tr');
+  var tdLabel = document.createElement('td');
+  tdLabel.textContent = 'Total';
+  var tdTotal = document.createElement('td');
+  tdTotal.textContent = parseFloat((targetRubOz).toFixed(1)) + ' oz';
+  var tdUnit = document.createElement('td');
+  tdUnit.textContent = '(' + Math.round(totalG) + ' g)';
+  tr.appendChild(tdLabel);
+  tr.appendChild(tdTotal);
+  tr.appendChild(tdUnit);
+  tfoot.appendChild(tr);
+
+  /* Modal title */
+  document.getElementById('resultsModalTitle').textContent =
+    'Dry Rub for ' + (state.wu === 'kg' ? parseFloat(rawWeight.toFixed(2)) + ' kg' : parseFloat(weightLbs.toFixed(1)) + ' lb') + ' of Meat';
+
+  openResultsModal();
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+(function init(){
+  /* Restore unit preferences from localStorage */
+  try {
+    var savedTu = localStorage.getItem('pitmaster_tu');
+    var savedWu = localStorage.getItem('pitmaster_wu');
+    if(!savedTu && !savedWu){
+      var lang = navigator.language || 'en-US';
+      if(shouldDefaultMetric(lang)){
+        savedTu = 'C';
+        savedWu = 'kg';
+      }
+    }
+    if (savedTu && ['C', 'F'].indexOf(savedTu) === -1) savedTu = null;
+    if (savedWu && ['kg', 'lbs'].indexOf(savedWu) === -1) savedWu = null;
+    if(savedTu){
+      document.querySelectorAll('#tempToggle button').forEach(function(b){
+        b.classList.toggle('active', b.dataset.unit === savedTu);
+      });
+    }
+    if(savedWu){
+      state.wu = savedWu;
+      document.getElementById('weightUnit').textContent = savedWu;
+      document.querySelectorAll('#weightToggle button').forEach(function(b){
+        b.classList.toggle('active', b.dataset.unit === savedWu);
+      });
+    }
+  } catch(e){}
+
+  /* Temp toggle — saves preference for other pages */
+  document.getElementById('tempToggle').addEventListener('click', function(e){
+    var btn = e.target.closest('button');
+    if(!btn) return;
+    var val = btn.dataset.unit;
+    document.querySelectorAll('#tempToggle button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.unit === val);
+    });
+    try { localStorage.setItem('pitmaster_tu', val); } catch(e){}
+  });
+
+  /* Weight toggle */
+  document.getElementById('weightToggle').addEventListener('click', function(e){
+    var btn = e.target.closest('button');
+    if(!btn) return;
+    var val = btn.dataset.unit;
+    if(val === state.wu) return;
+    var inp = document.getElementById('meatWeight');
+    var v = parseFloat(inp.value);
+    if(!isNaN(v) && v > 0){
+      inp.value = val === 'kg' ? lK(v).toFixed(2) : kL(v).toFixed(1);
+    }
+    state.wu = val;
+    document.getElementById('weightUnit').textContent = val;
+    document.querySelectorAll('#weightToggle button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.unit === val);
+    });
+    try { localStorage.setItem('pitmaster_wu', val); } catch(e){}
+    if(document.getElementById('results').classList.contains('visible')) calculate();
+  });
+
+  /* Coverage toggle */
+  document.getElementById('coverageToggle').addEventListener('click', function(e){
+    var btn = e.target.closest('button');
+    if(!btn) return;
+    var val = btn.dataset.cov;
+    if(!val || val === state.coverage) return;
+    state.coverage = val;
+    document.querySelectorAll('#coverageToggle button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.cov === val);
+    });
+    if(document.getElementById('results').classList.contains('visible')) calculate();
+  });
+
+  /* Add row button */
+  document.getElementById('addRowBtn').addEventListener('click', function(){
+    addRow('', '', 'tsp');
+    /* Focus the new name input */
+    var rows = document.querySelectorAll('.ingr-row');
+    var last = rows[rows.length - 1];
+    if(last) last.querySelector('.ingr-name').focus();
+  });
+
+  /* Reset button */
+  document.getElementById('resetBtn').addEventListener('click', loadDefaultRub);
+
+  /* Calculate button */
+  document.getElementById('calcBtn').addEventListener('click', calculate);
+
+  /* Keyboard shortcut: Enter on weight input */
+  document.getElementById('meatWeight').addEventListener('keydown', function(e){
+    if(e.key === 'Enter') calculate();
+  });
+
+  /* Modal close */
+  document.getElementById('closeResultsBtn').addEventListener('click', closeResultsModal);
+  document.getElementById('results').addEventListener('click', function(e){
+    if(e.target === this) closeResultsModal();
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && document.getElementById('results').classList.contains('visible')){
+      closeResultsModal();
+    }
+  });
+
+  /* Load default rub recipe */
+  loadDefaultRub();
+
+  initConsentBanner();
+})();
+
+})();
+</script>
+<!-- INJECT:site-header.js:script -->
+</body>
+</html>
+

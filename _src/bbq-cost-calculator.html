@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BBQ Cost Calculator — Cost Per Serving for Smoked Meat | Pitmaster Tools</title>
+<meta name="description" content="Free BBQ cost calculator. Enter meat weight, price per pound, rub, charcoal, and time to get your total cook cost, cost per pound cooked, and cost per serving.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://pitmaster.tools/bbq-cost-calculator.html">
+<meta property="og:title" content="BBQ Cost Calculator — Cost Per Serving for Smoked Meat">
+<meta property="og:description" content="Free BBQ cost calculator. Enter meat weight, price per pound, rub, charcoal, and time to get your total cook cost, cost per pound cooked, and cost per serving.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://pitmaster.tools/bbq-cost-calculator.html">
+<meta property="og:image" content="https://pitmaster.tools/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BBQ Cost Calculator — Cost Per Serving for Smoked Meat">
+<meta name="twitter:description" content="Free BBQ cost calculator. Enter meat weight, price per pound, rub, charcoal, and time to get your total cook cost, cost per pound cooked, and cost per serving.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23EF9F27' d='M36 4c2 10-3 15-8 21-5 6-9 11-9 19 0 10 7 16 15 16 11 0 19-8 19-19 0-12-7-19-17-37z'/%3E%3Cpath fill='%23D78108' d='M33 27c1 6-2 9-5 12-3 3-5 6-5 10 0 6 4 10 9 10 7 0 12-5 12-12 0-7-4-11-11-20z'/%3E%3C/svg%3E">
+<!-- INJECT:site-header.css -->
+<!-- INJECT:site-base.css -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {'ad_storage':'denied','analytics_storage':'denied','wait_for_update':500});
+  (function(){
+    var c = document.cookie.match(/pitmaster_consent=([^;]+)/);
+    if(c && c[1]==='accepted'){
+      window._gtagLoaded = true;
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-SJJVV37EWE';
+      document.head.appendChild(s);
+      s.onload = function(){
+        gtag('js', new Date());
+        gtag('config', 'G-SJJVV37EWE');
+        gtag('consent', 'update', {'ad_storage':'granted','analytics_storage':'granted'});
+      };
+    }
+  })();
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "BBQ Cost Calculator",
+  "url": "https://pitmaster.tools/bbq-cost-calculator.html",
+  "description": "Calculate total BBQ cook cost, cost per pound, and cost per serving for any smoked meat.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "isAccessibleForFree": true,
+  "browserRequirements": "Requires JavaScript enabled in a modern browser.",
+  "featureList": [
+    "Total cook cost",
+    "Cost per serving",
+    "Cost per pound cooked",
+    "Shrinkage-adjusted yield",
+    "Time value calculation",
+    "Serving size breakdown"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How much does it cost to smoke a brisket?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Smoking a whole packer brisket typically costs $60–$150 in meat alone, depending on grade and size. At $6/lb for a 14-pound choice brisket you spend $84 on meat. Add $8–$15 in charcoal or wood, $5–$10 in rub, and you are looking at $100–$115 total for 8–9 pounds of cooked brisket — roughly $11–$14 per pound cooked, or $3–$5 per 6-ounce serving."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the cost per serving for smoked pulled pork?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Pulled pork is one of the most economical BBQ options. A pork butt at $2–$3/lb yields about 65% cooked meat after a 35% shrinkage. At $2.50/lb for a 10-pound butt ($25 meat cost) plus $8 in supplies, your total cost is about $33 for roughly 6.5 pounds cooked — approximately $3.20 per 6-ounce serving. Feeding 12–17 people for under $35 is hard to beat."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does smoking meat cost more than oven cooking?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Smoking adds fuel cost ($5–$20 per cook) that oven cooking does not, and it takes more active time. However, smoking typically uses cheaper, tougher cuts (brisket flat, pork butt, spare ribs) that transform through collagen breakdown. The per-serving cost difference is usually $0.50–$2.00 when you factor in fuel, which is minimal compared to the quality difference. Long cooks also use less electricity than continuous oven use."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I calculate BBQ food cost for a party?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Use this calculator: enter your raw meat weight, price per pound, and supply costs, then enter your guest count and serving size. The calculator accounts for shrinkage — brisket loses 40% of weight during the cook, pulled pork loses 35% — so it tells you exactly how many servings you will have available and warns you if you need more meat. For parties, plan 6 oz of cooked meat per adult and buy extra to account for trim and bone."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is a good cost per serving for smoked meat?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A good home BBQ cost per serving (6 oz cooked) is $2–$5 for pork cuts and $4–$8 for beef brisket depending on local meat prices. Compare that to restaurant smoked brisket at $25–$35 per pound ($9–$13 per 6-oz serving) and the value of smoking at home is clear. Even with premium USDA Prime brisket at $9–$12/lb, home-cooked cost per serving rarely exceeds $6–$8 all-in."
+      }
+    }
+  ]
+}
+</script>
+<style>
+.unit-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.form-group select,
+.form-group input[type="number"] {
+  border: 1.5px solid var(--card-border); border-radius: 6px; padding: .55rem .75rem; font-size: .95rem;
+  color: var(--charcoal); background: #FAFAF8; font-family: inherit; transition: border-color .15s;
+  width: 100%; appearance: none; -webkit-appearance: none;
+}
+.input-with-prefix { display: flex; align-items: stretch; }
+.input-prefix-label { display: flex; align-items: center; padding: 0 .75rem; background: #F0EBE3; border: 1.5px solid var(--card-border); border-right: none; border-radius: 6px 0 0 6px; font-size: .85rem; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+.input-with-prefix input { border-radius: 0 6px 6px 0; flex: 1; }
+.serving-toggle { display: flex; border: 1.5px solid var(--card-border); border-radius: 6px; overflow: hidden; }
+.serving-toggle button { flex: 1; border: none; background: #FAFAF8; color: var(--text-muted); font-family: inherit; font-size: .875rem; font-weight: 600; padding: .55rem .5rem; cursor: pointer; transition: background .15s,color .15s; border-right: 1px solid var(--card-border); line-height: 1.2; }
+.serving-toggle button:last-child { border-right: none; }
+.serving-toggle button.active { background: var(--amber); color: #fff; }
+.serving-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.time-details { border: 1.5px solid var(--card-border); border-radius: 6px; background: #FAFAF8; overflow: hidden; grid-column: 1/-1; }
+.time-details summary { cursor: pointer; padding: .65rem .875rem; font-size: .875rem; font-weight: 600; color: var(--text-muted); list-style: none; display: flex; align-items: center; justify-content: space-between; }
+.time-details summary::-webkit-details-marker { display: none; }
+.time-details summary::after { content: '+'; font-size: 1rem; }
+.time-details[open] summary::after { content: '\2212'; }
+.time-details-body { padding: .75rem .875rem 1rem; border-top: 1px solid var(--card-border); display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.5rem; }
+.calc-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.stat-card.c-green::before { background: var(--emerald); }
+.stat-card.c-amber::before { background: var(--amber); }
+.stat-card.c-blue::before { background: var(--blue); }
+.stat-card.c-neutral::before { background: var(--text-muted); }
+.card-title { font-family: Georgia,serif; font-size: 1rem; font-weight: 700; margin-bottom: 1rem; }
+.breakdown-table { width: 100%; border-collapse: collapse; }
+.breakdown-table td { padding: .55rem .25rem; border-bottom: 1px solid #F0EBE3; font-size: .95rem; }
+.breakdown-table td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+.breakdown-table tr:last-child td { border-bottom: none; font-weight: 700; font-size: 1rem; border-top: 2px solid var(--card-border); padding-top: .75rem; }
+.breakdown-table tr.zero td { color: var(--text-muted); }
+.shrinkage-note { font-size: .875rem; color: var(--text-muted); margin-top: .5rem; padding: .6rem .875rem; background: var(--amber-light); border-radius: 6px; }
+.meat-warning { margin-top: 1rem; padding: .75rem 1rem; background: #FDECEA; border: 1px solid #F5C6C1; border-radius: 6px; color: #922B21; font-size: .9rem; font-weight: 600; display: none; }
+.meat-warning.visible { display: block; }
+.editorial-section p + p, .editorial-section p + h3, .editorial-section h3 + p,
+.editorial-section ul + p, .editorial-section p + ul { margin-top: .9rem; }
+.editorial-section ul { padding-left: 1.25rem; margin-top: .5rem; }
+.editorial-section li + li { margin-top: .3rem; }
+.ref-table-wrap { overflow-x: auto; border: 1px solid var(--card-border); border-radius: var(--radius); background: #fff; box-shadow: var(--shadow); margin: 1rem 0; }
+.ref-table { width: 100%; border-collapse: collapse; min-width: 480px; }
+.ref-table th, .ref-table td { text-align: center; padding: .7rem .8rem; border-bottom: 1px solid #EFE7DA; font-size: .9rem; }
+.ref-table th:first-child, .ref-table td:first-child { text-align: left; font-weight: 700; }
+.ref-table thead th { background: #FAF5EC; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); position: sticky; top: 0; }
+.ref-table tbody tr:nth-child(even) { background: #FCFAF6; }
+.faq-section { margin: 2rem 0; }
+.faq-section h2 { font-family: Georgia,serif; font-size: 1.55rem; margin-bottom: 1rem; }
+.faq-body { padding: 0 1.15rem 1rem; color: #332F2B; line-height: 1.75; font-size: .95rem; }
+.related-tools h2 { font-family: Georgia,serif; font-size: 1.35rem; margin-bottom: 1rem; }
+@media (max-width:480px) {
+  .stat-cards { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">Pitmaster<span> Tools</span></a>
+  <nav class="header-nav" aria-label="Site navigation">
+    <div class="nav-dropdown">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="tools.html">All Tools</a></li>
+        <li><a href="/">Meat Smoking Calculator</a></li>
+        <li><a href="brisket-calculator.html">Brisket Calculator</a></li>
+        <li><a href="pork-shoulder-calculator.html">Pork Shoulder Calculator</a></li>
+        <li><a href="rib-calculator.html">Rib Calculator</a></li>
+        <li><a href="turkey-smoking-calculator.html">Turkey Calculator</a></li>
+        <li><a href="meat-per-person.html">Meat Per Person</a></li>
+        <li><a href="cook-time-coordinator.html">Cook Time Coordinator</a></li>
+        <li><a href="charcoal-calculator.html">Charcoal Calculator</a></li>
+        <li><a href="brine-calculator.html">Brine Calculator</a></li>
+        <li><a href="dry-rub-calculator.html">Dry Rub Calculator</a></li>
+        <li><a href="bbq-cost-calculator.html" aria-current="page">BBQ Cost Calculator</a></li>
+        <li><a href="catering-calculator.html">Catering Calculator</a></li>
+        <li><a href="brisket-yield-calculator.html">Brisket Yield Calculator</a></li>
+      </ul>
+    </div>
+    <a href="about.html">About</a>
+  </nav>
+  <div class="unit-controls">
+    <div class="unit-toggle" id="weightToggle" role="group" aria-label="Weight unit">
+      <button data-unit="lbs" class="active" type="button">lbs</button>
+      <button data-unit="kg" type="button">kg</button>
+    </div>
+  </div>
+</header>
+
+<div class="ad-slot" aria-hidden="true">
+  <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4265262608577453" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+</div>
+
+<main>
+  <section class="page-hero" aria-label="Page introduction">
+    <h1>BBQ Cost Calculator</h1>
+    <p>Enter your meat weight, price per pound, and supply costs to calculate your total cook cost, cost per pound cooked, and cost per serving — with shrinkage-adjusted yields.</p>
+  </section>
+
+  <div class="form-card">
+    <p class="section-title">Meat</p>
+    <div class="form-grid">
+      <div class="form-group full-width">
+        <label for="meatType">Meat Type</label>
+        <select id="meatType" aria-label="Meat type">
+          <option value="brisket">Brisket (40% shrinkage)</option>
+          <option value="pulled_pork">Pulled Pork / Pork Butt (35% shrinkage)</option>
+          <option value="baby_back">Baby Back Ribs (25% shrinkage)</option>
+          <option value="spare_ribs">Spare Ribs (25% shrinkage)</option>
+          <option value="chicken_whole">Whole Chicken (25% shrinkage)</option>
+          <option value="chicken_thighs">Chicken Thighs (20% shrinkage)</option>
+          <option value="turkey_breast">Turkey Breast (20% shrinkage)</option>
+          <option value="turkey_whole">Whole Turkey (25% shrinkage)</option>
+          <option value="sausage">Sausage (10% shrinkage)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="rawWeight">Raw Weight</label>
+        <div class="input-with-unit">
+          <input type="number" id="rawWeight" min="0.1" max="500" step="0.5" value="14" aria-label="Raw meat weight">
+          <span class="input-unit-label" id="weightUnitLbl">lbs</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="pricePerUnit" id="pricePerUnitLabel">Price per lb</label>
+        <div class="input-with-prefix">
+          <span class="input-prefix-label">$</span>
+          <input type="number" id="pricePerUnit" min="0" step="0.01" placeholder="6.00" aria-labelledby="pricePerUnitLabel" aria-label="Price per pound">
+        </div>
+      </div>
+
+      <p class="section-title full-width" style="grid-column:1/-1;margin-top:.5rem">Cook Costs</p>
+
+      <div class="form-group">
+        <label for="rubCost">Rub / Seasonings</label>
+        <div class="input-with-prefix">
+          <span class="input-prefix-label">$</span>
+          <input type="number" id="rubCost" min="0" step="0.01" placeholder="5.00" aria-label="Rub and seasonings cost">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="woodCost">Wood / Charcoal</label>
+        <div class="input-with-prefix">
+          <span class="input-prefix-label">$</span>
+          <input type="number" id="woodCost" min="0" step="0.01" placeholder="8.00" aria-label="Wood and charcoal cost">
+        </div>
+      </div>
+
+      <div class="form-group full-width">
+        <label for="miscCost">Miscellaneous (injections, foil, butcher paper, etc.)</label>
+        <div class="input-with-prefix">
+          <span class="input-prefix-label">$</span>
+          <input type="number" id="miscCost" min="0" step="0.01" placeholder="0.00" aria-label="Miscellaneous costs">
+        </div>
+      </div>
+
+      <details class="time-details" id="timeDetails">
+        <summary>Add time value (optional)</summary>
+        <div class="time-details-body">
+          <div class="form-group">
+            <label for="cookHours">Cook Hours</label>
+            <input type="number" id="cookHours" min="0" step="0.5" placeholder="12" aria-label="Cook hours">
+          </div>
+          <div class="form-group">
+            <label for="hourlyRate">Your Time Value ($/hr)</label>
+            <div class="input-with-prefix">
+              <span class="input-prefix-label">$</span>
+              <input type="number" id="hourlyRate" min="0" step="0.5" placeholder="25.00" aria-label="Hourly time value in dollars">
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <p class="section-title full-width" style="grid-column:1/-1;margin-top:.5rem">Servings</p>
+
+      <div class="form-group">
+        <label for="numPeople">Number of People</label>
+        <input type="number" id="numPeople" min="1" step="1" placeholder="10" aria-label="Number of people to serve">
+      </div>
+
+      <div class="form-group">
+        <label>Serving Size</label>
+        <div class="serving-toggle" role="group" aria-label="Serving size">
+          <button type="button" data-serving="light" aria-pressed="false">Light<br><small>4 oz</small></button>
+          <button type="button" data-serving="normal" class="active" aria-pressed="true">Normal<br><small>6 oz</small></button>
+          <button type="button" data-serving="hungry" aria-pressed="false">Hungry<br><small>8 oz</small></button>
+        </div>
+      </div>
+    </div>
+
+    <button class="calc-btn" id="calcBtn" type="button">Calculate BBQ Cost</button>
+    <div class="vmsg" id="vmsg" role="alert" aria-live="polite"></div>
+  </div>
+
+  <!-- Results -->
+  <div id="results" aria-live="polite" aria-label="Calculation results">
+    <div class="stat-cards">
+      <div class="stat-card c-green">
+        <div class="sc-label">Total Cost</div>
+        <div class="sc-value" id="sTotalCost">—</div>
+        <div class="sc-sub" id="sTotalSub">all-in</div>
+      </div>
+      <div class="stat-card c-amber">
+        <div class="sc-label">Cost per Serving</div>
+        <div class="sc-value" id="sCostPerServing">—</div>
+        <div class="sc-sub" id="sCostServingSub">per 6 oz</div>
+      </div>
+      <div class="stat-card c-blue">
+        <div class="sc-label">Cost per lb Cooked</div>
+        <div class="sc-value" id="sCostPerLb">—</div>
+        <div class="sc-sub">cooked weight</div>
+      </div>
+      <div class="stat-card c-neutral">
+        <div class="sc-label">Servings Available</div>
+        <div class="sc-value" id="sServingsAvail">—</div>
+        <div class="sc-sub" id="sServingsSub">servings</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Cost Breakdown</div>
+      <table class="breakdown-table" aria-label="Cost breakdown">
+        <tbody id="breakdownBody">
+        </tbody>
+      </table>
+      <div class="shrinkage-note" id="shrinkageNote"></div>
+      <div class="meat-warning" id="meatWarning" role="alert"></div>
+    </div>
+  </div>
+
+  <div class="ad-slot" aria-hidden="true">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4265262608577453" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+  </div>
+
+  <!-- Editorial -->
+  <section class="editorial-section" aria-labelledby="editorial-title">
+    <h2 id="editorial-title">What Goes Into the Real Cost of a BBQ</h2>
+    <p>When people think about the cost of smoking meat, they usually think about the price tag at the butcher counter. But the full cost of a low-and-slow cook includes several line items that add up faster than most pitmasters expect. Understanding each category helps you plan smarter, price smarter for <a href="catering-calculator.html">catering</a>, and make an honest comparison to restaurant BBQ.</p>
+
+    <p>The five main cost categories in any BBQ cook are: meat, fuel (charcoal and wood), seasoning (rubs, injections, brines), consumables (foil, butcher paper, gloves, probes), and your own time. This calculator accounts for all of them. The one category that surprises people most is shrinkage — the weight lost during cooking — which we cover in detail below and break out even further in the <a href="brisket-yield-calculator.html">Brisket Yield Calculator</a>.</p>
+
+    <h3>Meat Cost: The Biggest Variable</h3>
+    <p>Meat is almost always the largest line item, typically representing 70–85% of total cook cost. The price per pound varies enormously depending on cut, grade, and market conditions. Here is a general range for common BBQ cuts at retail prices in the United States:</p>
+    <ul>
+      <li><strong>Pork butt (Boston butt):</strong> $1.99–$3.49/lb — the most economical BBQ protein, ideal for pulled pork</li>
+      <li><strong>Spare ribs:</strong> $2.99–$4.99/lb — budget-friendly, requires more trimming and cook time</li>
+      <li><strong>Baby back ribs:</strong> $3.99–$6.99/lb — leaner, shorter cook, popular for backyard cooks</li>
+      <li><strong>Chicken thighs:</strong> $1.49–$2.99/lb — cheapest per pound, excellent smoked flavor</li>
+      <li><strong>Whole brisket (packer):</strong> $3.99–$12.00/lb — the widest range, driven heavily by grade (select vs. choice vs. prime vs. wagyu)</li>
+      <li><strong>Beef ribs (plate short ribs):</strong> $6.99–$14.99/lb — premium cut, small supply, high demand</li>
+    </ul>
+    <p>Grade matters significantly for brisket. A USDA Select brisket at $4/lb and a USDA Prime at $9/lb are not just a $5/lb difference in cost — they are meaningfully different cooking experiences. Prime brisket has more intramuscular fat (marbling), rendering more deeply during the cook and producing a far more forgiving and juicy result. Select brisket demands more skill and moisture management to avoid drying out.</p>
+
+    <h3>Shrinkage: Why You Need More Than You Think</h3>
+    <p>Every cut of meat loses moisture and fat during cooking. For BBQ, this yield loss is significant — and failing to account for it is the most common planning mistake. A 14-pound whole packer brisket does not yield 14 pounds of sliced brisket. After trimming pre-cook (typically 1–2 pounds of hard fat cap), the stall, and 12–15 hours at temperature, you will yield roughly 8–9 pounds of finished product — a 35–40% reduction from raw untrimmed weight.</p>
+    <p>This calculator uses the following shrinkage estimates, based on industry consensus and USDA data:</p>
+    <ul>
+      <li><strong>Brisket:</strong> 40% shrinkage — the highest of any common BBQ cut due to its thick fat cap and long cook time</li>
+      <li><strong>Pulled pork (pork butt):</strong> 35% shrinkage — significant moisture and fat render, but bone-in butts lose bone weight too</li>
+      <li><strong>Spare ribs / baby back ribs:</strong> 25% shrinkage — bone accounts for much of the raw weight; meat yield is lower than it appears</li>
+      <li><strong>Whole chicken / whole turkey:</strong> 25% shrinkage — skin and bone are significant; usable meat yield is roughly 3/4 of raw weight</li>
+      <li><strong>Chicken thighs / turkey breast:</strong> 20% shrinkage — boneless portions lose less; skin-on thighs render well but lose less weight than whole birds</li>
+      <li><strong>Sausage:</strong> 10% shrinkage — casings hold moisture in, lowest yield loss of any BBQ protein</li>
+    </ul>
+    <p>These numbers assume proper cooking to safe internal temperatures. Overcooking increases yield loss; undercooking reduces it but also means collagen has not fully converted to gelatin. For the most accurate per-serving cost planning, weigh your finished product at pull time and compare to this calculator's estimate.</p>
+
+    <h3>Fuel and Seasoning Costs</h3>
+    <p>Charcoal and wood costs are often underestimated. A long brisket cook at 250°F typically consumes 8–12 pounds of charcoal briquettes or 6–10 pounds of lump charcoal, plus 4–8 wood chunks for smoke flavor. At current prices, fuel for a single brisket cook runs $8–$20 depending on your setup. Offset smokers running on splits burn through wood much faster and can cost $15–$30 in fuel per cook. If you want a fuel estimate before pricing a cook, use the <a href="charcoal-calculator.html">Charcoal Calculator</a>.</p>
+    <p>Dry rub ingredients add $3–$10 per cook for a homemade rub, or $8–$15 if using a premium commercial rub at recommended application rates (typically 1–2 tablespoons per pound of meat). Injections add $3–$8 for beef tallow, phosphate mixtures, or commercial injection powders. Butcher paper or foil for wrapping runs $1–$3 per cook. These numbers are small individually but add $15–$35 to every serious cook. If you want to scale seasoning accurately before buying ingredients, use the <a href="dry-rub-calculator.html">Dry Rub Calculator</a>.</p>
+
+    <h3>Is BBQ Cheaper Than Buying It?</h3>
+    <p>The short answer is yes — dramatically so. Restaurant-quality smoked brisket in BBQ-centric cities like Austin, Kansas City, or Nashville runs $25–$35 per pound at the counter. A 1-pound plate of brisket, two sides, and a drink easily reaches $35–$50 per person. Even at premium USDA Prime brisket prices ($9–$12/lb raw), the all-in home cost for sliced brisket rarely exceeds $8–$12 per pound cooked — a 65–75% savings versus restaurant pricing.</p>
+    <p>Pulled pork is even more compelling. At $2.50/lb for pork butt, an all-in cost of $3–$4 per serving compares favorably to $14–$20 per plate at a BBQ restaurant. For parties and events, home-smoked BBQ delivers an experience that would cost 3–5x more to cater professionally.</p>
+    <p>The cost advantage holds even when you include your time value. At $25/hour, a 14-hour brisket cook adds $350 in time cost — but most pitmasters are sleeping through the overnight portion and doing other things during the stall. The active hands-on time for most cooks is 2–4 hours. At $25/hour, that is $50–$100 in real time cost, still leaving a significant savings versus restaurant prices for a group of 8–12 people.</p>
+
+    <h3>BBQ Cost per Serving Reference Table</h3>
+    <p>The table below shows cost per 6-ounce serving for brisket at various price-per-pound points, assuming 40% shrinkage, a 14-pound raw brisket, and $15 in total supply costs (rub, charcoal, misc).</p>
+    <div class="ref-table-wrap">
+      <table class="ref-table">
+        <thead>
+          <tr>
+            <th>Price/lb Raw</th>
+            <th>Meat Cost (14 lb)</th>
+            <th>Meat Cost/Serving</th>
+            <th>All-In Cost/Serving</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>$4/lb</td>
+            <td>$56.00</td>
+            <td>$1.67</td>
+            <td>$2.29</td>
+          </tr>
+          <tr>
+            <td>$6/lb</td>
+            <td>$84.00</td>
+            <td>$2.50</td>
+            <td>$3.12</td>
+          </tr>
+          <tr>
+            <td>$8/lb</td>
+            <td>$112.00</td>
+            <td>$3.33</td>
+            <td>$3.95</td>
+          </tr>
+          <tr>
+            <td>$10/lb</td>
+            <td>$140.00</td>
+            <td>$4.17</td>
+            <td>$4.79</td>
+          </tr>
+          <tr>
+            <td>$12/lb</td>
+            <td>$168.00</td>
+            <td>$5.00</td>
+            <td>$5.62</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>A 14-pound brisket at 40% shrinkage yields 8.4 pounds cooked, or approximately 22.4 servings at 6 oz each. Even at $12/lb for premium USDA Prime, you are feeding guests for under $6 per serving all-in — far below any restaurant equivalent.</p>
+  </section>
+
+  <div class="ad-slot" aria-hidden="true">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4265262608577453" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+  </div>
+
+  <!-- FAQ -->
+  <section class="faq-section" aria-labelledby="faq-title">
+    <h2 id="faq-title">Frequently Asked Questions</h2>
+    <div class="faq-group">
+      <details class="faq-item">
+        <summary>How much does it cost to smoke a brisket?</summary>
+        <div class="faq-body">Smoking a whole packer brisket typically costs $60–$150 in meat alone depending on grade and size. At $6/lb for a 14-pound choice brisket you spend $84 on meat. Add $8–$15 in charcoal or wood, $5–$10 in rub, and you are looking at $100–$115 total for 8–9 pounds of cooked brisket — roughly $11–$14 per pound cooked, or $3–$5 per 6-ounce serving. Use this calculator to enter your exact prices and get a precise cost breakdown.</div>
+      </details>
+      <details class="faq-item">
+        <summary>What is the cost per serving for smoked pulled pork?</summary>
+        <div class="faq-body">Pulled pork is one of the most economical BBQ options. A pork butt at $2–$3/lb yields about 65% cooked meat after a 35% shrinkage. At $2.50/lb for a 10-pound butt ($25 meat cost) plus $8 in supplies, your total cost is about $33 for roughly 6.5 pounds cooked — approximately $3.20 per 6-ounce serving. That is roughly 17 servings for under $35. Feeding a crowd of 15 people high-quality smoked pulled pork for around $2/person is one of the best value propositions in backyard cooking.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Does smoking meat cost more than oven cooking?</summary>
+        <div class="faq-body">Smoking adds fuel cost ($5–$20 per cook) that oven cooking does not, and it takes more active time. However, smoking typically uses cheaper, tougher cuts (brisket flat, pork butt, spare ribs) that transform through collagen breakdown at low temperatures. The per-serving cost difference attributable to fuel is usually $0.50–$2.00, which is minimal compared to the quality difference. Long cooks also overlap with sleeping or other activities, so the real time cost is often lower than it appears. The better question is value delivered: restaurant-equivalent smoked brisket costs 3–5x more per serving than cooking it yourself.</div>
+      </details>
+      <details class="faq-item">
+        <summary>How do I calculate BBQ food cost for a party?</summary>
+        <div class="faq-body">Use this calculator: enter your raw meat weight, price per pound, and supply costs, then enter your guest count and serving size. The calculator accounts for shrinkage — brisket loses 40% of weight during the cook, pulled pork loses 35% — so it tells you exactly how many servings you will have available and warns you if you need more meat. For parties, plan 6 oz of cooked meat per adult as the base serving, then add 15–20% buffer for large eaters and seconds. For mixed crowds with children, 5 oz per person is a reasonable average. Always buy slightly more than the calculator minimum to account for trim loss and any doneness issues.</div>
+      </details>
+      <details class="faq-item">
+        <summary>What is a good cost per serving for smoked meat?</summary>
+        <div class="faq-body">A good home BBQ cost per serving (6 oz cooked) is $2–$5 for pork cuts and $4–$8 for beef brisket depending on local meat prices. Compare that to restaurant smoked brisket at $25–$35 per pound ($9–$13 per 6-oz serving) and the value of home cooking is clear. Even with premium USDA Prime brisket at $9–$12/lb, home-cooked cost per serving rarely exceeds $6–$8 all-in. For catering pricing, a common rule is to charge 3–4x food cost — so if your all-in cost is $4/serving, $12–$16/plate is a reasonable starting point, well below what most caterers charge.</div>
+      </details>
+    </div>
+  </section>
+
+  <!-- Related tools -->
+  <section class="related-tools" aria-labelledby="related-title">
+    <h2 id="related-title">More Pitmaster Tools</h2>
+    <div class="tool-links">
+      <a class="tool-link" href="/">
+        <span class="tool-link-icon">&#x1F321;&#xFE0F;</span>
+        <div>
+          <div class="tool-link-name">Meat Smoking Calculator</div>
+          <div class="tool-link-desc">Cook times for 28 cuts with full timeline, wood pairings, and serving size math.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="meat-per-person.html">
+        <span class="tool-link-icon">&#x1F356;</span>
+        <div>
+          <div class="tool-link-name">Meat Per Person Calculator</div>
+          <div class="tool-link-desc">How much raw meat to buy for any guest count, with shrinkage and sides adjustments.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="brisket-calculator.html">
+        <span class="tool-link-icon">&#x1F969;</span>
+        <div>
+          <div class="tool-link-name">Brisket Calculator</div>
+          <div class="tool-link-desc">Exact smoking timeline for brisket, working backward from your serve time.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="charcoal-calculator.html">
+        <span class="tool-link-icon">&#x26B0;&#xFE0F;</span>
+        <div>
+          <div class="tool-link-name">Charcoal Calculator</div>
+          <div class="tool-link-desc">Exact charcoal amounts for Minion, Snake, or direct-heat cooks.</div>
+        </div>
+      </a>
+    </div>
+  </section>
+</main>
+
+<!-- Cookie consent banner -->
+<div class="cookie-banner" id="cookieBanner" role="dialog" aria-live="polite" aria-label="Cookie consent">
+  <div class="cookie-banner__inner">
+    <p class="cookie-banner__text">We use cookies for analytics and advertising. See our <a href="privacy-policy.html">Privacy Policy</a> for details.</p>
+    <div class="cookie-banner__actions">
+      <button class="cookie-accept" id="cookieAccept" type="button">Accept</button>
+      <button class="cookie-reject" id="cookieReject" type="button">Reject</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>&#169; 2026 Pitmaster Tools. All rights reserved.</div>
+  <nav aria-label="Footer">
+    <a href="/">Calculator</a>
+    <span>|</span>
+    <a href="tools.html">All Tools</a>
+    <span>|</span>
+    <a href="privacy-policy.html">Privacy Policy</a>
+    <span>|</span>
+    <a href="terms-of-service.html">Terms of Service</a>
+    <span>|</span>
+    <a href="mailto:contact@pitmaster.tools">contact@pitmaster.tools</a>
+  </nav>
+  <p class="footer-small">Cost estimates are based on typical shrinkage rates and market pricing. Actual results vary by cook, cut, grade, and equipment. Always verify with a calibrated meat thermometer.</p>
+  <p class="footer-small">Last updated: April 12, 2026</p>
+</footer>
+
+<!-- INJECT:site-utils.js:script -->
+<script>
+
+var SHRINKAGE = {
+  brisket: 0.40,
+  pulled_pork: 0.35,
+  baby_back: 0.25,
+  spare_ribs: 0.25,
+  chicken_whole: 0.25,
+  chicken_thighs: 0.20,
+  turkey_breast: 0.20,
+  turkey_whole: 0.25,
+  sausage: 0.10
+};
+
+var SERVING_OZ = { light: 4, normal: 6, hungry: 8 };
+
+// ── State ─────────────────────────────────────────────────────────────────────
+var state = { wu: 'lbs', serving: 'normal' };
+
+function fmt$(n) {
+  return '$' + n.toFixed(2);
+}
+
+// ── Calculate ─────────────────────────────────────────────────────────────────
+function calculate() {
+  var vmsg = document.getElementById('vmsg');
+  vmsg.className = 'vmsg';
+  vmsg.textContent = '';
+
+  var rawWeightInput = parseFloat(document.getElementById('rawWeight').value);
+  if (!rawWeightInput || rawWeightInput <= 0) {
+    vmsg.textContent = 'Please enter a raw weight greater than zero.';
+    vmsg.classList.add('error');
+    document.getElementById('rawWeight').focus();
+    return;
+  }
+
+  var pricePerUnitInput = parseFloat(document.getElementById('pricePerUnit').value);
+  if (isNaN(pricePerUnitInput) || pricePerUnitInput < 0) {
+    vmsg.textContent = 'Please enter a valid price per pound (or per kg).';
+    vmsg.classList.add('error');
+    document.getElementById('pricePerUnit').focus();
+    return;
+  }
+
+  // Convert to lbs for calculation
+  var rawLbs = state.wu === 'kg' ? rawWeightInput * 2.20462 : rawWeightInput;
+  // Normalize price to per-lb
+  var pricePerLb = state.wu === 'kg' ? pricePerUnitInput / 2.20462 : pricePerUnitInput;
+
+  var meatType = document.getElementById('meatType').value;
+  var shrink = SHRINKAGE[meatType] || 0;
+
+  var rubCost = Math.max(0, parseFloat(document.getElementById('rubCost').value) || 0);
+  var woodCost = Math.max(0, parseFloat(document.getElementById('woodCost').value) || 0);
+  var miscCost = Math.max(0, parseFloat(document.getElementById('miscCost').value) || 0);
+
+  var cookHoursInput = parseFloat(document.getElementById('cookHours').value) || 0;
+  var hourlyRateInput = parseFloat(document.getElementById('hourlyRate').value) || 0;
+  var timeCost = (cookHoursInput > 0 && hourlyRateInput > 0) ? cookHoursInput * hourlyRateInput : 0;
+
+  var numPeople = parseInt(document.getElementById('numPeople').value, 10) || 0;
+  var servingSize = state.serving;
+  var servingOz = SERVING_OZ[servingSize];
+
+  var meatCost = rawLbs * pricePerLb;
+  var totalCost = meatCost + rubCost + woodCost + miscCost + timeCost;
+
+  var cookedLbs = rawLbs * (1 - shrink);
+  var servingsAvail = (cookedLbs * 16) / servingOz;
+  var costPerServing = totalCost / servingsAvail;
+  var costPerLbCooked = totalCost / cookedLbs;
+
+  // Update stat cards
+  document.getElementById('sTotalCost').textContent = fmt$(totalCost);
+  document.getElementById('sTotalSub').textContent = 'all-in for ' + (state.wu === 'kg' ? rawWeightInput.toFixed(1) + ' kg raw' : rawLbs.toFixed(1) + ' lbs raw');
+  document.getElementById('sCostPerServing').textContent = fmt$(costPerServing);
+  document.getElementById('sCostServingSub').textContent = 'per ' + servingOz + ' oz serving';
+  document.getElementById('sCostPerLb').textContent = fmt$(costPerLbCooked);
+  document.getElementById('sServingsAvail').textContent = Math.floor(servingsAvail).toString();
+  document.getElementById('sServingsSub').textContent = servingOz + ' oz servings from cook';
+
+  // Breakdown table
+  var rows = [
+    { label: 'Meat', amount: meatCost },
+    { label: 'Rub / Seasonings', amount: rubCost },
+    { label: 'Wood / Charcoal', amount: woodCost },
+    { label: 'Miscellaneous', amount: miscCost },
+    { label: 'Time Value', amount: timeCost }
+  ];
+
+  var tbody = document.getElementById('breakdownBody');
+  tbody.innerHTML = '';
+  rows.forEach(function(row) {
+    var tr = document.createElement('tr');
+    if (row.amount === 0 && row.label !== 'Meat') tr.className = 'zero';
+    var td1 = document.createElement('td');
+    var td2 = document.createElement('td');
+    td1.textContent = row.label;
+    td2.textContent = fmt$(row.amount);
+    tr.appendChild(td1);
+    tr.appendChild(td2);
+    tbody.appendChild(tr);
+  });
+  // Total row
+  var trTotal = document.createElement('tr');
+  var tdTL = document.createElement('td');
+  var tdTA = document.createElement('td');
+  tdTL.textContent = 'Total';
+  tdTA.textContent = fmt$(totalCost);
+  trTotal.appendChild(tdTL);
+  trTotal.appendChild(tdTA);
+  tbody.appendChild(trTotal);
+
+  // Shrinkage note
+  var cookedDisplay = state.wu === 'kg'
+    ? (cookedLbs / 2.20462).toFixed(2) + ' kg'
+    : cookedLbs.toFixed(2) + ' lbs';
+  var rawDisplay = state.wu === 'kg'
+    ? rawWeightInput.toFixed(1) + ' kg'
+    : rawLbs.toFixed(1) + ' lbs';
+  document.getElementById('shrinkageNote').textContent =
+    'Shrinkage: ' + escapeHtml(String(Math.round(shrink * 100))) + '% — ' +
+    escapeHtml(rawDisplay) + ' raw yields approximately ' + escapeHtml(cookedDisplay) + ' cooked';
+
+  // Meat warning
+  var warning = document.getElementById('meatWarning');
+  if (numPeople > 0 && servingsAvail < numPeople) {
+    var shortServings = numPeople - Math.floor(servingsAvail);
+    var extraOz = shortServings * servingOz;
+    var extraLbsNeeded = extraOz / 16 / (1 - shrink);
+    var extraDisplay = state.wu === 'kg'
+      ? (extraLbsNeeded / 2.20462).toFixed(1) + ' kg'
+      : extraLbsNeeded.toFixed(1) + ' lbs';
+    warning.textContent = 'Not enough meat! You need approximately ' + escapeHtml(extraDisplay) + ' more raw to feed everyone (' + escapeHtml(String(numPeople)) + ' people, ' + escapeHtml(String(Math.floor(servingsAvail))) + ' servings available).';
+    warning.classList.add('visible');
+  } else {
+    warning.classList.remove('visible');
+  }
+
+  // Show results
+  document.getElementById('results').classList.add('visible');
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ── Serving toggle ────────────────────────────────────────────────────────────
+document.querySelector('.serving-toggle').addEventListener('click', function(e) {
+  var btn = e.target.closest('button');
+  if (!btn || !btn.dataset.serving) return;
+  if (btn.dataset.serving === state.serving) return;
+  state.serving = btn.dataset.serving;
+  this.querySelectorAll('button').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.serving === state.serving);
+    b.setAttribute('aria-pressed', b.dataset.serving === state.serving ? 'true' : 'false');
+  });
+  if (document.getElementById('results').classList.contains('visible')) calculate();
+});
+
+// ── Weight unit toggle ────────────────────────────────────────────────────────
+document.getElementById('weightToggle').addEventListener('click', function(e) {
+  var btn = e.target.closest('button');
+  if (!btn) return;
+  var val = btn.dataset.unit;
+  if (val === state.wu) return;
+  var input = document.getElementById('rawWeight');
+  var cur = parseFloat(input.value);
+  if (!isNaN(cur)) {
+    input.value = val === 'kg'
+      ? Math.round(cur * 0.453592 * 10) / 10
+      : Math.round(cur / 0.453592 * 10) / 10;
+  }
+  state.wu = val;
+  document.getElementById('weightUnitLbl').textContent = val;
+  var priceLabel = document.getElementById('pricePerUnitLabel');
+  priceLabel.textContent = val === 'kg' ? 'Price per kg' : 'Price per lb';
+  this.querySelectorAll('button').forEach(function(b) { b.classList.toggle('active', b.dataset.unit === val); });
+  try { localStorage.setItem('pitmaster_wu', val); } catch(err){}
+  if (document.getElementById('results').classList.contains('visible')) calculate();
+});
+
+// ── Calculate button ──────────────────────────────────────────────────────────
+document.getElementById('calcBtn').addEventListener('click', calculate);
+document.getElementById('rawWeight').addEventListener('keydown', function(e) { if (e.key === 'Enter') calculate(); });
+document.getElementById('pricePerUnit').addEventListener('keydown', function(e) { if (e.key === 'Enter') calculate(); });
+
+document.getElementById('cookieAccept').addEventListener('click', function() {
+  setCookie(CONSENT_COOKIE_NAME, 'accepted', 365);
+  document.getElementById('cookieBanner').classList.remove('visible');
+  loadGoogleServices();
+});
+document.getElementById('cookieReject').addEventListener('click', function() {
+  setCookie(CONSENT_COOKIE_NAME, 'rejected', 365);
+  document.getElementById('cookieBanner').classList.remove('visible');
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(function init() {
+  try {
+    var savedWu = localStorage.getItem('pitmaster_wu');
+    if (!savedWu) {
+      var lang = navigator.language || 'en-US';
+      if (shouldDefaultMetric(lang)) { savedWu = 'kg'; }
+    }
+    if (savedWu) {
+      state.wu = savedWu;
+      document.getElementById('weightUnitLbl').textContent = savedWu;
+      var priceLabel = document.getElementById('pricePerUnitLabel');
+      priceLabel.textContent = savedWu === 'kg' ? 'Price per kg' : 'Price per lb';
+      if (savedWu === 'kg') {
+        var inp = document.getElementById('rawWeight');
+        inp.value = Math.round(parseFloat(inp.value) * 0.453592 * 10) / 10;
+      }
+      document.querySelectorAll('#weightToggle button').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.unit === savedWu);
+      });
+    }
+  } catch(err){}
+  initConsentBanner();
+})();
+</script>
+<!-- INJECT:site-header.js:script -->
+</body>
+</html>

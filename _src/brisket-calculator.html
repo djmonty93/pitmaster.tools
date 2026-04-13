@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brisket Smoking Calculator — How Long to Smoke a Brisket | Pitmaster Tools</title>
+<meta name="description" content="Free brisket smoking calculator. Enter your brisket weight, smoker temperature, and serve time to get exact cook times, start times, and a full smoking timeline for sliced or pulled brisket.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://pitmaster.tools/brisket-calculator.html">
+<meta property="og:title" content="Brisket Smoking Calculator — How Long to Smoke a Brisket">
+<meta property="og:description" content="Free brisket smoking calculator. Enter your brisket weight, smoker temperature, and serve time to get exact cook times, start times, and a full smoking timeline for sliced or pulled brisket.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://pitmaster.tools/brisket-calculator.html">
+<meta property="og:image" content="https://pitmaster.tools/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Brisket Smoking Calculator — How Long to Smoke a Brisket">
+<meta name="twitter:description" content="Free brisket smoking calculator. Enter your brisket weight, smoker temperature, and serve time to get exact cook times, start times, and a full smoking timeline for sliced or pulled brisket.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23EF9F27' d='M36 4c2 10-3 15-8 21-5 6-9 11-9 19 0 10 7 16 15 16 11 0 19-8 19-19 0-12-7-19-17-37z'/%3E%3Cpath fill='%23D78108' d='M33 27c1 6-2 9-5 12-3 3-5 6-5 10 0 6 4 10 9 10 7 0 12-5 12-12 0-7-4-11-11-20z'/%3E%3C/svg%3E">
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {'ad_storage':'denied','analytics_storage':'denied','wait_for_update':500});
+  (function(){
+    var prefix = 'pitmaster_consent=';
+    var cookies = document.cookie ? document.cookie.split(';') : [];
+    for(var i=0;i<cookies.length;i++){
+      var c=cookies[i].trim();
+      if(c.indexOf(prefix)!==0) continue;
+      if(decodeURIComponent(c.substring(prefix.length))!=='accepted') break;
+      gtag('consent','update',{'ad_storage':'granted','analytics_storage':'granted'});
+      var s=document.createElement('script'); s.async=true;
+      s.src='https://www.googletagmanager.com/gtag/js?id=G-SJJVV37EWE';
+      document.head.appendChild(s);
+      gtag('js',new Date()); gtag('config','G-SJJVV37EWE');
+      window._gtagLoaded=true; break;
+    }
+  })();
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Pitmaster Tools — Brisket Smoking Calculator",
+  "url": "https://pitmaster.tools/brisket-calculator.html",
+  "description": "Free brisket smoking calculator. Enter your brisket weight, smoker temperature, and serve time to get exact cook times, start times, and a full smoking timeline for sliced or pulled brisket.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "isAccessibleForFree": true,
+  "browserRequirements": "Requires JavaScript enabled in a modern browser.",
+  "featureList": [
+    "Brisket cook time calculator",
+    "Full smoking timeline working backward from serve time",
+    "Stall prediction with wrap-method adjustment",
+    "Sliced vs. pulled brisket pull temperatures",
+    "Foil, butcher paper, and no-wrap timing factors",
+    "Reference table for multiple weights and temperatures"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How long does it take to smoke a brisket?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "At 250°F, a 12-pound brisket takes approximately 15 hours of active cook time before a 90-minute rest. The exact time depends on the smoker temperature, wrap method, and the brisket's thickness. Always cook to internal temperature — never to time alone. A probe thermometer is mandatory."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What temperature do you pull a brisket?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Pull brisket for slicing at 195°F internal temperature. Pull brisket for pulling (shredding) at 205°F. At both temperatures, test with a probe — it should slide in with zero resistance, like pushing into warm butter. Do not rely on temperature alone if the probe still meets resistance."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the brisket stall?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The brisket stall is a plateau that occurs between 150°F and 170°F internal temperature, where the meat stops rising in temperature for several hours. This is caused by evaporative cooling — moisture evaporating from the meat's surface at the same rate that the smoker adds heat. Collagen is also breaking down into gelatin during this period. The stall can last 3–6 hours. Do not panic and do not raise the smoker temperature. Wrapping in foil (Texas Crutch) or butcher paper will shorten or eliminate the stall."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should you wrap a brisket in foil or butcher paper?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Wrapping in foil (the Texas Crutch) speeds the brisket through the stall fastest by trapping steam, but it softens the bark. Butcher paper allows the bark to breathe while still reducing stall time by roughly half — it is the preferred method for competition pitmasters who want both speed and bark quality. No wrap produces the hardest, most developed bark but adds significant cook time and requires more fuel management. All three methods produce excellent brisket when executed well."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long should brisket rest before slicing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Brisket should rest a minimum of 90 minutes before slicing. A 2–4 hour rest is ideal and will noticeably improve juiciness and sliceability. For large events, a faux Cambro — wrapping the foiled brisket in towels and placing it in a cooler — can hold a brisket safely at temperature for 6 hours or more, giving you tremendous flexibility on serve time."
+      }
+    }
+  ]
+}
+</script>
+<!-- INJECT:site-header.css -->
+<!-- INJECT:site-base.css -->
+<style>
+.unit-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.style-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: .25rem; }
+.style-btn { border: 2px solid var(--card-border); border-radius: 8px; padding: .875rem 1rem; background: #FAFAF8; text-align: center; cursor: pointer; font-family: inherit; transition: border-color .15s, background .15s; }
+.style-btn.active { border-color: var(--amber); background: var(--amber-light); }
+.style-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.sb-icon { font-size: 1.35rem; display: block; margin-bottom: .25rem; }
+.sb-name { font-weight: 700; font-size: .95rem; display: block; margin-bottom: .1rem; }
+.sb-desc { font-size: .76rem; color: var(--text-muted); line-height: 1.4; }
+.wrap-toggle { display: flex; border: 1.5px solid var(--card-border); border-radius: 6px; overflow: hidden; }
+.wrap-toggle button { flex: 1; border: none; background: #FAFAF8; color: var(--text-muted); font-family: inherit; font-size: .875rem; font-weight: 600; padding: .55rem .5rem; cursor: pointer; transition: background .15s,color .15s; border-right: 1px solid var(--card-border); line-height: 1.2; }
+.wrap-toggle button:last-child { border-right: none; }
+.wrap-toggle button.active { background: var(--amber); color: #fff; }
+.wrap-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.calc-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.results-close:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.tl-list { list-style: none; padding: 0; margin-bottom: 1rem; }
+.tl-item { display: flex; gap: .75rem; padding: .6rem 0; border-bottom: 1px solid #F0EBE3; align-items: flex-start; }
+.tl-item:last-child { border-bottom: none; }
+.tl-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: .35rem; }
+.tl-dot.blue { background: var(--blue); }
+.tl-dot.amber { background: var(--amber); }
+.tl-dot.red { background: var(--red); }
+.tl-dot.green { background: var(--green); }
+.tl-time { font-weight: 700; font-size: .9rem; min-width: 90px; font-variant-numeric: tabular-nums; }
+.tl-day { font-size: .72rem; color: var(--text-muted); }
+.tl-label { font-weight: 600; font-size: .9rem; }
+.tl-sub { font-size: .8rem; color: var(--text-muted); margin-top: .1rem; }
+.print-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.editorial-section p + p, .editorial-section p + h3, .editorial-section h3 + p,
+.editorial-section ul + p, .editorial-section p + ul { margin-top: .9rem; }
+.editorial-section ul { padding-left: 1.25rem; margin-top: .5rem; }
+.editorial-section li + li { margin-top: .3rem; }
+.ref-table-wrap { overflow-x: auto; border: 1px solid var(--card-border); border-radius: var(--radius); background: #fff; box-shadow: var(--shadow); margin: 1rem 0; }
+.ref-table { width: 100%; border-collapse: collapse; min-width: 480px; }
+.ref-table th, .ref-table td { text-align: center; padding: .7rem .8rem; border-bottom: 1px solid #EFE7DA; font-size: .9rem; }
+.ref-table th:first-child, .ref-table td:first-child { text-align: left; font-weight: 700; }
+.ref-table thead th { background: #FAF5EC; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); position: sticky; top: 0; }
+.ref-table tbody tr:nth-child(even) { background: #FCFAF6; }
+.faq-section { margin: 2rem 0; }
+.faq-section h2 { font-family: Georgia,serif; font-size: 1.55rem; margin-bottom: 1rem; }
+.faq-body { padding: 0 1.15rem 1rem; color: #332F2B; line-height: 1.75; font-size: .95rem; }
+.related-tools h2 { font-family: Georgia,serif; font-size: 1.35rem; margin-bottom: 1rem; }
+#print-header { display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">Pitmaster<span> Tools</span></a>
+  <nav class="header-nav" aria-label="Site navigation">
+    <div class="nav-dropdown">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="tools.html">All Tools</a></li>
+        <li><a href="/">Meat Smoking Calculator</a></li>
+        <li><a href="brisket-calculator.html" aria-current="page">Brisket Calculator</a></li>
+        <li><a href="pork-shoulder-calculator.html">Pork Shoulder Calculator</a></li>
+        <li><a href="rib-calculator.html">Rib Calculator</a></li>
+        <li><a href="turkey-smoking-calculator.html">Turkey Calculator</a></li>
+        <li><a href="meat-per-person.html">Meat Per Person</a></li>
+        <li><a href="cook-time-coordinator.html">Cook Time Coordinator</a></li>
+        <li><a href="charcoal-calculator.html">Charcoal Calculator</a></li>
+        <li><a href="brine-calculator.html">Brine Calculator</a></li>
+        <li><a href="dry-rub-calculator.html">Dry Rub Calculator</a></li>
+        <li><a href="bbq-cost-calculator.html">BBQ Cost Calculator</a></li>
+        <li><a href="catering-calculator.html">Catering Calculator</a></li>
+        <li><a href="brisket-yield-calculator.html">Brisket Yield Calculator</a></li>
+      </ul>
+    </div>
+    <a href="about.html">About</a>
+  </nav>
+  <div class="unit-controls">
+    <div class="unit-toggle" id="tempToggle" role="group" aria-label="Temperature unit">
+      <button data-unit="F" class="active" type="button">&#xB0;F</button>
+      <button data-unit="C" type="button">&#xB0;C</button>
+    </div>
+    <div class="unit-toggle" id="weightToggle" role="group" aria-label="Weight unit">
+      <button data-unit="lbs" class="active" type="button">lbs</button>
+      <button data-unit="kg" type="button">kg</button>
+    </div>
+  </div>
+</header>
+
+<div class="ad-slot" aria-hidden="true">
+  <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4265262608577453" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+</div>
+
+<main>
+  <div id="print-header">
+    <div class="print-title" id="ptitle">Brisket Smoking Timeline</div>
+    <div class="pm" id="pmeta"></div>
+  </div>
+
+  <section class="page-hero" aria-label="Page introduction">
+    <h1>Brisket Smoking Calculator</h1>
+    <p>Enter your brisket details and serve time to get a complete cook timeline — including exactly when to light the smoker, when the stall hits, and when to pull.</p>
+  </section>
+
+  <div class="form-card">
+    <p class="section-title">Brisket Style</p>
+    <div class="style-toggle" role="group" aria-label="Brisket style">
+      <button class="style-btn active" data-style="sliced" type="button" aria-pressed="true">
+        <span class="sb-icon">&#x1F969;</span>
+        <span class="sb-name">Sliced Brisket</span>
+        <span class="sb-desc">Pull at 195&#xB0;F. Ideal for Texas-style brisket with clean slices from the flat.</span>
+      </button>
+      <button class="style-btn" data-style="pulled" type="button" aria-pressed="false">
+        <span class="sb-icon">&#x1F356;</span>
+        <span class="sb-name">Pulled Brisket</span>
+        <span class="sb-desc">Pull at 205&#xB0;F. Fully rendered collagen for pulled or chopped brisket from the point.</span>
+      </button>
+    </div>
+
+    <div class="form-grid" style="margin-top:1.25rem">
+      <div class="form-group">
+        <label for="weight">Brisket Weight</label>
+        <div class="input-with-unit">
+          <input type="number" id="weight" min="1" max="100" step="0.5" value="12" aria-label="Brisket weight">
+          <span class="input-unit-label" id="weightUnitLbl">lbs</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="smokerTemp">Smoker Temperature</label>
+        <select id="smokerTemp" aria-label="Smoker temperature">
+          <option value="225">225&#xB0;F (107&#xB0;C)</option>
+          <option value="250" selected>250&#xB0;F (121&#xB0;C)</option>
+          <option value="275">275&#xB0;F (135&#xB0;C)</option>
+          <option value="300">300&#xB0;F (149&#xB0;C)</option>
+        </select>
+      </div>
+
+      <div class="form-group full-width">
+        <label>Wrap Method</label>
+        <div class="wrap-toggle" role="group" aria-label="Wrap method">
+          <button data-wrap="foil" class="active" type="button" aria-pressed="true">Foil<br><small style="font-weight:400;font-size:.72rem">Texas Crutch</small></button>
+          <button data-wrap="paper" type="button" aria-pressed="false">Butcher Paper<br><small style="font-weight:400;font-size:.72rem">Best bark</small></button>
+          <button data-wrap="none" type="button" aria-pressed="false">No Wrap<br><small style="font-weight:400;font-size:.72rem">Maximum bark</small></button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="serveTime">Serve Time</label>
+        <input type="time" id="serveTime" value="14:00" aria-label="Serve time">
+      </div>
+    </div>
+
+    <button class="calc-btn" id="calcBtn" type="button">Calculate Brisket Timeline</button>
+    <div class="vmsg" id="vmsg" role="alert" aria-live="polite"></div>
+  </div>
+
+  <div class="ad-slot" aria-hidden="true">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4265262608577453" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+  </div>
+
+  <!-- Results modal -->
+  <div id="results" role="dialog" aria-modal="true" aria-labelledby="resultsModalTitle">
+    <div class="results-modal" tabindex="-1">
+      <div class="results-modal__header no-print">
+        <h2 class="results-modal__title" id="resultsModalTitle">Your Brisket Timeline</h2>
+        <button class="results-close" id="resultsClose" type="button" aria-label="Close results">&#x00D7;</button>
+      </div>
+
+      <div class="stat-cards">
+        <div class="stat-card c1">
+          <span class="sc-icon">&#x1F550;</span>
+          <div class="sc-label">Cook Time</div>
+          <div class="sc-value" id="sCookTime">&#x2014;</div>
+          <div class="sc-sub" id="sCookSub">hours</div>
+        </div>
+        <div class="stat-card c2">
+          <span class="sc-icon">&#x1F525;</span>
+          <div class="sc-label">Light Smoker</div>
+          <div class="sc-value" id="sLightTime">&#x2014;</div>
+          <div class="sc-sub" id="sLightDay"></div>
+        </div>
+        <div class="stat-card c3">
+          <span class="sc-icon">&#x1F321;&#xFE0F;</span>
+          <div class="sc-label">Pull Temp</div>
+          <div class="sc-value" id="sPullTemp">&#x2014;</div>
+          <div class="sc-sub">internal temp</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="section-title">Cook Timeline</h3>
+        <ul class="tl-list" id="tlList" aria-label="Cook timeline"></ul>
+      </div>
+
+      <div style="margin-top:1rem" class="no-print">
+        <button class="print-btn" id="printBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <polyline points="6 9 6 2 18 2 18 9"/>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+            <rect x="6" y="14" width="12" height="8"/>
+          </svg>
+          Print Timeline
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Editorial content -->
+  <section class="editorial-section" aria-labelledby="editorial-title">
+    <h2 id="editorial-title">How Long to Smoke a Brisket</h2>
+
+    <p>Brisket is the most rewarding — and most demanding — cook in low-and-slow BBQ. The general rule of thumb is <strong>1.25 to 1.5 hours per pound at 225&#xB0;F</strong>. A full packer brisket weighing 14 to 16 pounds will take 17 to 22 hours from smoker on to pull. At 250&#xB0;F, that same brisket comes in closer to 14 to 18 hours. These numbers are averages; your actual time will depend on the thickness of the flat, your smoker's temperature consistency, and how you manage the stall. If you are trying to estimate usable sliced meat instead of clock time, the <a href="brisket-yield-calculator.html">Brisket Yield Calculator</a> breaks down packer, flat, point, and trim loss.</p>
+
+    <p>The single most important rule: <strong>cook to temperature, not to time.</strong> A meat thermometer is not optional equipment for brisket — it is the cook. Pull brisket for slicing at 195&#xB0;F internal, or 205&#xB0;F if you are pulling or chopping. Use the probe test to confirm: when a thermometer probe slides into the thickest part of the flat with zero resistance — like pushing into warm butter — the brisket is done regardless of what the thermometer reads.</p>
+
+    <h3>The Brisket Stall</h3>
+
+    <p>Every pitmaster who has cooked a brisket has encountered the stall: a maddening plateau that begins around 150&#xB0;F and can hold for three to six hours. The internal temperature stops climbing or even drops a degree or two, and panic sets in. Do not raise the smoker temperature. The brisket is fine.</p>
+
+    <p>The stall occurs because brisket contains a significant amount of surface moisture that evaporates at the same rate the smoker adds heat — a process called evaporative cooling. Your brisket is essentially sweating, and as long as that evaporation is happening, the temperature will not rise. Simultaneously, collagen in the connective tissue is beginning its conversion into gelatin — the process that makes brisket tender. The stall ends naturally when enough moisture has evaporated and the collagen conversion is complete, at which point the internal temperature begins climbing again.</p>
+
+    <p>The stall typically begins at around 40% of total cook time and ends near 65%. For a 16-hour cook, that means a stall window of roughly hours 6 through 10. This calculator estimates your stall window and builds it into the timeline automatically.</p>
+
+    <h3>Wrapping Decisions: Foil vs. Butcher Paper vs. No Wrap</h3>
+
+    <p>How you wrap — or choose not to wrap — is one of the most consequential decisions of the cook. Each method produces a different result.</p>
+
+    <ul>
+      <li><strong>Foil (Texas Crutch):</strong> Wrapping tightly in heavy-duty aluminum foil eliminates the stall almost entirely by trapping steam around the meat. The brisket essentially braises in its own juices for the remainder of the cook. Cook time is reduced by roughly 10%. The downside is bark: the steam softens the crust. If you wrap in foil, unwrap during the rest to let the bark firm up. Most backyard cooks and competition teams on a schedule use foil.</li>
+      <li><strong>Butcher Paper (Pink / Peach Paper):</strong> Butcher paper is breathable, which means it reduces the stall without the bark-destroying steam environment of foil. It slows moisture loss and stabilizes the cook without fully trapping humidity. Cook time is reduced by about 5% compared to foil. The bark is noticeably better — this is the method used by Franklin Barbecue and most serious Texas pitmasters. Wrap when the bark is fully set and the surface is deep mahogany, typically at the onset of the stall.</li>
+      <li><strong>No Wrap:</strong> The purist approach. The stall runs its full course, the bark gets maximum time exposed to smoke and airflow, and the result is the hardest, most developed crust you can achieve. Cook time is 10% longer than foil-wrapped. Fuel management matters more with no wrap because temperature spikes will dry out the flat faster. It is the highest-risk approach and the most rewarding when executed well.</li>
+    </ul>
+
+    <h3>The Rest Is Not Optional</h3>
+
+    <p>Resting brisket is not a suggestion — it is a step as important as the cook itself. When brisket comes off the smoker, the muscle fibers are tightly contracted from hours of heat. During the rest, those fibers relax and reabsorb the juices that were pushed to the center during cooking. Slice too early, and the cutting board fills with juice that should have stayed in the meat.</p>
+
+    <p>The minimum rest is 90 minutes, loosely tented in foil. Two to four hours is ideal. For large events or catering situations, the faux Cambro method — wrapping the brisket tightly in foil, then in a thick beach towel, and placing it in a dry cooler — will safely hold a brisket at serving temperature for four to six hours, sometimes more. This technique gives you enormous flexibility on timing and is used at competition cook sites worldwide. If you are serving a crowd, the <a href="catering-calculator.html">Catering Calculator</a> helps convert that finished brisket into realistic portions and shopping numbers.</p>
+
+    <p>Do not skip the rest because the brisket probed done an hour early. That extra hour in the cooler makes it better, not worse. The calculator builds in a 90-minute rest by default and works backward from your serve time accordingly.</p>
+
+    <h3>Sliced vs. Pulled Brisket</h3>
+
+    <p>A full packer brisket consists of two muscles: the flat and the point. The flat is the leaner, thinner muscle used for classic sliced brisket. The point (also called the deckle or nose) is heavily marbled and is typically used for burnt ends or pulled brisket.</p>
+
+    <ul>
+      <li><strong>Sliced brisket (195&#xB0;F):</strong> The flat holds its structure for clean slices. Pull at 195&#xB0;F internal, rest, and slice against the grain to 1/4-inch thickness — the width of a pencil. Going thicker or thinner makes it either chewy or crumbly.</li>
+      <li><strong>Pulled brisket (205&#xB0;F):</strong> Cooking to 205&#xB0;F breaks down more collagen and renders more intramuscular fat, producing meat that pulls apart easily. The point is ideal for this treatment. At 205&#xB0;F, the flat will be very tender but may not hold together for slices — plan accordingly and separate the flat and point before pulling.</li>
+    </ul>
+
+    <p>Neither style is superior — they serve different occasions. Sliced brisket is the centerpiece of a Texas-style plate. Pulled brisket works beautifully in sandwiches, tacos, and hash. If you are cooking a whole packer, you can serve both by pulling the point while slicing the flat.</p>
+
+    <!-- Reference table -->
+    <h3>Brisket Smoke Time Reference (foil wrap)</h3>
+    <p>Estimated cook times at each temperature using foil wrap. Add 5% for butcher paper and 10% for no wrap. All times include cook only — rest is not included.</p>
+    <div class="ref-table-wrap">
+      <table class="ref-table">
+        <thead>
+          <tr>
+            <th>Temp</th>
+            <th>8 lbs</th>
+            <th>10 lbs</th>
+            <th>12 lbs</th>
+            <th>14 lbs</th>
+            <th>16 lbs</th>
+            <th>18 lbs</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>225&#xB0;F</td>
+            <td>12.0 hrs</td>
+            <td>15.0 hrs</td>
+            <td>18.0 hrs</td>
+            <td>21.0 hrs</td>
+            <td>24.0 hrs</td>
+            <td>27.0 hrs</td>
+          </tr>
+          <tr>
+            <td>250&#xB0;F</td>
+            <td>10.2 hrs</td>
+            <td>12.8 hrs</td>
+            <td>15.3 hrs</td>
+            <td>17.9 hrs</td>
+            <td>20.4 hrs</td>
+            <td>23.0 hrs</td>
+          </tr>
+          <tr>
+            <td>275&#xB0;F</td>
+            <td>9.0 hrs</td>
+            <td>11.3 hrs</td>
+            <td>13.5 hrs</td>
+            <td>15.8 hrs</td>
+            <td>18.0 hrs</td>
+            <td>20.3 hrs</td>
+          </tr>
+          <tr>
+            <td>300&#xB0;F</td>
+            <td>7.8 hrs</td>
+            <td>9.8 hrs</td>
+            <td>11.7 hrs</td>
+            <td>13.7 hrs</td>
+            <td>15.6 hrs</td>
+            <td>17.6 hrs</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="ad-slot" aria-hidden="true">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4265262608577453" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+  </div>
+
+  <!-- FAQ -->
+  <section class="faq-section" aria-labelledby="faq-title">
+    <h2 id="faq-title">Frequently Asked Questions</h2>
+    <div class="faq-group">
+      <details class="faq-item">
+        <summary>How long does it take to smoke a brisket?</summary>
+        <div class="faq-body">At 250&#xB0;F, a 12-pound brisket takes approximately 15 hours of active cook time before a 90-minute rest. The exact time depends on the smoker temperature, wrap method, and the brisket's thickness. Always cook to internal temperature — never to time alone. A probe thermometer is mandatory.</div>
+      </details>
+      <details class="faq-item">
+        <summary>What temperature do you pull a brisket?</summary>
+        <div class="faq-body">Pull brisket for slicing at 195&#xB0;F internal temperature. Pull brisket for pulling (shredding) at 205&#xB0;F. At both temperatures, test with a probe — it should slide in with zero resistance, like pushing into warm butter. Do not rely on temperature alone if the probe still meets resistance.</div>
+      </details>
+      <details class="faq-item">
+        <summary>What is the brisket stall?</summary>
+        <div class="faq-body">The brisket stall is a plateau that occurs between 150&#xB0;F and 170&#xB0;F internal temperature, where the meat stops rising in temperature for several hours. This is caused by evaporative cooling — moisture evaporating from the meat's surface at the same rate that the smoker adds heat. Collagen is also breaking down into gelatin during this period. The stall can last 3 to 6 hours. Do not panic and do not raise the smoker temperature. Wrapping in foil (Texas Crutch) or butcher paper will shorten or eliminate the stall.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Should you wrap a brisket in foil or butcher paper?</summary>
+        <div class="faq-body">Wrapping in foil (the Texas Crutch) speeds the brisket through the stall fastest by trapping steam, but it softens the bark. Butcher paper allows the bark to breathe while still reducing stall time — it is the preferred method for pitmasters who want both speed and bark quality. No wrap produces the hardest, most developed bark but adds significant cook time and requires more fuel management. All three methods produce excellent brisket when executed well.</div>
+      </details>
+      <details class="faq-item">
+        <summary>How long should brisket rest before slicing?</summary>
+        <div class="faq-body">Brisket should rest a minimum of 90 minutes before slicing. A 2 to 4 hour rest is ideal and will noticeably improve juiciness and sliceability. For large events, a faux Cambro — wrapping the foiled brisket in towels and placing it in a cooler — can hold a brisket safely at temperature for 6 hours or more, giving you tremendous flexibility on serve time.</div>
+      </details>
+    </div>
+  </section>
+
+  <!-- Related tools -->
+  <section class="related-tools" aria-labelledby="related-title">
+    <h2 id="related-title">More Pitmaster Tools</h2>
+    <div class="tool-links">
+      <a class="tool-link" href="/">
+        <span class="tool-link-icon">&#x1F321;&#xFE0F;</span>
+        <div>
+          <div class="tool-link-name">Meat Smoking Calculator</div>
+          <div class="tool-link-desc">Cook times for 28 cuts with full timeline, wood pairings, and serving size math.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="pork-shoulder-calculator.html">
+        <span class="tool-link-icon">&#x1F416;</span>
+        <div>
+          <div class="tool-link-name">Pork Shoulder Calculator</div>
+          <div class="tool-link-desc">Dedicated cook timeline for pulled pork and sliced pork shoulder.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="charcoal-calculator.html">
+        <span class="tool-link-icon">&#x26B0;&#xFE0F;</span>
+        <div>
+          <div class="tool-link-name">Charcoal Calculator</div>
+          <div class="tool-link-desc">Exact charcoal amounts for Minion, Snake, or direct-heat cooks.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="cook-time-coordinator.html">
+        <span class="tool-link-icon">&#x1F4CB;</span>
+        <div>
+          <div class="tool-link-name">Cook Time Coordinator</div>
+          <div class="tool-link-desc">Smoke multiple meats and sync all finish times to the same table.</div>
+        </div>
+      </a>
+    </div>
+  </section>
+</main>
+
+<!-- Cookie consent banner -->
+<div class="cookie-banner" id="cookieBanner" role="dialog" aria-live="polite" aria-label="Cookie consent">
+  <div class="cookie-banner__inner">
+    <p class="cookie-banner__text">We use cookies for analytics and advertising. See our <a href="privacy-policy.html">Privacy Policy</a> for details.</p>
+    <div class="cookie-banner__actions">
+      <button class="cookie-accept" id="cookieAccept" type="button">Accept</button>
+      <button class="cookie-reject" id="cookieReject" type="button">Reject</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>&#169; 2026 Pitmaster Tools. All rights reserved.</div>
+  <nav aria-label="Footer">
+    <a href="/">Calculator</a>
+    <span>|</span>
+    <a href="tools.html">All Tools</a>
+    <span>|</span>
+    <a href="privacy-policy.html">Privacy Policy</a>
+    <span>|</span>
+    <a href="terms-of-service.html">Terms of Service</a>
+    <span>|</span>
+    <a href="mailto:contact@pitmaster.tools">contact@pitmaster.tools</a>
+  </nav>
+  <p class="footer-small">Cook times are estimates based on USDA guidelines and pitmaster consensus. Always verify doneness with a calibrated meat thermometer. Never rely solely on time.</p>
+  <p class="footer-small">Last updated: April 12, 2026</p>
+</footer>
+
+<!-- INJECT:site-utils.js:script -->
+<script>
+
+var CUTS = {
+  sliced: { name: 'Brisket (Sliced)', cookRate: 1.5, pullTemp: 195, restMinutes: 90, stallLo: 150, stallHi: 170 },
+  pulled: { name: 'Brisket (Pulled)', cookRate: 1.5, pullTemp: 205, restMinutes: 90, stallLo: 150, stallHi: 170 }
+};
+
+var TM = { 225: 1.0, 250: 0.85, 275: 0.75, 300: 0.65 };
+
+function cookHrs(wLbs, temp, wrap) {
+  var h = 1.5 * wLbs * (TM[temp] || 1.0);
+  if (wrap === 'none') h *= 1.10;
+  else if (wrap === 'paper') h *= 1.05;
+  return h;
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+var state = { style: 'sliced', wrap: 'foil', tu: 'F', wu: 'lbs' };
+
+function fmtTime(date) {
+  var h = date.getHours(), m = date.getMinutes();
+  var ampm = h >= 12 ? 'PM' : 'AM';
+  var h12 = h % 12 || 12;
+  return h12 + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
+}
+
+function dayLabel(base, target) {
+  var bd = new Date(base.getFullYear(), base.getMonth(), base.getDate());
+  var td = new Date(target.getFullYear(), target.getMonth(), target.getDate());
+  var diff = Math.round((td - bd) / 86400000);
+  if (diff === 0) return '';
+  if (diff === -1) return 'yesterday';
+  if (diff === -2) return '2 days ago';
+  if (diff === 1) return 'tomorrow';
+  var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  return days[target.getDay()];
+}
+
+function fmtTemp(f) {
+  if (state.tu === 'C') return Math.round((f - 32) * 5 / 9) + '\u00B0C';
+  return f + '\u00B0F';
+}
+
+function fmtSmokerTemp(f) {
+  if (state.tu === 'C') return Math.round((f - 32) * 5 / 9) + '\u00B0C';
+  return f + '\u00B0F';
+}
+
+// ── Calculate ─────────────────────────────────────────────────────────────────
+function calculate() {
+  var vmsg = document.getElementById('vmsg');
+  vmsg.className = 'vmsg';
+  vmsg.textContent = '';
+
+  var rawWeight = parseFloat(document.getElementById('weight').value);
+  if (!rawWeight || rawWeight <= 0) {
+    vmsg.textContent = 'Please enter a brisket weight greater than zero.';
+    vmsg.classList.add('error');
+    document.getElementById('weight').focus();
+    return;
+  }
+
+  var weightLbs = state.wu === 'kg' ? rawWeight / 0.453592 : rawWeight;
+  var temp = parseInt(document.getElementById('smokerTemp').value, 10);
+  var wrap = state.wrap;
+  var serveVal = document.getElementById('serveTime').value;
+
+  if (!serveVal) {
+    vmsg.textContent = 'Please enter a serve time.';
+    vmsg.classList.add('error');
+    document.getElementById('serveTime').focus();
+    return;
+  }
+
+  var cut = CUTS[state.style];
+  var totalCookHrs = cookHrs(weightLbs, temp, wrap);
+  var cookMs = totalCookHrs * 3600000;
+  var restMs = cut.restMinutes * 60000;
+
+  // Build serve date from today, rolling past times to tomorrow.
+  var now = new Date();
+  var parts = serveVal.split(':');
+  var serve = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+  var nowMinute = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), 0, 0);
+  if (serve < nowMinute) serve.setDate(serve.getDate() + 1);
+
+  var pull = new Date(serve.getTime() - restMs);
+  var meatOn = new Date(pull.getTime() - cookMs);
+  var light = new Date(meatOn.getTime() - 30 * 60000);
+
+  // Stall window
+  var stallBase = wrap === 'none' ? cookMs / 1.10 : wrap === 'paper' ? cookMs / 1.05 : cookMs;
+  var stallStart = new Date(meatOn.getTime() + stallBase * 0.40);
+  var stallEnd   = new Date(meatOn.getTime() + cookMs * 0.65);
+
+  var lightDay = dayLabel(serve, light);
+  var meatOnDay = dayLabel(serve, meatOn);
+  var stallStartDay = dayLabel(serve, stallStart);
+  var stallEndDay = dayLabel(serve, stallEnd);
+  var pullDay = dayLabel(serve, pull);
+
+  // Stall wrap note
+  var stallNote = '';
+  if (wrap === 'foil') stallNote = 'Internal reaches ' + fmtTemp(cut.stallLo) + '\u2013' + fmtTemp(cut.stallHi) + ' \u2014 temperature plateau begins. Wrap tightly in foil now (Texas Crutch).';
+  else if (wrap === 'paper') stallNote = 'Internal reaches ' + fmtTemp(cut.stallLo) + '\u2013' + fmtTemp(cut.stallHi) + ' \u2014 temperature plateau begins. Wrap in butcher paper now.';
+  else stallNote = 'Internal reaches ' + fmtTemp(cut.stallLo) + '\u2013' + fmtTemp(cut.stallHi) + ' \u2014 temperature plateau begins. Hold steady \u2014 no wrap, trust the process.';
+
+  var stallEndNote = wrap === 'none' ? 'Temperature climbs again' : 'Temperature climbs again \u2014 leave wrapped until pull temp';
+
+  // Build timeline
+  var events = [
+    { dot: 'blue',  time: light,      day: lightDay,      label: 'Light smoker / preheat',       sub: 'Target: ' + fmtSmokerTemp(temp) + ' stable before meat goes on' },
+    { dot: 'amber', time: meatOn,     day: meatOnDay,     label: 'Meat goes on smoker',           sub: weightLbs.toFixed(1) + ' lbs brisket \u2014 fat side up or down per your setup' },
+    { dot: 'red',   time: stallStart, day: stallStartDay, label: 'Stall begins',                  sub: stallNote },
+    { dot: 'amber', time: stallEnd,   day: stallEndDay,   label: wrap === 'none' ? 'Stall ends' : 'Stall ends / unwrap', sub: stallEndNote },
+    { dot: 'amber', time: pull,       day: pullDay,       label: 'Pull from smoker \u2014 begin rest', sub: 'Target internal: ' + fmtTemp(cut.pullTemp) + ' \u2014 rest 90 min loosely tented' },
+    { dot: 'green', time: serve,      day: '',            label: 'Serve',                          sub: 'Slice against the grain 1/4\u201D thick \u2014 enjoy' }
+  ];
+
+  var tlList = document.getElementById('tlList');
+  tlList.innerHTML = '';
+  events.forEach(function(ev) {
+    var li = document.createElement('li');
+    li.className = 'tl-item';
+    li.innerHTML =
+      '<span class="tl-dot ' + ev.dot + '" aria-hidden="true"></span>' +
+      '<div style="flex:1">' +
+        '<div class="tl-time">' + fmtTime(ev.time) + (ev.day ? '<span class="tl-day"> (' + ev.day + ')</span>' : '') + '</div>' +
+        '<div class="tl-label">' + ev.label + '</div>' +
+        '<div class="tl-sub">' + ev.sub + '</div>' +
+      '</div>';
+    tlList.appendChild(li);
+  });
+
+  // Stat cards
+  document.getElementById('sCookTime').textContent = totalCookHrs.toFixed(1);
+  document.getElementById('sCookSub').textContent = 'hours at ' + fmtSmokerTemp(temp);
+  document.getElementById('sLightTime').textContent = fmtTime(light);
+  document.getElementById('sLightDay').textContent = lightDay ? lightDay : 'today';
+  document.getElementById('sPullTemp').textContent = fmtTemp(cut.pullTemp);
+
+  // Print header
+  document.getElementById('ptitle').textContent = cut.name + ' Smoking Timeline';
+  document.getElementById('pmeta').textContent = weightLbs.toFixed(1) + ' lbs \u2014 ' + temp + '\u00B0F \u2014 serve ' + fmtTime(serve);
+
+  openResultsModal();
+}
+
+// ── Style toggle ──────────────────────────────────────────────────────────────
+document.querySelectorAll('.style-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    if (state.style === this.dataset.style) return;
+    state.style = this.dataset.style;
+    document.querySelectorAll('.style-btn').forEach(function(b) {
+      b.classList.toggle('active', b.dataset.style === state.style);
+      b.setAttribute('aria-pressed', b.dataset.style === state.style ? 'true' : 'false');
+    });
+    if (document.getElementById('results').classList.contains('visible')) calculate();
+  });
+});
+
+// ── Wrap toggle ───────────────────────────────────────────────────────────────
+document.querySelector('.wrap-toggle').addEventListener('click', function(e) {
+  var btn = e.target.closest('button');
+  if (!btn || !btn.dataset.wrap) return;
+  if (btn.dataset.wrap === state.wrap) return;
+  state.wrap = btn.dataset.wrap;
+  this.querySelectorAll('button').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.wrap === state.wrap);
+    b.setAttribute('aria-pressed', b.dataset.wrap === state.wrap ? 'true' : 'false');
+  });
+  if (document.getElementById('results').classList.contains('visible')) calculate();
+});
+
+// ── Unit toggles ──────────────────────────────────────────────────────────────
+document.getElementById('tempToggle').addEventListener('click', function(e) {
+  var btn = e.target.closest('button');
+  if (!btn) return;
+  var val = btn.dataset.unit;
+  if (val === state.tu) return;
+  state.tu = val;
+  this.querySelectorAll('button').forEach(function(b) { b.classList.toggle('active', b.dataset.unit === val); });
+  try { localStorage.setItem('pitmaster_tu', val); } catch(err){}
+  if (document.getElementById('results').classList.contains('visible')) calculate();
+});
+
+document.getElementById('weightToggle').addEventListener('click', function(e) {
+  var btn = e.target.closest('button');
+  if (!btn) return;
+  var val = btn.dataset.unit;
+  if (val === state.wu) return;
+  var input = document.getElementById('weight');
+  var cur = parseFloat(input.value);
+  if (!isNaN(cur)) {
+    input.value = val === 'kg'
+      ? Math.round(cur * 0.453592 * 10) / 10
+      : Math.round(cur / 0.453592 * 10) / 10;
+  }
+  state.wu = val;
+  document.getElementById('weightUnitLbl').textContent = val;
+  this.querySelectorAll('button').forEach(function(b) { b.classList.toggle('active', b.dataset.unit === val); });
+  try { localStorage.setItem('pitmaster_wu', val); } catch(err){}
+  if (document.getElementById('results').classList.contains('visible')) calculate();
+});
+
+// ── Calculate button ──────────────────────────────────────────────────────────
+document.getElementById('calcBtn').addEventListener('click', calculate);
+document.getElementById('weight').addEventListener('keydown', function(e) { if (e.key === 'Enter') calculate(); });
+document.getElementById('serveTime').addEventListener('keydown', function(e) { if (e.key === 'Enter') calculate(); });
+
+// ── Modal close ───────────────────────────────────────────────────────────────
+document.getElementById('resultsClose').addEventListener('click', closeResultsModal);
+document.getElementById('results').addEventListener('click', function(e) { if (e.target === this) closeResultsModal(); });
+document.getElementById('printBtn').addEventListener('click', function() { window.print(); });
+
+document.getElementById('cookieAccept').addEventListener('click', function() {
+  setCookie(CONSENT_COOKIE_NAME, 'accepted', 365);
+  document.getElementById('cookieBanner').classList.remove('visible');
+  loadGoogleServices();
+});
+document.getElementById('cookieReject').addEventListener('click', function() {
+  setCookie(CONSENT_COOKIE_NAME, 'rejected', 365);
+  document.getElementById('cookieBanner').classList.remove('visible');
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(function init() {
+  try {
+    var savedTu = localStorage.getItem('pitmaster_tu');
+    var savedWu = localStorage.getItem('pitmaster_wu');
+    if (!savedTu && !savedWu) {
+      var lang = navigator.language || 'en-US';
+      if (shouldDefaultMetric(lang)) { savedTu = 'C'; savedWu = 'kg'; }
+    }
+    if (savedTu && ['C', 'F'].indexOf(savedTu) === -1) savedTu = null;
+    if (savedWu && ['kg', 'lbs'].indexOf(savedWu) === -1) savedWu = null;
+    if (savedTu) {
+      state.tu = savedTu;
+      document.querySelectorAll('#tempToggle button').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.unit === savedTu);
+      });
+    }
+    if (savedWu) {
+      state.wu = savedWu;
+      document.getElementById('weightUnitLbl').textContent = savedWu;
+      // Convert default weight value if kg
+      if (savedWu === 'kg') {
+        var inp = document.getElementById('weight');
+        inp.value = Math.round(parseFloat(inp.value) * 0.453592 * 10) / 10;
+      }
+      document.querySelectorAll('#weightToggle button').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.unit === savedWu);
+      });
+    }
+  } catch(err){}
+
+  initConsentBanner();
+})();
+</script>
+<!-- INJECT:site-header.js:script -->
+</body>
+</html>

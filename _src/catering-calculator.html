@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BBQ Catering Calculator — How Much BBQ for a Party or Event | Pitmaster Tools</title>
+<meta name="description" content="Free BBQ catering calculator. Enter guest count and meat choices to get raw weight to purchase, serving breakdowns, and total cost estimates for parties up to 500 people.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://pitmaster.tools/catering-calculator.html">
+<meta property="og:title" content="BBQ Catering Calculator — How Much BBQ for a Party or Event">
+<meta property="og:description" content="Free BBQ catering calculator. Enter guest count and meat choices to get raw weight to purchase, serving breakdowns, and total cost estimates for parties up to 500 people.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://pitmaster.tools/catering-calculator.html">
+<meta property="og:image" content="https://pitmaster.tools/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BBQ Catering Calculator — How Much BBQ for a Party or Event">
+<meta name="twitter:description" content="Free BBQ catering calculator. Enter guest count and meat choices to get raw weight to purchase, serving breakdowns, and total cost estimates for parties up to 500 people.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23EF9F27' d='M36 4c2 10-3 15-8 21-5 6-9 11-9 19 0 10 7 16 15 16 11 0 19-8 19-19 0-12-7-19-17-37z'/%3E%3Cpath fill='%23D78108' d='M33 27c1 6-2 9-5 12-3 3-5 6-5 10 0 6 4 10 9 10 7 0 12-5 12-12 0-7-4-11-11-20z'/%3E%3C/svg%3E">
+<!-- INJECT:site-header.css -->
+<!-- INJECT:site-base.css -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {'ad_storage':'denied','analytics_storage':'denied','wait_for_update':500});
+  (function(){
+    var c = document.cookie.match(/pitmaster_consent=([^;]+)/);
+    if(c && c[1]==='accepted'){
+      window._gtagLoaded = true;
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-SJJVV37EWE';
+      document.head.appendChild(s);
+      s.onload = function(){
+        gtag('js', new Date());
+        gtag('config', 'G-SJJVV37EWE');
+        gtag('consent', 'update', {'ad_storage':'granted','analytics_storage':'granted'});
+      };
+    }
+  })();
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "BBQ Catering Calculator",
+  "url": "https://pitmaster.tools/catering-calculator.html",
+  "description": "Calculate how much BBQ to buy for parties and events up to 500 guests, with per-meat breakdowns and optional cost estimates.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "isAccessibleForFree": true,
+  "browserRequirements": "Requires JavaScript enabled in a modern browser.",
+  "featureList": ["Multi-meat planning", "Guest count up to 500", "Rack and piece calculations for ribs and chicken", "Optional cost estimation", "Sides adjustment", "lbs/kg unit toggle"],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How much brisket do I need for 100 people?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For 100 people at moderate appetite with sides, plan on purchasing approximately 75 lbs of raw brisket. Brisket loses about 40% of its weight during a long smoke, so you need roughly 0.75 lbs raw per person to serve a 6 oz portion. If you are also serving pulled pork or other meats, reduce brisket to about 0.45 lbs raw per person. You will need 4 to 6 whole briskets depending on their size."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many racks of ribs for 50 people?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For 50 people at moderate appetite with sides, you will need approximately 25 racks of baby back ribs or 17 racks of spare ribs. Baby back racks serve 2 people each; spare rib racks serve 3 people each. Always round up to a whole rack — it is impossible to buy half a rack, and leftover ribs are never a problem."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much pulled pork per person for a party?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Plan on 0.55 lbs of raw pork butt per person as the main meat at a moderate appetite event with sides. This accounts for 35% shrinkage during smoking. For a party of 50 people, purchase approximately 28 lbs of raw pork shoulder. A single 8 to 10 lb bone-in pork butt feeds about 15 to 18 people with sides, so you would need 3 to 4 butts for 50 guests."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I plan for more meat than calculated?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. A 20% buffer above the calculated minimum is standard practice in BBQ catering. Shrinkage varies depending on the quality of the cut, fat content, and how consistently you hold smoker temperature. Guest appetites are unpredictable. And leftover smoked meat reheats beautifully and makes excellent sandwiches, tacos, and hash the next day. Never plan for zero leftovers at an event — it is a false economy."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much BBQ do I need for a wedding or large event?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For a wedding or formal event with 150 to 300 guests, plan a multi-meat spread: one primary meat (brisket or pulled pork) plus one secondary option (chicken or sausage), and scale each to 60% of the single-meat serving size so the combined total equals a full meal. For 200 guests with brisket and pulled pork, you would need roughly 90 lbs of raw brisket and 70 lbs of raw pork shoulder. Hire professional pitmasters for events over 100 people — the logistics of holding, slicing, and serving at temperature require dedicated staff."
+      }
+    }
+  ]
+}
+</script>
+<style>
+.unit-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.form-group select,
+.form-group input[type="number"],
+.form-group input[type="text"] {
+  width: 100%;
+  padding: .6rem .75rem;
+  border: 1.5px solid var(--card-border);
+  border-radius: 6px;
+  background: #FAFAF8;
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--charcoal);
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color .15s;
+}
+.appetite-toggle { display: flex; border: 1.5px solid var(--card-border); border-radius: 6px; overflow: hidden; }
+.appetite-toggle button { flex: 1; padding: .6rem .25rem; border: none; background: #FAFAF8; font-family: inherit; font-size: .85rem; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: background .15s, color .15s; }
+.appetite-toggle button + button { border-left: 1.5px solid var(--card-border); }
+.appetite-toggle button.active { background: var(--charcoal); color: #fff; }
+.appetite-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
+.service-toggle { display: flex; gap: .75rem; }
+.service-btn { flex: 1; border: 2px solid var(--card-border); border-radius: 8px; padding: .75rem 1rem; background: #FAFAF8; text-align: center; cursor: pointer; font-family: inherit; transition: border-color .15s, background .15s; }
+.service-btn.active { border-color: var(--amber); background: var(--amber-light); }
+.service-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.sb-icon { font-size: 1.35rem; display: block; margin-bottom: .2rem; }
+.sb-name { font-weight: 700; font-size: .9rem; display: block; margin-bottom: .1rem; }
+.sb-desc { font-size: .75rem; color: var(--text-muted); line-height: 1.4; }
+.sides-check { display: flex; align-items: center; gap: .6rem; cursor: pointer; user-select: none; font-size: .95rem; font-weight: 500; }
+.sides-check input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--amber); cursor: pointer; flex-shrink: 0; }
+.meat-rows { display: flex; flex-direction: column; gap: .75rem; }
+.meat-row { display: grid; grid-template-columns: 1fr auto auto; gap: .5rem; align-items: end; background: #FAFAF8; border: 1.5px solid var(--card-border); border-radius: 8px; padding: .75rem; }
+.meat-row-fields { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem 1rem; grid-column: 1; }
+.meat-row .price-wrap { display: flex; align-items: stretch; }
+.meat-row .price-prefix { display: flex; align-items: center; padding: 0 .6rem; background: #F0EBE3; border: 1.5px solid var(--card-border); border-right: none; border-radius: 6px 0 0 6px; font-size: .85rem; font-weight: 700; color: var(--text-muted); }
+.meat-row .price-input { border-radius: 0 6px 6px 0 !important; }
+.meat-row-delete { align-self: end; width: 36px; height: 36px; flex-shrink: 0; border: 1.5px solid var(--card-border); border-radius: 6px; background: #fff; color: var(--text-muted); font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .15s, color .15s, border-color .15s; }
+.meat-row-delete:hover { background: #FEE2E2; border-color: #FECACA; color: #991B1B; }
+.meat-row-delete:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.add-meat-btn { display: flex; align-items: center; gap: .4rem; background: none; border: 1.5px dashed var(--card-border); border-radius: 6px; padding: .6rem 1rem; font-family: inherit; font-size: .9rem; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: border-color .15s, color .15s; margin-top: .25rem; }
+.add-meat-btn:hover { border-color: var(--amber); color: var(--charcoal); }
+.add-meat-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.calc-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.vmsg.visible { display: block; }
+.results-inner { animation: fadeUp .3s ease both; }
+.results-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+.results-title { font-family: Georgia,serif; font-size: 1.3rem; font-weight: 700; }
+.meat-cards { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
+.meat-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.25rem; position: relative; overflow: hidden; }
+.meat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.meat-card:nth-child(1)::before { background: var(--blue); }
+.meat-card:nth-child(2)::before { background: var(--amber); }
+.meat-card:nth-child(3)::before { background: var(--red); }
+.meat-card:nth-child(4)::before { background: var(--green); }
+.meat-card-header { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: .75rem; }
+.meat-card-name { font-family: Georgia,serif; font-size: 1.05rem; font-weight: 700; }
+.meat-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .5rem; }
+.mcs { background: #F9F5EE; border: 1px solid var(--card-border); border-radius: 6px; padding: .6rem .75rem; }
+.mcs-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--text-muted); margin-bottom: .2rem; }
+.mcs-value { font-size: 1rem; font-weight: 700; color: var(--charcoal); line-height: 1.2; }
+.mcs-sub { font-size: .78rem; color: var(--text-muted); margin-top: .15rem; }
+.meat-warn { margin-top: .75rem; padding: .65rem .9rem; background: var(--yellow-warn); border: 1px solid var(--yellow-warn-border); border-radius: 6px; font-size: .875rem; color: #6D4C00; }
+.summary-card { background: var(--charcoal); color: #fff; border-radius: var(--radius); padding: 1.25rem 1.5rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+.summary-card h3 { font-family: Georgia,serif; font-size: 1rem; font-weight: 700; margin-bottom: 1rem; color: rgba(255,255,255,.85); text-transform: uppercase; letter-spacing: .06em; }
+.summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; }
+.sum-item { }
+.sum-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: rgba(255,255,255,.6); margin-bottom: .25rem; }
+.sum-value { font-family: Georgia,serif; font-size: 1.5rem; font-weight: 700; line-height: 1; }
+.sum-sub { font-size: .8rem; color: rgba(255,255,255,.65); margin-top: .2rem; }
+.editorial-section p { margin-bottom: .85rem; line-height: 1.75; font-size: .95rem; color: #332F2B; }
+.editorial-section p:last-child { margin-bottom: 0; }
+.editorial-section ul { padding-left: 1.25rem; margin-bottom: .85rem; }
+.editorial-section li { margin-bottom: .4rem; font-size: .95rem; line-height: 1.65; color: #332F2B; }
+.ref-table-wrap { overflow-x: auto; margin: 1rem 0; }
+.ref-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .88rem;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--card-border);
+  min-width: 480px;
+}
+.ref-table th { background: var(--charcoal); color: #fff; text-align: left; padding: .65rem .9rem; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.ref-table td { padding: .6rem .9rem; border-bottom: 1px solid #F0EBE3; vertical-align: middle; }
+.ref-table tr:last-child td { border-bottom: none; }
+.ref-table tr:nth-child(even) td { background: #FAFAF8; }
+.ref-table td:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+.faq-section { margin: 2rem 0; }
+.faq-section h2 { font-family: Georgia,serif; font-size: 1.35rem; font-weight: 700; margin-bottom: 1rem; }
+.faq-item summary:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
+.faq-body { padding: 0 1.25rem 1rem; font-size: .9rem; line-height: 1.7; color: #332F2B; }
+.related-tools h2 { font-family: Georgia,serif; font-size: 1.35rem; font-weight: 700; margin-bottom: 1rem; }
+.tool-link:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); border-color: var(--amber); }
+.tool-link:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.cookie-accept:hover { background: var(--amber-dark); }
+.cookie-reject:hover { color: #fff; border-color: rgba(255,255,255,.5) !important; }
+.cookie-accept:focus-visible, .cookie-reject:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+@media (max-width: 640px) {
+  header { padding: .75rem 1rem; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-group.full-width { grid-column: auto; }
+  .service-toggle { flex-direction: column; }
+  .meat-row-fields { grid-template-columns: 1fr; }
+  .meat-card-grid { grid-template-columns: 1fr 1fr; }
+  .summary-grid { grid-template-columns: 1fr 1fr; }
+  .tool-links { grid-template-columns: 1fr; }
+  .cookie-banner__inner { align-items: stretch; }
+  .cookie-banner__actions { width: 100%; }
+  .cookie-banner__actions button { flex: 1 1 140px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">Pitmaster<span> Tools</span></a>
+  <nav class="header-nav" aria-label="Site navigation">
+    <div class="nav-dropdown">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="tools.html">All Tools</a></li>
+        <li><a href="/">Meat Smoking Calculator</a></li>
+        <li><a href="brisket-calculator.html">Brisket Calculator</a></li>
+        <li><a href="pork-shoulder-calculator.html">Pork Shoulder Calculator</a></li>
+        <li><a href="rib-calculator.html">Rib Calculator</a></li>
+        <li><a href="turkey-smoking-calculator.html">Turkey Calculator</a></li>
+        <li><a href="meat-per-person.html">Meat Per Person</a></li>
+        <li><a href="cook-time-coordinator.html">Cook Time Coordinator</a></li>
+        <li><a href="charcoal-calculator.html">Charcoal Calculator</a></li>
+        <li><a href="brine-calculator.html">Brine Calculator</a></li>
+        <li><a href="dry-rub-calculator.html">Dry Rub Calculator</a></li>
+        <li><a href="bbq-cost-calculator.html">BBQ Cost Calculator</a></li>
+        <li><a href="catering-calculator.html" aria-current="page">Catering Calculator</a></li>
+        <li><a href="brisket-yield-calculator.html">Brisket Yield Calculator</a></li>
+      </ul>
+    </div>
+    <a href="about.html">About</a>
+  </nav>
+  <div class="unit-controls">
+    <div class="unit-toggle" id="weightToggle" role="group" aria-label="Weight unit">
+      <button data-unit="lbs" class="active" type="button">lbs</button>
+      <button data-unit="kg" type="button">kg</button>
+    </div>
+  </div>
+</header>
+
+<div class="ad-slot" aria-hidden="true">
+  <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4265262608577453" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+</div>
+
+<main>
+
+  <section class="page-hero" aria-label="Page introduction">
+    <h1>BBQ Catering Calculator</h1>
+    <p>Enter your guest count, pick your meats, and get exact raw weight to purchase for every cut — including racks, pieces, and optional cost estimates for events up to 500 people.</p>
+  </section>
+
+  <div class="form-card" role="form" aria-label="Catering calculator">
+    <h2 class="section-title">Event Details</h2>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="guestCount">Number of Guests</label>
+        <input type="number" id="guestCount" min="1" max="500" value="50" aria-describedby="guestCountHint">
+        <span id="guestCountHint" style="font-size:.78rem;color:var(--text-muted);">Between 1 and 500 guests</span>
+      </div>
+
+      <div class="form-group">
+        <label>Serving Style</label>
+        <div class="service-toggle" role="group" aria-label="Serving style">
+          <button class="service-btn active" data-style="buffet" type="button" aria-pressed="true">
+            <span class="sb-icon">&#x1F37D;&#xFE0F;</span>
+            <span class="sb-name">Buffet</span>
+            <span class="sb-desc">Guests serve themselves; multiple meats reduce per-meat portions</span>
+          </button>
+          <button class="service-btn" data-style="plated" type="button" aria-pressed="false">
+            <span class="sb-icon">&#x1F374;</span>
+            <span class="sb-name">Plated</span>
+            <span class="sb-desc">Pre-portioned service; each guest gets a fixed plate</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group full-width">
+        <label>Appetite Level</label>
+        <div class="appetite-toggle" id="appetiteToggle" role="group" aria-label="Appetite level">
+          <button data-appetite="light" type="button">Light</button>
+          <button data-appetite="moderate" class="active" type="button">Moderate</button>
+          <button data-appetite="hungry" type="button">Hungry</button>
+        </div>
+      </div>
+
+      <div class="form-group full-width">
+        <label class="sides-check" for="withSides">
+          <input type="checkbox" id="withSides" checked>
+          Serving with sides (mac &amp; cheese, beans, slaw, cornbread, etc.)
+        </label>
+      </div>
+    </div>
+
+    <h2 class="section-title" style="margin-top:1.5rem;">Meat Selection</h2>
+
+    <div class="meat-rows" id="meatRows" aria-label="Meat selections">
+      <!-- Rows injected by JS -->
+    </div>
+
+    <button class="add-meat-btn" id="addMeatBtn" type="button" aria-label="Add another meat">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Add another meat
+    </button>
+
+    <button class="calc-btn" id="calcBtn" type="button">
+      &#x1F969; Calculate Catering Quantities
+    </button>
+    <div class="vmsg" id="vmsg" role="alert" aria-live="polite"></div>
+  </div>
+
+  <div class="ad-slot" aria-hidden="true">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4265262608577453" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+  </div>
+
+  <!-- Results — inline -->
+  <div id="results" aria-live="polite" aria-label="Catering results">
+    <div class="results-inner">
+      <div class="results-header">
+        <div class="results-title">&#x1F4CA; Your Catering Plan</div>
+      </div>
+      <div class="meat-cards" id="meatCards"></div>
+      <div class="summary-card" id="summaryCard" aria-label="Summary">
+        <h3>Summary</h3>
+        <div class="summary-grid" id="summaryGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       EDITORIAL CONTENT
+  ============================================================ -->
+  <section class="editorial-section" aria-labelledby="ed1">
+    <h2 id="ed1">How Much BBQ Do You Need Per Person?</h2>
+    <p>The most fundamental question in BBQ catering is deceptively simple: how much raw meat do I need to buy? The answer is never the same as the cooked serving size you intend to put on a plate. Every cut of meat loses a significant percentage of its weight during a long smoke — moisture evaporates, fat renders out, and collagen converts to gelatin. A 10 lb brisket flat becomes roughly 6 lbs of cooked meat. A 12 lb bone-in pork shoulder yields about 7 to 8 lbs of pulled pork. If you are planning a single-protein cook instead of a full event, the <a href="meat-per-person.html">Meat Per Person Calculator</a> is the simpler version of this same problem.</p>
+    <p>The general formula used by professional BBQ caterers is: <strong>divide your target cooked serving weight by (1 minus the shrinkage percentage)</strong> to find the raw weight to purchase. For brisket with 40% shrinkage and a 6 oz serving, that math is: 6 oz ÷ 0.60 = 10 oz raw per person, or roughly 0.63 lbs. For 100 people, you need 63 lbs of raw brisket — about 4 to 5 whole briskets.</p>
+    <p>This calculator runs that math for every meat you select, adjusts for appetite level and whether you are serving sides, and gives you whole-cut counts (racks, pieces, links) alongside raw weight so you can walk into a restaurant supply store or butcher with a precise shopping list.</p>
+
+    <h3>Understanding Shrinkage by Cut</h3>
+    <p>Not all meats shrink equally. Brisket and pork shoulder are long-cook cuts that lose 35 to 40% of their weight over many hours on the smoker. Chicken thighs and turkey breast lose only 20 to 25% because they cook faster and retain more moisture. Ribs are a special case — you are buying significant bone weight that will never be eaten, so per-person raw weight is calculated in racks and pieces rather than ounces.</p>
+    <p>Sausage loses the least weight of any BBQ protein — about 10% — because the casing limits moisture escape. Two links per person is the standard catering rate for sausage as a secondary meat; if sausage is your primary protein, increase to three links per person.</p>
+  </section>
+
+  <section class="editorial-section" aria-labelledby="ed2">
+    <h2 id="ed2">Buffet vs. Plated Service</h2>
+    <p>How you serve the food dramatically affects how much meat you need to buy. In plated service, each guest receives a pre-portioned plate with a fixed amount of meat — portion control is exact and waste is minimal. In buffet service, guests self-select and the math changes because guests tend to take larger portions of their favorites, especially when multiple meats are present.</p>
+    <p>The upside of a multi-meat buffet is that <strong>per-meat portions decrease as the number of options increases</strong>. When guests face a buffet with brisket, pulled pork, and chicken quarters, no single meat needs to account for a full serving. Most professional caterers reduce each meat's serving size by 20 to 30% when offering three or more meats on a buffet. This calculator applies that adjustment automatically based on how many meats you select and whether you choose buffet or plated service.</p>
+    <p>For formal events — weddings, corporate dinners, charity galas — plated service gives you tighter cost control and a more refined presentation. For backyard cookouts, tailgates, family reunions, and church events, buffet service is both more practical and more fun. Guests love the freedom to pile their plates. If you also need all of those meats to finish at the same hour, use the <a href="cook-time-coordinator.html">Cook Time Coordinator</a> alongside this page.</p>
+
+    <h3>How the 20% Sides Reduction Works</h3>
+    <p>When you check "serving with sides," this calculator reduces each meat's cooked serving target by 20%. The reasoning is straightforward: a guest who has filled part of their plate with baked beans, coleslaw, cornbread, and potato salad will eat less meat than a guest at a meat-only spread. This 20% reduction is a conservative estimate — some caterers reduce by as much as 30% when sides are abundant. The advantage of the conservative approach is that you will have modest leftovers rather than running short.</p>
+  </section>
+
+  <section class="editorial-section" aria-labelledby="ed3">
+    <h2 id="ed3">The 20% Buffer Rule</h2>
+    <p>Every experienced BBQ caterer will tell you the same thing: <strong>always buy 20% more than your calculation says you need</strong>. This is not padding — it is reality. Here is why:</p>
+    <ul>
+      <li><strong>Shrinkage varies.</strong> A USDA Choice brisket may lose 35%; a heavily marbled Prime brisket may lose 42%. The grade of meat, fat cap thickness, and your smoker's humidity all affect actual yield.</li>
+      <li><strong>Guests surprise you.</strong> People at BBQ events consistently eat more than a catering calculator predicts, especially when the food is exceptional. Good BBQ disappears faster than mediocre food does.</li>
+      <li><strong>Accidents happen.</strong> A dropped tray, a smoker temperature spike, a piece that does not hold together at slicing time — having buffer meat means your event does not end badly.</li>
+      <li><strong>Leftover smoked meat is an asset.</strong> Pulled pork burritos, brisket breakfast hash, smoked chicken salad — the leftovers from a great BBQ are desirable, not a problem.</li>
+    </ul>
+    <p>The raw weights shown in this calculator already include a 20% safety buffer on top of the minimum calculated quantity. The "raw weight to buy" figures are your shopping target, not a bare minimum.</p>
+  </section>
+
+  <section class="editorial-section" aria-labelledby="ed4">
+    <h2 id="ed4">Planning by Meat Type</h2>
+
+    <h3>Brisket per Person</h3>
+    <p>At moderate appetite with sides, plan <strong>0.63 lbs of raw brisket per person</strong> as the sole meat, or about 0.40 lbs raw when brisket is one of two or three buffet options. A whole packer brisket runs 12 to 18 lbs and serves 12 to 20 people depending on appetite. For groups of 50 or more, order multiple briskets and stage your cook — not every smoker can hold six full packers simultaneously. Sliced brisket is easier to serve at scale than pulled; pulled brisket can be held in a chafing dish without quality loss for up to two hours.</p>
+
+    <h3>Pulled Pork per Person</h3>
+    <p>Pulled pork is the most economical and scalable BBQ protein for large events. At moderate appetite with sides, plan <strong>0.55 lbs of raw pork shoulder per person</strong>. A 10 lb bone-in pork butt yields about 6.5 lbs of pulled pork after a 35% shrink, feeding roughly 17 people at a moderate serving. Pulled pork holds beautifully in a chafing dish for 3 to 4 hours and reheats exceptionally well, making it ideal for events where staggered serving times are likely.</p>
+
+    <h3>Ribs per Person (Racks)</h3>
+    <p>Ribs require thinking in racks and pieces rather than pounds. <strong>One rack of baby back ribs serves 2 people</strong> at a moderate appetite with sides. One rack of spare ribs serves 3. For 50 guests with baby backs as the sole meat, you need 25 racks — that is a substantial cook requiring a large offset smoker, a trailer pit, or multiple cooker runs. For mixed events, ribs work best as a secondary meat with pulled pork or brisket as the primary; reduce rack counts by 40% in a two-meat spread.</p>
+
+    <h3>Chicken Quarters and Thighs</h3>
+    <p>Chicken is the most cost-effective BBQ protein and the fastest to cook. Plan <strong>1 quarter per person</strong> at moderate appetite or <strong>2 thighs per person</strong>. Chicken can be cooked in batches efficiently since it takes only 2 to 3 hours at 275°F. For large events, chicken is an excellent secondary meat to stretch your budget while brisket or pulled pork anchors the spread.</p>
+
+    <h3>Sausage</h3>
+    <p>At most Texas-style BBQ catering events, sausage is served as an add-on rather than a primary protein. <strong>Two links per person</strong> is the standard catering rate for sausage as a secondary option. Each link runs about 6 oz raw and loses roughly 10% during smoking. Sausage is fast to cook (45 to 75 minutes), easy to hold, and universally popular. It is the ideal meat to add to a brisket and pulled pork spread when your guest count increases at the last minute.</p>
+  </section>
+
+  <section class="editorial-section" aria-labelledby="ed5">
+    <h2 id="ed5">Catering Timeline — When to Start Cooking</h2>
+    <p>Large-scale BBQ catering requires backward planning from your serve time. The critical constraint is that brisket and pork shoulder both need 12 to 18 hours of cook time plus 1 to 2 hours of rest before service. Here is a general guide:</p>
+    <ul>
+      <li><strong>Events of 25 to 50 guests:</strong> A single offset smoker with a 500 lb capacity can handle this. Light at midnight or 1 AM for a 12 PM serve. One pitmaster can manage solo with a remote thermometer and a rested meat hold in a cambro or cooler.</li>
+      <li><strong>Events of 50 to 100 guests:</strong> Plan for two smokers or a trailer pit. You will need one person managing the fire and one handling slicing/service. Order your meat in advance — butcher shops at this volume need 2 to 3 business days of lead time.</li>
+      <li><strong>Events of 100 to 200 guests:</strong> A full trailer pit or multiple cabinet smokers. Two to three pitmaster-level staff. Meat should go on smokers 16 to 18 hours before service. Have a plan for holding — a commercial oven at 160°F holds brisket and pulled pork for up to 4 hours without quality loss.</li>
+      <li><strong>Events of 200 to 500 guests:</strong> This is professional catering territory. Hire a licensed BBQ catering company. The logistics of food safety, transport, holding, and service at this scale require permits, licensed equipment, and a dedicated team. This calculator can help you understand quantities and build a bid — but execute it with professionals.</li>
+    </ul>
+
+    <!-- Reference table -->
+    <h3>Quick Reference: Common Event Sizes</h3>
+    <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:.5rem;">Moderate appetite, with sides. Figures include 20% buffer. Brisket and pulled pork in raw lbs; ribs in full racks.</p>
+    <div class="ref-table-wrap">
+      <table class="ref-table" aria-label="BBQ quantity reference by event size">
+        <thead>
+          <tr>
+            <th scope="col">Guests</th>
+            <th scope="col">Brisket (raw lbs)</th>
+            <th scope="col">Pulled Pork (raw lbs)</th>
+            <th scope="col">Baby Back Racks</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>25</td><td>19 lbs</td><td>14 lbs</td><td>13 racks</td></tr>
+          <tr><td>50</td><td>38 lbs</td><td>28 lbs</td><td>25 racks</td></tr>
+          <tr><td>100</td><td>75 lbs</td><td>55 lbs</td><td>50 racks</td></tr>
+          <tr><td>200</td><td>150 lbs</td><td>110 lbs</td><td>100 racks</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="ad-slot" aria-hidden="true">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4265262608577453" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+  </div>
+
+  <!-- FAQ -->
+  <section class="faq-section" aria-labelledby="faq-title">
+    <h2 id="faq-title">Frequently Asked Questions</h2>
+
+    <details class="faq-item">
+      <summary>How much brisket do I need for 100 people?</summary>
+      <div class="faq-body">For 100 people at moderate appetite with sides, plan on purchasing approximately 75 lbs of raw brisket. Brisket loses about 40% of its weight during a long smoke, so you need roughly 0.75 lbs raw per person (including a 20% buffer) to serve a proper 6 oz cooked portion. You will need 4 to 6 whole briskets depending on their size. If brisket is one of two or three meats on a buffet, reduce to about 0.45 lbs raw per person and buy 3 to 4 briskets.</div>
+    </details>
+
+    <details class="faq-item">
+      <summary>How many racks of ribs for 50 people?</summary>
+      <div class="faq-body">For 50 people at moderate appetite with sides, you will need approximately 25 racks of baby back ribs or 17 racks of spare ribs. Baby back racks serve 2 people each at a moderate serving; spare rib racks serve 3 people each. Always round up to a whole rack since you cannot buy partial racks. If ribs are a secondary option alongside pulled pork or brisket, reduce to 12 to 13 baby back racks for 50 people.</div>
+    </details>
+
+    <details class="faq-item">
+      <summary>How much pulled pork per person for a party?</summary>
+      <div class="faq-body">Plan on 0.55 lbs of raw pork butt per person at moderate appetite with sides, including a 20% safety buffer. This accounts for 35% shrinkage during smoking. For a party of 50 people, purchase approximately 28 lbs of raw pork shoulder. A single 8 to 10 lb bone-in pork butt feeds about 15 to 18 people when served with sides, so you would need 3 butts for 50 guests. Pulled pork is one of the most cost-effective and crowd-friendly BBQ proteins for large events.</div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Should I plan for more meat than calculated?</summary>
+      <div class="faq-body">Yes — the quantities shown by this calculator already include a 20% buffer above the mathematical minimum. Even so, it is wise to round up to the nearest whole cut (brisket, pork shoulder, rack of ribs) beyond the calculated amount. Shrinkage varies by cut quality and smoker consistency. Guest appetites at outdoor BBQ events routinely exceed estimates. And leftover smoked meat is never a problem — it reheats beautifully and makes exceptional meals the next day.</div>
+    </details>
+
+    <details class="faq-item">
+      <summary>How much BBQ do I need for a wedding or large event?</summary>
+      <div class="faq-body">For a wedding or formal event with 150 to 300 guests, plan a two-meat spread: a primary meat (brisket or pulled pork) at about 60% of a single-meat serving, plus a secondary meat (chicken quarters or sausage) at about 40%. For 200 guests with brisket and pulled pork, budget roughly 90 lbs raw brisket and 70 lbs raw pork shoulder. Hire professional pitmaster staff for events over 100 people — the food safety logistics of holding, slicing, and serving at temperature for a large crowd require licensed commercial equipment and dedicated catering experience.</div>
+    </details>
+  </section>
+
+  <!-- Related tools -->
+  <section class="related-tools" aria-labelledby="related-title">
+    <h2 id="related-title">More Pitmaster Tools</h2>
+    <div class="tool-links">
+      <a class="tool-link" href="/">
+        <span class="tool-link-icon" aria-hidden="true">&#x1F321;&#xFE0F;</span>
+        <div>
+          <div class="tool-link-name">Meat Smoking Calculator</div>
+          <div class="tool-link-desc">Full cook timeline, pull temps, and wood pairings for 28 cuts — backward from your serve time.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="meat-per-person.html">
+        <span class="tool-link-icon" aria-hidden="true">&#x1F356;</span>
+        <div>
+          <div class="tool-link-name">Meat Per Person</div>
+          <div class="tool-link-desc">Raw weight to buy for a single cut with light, moderate, and hungry serving sizes.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="bbq-cost-calculator.html">
+        <span class="tool-link-icon" aria-hidden="true">&#x1F4B0;</span>
+        <div>
+          <div class="tool-link-name">BBQ Cost Calculator</div>
+          <div class="tool-link-desc">Total ingredient cost, cost per serving, and cost per pound across all your meats.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="brisket-calculator.html">
+        <span class="tool-link-icon" aria-hidden="true">&#x1F969;</span>
+        <div>
+          <div class="tool-link-name">Brisket Calculator</div>
+          <div class="tool-link-desc">Exact cook timeline for sliced or pulled brisket — light smoker time, stall window, rest, and serve.</div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<!-- Cookie consent banner -->
+<div class="cookie-banner" id="cookieBanner" role="dialog" aria-live="polite" aria-label="Cookie consent">
+  <div class="cookie-banner__inner">
+    <p class="cookie-banner__text">We use cookies for analytics and personalized ads. See our <a href="privacy-policy.html">Privacy Policy</a> for details.</p>
+    <div class="cookie-banner__actions">
+      <button class="cookie-accept" id="acceptCookies" type="button">Accept all</button>
+      <button class="cookie-reject" id="rejectCookies" type="button">Reject non-essential</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>&copy; 2026 Pitmaster Tools. All rights reserved.</div>
+  <nav aria-label="Footer">
+    <a href="/">Calculator</a>
+    <span>|</span>
+    <a href="tools.html">All Tools</a>
+    <span>|</span>
+    <a href="privacy-policy.html">Privacy Policy</a>
+    <span>|</span>
+    <a href="terms-of-service.html">Terms of Service</a>
+    <span>|</span>
+    <a href="mailto:contact@pitmaster.tools">contact@pitmaster.tools</a>
+  </nav>
+  <p class="footer-small">Serving estimates are based on USDA guidelines and pitmaster consensus. Always account for bone weight, fat trim, and your crowd's appetite. Calculator outputs are estimates only.</p>
+  <p class="footer-small">Last updated: April 12, 2026</p>
+</footer>
+
+<!-- INJECT:site-utils.js:script -->
+<script>
+(function(){
+'use strict';
+
+/* ============================================================
+   CONSTANTS & STATE
+   ============================================================ */
+var MAX_MEAT_ROWS = 4;
+
+var state = {
+  wu: 'lbs',
+  appetite: 'moderate',  /* light | moderate | hungry */
+  style: 'buffet'        /* buffet | plated */
+};
+
+/* ============================================================
+   MEAT DATA
+   ============================================================ */
+var MEATS = {
+  brisket_sliced:   { name: 'Brisket (Sliced)',      shrinkage: 0.40, maxLbs: 18, ozPerServing: 6,    rackServes: null, pcsPerPerson: null, linksPerPerson: null, rackWeightLbs: null, linkWeightLbs: null },
+  brisket_pulled:   { name: 'Brisket (Pulled)',       shrinkage: 0.40, maxLbs: 18, ozPerServing: 5,    rackServes: null, pcsPerPerson: null, linksPerPerson: null, rackWeightLbs: null, linkWeightLbs: null },
+  pulled_pork:      { name: 'Pulled Pork',            shrinkage: 0.35, maxLbs: 12, ozPerServing: 5,    rackServes: null, pcsPerPerson: null, linksPerPerson: null, rackWeightLbs: null, linkWeightLbs: null },
+  baby_back:        { name: 'Baby Back Ribs',         shrinkage: 0.25, maxLbs: 4,  ozPerServing: null, rackServes: 2,    pcsPerPerson: null, linksPerPerson: null, rackWeightLbs: 3,    linkWeightLbs: null },
+  spare_ribs:       { name: 'Spare Ribs',             shrinkage: 0.25, maxLbs: 4,  ozPerServing: null, rackServes: 3,    pcsPerPerson: null, linksPerPerson: null, rackWeightLbs: 4.5,  linkWeightLbs: null },
+  chicken_quarters: { name: 'Chicken Quarters',       shrinkage: 0.25, maxLbs: 20, ozPerServing: null, rackServes: null, pcsPerPerson: 1,    linksPerPerson: null, rackWeightLbs: null, linkWeightLbs: null },
+  chicken_thighs:   { name: 'Chicken Thighs',         shrinkage: 0.20, maxLbs: 6,  ozPerServing: null, rackServes: null, pcsPerPerson: 2,    linksPerPerson: null, rackWeightLbs: null, linkWeightLbs: null },
+  sausage:          { name: 'Sausage',                shrinkage: 0.10, maxLbs: 5,  ozPerServing: null, rackServes: null, pcsPerPerson: null, linksPerPerson: 2,    rackWeightLbs: null, linkWeightLbs: 0.375 },
+  turkey_breast:    { name: 'Turkey Breast',          shrinkage: 0.20, maxLbs: 10, ozPerServing: 4,    rackServes: null, pcsPerPerson: null, linksPerPerson: null, rackWeightLbs: null, linkWeightLbs: null },
+  whole_turkey:     { name: 'Whole Turkey',           shrinkage: 0.25, maxLbs: 24, ozPerServing: 5,    rackServes: null, pcsPerPerson: null, linksPerPerson: null, rackWeightLbs: null, linkWeightLbs: null }
+};
+
+/* Piece weights for chicken calculations */
+var PIECE_WEIGHTS = {
+  chicken_quarters: 0.5625, /* ~9 oz raw per quarter */
+  chicken_thighs:   0.3125  /* ~5 oz raw per thigh */
+};
+
+/* Appetite multipliers applied to ozPerServing */
+var APPETITE_MULT = { light: 0.75, moderate: 1.0, hungry: 1.25 };
+
+function lbsToKg(v) { return Math.round(v * 0.453592 * 100) / 100; }
+
+function fmtWeight(lbs, decimals) {
+  decimals = decimals !== undefined ? decimals : 1;
+  if (state.wu === 'kg') return lbsToKg(lbs).toFixed(decimals) + ' kg';
+  return lbs.toFixed(decimals) + ' lbs';
+}
+
+function fmtCurrency(val) {
+  return '$' + val.toFixed(2);
+}
+
+/* ============================================================
+   MEAT ROW MANAGEMENT
+   ============================================================ */
+var rowCounter = 0;
+
+function buildMeatSelect(selectedKey) {
+  var opts = '';
+  Object.keys(MEATS).forEach(function(key) {
+    var m = MEATS[key];
+    var sel = key === selectedKey ? ' selected' : '';
+    opts += '<option value="' + escapeHtml(key) + '"' + sel + '>' + escapeHtml(m.name) + '</option>';
+  });
+  return opts;
+}
+
+function addMeatRow(selectedKey) {
+  var rows = document.getElementById('meatRows');
+  var count = rows.querySelectorAll('.meat-row').length;
+  if (count >= MAX_MEAT_ROWS) return;
+
+  rowCounter++;
+  var id = 'meatRow' + rowCounter;
+  var selectId = 'meatSel' + rowCounter;
+  var priceId = 'meatPrice' + rowCounter;
+
+  var div = document.createElement('div');
+  div.className = 'meat-row';
+  div.id = id;
+  div.innerHTML =
+    '<div class="meat-row-fields">' +
+      '<div class="form-group">' +
+        '<label for="' + escapeHtml(selectId) + '">Meat</label>' +
+        '<select id="' + escapeHtml(selectId) + '" aria-label="Meat type">' +
+          buildMeatSelect(selectedKey || 'brisket_sliced') +
+        '</select>' +
+      '</div>' +
+      '<div class="form-group">' +
+        '<label for="' + escapeHtml(priceId) + '">Price per lb (optional)</label>' +
+        '<div class="price-wrap">' +
+          '<span class="price-prefix">$</span>' +
+          '<input type="number" id="' + escapeHtml(priceId) + '" class="price-input" min="0" step="0.01" placeholder="optional" aria-label="Price per pound">' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<button class="meat-row-delete" type="button" aria-label="Remove this meat" data-row="' + escapeHtml(id) + '">&times;</button>';
+
+  rows.appendChild(div);
+  updateAddButton();
+}
+
+function removeMeatRow(rowId) {
+  var rows = document.getElementById('meatRows');
+  var row = document.getElementById(rowId);
+  if (!row) return;
+  /* Keep at least one row */
+  if (rows.querySelectorAll('.meat-row').length <= 1) return;
+  rows.removeChild(row);
+  updateAddButton();
+}
+
+function updateAddButton() {
+  var rows = document.getElementById('meatRows');
+  var count = rows.querySelectorAll('.meat-row').length;
+  var btn = document.getElementById('addMeatBtn');
+  btn.style.display = count >= MAX_MEAT_ROWS ? 'none' : 'flex';
+}
+
+/* ============================================================
+   CALCULATE
+   ============================================================ */
+function calculate() {
+  var vmsg = document.getElementById('vmsg');
+  vmsg.textContent = '';
+  vmsg.classList.remove('visible');
+
+  /* Guest count */
+  var guestRaw = document.getElementById('guestCount').value.trim();
+  var guests = parseInt(guestRaw, 10);
+  if (!guestRaw || isNaN(guests) || guests < 1 || guests > 500) {
+    vmsg.textContent = 'Please enter a guest count between 1 and 500.';
+    vmsg.classList.add('visible');
+    document.getElementById('guestCount').focus();
+    return;
+  }
+
+  var withSides = document.getElementById('withSides').checked;
+  var numMeats = document.getElementById('meatRows').querySelectorAll('.meat-row').length;
+
+  /* Multiplier modifiers */
+  var appetiteMult = APPETITE_MULT[state.appetite] || 1.0;
+  /* Sides reduce each meat by 20% */
+  var sidesMult = withSides ? 0.80 : 1.0;
+  /* Buffet multi-meat reduction: -15% per additional meat beyond 1 */
+  var buffetReduction = (state.style === 'buffet' && numMeats > 1)
+    ? Math.max(0.60, 1 - (numMeats - 1) * 0.15)
+    : 1.0;
+
+  var rows = document.getElementById('meatRows').querySelectorAll('.meat-row');
+  var results = [];
+  var totalRawLbs = 0;
+  var totalCost = 0;
+  var hasCost = false;
+
+  for (var i = 0; i < rows.length; i++) {
+    var row = rows[i];
+    var selectEl = row.querySelector('select');
+    var priceEl = row.querySelector('input[type="number"]');
+    if (!selectEl) continue;
+
+    var key = selectEl.value;
+    var meat = MEATS[key];
+    if (!meat) continue;
+
+    var pricePerLb = priceEl && priceEl.value.trim() !== '' ? parseFloat(priceEl.value) : null;
+    if (pricePerLb !== null && (!isFinite(pricePerLb) || pricePerLb < 0)) pricePerLb = null;
+
+    var result = computeMeatResult(key, meat, guests, appetiteMult, sidesMult, buffetReduction, pricePerLb);
+    results.push(result);
+    totalRawLbs += result.rawLbs;
+    if (result.totalCost !== null) { totalCost += result.totalCost; hasCost = true; }
+  }
+
+  if (results.length === 0) {
+    vmsg.textContent = 'Please add at least one meat to calculate.';
+    vmsg.classList.add('visible');
+    return;
+  }
+
+  renderResults(results, guests, totalRawLbs, totalCost, hasCost);
+}
+
+function computeMeatResult(key, meat, guests, appetiteMult, sidesMult, buffetReduction, pricePerLb) {
+  var rawLbs, pieces, racks, links, piecesLabel, warningText;
+
+  if (meat.rackServes !== null) {
+    /* Ribs — calculate by racks */
+    var effectiveGuests = guests * sidesMult * buffetReduction * appetiteMult;
+    racks = Math.ceil(effectiveGuests / meat.rackServes);
+    rawLbs = racks * meat.rackWeightLbs;
+    /* Apply 20% buffer */
+    var rawLbsWithBuffer = rawLbs * 1.20;
+    racks = Math.ceil(rawLbsWithBuffer / meat.rackWeightLbs);
+    rawLbs = racks * meat.rackWeightLbs;
+    piecesLabel = racks + ' rack' + (racks !== 1 ? 's' : '');
+    pieces = racks;
+  } else if (meat.pcsPerPerson !== null) {
+    /* Chicken quarters / thighs — calculate by pieces */
+    var effectivePcs = guests * meat.pcsPerPerson * sidesMult * buffetReduction * appetiteMult;
+    pieces = Math.ceil(effectivePcs * 1.20); /* 20% buffer */
+    rawLbs = pieces * (PIECE_WEIGHTS[key] || 0.5);
+    piecesLabel = pieces + ' piece' + (pieces !== 1 ? 's' : '');
+  } else if (meat.linksPerPerson !== null) {
+    /* Sausage — calculate by links */
+    var effectiveLinks = guests * meat.linksPerPerson * sidesMult * buffetReduction * appetiteMult;
+    links = Math.ceil(effectiveLinks * 1.20);
+    rawLbs = links * meat.linkWeightLbs;
+    piecesLabel = links + ' link' + (links !== 1 ? 's' : '');
+    pieces = links;
+  } else {
+    /* Standard oz/serving meats */
+    var baseOz = meat.ozPerServing * appetiteMult * sidesMult * buffetReduction;
+    var cookedLbs = guests * baseOz / 16;
+    var rawMin = cookedLbs / (1 - meat.shrinkage);
+    rawLbs = rawMin * 1.20; /* 20% buffer */
+    piecesLabel = null;
+    pieces = null;
+  }
+
+  /* Whole-cut count */
+  var wholeCuts = Math.ceil(rawLbs / meat.maxLbs);
+  if (wholeCuts > 1) {
+    warningText = 'You\'ll need ' + wholeCuts + ' whole ' + escapeHtml(meat.name) + ' cuts (each up to ' + meat.maxLbs + ' lbs).';
+  }
+
+  /* Cost */
+  var totalCost = null;
+  var costPerPerson = null;
+  if (pricePerLb !== null) {
+    totalCost = rawLbs * pricePerLb;
+    costPerPerson = totalCost / guests;
+  }
+
+  return {
+    key: key,
+    name: meat.name,
+    rawLbs: rawLbs,
+    piecesLabel: piecesLabel,
+    pieces: pieces,
+    wholeCuts: wholeCuts,
+    maxLbs: meat.maxLbs,
+    warningText: warningText || null,
+    totalCost: totalCost,
+    costPerPerson: costPerPerson,
+    pricePerLb: pricePerLb
+  };
+}
+
+/* ============================================================
+   RENDER RESULTS
+   ============================================================ */
+function renderResults(results, guests, totalRawLbs, totalCost, hasCost) {
+  var cardsEl = document.getElementById('meatCards');
+  cardsEl.innerHTML = '';
+
+  results.forEach(function(r) {
+    var card = document.createElement('div');
+    card.className = 'meat-card';
+
+    var statsHtml = '<div class="mcs"><div class="mcs-label">Raw Weight to Buy</div><div class="mcs-value">' + escapeHtml(fmtWeight(r.rawLbs, 1)) + '</div><div class="mcs-sub">incl. 20% buffer</div></div>';
+
+    if (r.piecesLabel) {
+      statsHtml += '<div class="mcs"><div class="mcs-label">Pieces / Racks</div><div class="mcs-value">' + escapeHtml(r.piecesLabel) + '</div><div class="mcs-sub">whole cuts to order</div></div>';
+    }
+
+    if (r.totalCost !== null) {
+      statsHtml += '<div class="mcs"><div class="mcs-label">Total Cost</div><div class="mcs-value">' + escapeHtml(fmtCurrency(r.totalCost)) + '</div><div class="mcs-sub">' + escapeHtml(fmtCurrency(r.costPerPerson)) + ' per person</div></div>';
+    }
+
+    var warnHtml = r.warningText
+      ? '<div class="meat-warn" role="alert">&#x26A0;&#xFE0F; ' + escapeHtml(r.warningText) + '</div>'
+      : '';
+
+    card.innerHTML =
+      '<div class="meat-card-header"><div class="meat-card-name">&#x1F356; ' + escapeHtml(r.name) + '</div></div>' +
+      '<div class="meat-card-grid">' + statsHtml + '</div>' +
+      warnHtml;
+
+    cardsEl.appendChild(card);
+  });
+
+  /* Summary */
+  var summaryGrid = document.getElementById('summaryGrid');
+  summaryGrid.innerHTML = '';
+
+  function addSumItem(label, value, sub) {
+    var div = document.createElement('div');
+    div.className = 'sum-item';
+    div.innerHTML =
+      '<div class="sum-label">' + escapeHtml(label) + '</div>' +
+      '<div class="sum-value">' + escapeHtml(value) + '</div>' +
+      (sub ? '<div class="sum-sub">' + escapeHtml(sub) + '</div>' : '');
+    summaryGrid.appendChild(div);
+  }
+
+  addSumItem('Total Guests', guests.toLocaleString(), 'people to serve');
+  addSumItem('Total Raw Weight', fmtWeight(totalRawLbs, 1), 'all meats combined');
+
+  if (hasCost) {
+    addSumItem('Total Cost', fmtCurrency(totalCost), 'meat only');
+    addSumItem('Cost per Person', fmtCurrency(totalCost / guests), 'meat only');
+  }
+
+  /* Show results */
+  var resultsEl = document.getElementById('results');
+  resultsEl.classList.add('visible');
+  resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+(function init() {
+
+  /* Restore weight unit from localStorage */
+  try {
+    var savedWu = localStorage.getItem('pitmaster_wu');
+    if (!savedWu) {
+      var lang = navigator.language || 'en-US';
+      if (shouldDefaultMetric(lang)) savedWu = 'kg';
+    }
+    if (savedWu) {
+      state.wu = savedWu;
+      document.querySelectorAll('#weightToggle button').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.unit === savedWu);
+      });
+    }
+  } catch(e) {}
+
+  function refreshVisibleResults() {
+    if (document.getElementById('results').classList.contains('visible')) calculate();
+  }
+
+  /* Weight toggle */
+  document.getElementById('weightToggle').addEventListener('click', function(e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    var val = btn.dataset.unit;
+    if (!val || state.wu === val) return;
+    state.wu = val;
+    document.querySelectorAll('#weightToggle button').forEach(function(b) {
+      b.classList.toggle('active', b.dataset.unit === val);
+    });
+    try { localStorage.setItem('pitmaster_wu', val); } catch(e) {}
+    refreshVisibleResults();
+  });
+
+  /* Service style toggle */
+  var styleBtns = document.querySelectorAll('.service-btn');
+  styleBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var val = this.dataset.style;
+      if (!val || state.style === val) return;
+      state.style = val;
+      styleBtns.forEach(function(b) {
+        var active = b.dataset.style === val;
+        b.classList.toggle('active', active);
+        b.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+      refreshVisibleResults();
+    });
+  });
+
+  /* Appetite toggle */
+  var appetiteBtns = document.querySelectorAll('#appetiteToggle button');
+  document.getElementById('appetiteToggle').addEventListener('click', function(e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    var val = btn.dataset.appetite;
+    if (!val || state.appetite === val) return;
+    state.appetite = val;
+    appetiteBtns.forEach(function(b) {
+      b.classList.toggle('active', b.dataset.appetite === val);
+    });
+    refreshVisibleResults();
+  });
+
+  document.getElementById('withSides').addEventListener('change', refreshVisibleResults);
+
+  document.getElementById('meatRows').addEventListener('change', function(e) {
+    if (e.target.closest('.meat-row')) refreshVisibleResults();
+  });
+
+  /* Add meat row button */
+  document.getElementById('addMeatBtn').addEventListener('click', function() {
+    addMeatRow();
+    refreshVisibleResults();
+  });
+
+  /* Delete meat row (event delegation) */
+  document.getElementById('meatRows').addEventListener('click', function(e) {
+    var btn = e.target.closest('.meat-row-delete');
+    if (!btn) return;
+    var rowId = btn.dataset.row;
+    if (rowId) {
+      removeMeatRow(rowId);
+      refreshVisibleResults();
+    }
+  });
+
+  /* Calculate button */
+  document.getElementById('calcBtn').addEventListener('click', calculate);
+
+  /* Enter key on guest count */
+  document.getElementById('guestCount').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') calculate();
+  });
+  document.getElementById('guestCount').addEventListener('change', refreshVisibleResults);
+
+  /* Add first default meat row */
+  addMeatRow('brisket_sliced');
+
+  initConsentBanner();
+})();
+
+})();
+</script>
+<!-- INJECT:site-header.js:script -->
+</body>
+</html>

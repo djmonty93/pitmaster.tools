@@ -1,3 +1,5 @@
+dist/
+
 # wrangler files
 .wrangler
 .dev.vars*
