@@ -52,8 +52,12 @@
     });
 
     document.addEventListener('click', function(event){
-      if (window.innerWidth > MOBILE_BREAKPOINT) return;
-      if (!header.contains(event.target)) closeMenu();
+      if (!header.contains(event.target)) {
+        // Always close open dropdowns (resets aria-expanded on desktop too)
+        closeDropdowns();
+        // Only collapse the mobile nav on small screens
+        if (window.innerWidth <= MOBILE_BREAKPOINT) closeMenu();
+      }
     });
 
     document.addEventListener('keydown', function(event){

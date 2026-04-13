@@ -1,8 +1,10 @@
 /* ============================================================
    Shared site header — nav, dropdown, hamburger
-   Loaded after page <style> block on every page.
-   These rules own the header-nav and dropdown — do not
-   duplicate them in individual page stylesheets.
+   Loaded BEFORE each page's <style> block (link tag precedes style).
+   Depends on --amber being defined in each page's :root — do not
+   define it here; pages own their own palette.
+   Do not duplicate .header-nav or .nav-dropdown rules in individual
+   page stylesheets.
    ============================================================ */
 
 /* ----- Header nav container ----- */
