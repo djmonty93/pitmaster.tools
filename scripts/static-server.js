@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const root = process.cwd();
+const root = path.resolve(process.cwd());
 const port = 4173;
 
 const types = {
@@ -20,8 +20,9 @@ const types = {
 function resolvePath(urlPath) {
   let pathname = decodeURIComponent(urlPath.split('?')[0]);
   if (pathname === '/') pathname = '/index.html';
-  const fullPath = path.normalize(path.join(root, pathname));
-  if (!fullPath.startsWith(root)) return null;
+  const fullPath = path.resolve(root, `.${pathname}`);
+  const relativePath = path.relative(root, fullPath);
+  if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) return null;
   return fullPath;
 }
 

@@ -1,0 +1,12 @@
+/package.json /404.html 404
+/package-lock.json /404.html 404
+/README.md /404.html 404
+/CLAUDE.md /404.html 404
+/wrangler.jsonc /404.html 404
+/validate.ps1 /404.html 404
+/playwright.config.js /404.html 404
+/.gitignore /404.html 404
+/scripts/* /404.html 404
+/tests/* /404.html 404
+/node_modules/* /404.html 404
+/.npm-cache/* /404.html 404
