@@ -2,6 +2,7 @@ $ErrorActionPreference = 'Stop'
 
 $repoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $repoRoot
+$distRoot = Join-Path $repoRoot 'dist'
 
 $errors = New-Object System.Collections.Generic.List[string]
 
@@ -31,11 +32,15 @@ function Test-JsonFile {
 }
 
 function Test-LocalLinks {
-  param([string[]]$Paths)
+  param(
+    [string]$BaseDirectory,
+    [string[]]$Paths
+  )
 
   $pattern = '<[^>' + "`r`n" + ']+\b(?:href|src)="([^"]+)"'
   foreach ($path in $Paths) {
-    $content = Get-Content $path -Raw
+    $fullPath = Join-Path $BaseDirectory $path
+    $content = Get-Content $fullPath -Raw
     $matches = [regex]::Matches($content, $pattern)
     foreach ($match in $matches) {
       $target = $match.Groups[1].Value
@@ -55,9 +60,9 @@ function Test-LocalLinks {
       }
 
       $resolved = if ($cleanTarget.StartsWith('/')) {
-        Join-Path $repoRoot $cleanTarget.TrimStart('/')
+        Join-Path $BaseDirectory $cleanTarget.TrimStart('/')
       } else {
-        Join-Path (Split-Path -Parent (Join-Path $repoRoot $path)) $cleanTarget
+        Join-Path (Split-Path -Parent $fullPath) $cleanTarget
       }
 
       if (-not (Test-Path $resolved)) {
@@ -68,7 +73,24 @@ function Test-LocalLinks {
   }
 }
 
+function Test-NoInjectPlaceholders {
+  param(
+    [string]$BaseDirectory,
+    [string[]]$Paths
+  )
+
+  foreach ($path in $Paths) {
+    $fullPath = Join-Path $BaseDirectory $path
+    if (Select-String -Path $fullPath -Pattern '<!--\s*INJECT:' -Quiet) {
+      Add-Error("Unresolved partial placeholder in ${path}")
+    } else {
+      Write-Host "OK INJ  $path"
+    }
+  }
+}
+
 $htmlFiles = @(
+  '404.html',
   'about.html',
   'bbq-cost-calculator.html',
   'brisket-calculator.html',
@@ -88,15 +110,22 @@ $htmlFiles = @(
   'terms-of-service.html'
 )
 
-if (-not (Test-Path 'favicon.ico')) {
-  Add-Error('Missing favicon.ico at repo root.')
-} else {
-  Write-Host 'OK FILE favicon.ico'
+Write-Host 'Building dist/ before validation...'
+npm run build
+if ($LASTEXITCODE -ne 0) {
+  Add-Error('Build failed; dist/ was not generated successfully.')
 }
 
-Test-XmlFile 'sitemap.xml'
+if (-not (Test-Path (Join-Path $distRoot 'favicon.ico'))) {
+  Add-Error('Missing favicon.ico in dist/.')
+} else {
+  Write-Host 'OK FILE dist/favicon.ico'
+}
+
+Test-XmlFile (Join-Path $distRoot 'sitemap.xml')
 Test-JsonFile 'wrangler.jsonc'
-Test-LocalLinks $htmlFiles
+Test-LocalLinks -BaseDirectory $distRoot -Paths $htmlFiles
+Test-NoInjectPlaceholders -BaseDirectory $distRoot -Paths $htmlFiles
 
 if ($errors.Count -gt 0) {
   Write-Host ''

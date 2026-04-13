@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brine Calculator — Wet and Dry Brine Ratios | Pitmaster Tools</title>
+<meta name="description" content="Free brine calculator for BBQ. Enter meat weight, salt type, and strength to get exact water, salt, and sugar amounts for wet or dry brining any cut.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://pitmaster.tools/brine-calculator.html">
+<meta property="og:title" content="Brine Calculator — Wet and Dry Brine Ratios">
+<meta property="og:description" content="Free brine calculator for BBQ. Enter meat weight, salt type, and strength to get exact water, salt, and sugar amounts for wet or dry brining any cut.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://pitmaster.tools/brine-calculator.html">
+<meta property="og:image" content="https://pitmaster.tools/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Brine Calculator — Wet and Dry Brine Ratios">
+<meta name="twitter:description" content="Free brine calculator for BBQ. Enter meat weight, salt type, and strength to get exact water, salt, and sugar amounts for wet or dry brining any cut.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23EF9F27' d='M36 4c2 10-3 15-8 21-5 6-9 11-9 19 0 10 7 16 15 16 11 0 19-8 19-19 0-12-7-19-17-37z'/%3E%3Cpath fill='%23D78108' d='M33 27c1 6-2 9-5 12-3 3-5 6-5 10 0 6 4 10 9 10 7 0 12-5 12-12 0-7-4-11-11-20z'/%3E%3C/svg%3E">
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'analytics_storage': 'denied',
+    'wait_for_update': 500
+  });
+  (function(){
+    var prefix = 'pitmaster_consent=';
+    var cookies = document.cookie ? document.cookie.split(';') : [];
+    for(var i = 0; i < cookies.length; i++){
+      var c = cookies[i].trim();
+      if(c.indexOf(prefix) !== 0) continue;
+      if(decodeURIComponent(c.substring(prefix.length)) !== 'accepted') break;
+      gtag('consent', 'update', {'ad_storage':'granted','analytics_storage':'granted'});
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-SJJVV37EWE';
+      document.head.appendChild(s);
+      gtag('js', new Date());
+      gtag('config', 'G-SJJVV37EWE');
+      window._gtagLoaded = true;
+      break;
+    }
+  })();
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Pitmaster Tools — Brine Calculator",
+  "url": "https://pitmaster.tools/brine-calculator.html",
+  "description": "Calculate exact brine ratios for any meat weight. Supports wet brining (light, standard, and strong concentrations) and dry brining with four salt types.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "offers": {"@type":"Offer","price":"0","priceCurrency":"USD"},
+  "featureList": [
+    "Wet brine with light (2%), standard (5%), and strong (7%) salinity",
+    "Dry brine with per-pound salt application",
+    "Diamond Crystal Kosher, Morton Kosher, Table, and Sea Salt types",
+    "Optional sugar calculation (50% of salt weight)",
+    "Pounds and kilograms input; gallons and liters output",
+    "Recommended brining time with adequacy check"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How much salt do you use for a brine?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For a standard wet brine at 5% salinity, use about 50 grams of salt per liter of water. In practical terms: roughly 3/4 cup of Diamond Crystal Kosher salt per gallon, or 1/2 cup of Morton Kosher or table salt per gallon. For equilibrium (light) brining at 2%, use about 30 grams per liter. For dry brining, apply 1/2 teaspoon of Diamond Crystal (or 1/4 teaspoon of Morton or table salt) per pound of meat."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long should you brine meat before smoking?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Brining time depends on meat thickness and brine concentration. For a whole chicken (4–5 lbs) in a standard 5% brine: 4–12 hours. For a pork shoulder (8–10 lbs): 12–24 hours. For brisket (12–15 lbs): 24–48 hours in a light equilibrium brine. Dry brining follows similar timing: 1–2 hours for thinner cuts and 24–72 hours for large roasts. Never brine longer than recommended — over-brined meat becomes unpleasantly salty and has a mushy texture."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between wet brining and dry brining?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A wet brine submerges meat in salted water, causing osmosis to drive moisture and flavor into the meat. It adds water weight (juiciness) but can dilute surface flavors and makes bark formation harder. A dry brine applies salt directly to the meat surface, drawing out moisture initially — which then dissolves the salt and reabsorbs. Dry brining seasons more deeply, preserves natural meat flavor, and produces a better bark on smoked meats. Most competition pitmasters prefer dry brining brisket and pork for this reason."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does Diamond Crystal or Morton kosher salt matter for brining?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes — it matters significantly. Diamond Crystal is much coarser and less dense, so 1 teaspoon of Diamond Crystal contains about half the salt of 1 teaspoon of Morton Kosher by weight. If a recipe calls for 1 tablespoon of Diamond Crystal and you substitute Morton, your brine will be nearly twice as salty. Always measure by weight (grams) for the most consistent results, or use this calculator to convert between salt types automatically."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should you add sugar to a brine?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sugar in a wet brine is optional but provides two benefits: it balances the saltiness and promotes browning through caramelization and the Maillard reaction. A standard ratio is 50% sugar by weight of the salt — so if you use 100g of salt, add 50g of sugar (roughly 1/4 cup of granulated white sugar). Brown sugar adds a molasses note that works well with pork and poultry. For dry brines, sugar can be added directly to the salt mix but is less common since it can cause surface burning at high smoker temperatures."
+      }
+    }
+  ]
+}
+</script>
+<!-- INJECT:site-header.css -->
+<!-- INJECT:site-base.css -->
+<style>
+.unit-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.brine-type-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1.5rem; }
+.brine-type-btn { border: 2px solid var(--card-border); border-radius: 8px; padding: 1rem; background: #FAFAF8; text-align: center; cursor: pointer; font-family: inherit; transition: border-color .15s, background .15s; }
+.brine-type-btn.active { border-color: var(--amber); background: var(--amber-light); }
+.brine-type-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.bt-icon { font-size: 1.5rem; display: block; margin-bottom: .3rem; }
+.bt-name { font-weight: 700; font-size: .95rem; display: block; margin-bottom: .15rem; }
+.bt-desc { font-size: .78rem; color: var(--text-muted); line-height: 1.4; }
+.form-group select, .form-group input[type="number"] {
+  width: 100%; padding: .6rem .75rem; border: 1.5px solid var(--card-border); border-radius: 6px;
+  background: #FAFAF8; font-family: inherit; font-size: 1rem; color: var(--charcoal);
+  transition: border-color .15s; appearance: none; -webkit-appearance: none;
+}
+.form-group select:focus:not(:focus-visible), .form-group input[type="number"]:focus:not(:focus-visible) { outline: none; border-color: var(--amber); background: #fff; }
+.form-group select:focus-visible, .form-group input[type="number"]:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; border-color: var(--amber); background: #fff; }
+.weight-wrap { display: flex; align-items: center; gap: .5rem; }
+.weight-wrap input { flex: 1; padding: .6rem .75rem; border: 1.5px solid var(--card-border); border-radius: 6px; background: #FAFAF8; font-family: inherit; font-size: 1rem; color: var(--charcoal); transition: border-color .15s; }
+.weight-wrap input:focus:not(:focus-visible) { outline: none; border-color: var(--amber); background: #fff; }
+.weight-wrap input:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; border-color: var(--amber); background: #fff; }
+.weight-unit-lbl { font-weight: 700; font-size: .95rem; color: var(--text-muted); min-width: 2rem; }
+.strength-toggle { display: flex; border: 1.5px solid var(--card-border); border-radius: 6px; overflow: hidden; }
+.strength-toggle button { flex: 1; padding: .65rem .5rem; border: none; background: #FAFAF8; font-family: inherit; font-size: .85rem; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: background .15s, color .15s; }
+.strength-toggle button + button { border-left: 1.5px solid var(--card-border); }
+.strength-toggle button.active { background: var(--charcoal); color: #fff; }
+.strength-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
+.sugar-row { display: flex; align-items: center; gap: .75rem; margin-top: .75rem; padding: .75rem; background: #FAFAF8; border: 1px solid var(--card-border); border-radius: 6px; }
+.sugar-row label { font-size: .875rem; font-weight: 600; cursor: pointer; user-select: none; }
+.sugar-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--amber); cursor: pointer; }
+.calc-btn:focus-visible { outline: 2px solid var(--amber-dark); outline-offset: 2px; }
+.vmsg.visible { display: block; }
+.results-close:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.detail-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.25rem; margin-bottom: 1rem; }
+.detail-card h3 { font-family: Georgia,serif; font-size: 1rem; font-weight: 700; margin-bottom: .75rem; }
+.detail-rows { display: flex; flex-direction: column; gap: .5rem; }
+.detail-row { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; font-size: .9rem; padding-bottom: .5rem; border-bottom: 1px solid #F0EBE3; }
+.detail-row:last-child { border-bottom: none; padding-bottom: 0; }
+.detail-row .dr-label { color: var(--text-muted); font-weight: 600; }
+.detail-row .dr-val { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+.time-badge { display: inline-flex; align-items: center; gap: .4rem; padding: .45rem .85rem; border-radius: 20px; font-size: .82rem; font-weight: 700; margin-bottom: 1rem; }
+.time-badge.ok { background: #DCFCE7; color: #166534; }
+.time-badge.warn { background: var(--yellow-warn); color: #92400E; }
+.time-badge.err { background: #FEE2E2; color: #991B1B; }
+.warn-card { background: var(--yellow-warn); border: 1px solid var(--yellow-warn-border); border-radius: var(--radius); padding: 1rem 1.25rem; font-size: .875rem; color: #92400E; line-height: 1.55; margin-bottom: 1rem; }
+.editorial-section p { margin-bottom: .85rem; line-height: 1.7; font-size: .95rem; color: #333; }
+.editorial-section p:last-child { margin-bottom: 0; }
+.editorial-section ul { padding-left: 1.25rem; margin-bottom: .85rem; }
+.editorial-section li { margin-bottom: .4rem; font-size: .95rem; line-height: 1.6; color: #333; }
+.ref-table-wrap { margin-top: 2.5rem; overflow-x: auto; }
+.ref-table-wrap h2 { font-family: Georgia,serif; font-size: 1.3rem; font-weight: 700; margin-bottom: .5rem; }
+.ref-table-wrap p { font-size: .88rem; color: var(--text-muted); margin-bottom: 1rem; }
+.ref-table { width: 100%; border-collapse: collapse; font-size: .88rem; background: var(--card-bg); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--card-border); }
+.ref-table th { background: var(--charcoal); color: #fff; text-align: left; padding: .65rem .9rem; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.ref-table td { padding: .6rem .9rem; border-bottom: 1px solid #F0EBE3; vertical-align: middle; font-size: .88rem; }
+.ref-table tr:last-child td { border-bottom: none; }
+.ref-table tr:nth-child(even) td { background: #FAFAF8; }
+.ref-table td:not(:first-child):not(:nth-child(2)) { text-align: right; font-variant-numeric: tabular-nums; }
+.faq-section { margin-top: 2.5rem; }
+.faq-section h2 { font-family: Georgia,serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; }
+.faq-item summary:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
+.faq-body { padding: 0 1.25rem 1rem; font-size: .9rem; line-height: 1.7; color: #333; }
+.related-tools h2 { font-family: Georgia,serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; }
+.tool-link:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); border-color: var(--amber); }
+.tool-link:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.cookie-accept:hover { background: var(--amber-dark); }
+.cookie-reject:hover { color: #fff; border-color: rgba(255,255,255,.5) !important; }
+.cookie-accept:focus-visible, .cookie-reject:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">Pitmaster<span> Tools</span></a>
+  <nav class="header-nav" aria-label="Site navigation">
+    <div class="nav-dropdown">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="tools.html">All Tools</a></li>
+        <li><a href="/">Meat Smoking Calculator</a></li>
+        <li><a href="brisket-calculator.html">Brisket Calculator</a></li>
+        <li><a href="pork-shoulder-calculator.html">Pork Shoulder Calculator</a></li>
+        <li><a href="rib-calculator.html">Rib Calculator</a></li>
+        <li><a href="turkey-smoking-calculator.html">Turkey Calculator</a></li>
+        <li><a href="meat-per-person.html">Meat Per Person</a></li>
+        <li><a href="cook-time-coordinator.html">Cook Time Coordinator</a></li>
+        <li><a href="charcoal-calculator.html">Charcoal Calculator</a></li>
+        <li><a href="brine-calculator.html" aria-current="page">Brine Calculator</a></li>
+        <li><a href="dry-rub-calculator.html">Dry Rub Calculator</a></li>
+        <li><a href="bbq-cost-calculator.html">BBQ Cost Calculator</a></li>
+        <li><a href="catering-calculator.html">Catering Calculator</a></li>
+        <li><a href="brisket-yield-calculator.html">Brisket Yield Calculator</a></li>
+      </ul>
+    </div>
+    <a href="about.html">About</a>
+  </nav>
+  <div class="unit-controls">
+    <div class="unit-toggle" id="tempToggle" role="group" aria-label="Temperature unit">
+      <button data-unit="F" class="active" type="button">&#xB0;F</button>
+      <button data-unit="C" type="button">&#xB0;C</button>
+    </div>
+    <div class="unit-toggle" id="weightToggle" role="group" aria-label="Weight unit">
+      <button data-unit="lbs" class="active" type="button">lbs</button>
+      <button data-unit="kg" type="button">kg</button>
+    </div>
+  </div>
+</header>
+
+<div class="ad-slot" aria-hidden="true">
+  <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4265262608577453" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+</div>
+
+<main>
+  <div class="page-hero">
+    <h1>Brine Calculator</h1>
+    <p>Enter your meat weight and preferences to get exact water, salt, and sugar amounts for wet brining — or salt amounts for dry brining any cut.</p>
+  </div>
+
+  <div class="form-card">
+    <p class="section-title">Brine Method</p>
+    <div class="brine-type-toggle" role="group" aria-label="Brine type">
+      <button class="brine-type-btn active" data-brine="wet" type="button" aria-pressed="true">
+        <span class="bt-icon">&#x1F4A7;</span>
+        <span class="bt-name">Wet Brine</span>
+        <span class="bt-desc">Submerge in salted water. Adds moisture; best for poultry and lean cuts.</span>
+      </button>
+      <button class="brine-type-btn" data-brine="dry" type="button" aria-pressed="false">
+        <span class="bt-icon">&#x1F9C2;</span>
+        <span class="bt-name">Dry Brine</span>
+        <span class="bt-desc">Salt rubbed directly on meat. Better bark; preferred for brisket and pork.</span>
+      </button>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="meatWeight">Meat Weight</label>
+        <div class="weight-wrap">
+          <input type="number" id="meatWeight" value="10" min="0.5" max="100" step="0.5" aria-label="Meat weight">
+          <span class="weight-unit-lbl" id="weightUnitLbl">lbs</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="saltType">Salt Type</label>
+        <select id="saltType">
+          <option value="dc">Diamond Crystal Kosher</option>
+          <option value="morton">Morton Kosher Salt</option>
+          <option value="table">Table Salt (Iodized)</option>
+          <option value="sea">Coarse Sea Salt</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Wet brine options -->
+    <div id="wetOptions">
+      <p class="section-title" style="margin-bottom:.65rem">Brine Strength</p>
+      <div class="strength-toggle" role="group" aria-label="Brine strength" style="margin-bottom:1.25rem">
+        <button type="button" data-strength="light">Light 2%<br><small style="font-weight:400;font-size:.72rem">8–48 hr soak</small></button>
+        <button type="button" class="active" data-strength="standard">Standard 5%<br><small style="font-weight:400;font-size:.72rem">4–24 hr soak</small></button>
+        <button type="button" data-strength="strong">Strong 7%<br><small style="font-weight:400;font-size:.72rem">1–6 hr soak</small></button>
+      </div>
+      <div class="form-grid" style="margin-bottom:.5rem">
+        <div class="form-group">
+          <label for="brineHours">Planned Brine Time (hours)</label>
+          <input type="number" id="brineHours" value="12" min="0.5" max="96" step="0.5">
+        </div>
+      </div>
+      <div class="sugar-row">
+        <input type="checkbox" id="includeSugar" checked>
+        <label for="includeSugar">Include optional sugar (50% of salt weight — balances saltiness and promotes browning)</label>
+      </div>
+    </div>
+
+    <!-- Dry brine options -->
+    <div id="dryOptions" style="display:none">
+      <div class="form-grid" style="margin-bottom:.5rem">
+        <div class="form-group">
+          <label for="dryBrineHours">Planned Rest Time (hours)</label>
+          <input type="number" id="dryBrineHours" value="24" min="1" max="96" step="1">
+        </div>
+      </div>
+    </div>
+
+    <button class="calc-btn" id="calcBtn" type="button">Calculate Brine</button>
+    <div class="vmsg" id="vmsg" role="alert" aria-live="polite"></div>
+  </div>
+
+  <div class="ad-slot" aria-hidden="true">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4265262608577453" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+  </div>
+
+  <!-- Results modal -->
+  <div id="results" role="dialog" aria-modal="true" aria-labelledby="resultsModalTitle">
+    <div class="results-modal" tabindex="-1">
+      <div class="results-modal__header">
+        <h2 class="results-modal__title" id="resultsModalTitle">Your Brine Recipe</h2>
+        <button class="results-close" id="resultsClose" aria-label="Close results">&times;</button>
+      </div>
+
+      <div class="stat-cards">
+        <div class="stat-card c1">
+          <span class="sc-icon" id="sc1Icon">&#x1F4A7;</span>
+          <div class="sc-label" id="sc1Label">Water Needed</div>
+          <div class="sc-value" id="sc1Value">—</div>
+          <div class="sc-sub" id="sc1Sub"></div>
+        </div>
+        <div class="stat-card c2">
+          <span class="sc-icon">&#x1F9C2;</span>
+          <div class="sc-label">Salt Amount</div>
+          <div class="sc-value" id="scSalt">—</div>
+          <div class="sc-sub" id="scSaltSub"></div>
+        </div>
+        <div class="stat-card c3">
+          <span class="sc-icon" id="sc3Icon">&#x1F36C;</span>
+          <div class="sc-label" id="sc3Label">Optional Sugar</div>
+          <div class="sc-value" id="sc3Value">—</div>
+          <div class="sc-sub" id="sc3Sub"></div>
+        </div>
+      </div>
+
+      <div id="timeBadge" class="time-badge ok" role="status" aria-live="polite"></div>
+
+      <div class="detail-card">
+        <h3 id="detailHeading">Recipe Details</h3>
+        <div class="detail-rows" id="detailRows"></div>
+      </div>
+
+      <div class="warn-card" id="warnCard" style="display:none" role="alert"></div>
+
+      <div style="text-align:center;margin-top:.75rem">
+        <button class="calc-btn" id="editBtn" type="button" style="max-width:300px">Edit Inputs</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Editorial -->
+  <section class="editorial-section">
+    <h2>Wet Brine vs. Dry Brine: Which Is Better for Smoking?</h2>
+    <p>Both brining methods improve the finished product, but they work differently and suit different cuts and goals. Choosing the right method — and getting the salt ratio right — is one of the highest-leverage steps you can take before any long smoke.</p>
+
+    <h3>How Wet Brining Works</h3>
+    <p>A wet brine is a salt-water solution that meat is submerged in for several hours. Osmosis initially draws moisture out of the meat into the concentrated brine, then — as the salt begins to denature surface proteins — the process reverses and the brined solution is pulled back into the meat. The result is meat that is seasoned throughout and retains more moisture during the cook.</p>
+    <p>Wet brining is especially effective for poultry (chicken and turkey), lean pork cuts like loins and tenderloins, and whole fish. These cuts have less intramuscular fat and benefit most from added moisture. The tradeoff is surface wetness — a wet-brined bird needs to be dried thoroughly before cooking or the skin will steam rather than crisp. If you are smoking a holiday bird, pair this with the <a href="turkey-smoking-calculator.html">Turkey Smoking Calculator</a> so the brine window and cook window line up cleanly.</p>
+    <p>Brine concentration matters. A light 2% brine (equilibrium brining) is forgiving — you can leave meat in it for 24–48 hours without risk of over-salting, because the salt migrates until the meat and brine reach the same concentration. A strong 7% brine works faster but must be timed carefully; left too long, it produces a rubbery, overly salty result.</p>
+
+    <h3>How Dry Brining Works</h3>
+    <p>Dry brining applies kosher salt directly to the meat surface and lets it rest uncovered in the refrigerator. Within the first 30–60 minutes, the salt draws moisture to the surface and dissolves, forming a concentrated brine on the meat. Over the next several hours, this concentrated liquid reabsorbs into the meat, seasoning it deeply without adding extra water weight.</p>
+    <p>Dry brining is the preferred method for most BBQ cuts — especially <a href="brisket-calculator.html">brisket</a>, <a href="pork-shoulder-calculator.html">pork butt</a>, and <a href="rib-calculator.html">ribs</a> — because it preserves the natural flavor concentration and allows the surface to dry out completely, which is essential for bark formation. A well-dried surface develops a better pellicle (the tacky layer smoke adheres to) and produces a darker, more flavorful crust.</p>
+    <p>The gold standard for dry brining is to apply the salt 24–72 hours before cooking and let the meat rest uncovered on a rack in the refrigerator. For large cuts like a 14-lb brisket, 48 hours gives the salt time to penetrate fully to the center.</p>
+
+    <h3>Salt Type Makes a Major Difference</h3>
+    <p>All four salt types calculate differently because their densities vary significantly. Diamond Crystal Kosher is the least dense — its large, flake-like crystals create a lot of air space in the measuring cup. Morton Kosher is more compact. Table salt is the densest common salt. If you substitute one for another by volume, your brine will be off by 50–100%.</p>
+    <p>Pitmaster preference: most competition BBQ cooks prefer Diamond Crystal Kosher for dry brining because its coarser grain sticks to meat surfaces better and is less likely to over-season if you accidentally apply a little extra. Morton Kosher is the backup for most grocery stores that do not carry Diamond Crystal.</p>
+
+    <h3>Sugar in a Brine</h3>
+    <p>Adding sugar to a wet brine is optional but recommended for poultry and pork. A ratio of 50% sugar by weight of the salt provides the best balance — enough to round out the saltiness and promote caramelization without making the meat noticeably sweet. Brown sugar adds a subtle molasses depth. For brisket, sugar in a brine is usually omitted since beef fat and bark provide natural richness.</p>
+    <p>Do not add sugar to a dry brine if you plan to smoke at very high temperatures (above 325°F) — the surface sugar can burn before the meat finishes. For low-and-slow cooks at 225–275°F, a small amount of sugar in the <a href="dry-rub-calculator.html">dry rub</a> (applied separately) is a better approach than adding it to the dry brine.</p>
+
+    <h3>After Brining: The Drying Step</h3>
+    <p>Wet-brined meat should be removed from the brine, rinsed lightly, and patted completely dry with paper towels. Then it benefits from an uncovered rest on a wire rack in the refrigerator for 1–4 hours so the surface dries out. This step is frequently skipped and frequently regretted — a wet surface produces steam, not smoke adherence.</p>
+    <p>Dry-brined meat pulled straight from the refrigerator is already surface-dry and can go directly into the smoker, though bringing it to room temperature for 30–60 minutes first reduces the initial temperature shock and shortens cook time slightly.</p>
+  </section>
+
+  <!-- Reference table -->
+  <section class="ref-table-wrap">
+    <h2>Quick Reference — Wet Brine (Standard 5%), Briquettes</h2>
+    <p>Water and salt amounts for common meat weights. Uses Diamond Crystal Kosher Salt at 5% salinity. Multiply salt by 1.92 for Morton Kosher or Table Salt.</p>
+    <table class="ref-table" aria-label="Wet brine reference by meat weight">
+      <thead>
+        <tr>
+          <th>Meat / Weight</th>
+          <th>Water</th>
+          <th>Diamond Crystal</th>
+          <th>Morton / Table</th>
+          <th>Optional Sugar</th>
+          <th>Brine Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Chicken thighs (3 lbs)</td><td>0.75 gal / 2.8 L</td><td>⅔ cup / 133g</td><td>¼ cup / 70g</td><td>⅓ cup / 67g</td><td>4–8 hrs</td></tr>
+        <tr><td>Whole chicken (5 lbs)</td><td>1.25 gal / 4.7 L</td><td>1 cup / 222g</td><td>½ cup / 118g</td><td>½ cup / 111g</td><td>8–12 hrs</td></tr>
+        <tr><td>Turkey breast (8 lbs)</td><td>2 gal / 7.6 L</td><td>1¾ cups / 355g</td><td>¾ cup / 189g</td><td>¾ cup / 178g</td><td>12–24 hrs</td></tr>
+        <tr><td>Whole turkey (14 lbs)</td><td>3.5 gal / 13.2 L</td><td>3 cups / 621g</td><td>1½ cups / 331g</td><td>1½ cups / 311g</td><td>24–48 hrs</td></tr>
+        <tr><td>Pork loin (5 lbs)</td><td>1.25 gal / 4.7 L</td><td>1 cup / 222g</td><td>½ cup / 118g</td><td>½ cup / 111g</td><td>6–12 hrs</td></tr>
+        <tr><td>Pork chops (2 lbs)</td><td>0.5 gal / 1.9 L</td><td>⅓ cup / 89g</td><td>3 tbsp / 47g</td><td>3 tbsp / 45g</td><td>2–4 hrs</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="ref-table-wrap" style="margin-top:1.5rem">
+    <h2>Quick Reference — Dry Brine by Salt Type</h2>
+    <p>Salt application per pound of meat. Apply evenly to all surfaces and refrigerate uncovered.</p>
+    <table class="ref-table" aria-label="Dry brine salt amounts by salt type">
+      <thead>
+        <tr>
+          <th>Salt Type</th>
+          <th>Rate</th>
+          <th>5 lbs</th>
+          <th>10 lbs</th>
+          <th>15 lbs</th>
+          <th>Minimum Rest</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Diamond Crystal Kosher</td><td>½ tsp / lb</td><td>2½ tsp</td><td>5 tsp</td><td>7½ tsp</td><td>1 hr (thin), 24 hr (thick)</td></tr>
+        <tr><td>Morton Kosher Salt</td><td>¼ tsp / lb</td><td>1¼ tsp</td><td>2½ tsp</td><td>3¾ tsp</td><td>1 hr (thin), 24 hr (thick)</td></tr>
+        <tr><td>Table Salt (Iodized)</td><td>¼ tsp / lb</td><td>1¼ tsp</td><td>2½ tsp</td><td>3¾ tsp</td><td>1 hr (thin), 24 hr (thick)</td></tr>
+        <tr><td>Coarse Sea Salt</td><td>⅜ tsp / lb</td><td>1⅞ tsp</td><td>3¾ tsp</td><td>5⅝ tsp</td><td>1 hr (thin), 24 hr (thick)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq-section">
+    <h2>Frequently Asked Questions</h2>
+    <details class="faq-item">
+      <summary>How much salt do you use for a brine?</summary>
+      <div class="faq-body">For a standard wet brine at 5% salinity, use about 50 grams of salt per liter of water — roughly ¾ cup of Diamond Crystal Kosher or ½ cup of Morton Kosher per gallon. For equilibrium (light) brining at 2%, use about 20 grams per liter. For dry brining, apply ½ teaspoon of Diamond Crystal (or ¼ teaspoon of Morton or table salt) per pound of meat.</div>
+    </details>
+    <details class="faq-item">
+      <summary>How long should you brine meat before smoking?</summary>
+      <div class="faq-body">Brining time depends on meat thickness and brine concentration. For a whole chicken in a standard 5% brine: 4–12 hours. For a pork shoulder: 12–24 hours. For brisket in a light equilibrium brine: 24–48 hours. Dry brining follows similar timing: 1–2 hours for thinner cuts and 24–72 hours for large roasts. Never brine longer than recommended — over-brined meat becomes unpleasantly salty and mushy.</div>
+    </details>
+    <details class="faq-item">
+      <summary>What is the difference between wet brining and dry brining?</summary>
+      <div class="faq-body">A wet brine submerges meat in salted water, causing osmosis to drive moisture and flavor into the meat. It adds water weight (juiciness) but can dilute surface flavors and makes bark formation harder. A dry brine applies salt directly to the surface, drawing out moisture initially — which dissolves the salt and then reabsorbs. Dry brining seasons more deeply, preserves natural meat flavor, and produces better bark on smoked meats. Most competition pitmasters prefer dry brining brisket and pork.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Does Diamond Crystal or Morton kosher salt matter for brining?</summary>
+      <div class="faq-body">Yes — significantly. Diamond Crystal is much coarser and less dense, so 1 teaspoon of Diamond Crystal contains about half the salt of 1 teaspoon of Morton Kosher by weight. If a recipe calls for 1 tablespoon of Diamond Crystal and you substitute Morton, your brine will be nearly twice as salty. Always measure by weight (grams) for the most consistent results, or use this calculator to convert between salt types automatically.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Should you add sugar to a brine?</summary>
+      <div class="faq-body">Sugar in a wet brine is optional but provides two benefits: it balances saltiness and promotes browning through caramelization. A standard ratio is 50% sugar by weight of the salt. Brown sugar adds a subtle molasses note that works well with pork and poultry. For brisket, sugar in a brine is usually omitted. For dry brines, sugar can cause surface burning above 325°F — it is better applied in the rub separately for low-and-slow cooks.</div>
+    </details>
+  </section>
+
+  <!-- Related tools -->
+  <section class="related-tools">
+    <h2>More Pitmaster Tools</h2>
+    <div class="tool-links">
+      <a class="tool-link" href="/">
+        <span class="tool-link-icon">&#x1F321;&#xFE0F;</span>
+        <div>
+          <div class="tool-link-name">Meat Smoking Calculator</div>
+          <div class="tool-link-desc">Cook times, temperatures, and wood pairings for 28 cuts.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="dry-rub-calculator.html">
+        <span class="tool-link-icon">&#x1F9C2;</span>
+        <div>
+          <div class="tool-link-name">Dry Rub Calculator</div>
+          <div class="tool-link-desc">Scale any rub recipe to your exact meat weight and coverage.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="charcoal-calculator.html">
+        <span class="tool-link-icon">&#x26B0;&#xFE0F;</span>
+        <div>
+          <div class="tool-link-name">Charcoal Calculator</div>
+          <div class="tool-link-desc">Exact charcoal amounts for Minion, Snake, or direct-heat cooks.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="meat-per-person.html">
+        <span class="tool-link-icon">&#x1F356;</span>
+        <div>
+          <div class="tool-link-name">Meat Per Person Calculator</div>
+          <div class="tool-link-desc">Raw weight to buy for any crowd size and serving style.</div>
+        </div>
+      </a>
+    </div>
+  </section>
+</main>
+
+<div class="ad-slot" aria-hidden="true">
+  <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4265262608577453" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+</div>
+
+<!-- Cookie consent banner -->
+<div class="cookie-banner" id="cookieBanner" role="dialog" aria-live="polite" aria-label="Cookie consent">
+  <div class="cookie-banner__inner">
+    <p class="cookie-banner__text">We use cookies for analytics and advertising. See our <a href="privacy-policy.html">Privacy Policy</a> for details.</p>
+    <div class="cookie-banner__actions">
+      <button class="cookie-accept" id="cookieAccept" type="button">Accept</button>
+      <button class="cookie-reject" id="cookieReject" type="button">Reject</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>&#169; 2026 Pitmaster Tools. All rights reserved.</div>
+  <nav aria-label="Footer">
+    <a href="/">Calculator</a>
+    <span>|</span>
+    <a href="tools.html">All Tools</a>
+    <span>|</span>
+    <a href="privacy-policy.html">Privacy Policy</a>
+    <span>|</span>
+    <a href="terms-of-service.html">Terms of Service</a>
+    <span>|</span>
+    <a href="mailto:contact@pitmaster.tools">contact@pitmaster.tools</a>
+  </nav>
+  <p class="footer-small">Brine amounts are estimates. Actual seasoning penetration varies with meat thickness, refrigerator temperature, and initial salt content of your cut. Always taste before serving.</p>
+  <p class="footer-small">Last updated: April 12, 2026</p>
+</footer>
+
+<!-- INJECT:site-utils.js:script -->
+<script>
+
+// ── Salt data ─────────────────────────────────────────────────────────────────
+// g per cup, g per tsp
+var SALT = {
+  dc:     { name: 'Diamond Crystal Kosher', gPerCup: 142, gPerTsp: 2.84 },
+  morton: { name: 'Morton Kosher Salt',     gPerCup: 273, gPerTsp: 5.46 },
+  table:  { name: 'Table Salt',             gPerCup: 292, gPerTsp: 5.84 },
+  sea:    { name: 'Coarse Sea Salt',        gPerCup: 220, gPerTsp: 4.40 }
+};
+
+// Wet brine: g of salt per liter of water
+var WET_SALINITY = { light: 20, standard: 50, strong: 70 };
+
+// Min recommended brine hours by strength (per gallon of water, scales loosely)
+var WET_MIN_HRS = { light: 8, standard: 3, strong: 1 };
+var WET_MAX_HRS = { light: 72, standard: 24, strong: 6 };
+
+// Dry brine: tsp of salt per pound of meat
+var DRY_TSP_PER_LB = { dc: 0.50, morton: 0.25, table: 0.25, sea: 0.375 };
+
+// ── State ─────────────────────────────────────────────────────────────────────
+var state = { brineType: 'wet', strength: 'standard', wu: 'lbs', tu: 'F' };
+
+// ── Format helpers ─────────────────────────────────────────────────────────────
+function fmtG(g) { return Math.round(g) + 'g'; }
+
+function fmtCups(cups) {
+  if (cups < 0.1) {
+    var tsp = cups * 48;
+    return fmtTsp(tsp);
+  }
+  if (cups < 0.5) {
+    var tbsp = cups * 16;
+    if (tbsp < 1) { var tsp2 = tbsp * 3; return fmtTsp(tsp2); }
+    return Math.round(tbsp * 10) / 10 + ' tbsp';
+  }
+  // Round to nearest common fraction
+  var fracs = [[1,'1 cup'],[0.75,'¾ cup'],[0.667,'⅔ cup'],[0.5,'½ cup'],[0.333,'⅓ cup'],[0.25,'¼ cup']];
+  var whole = Math.floor(cups);
+  var rem = cups - whole;
+  var prefix = whole > 0 ? whole + ' ' : '';
+  if (rem < 0.08) return (whole > 0 ? whole + ' cup' + (whole > 1 ? 's' : '') : '0 cups');
+  for (var i = 0; i < fracs.length; i++) {
+    if (Math.abs(rem - fracs[i][0]) < 0.09) return prefix + fracs[i][1];
+  }
+  return (Math.round(cups * 10) / 10) + ' cups';
+}
+
+function fmtTsp(tsp) {
+  if (tsp < 0.3) return '⅛ tsp';
+  if (tsp < 0.6) return '¼ tsp';
+  if (tsp < 0.9) return '½ tsp';
+  if (tsp < 1.3) return '1 tsp';
+  if (tsp < 1.8) return '1½ tsp';
+  if (tsp < 2.3) return '2 tsp';
+  var tbsp = tsp / 3;
+  if (tbsp < 1.2) return Math.round(tsp * 2) / 2 + ' tsp';
+  return (Math.round(tbsp * 10) / 10) + ' tbsp';
+}
+
+function fmtGal(gal, wu) {
+  if (wu === 'kg') {
+    var liters = gal * 3.785;
+    return liters.toFixed(1) + ' L';
+  }
+  if (gal < 1) return (gal * 4).toFixed(1) + ' qt';
+  return gal.toFixed(1) + ' gal';
+}
+
+function fmtWeight(lbs, wu) {
+  if (wu === 'kg') return (lbs * 0.453592).toFixed(1) + ' kg';
+  return lbs.toFixed(1) + ' lbs';
+}
+
+// ── Calculate ─────────────────────────────────────────────────────────────────
+function calculate() {
+  var vmsg = document.getElementById('vmsg');
+  vmsg.classList.remove('visible');
+
+  var rawWeight = parseFloat(document.getElementById('meatWeight').value);
+  if (!rawWeight || rawWeight <= 0) {
+    vmsg.textContent = 'Please enter a meat weight greater than zero.';
+    vmsg.classList.add('visible');
+    document.getElementById('meatWeight').focus();
+    return;
+  }
+
+  var weightLbs = state.wu === 'kg' ? rawWeight / 0.453592 : rawWeight;
+  var saltKey = document.getElementById('saltType').value;
+  var salt = SALT[saltKey];
+  var warnCard = document.getElementById('warnCard');
+  warnCard.style.display = 'none';
+
+  if (state.brineType === 'wet') {
+    var hours = parseFloat(document.getElementById('brineHours').value);
+    if (!hours || hours < 0.5) {
+      vmsg.textContent = 'Please enter a brine time of at least 0.5 hours.';
+      vmsg.classList.add('visible');
+      document.getElementById('brineHours').focus();
+      return;
+    }
+    var salinitY = WET_SALINITY[state.strength];
+    // Water: ~1 gallon per 4 lbs of meat, minimum 0.5 gallon
+    var waterGal = Math.max(0.5, weightLbs / 4);
+    var waterL = waterGal * 3.785;
+    var saltGrams = waterL * salinitY;
+    var saltCups = saltGrams / salt.gPerCup;
+    var includeSugar = document.getElementById('includeSugar').checked;
+    var sugarGrams = includeSugar ? saltGrams * 0.5 : 0;
+    var sugarCups = sugarGrams / 200; // ~200g/cup granulated sugar
+
+    // Stat card 1 — water
+    document.getElementById('sc1Icon').textContent = '\u{1F4A7}';
+    document.getElementById('sc1Label').textContent = 'Water Needed';
+    document.getElementById('sc1Value').textContent = fmtGal(waterGal, state.wu);
+    document.getElementById('sc1Sub').textContent = state.wu === 'kg'
+      ? '(' + waterGal.toFixed(1) + ' gal)'
+      : '(' + (waterGal * 3.785).toFixed(1) + ' L)';
+
+    // Stat card 2 — salt
+    document.getElementById('scSalt').textContent = fmtCups(saltCups);
+    document.getElementById('scSaltSub').textContent = fmtG(saltGrams) + ' — ' + salt.name;
+
+    // Stat card 3 — sugar
+    document.getElementById('sc3Icon').textContent = '\u{1F36C}';
+    document.getElementById('sc3Label').textContent = 'Optional Sugar';
+    if (includeSugar) {
+      document.getElementById('sc3Value').textContent = fmtCups(sugarCups);
+      document.getElementById('sc3Sub').textContent = fmtG(sugarGrams) + ' — granulated white';
+    } else {
+      document.getElementById('sc3Value').textContent = 'Skipped';
+      document.getElementById('sc3Sub').textContent = 'Toggle above to include';
+    }
+
+    // Detail rows
+    document.getElementById('detailHeading').textContent = 'Wet Brine Recipe';
+    var rows = [
+      { label: 'Salinity', val: (salinitY / 10).toFixed(1) + '% (' + salinitY + 'g salt per liter)' },
+      { label: 'Salt per gallon', val: fmtCups(saltCups / waterGal) + ' (' + Math.round(saltGrams / waterGal) + 'g)' },
+      { label: 'Salt (total)', val: fmtCups(saltCups) + ' / ' + fmtG(saltGrams) },
+      { label: 'Water (total)', val: fmtGal(waterGal, state.wu) + ' / ' + (waterL).toFixed(1) + ' L' },
+      includeSugar ? { label: 'Sugar (total)', val: fmtCups(sugarCups) + ' / ' + fmtG(sugarGrams) } : null,
+      { label: 'Combine', val: 'Dissolve salt (and sugar) in warm water, then cool to 40°F / 4°C before adding meat' },
+      { label: 'Temperature', val: 'Keep at 34–40°F / 1–4°C for entire brine period' }
+    ].filter(Boolean);
+    var detailRows = document.getElementById('detailRows');
+    detailRows.innerHTML = '';
+    rows.forEach(function(r) {
+      var div = document.createElement('div');
+      div.className = 'detail-row';
+      div.innerHTML = '<span class="dr-label">' + r.label + '</span><span class="dr-val">' + r.val + '</span>';
+      detailRows.appendChild(div);
+    });
+
+    // Time adequacy badge
+    var minHrs = WET_MIN_HRS[state.strength];
+    var maxHrs = WET_MAX_HRS[state.strength];
+    var badge = document.getElementById('timeBadge');
+    if (hours < minHrs) {
+      badge.className = 'time-badge warn';
+      badge.textContent = '\u26A0\uFE0F ' + hours + ' hr brine may be too short — minimum recommended: ' + minHrs + ' hrs for a ' + state.strength + ' brine';
+    } else if (hours > maxHrs) {
+      badge.className = 'time-badge err';
+      badge.textContent = '\u26D4 ' + hours + ' hrs exceeds the ' + maxHrs + '-hr maximum for a ' + state.strength + ' brine — risk of over-salting';
+      warnCard.style.display = 'block';
+      warnCard.textContent = 'Over-brining at a ' + state.strength + ' concentration can make meat unpleasantly salty and cause a mushy texture. Reduce brine time or switch to a lighter concentration.';
+    } else {
+      badge.className = 'time-badge ok';
+      badge.textContent = '\u2705 ' + hours + ' hours is within the recommended ' + minHrs + '–' + maxHrs + '-hr range for a ' + state.strength + ' brine';
+    }
+
+  } else {
+    // Dry brine
+    var dryHours = parseFloat(document.getElementById('dryBrineHours').value);
+    if (!dryHours || dryHours < 1) {
+      vmsg.textContent = 'Please enter a rest time of at least 1 hour.';
+      vmsg.classList.add('visible');
+      document.getElementById('dryBrineHours').focus();
+      return;
+    }
+    var tspPerLb = DRY_TSP_PER_LB[saltKey];
+    var totalTsp = tspPerLb * weightLbs;
+    var totalG = totalTsp * salt.gPerTsp;
+    var totalTbsp = totalTsp / 3;
+
+    // Stat card 1 — application rate
+    document.getElementById('sc1Icon').textContent = '\u{1F969}';
+    document.getElementById('sc1Label').textContent = 'Application Rate';
+    document.getElementById('sc1Value').textContent = fmtTsp(tspPerLb) + ' / lb';
+    document.getElementById('sc1Sub').textContent = state.wu === 'kg'
+      ? fmtTsp(tspPerLb / 0.453592) + ' per kg'
+      : 'for ' + salt.name;
+
+    // Stat card 2 — total salt
+    document.getElementById('scSalt').textContent = fmtTsp(totalTsp);
+    document.getElementById('scSaltSub').textContent = fmtG(totalG) + ' — ' + salt.name;
+
+    // Stat card 3 — rest time
+    document.getElementById('sc3Icon').textContent = '\u23F0';
+    document.getElementById('sc3Label').textContent = 'Planned Rest';
+    document.getElementById('sc3Value').textContent = dryHours + ' hr' + (dryHours !== 1 ? 's' : '');
+    document.getElementById('sc3Sub').textContent = dryHours >= 24 ? 'Excellent — full penetration' : dryHours >= 4 ? 'Good for thin cuts' : 'Minimum for surface seasoning';
+
+    // Detail rows
+    document.getElementById('detailHeading').textContent = 'Dry Brine Application';
+    var dryRows = [
+      { label: 'Total salt', val: fmtTsp(totalTsp) + ' / ' + fmtG(totalG) },
+      { label: 'As tablespoons', val: (Math.round(totalTbsp * 10) / 10) + ' tbsp' },
+      { label: 'Application', val: 'Apply evenly to all surfaces including sides, seams, and exposed fat' },
+      { label: 'After applying', val: 'Place uncovered on a rack in the refrigerator — do not wrap tightly' },
+      { label: 'Surface moisture', val: 'Normal: surface draws moisture within 30–60 min, then reabsorbs over 2–4 hrs' },
+      { label: 'Pull from fridge', val: '30–60 min before smoking to take off the cold chill' }
+    ];
+    var dryDetailRows = document.getElementById('detailRows');
+    dryDetailRows.innerHTML = '';
+    dryRows.forEach(function(r) {
+      var div = document.createElement('div');
+      div.className = 'detail-row';
+      div.innerHTML = '<span class="dr-label">' + r.label + '</span><span class="dr-val">' + r.val + '</span>';
+      dryDetailRows.appendChild(div);
+    });
+
+    // Time badge
+    var recMin = weightLbs >= 10 ? 24 : weightLbs >= 4 ? 4 : 1;
+    var dbadge = document.getElementById('timeBadge');
+    if (dryHours < recMin) {
+      dbadge.className = 'time-badge warn';
+      dbadge.textContent = '\u26A0\uFE0F ' + dryHours + ' hr rest may be too short for ' + Math.round(weightLbs) + ' lbs — recommended minimum: ' + recMin + ' hrs';
+    } else {
+      dbadge.className = 'time-badge ok';
+      dbadge.textContent = '\u2705 ' + dryHours + ' hours is sufficient for ' + Math.round(weightLbs) + ' lbs of meat';
+    }
+  }
+
+  openResultsModal();
+}
+
+// ── Brine type toggle ─────────────────────────────────────────────────────────
+document.querySelectorAll('.brine-type-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    if (state.brineType === this.dataset.brine) return;
+    state.brineType = this.dataset.brine;
+    document.querySelectorAll('.brine-type-btn').forEach(function(b) {
+      b.classList.toggle('active', b.dataset.brine === state.brineType);
+      b.setAttribute('aria-pressed', b.dataset.brine === state.brineType ? 'true' : 'false');
+    });
+    document.getElementById('wetOptions').style.display = state.brineType === 'wet' ? '' : 'none';
+    document.getElementById('dryOptions').style.display = state.brineType === 'dry' ? '' : 'none';
+    if (document.getElementById('results').classList.contains('visible')) calculate();
+  });
+});
+
+// ── Strength toggle ───────────────────────────────────────────────────────────
+document.querySelector('.strength-toggle').addEventListener('click', function(e) {
+  var btn = e.target.closest('button');
+  if (!btn) return;
+  if (btn.dataset.strength === state.strength) return;
+  state.strength = btn.dataset.strength;
+  this.querySelectorAll('button').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.strength === state.strength);
+  });
+  if (document.getElementById('results').classList.contains('visible')) calculate();
+});
+
+// ── Unit toggles ──────────────────────────────────────────────────────────────
+document.getElementById('tempToggle').addEventListener('click', function(e) {
+  var btn = e.target.closest('button');
+  if (!btn) return;
+  var val = btn.dataset.unit;
+  if (val === state.tu) return;
+  state.tu = val;
+  this.querySelectorAll('button').forEach(function(b) { b.classList.toggle('active', b.dataset.unit === val); });
+  try { localStorage.setItem('pitmaster_tu', val); } catch(err){}
+  if (document.getElementById('results').classList.contains('visible')) calculate();
+});
+
+document.getElementById('weightToggle').addEventListener('click', function(e) {
+  var btn = e.target.closest('button');
+  if (!btn) return;
+  var val = btn.dataset.unit;
+  if (val === state.wu) return;
+  // Convert displayed weight value
+  var input = document.getElementById('meatWeight');
+  var cur = parseFloat(input.value);
+  if (!isNaN(cur)) {
+    input.value = val === 'kg'
+      ? Math.round(cur * 0.453592 * 10) / 10
+      : Math.round(cur / 0.453592 * 10) / 10;
+  }
+  state.wu = val;
+  document.getElementById('weightUnitLbl').textContent = val;
+  this.querySelectorAll('button').forEach(function(b) { b.classList.toggle('active', b.dataset.unit === val); });
+  try { localStorage.setItem('pitmaster_wu', val); } catch(err){}
+  if (document.getElementById('results').classList.contains('visible')) calculate();
+});
+
+// ── Calculate button ──────────────────────────────────────────────────────────
+document.getElementById('calcBtn').addEventListener('click', calculate);
+document.getElementById('meatWeight').addEventListener('keydown', function(e) { if (e.key === 'Enter') calculate(); });
+
+// ── Modal close ───────────────────────────────────────────────────────────────
+document.getElementById('resultsClose').addEventListener('click', closeResultsModal);
+document.getElementById('editBtn').addEventListener('click', closeResultsModal);
+document.getElementById('results').addEventListener('click', function(e) { if (e.target === this) closeResultsModal(); });
+
+document.getElementById('cookieAccept').addEventListener('click', function() {
+  setCookie(CONSENT_COOKIE_NAME, 'accepted', 365);
+  document.getElementById('cookieBanner').classList.remove('visible');
+  loadGoogleServices();
+});
+document.getElementById('cookieReject').addEventListener('click', function() {
+  setCookie(CONSENT_COOKIE_NAME, 'rejected', 365);
+  document.getElementById('cookieBanner').classList.remove('visible');
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(function init() {
+  try {
+    var savedTu = localStorage.getItem('pitmaster_tu');
+    var savedWu = localStorage.getItem('pitmaster_wu');
+    if (!savedTu && !savedWu) {
+      var lang = navigator.language || 'en-US';
+      if (shouldDefaultMetric(lang)) { savedTu = 'C'; savedWu = 'kg'; }
+    }
+    if (savedTu && ['C', 'F'].indexOf(savedTu) === -1) savedTu = null;
+    if (savedWu && ['kg', 'lbs'].indexOf(savedWu) === -1) savedWu = null;
+    if (savedTu) {
+      state.tu = savedTu;
+      document.querySelectorAll('#tempToggle button').forEach(function(b) { b.classList.toggle('active', b.dataset.unit === savedTu); });
+    }
+    if (savedWu) {
+      state.wu = savedWu;
+      document.querySelectorAll('#weightToggle button').forEach(function(b) { b.classList.toggle('active', b.dataset.unit === savedWu); });
+      document.getElementById('weightUnitLbl').textContent = savedWu;
+      if (savedWu === 'kg') {
+        var input = document.getElementById('meatWeight');
+        input.value = Math.round(parseFloat(input.value) * 0.453592 * 10) / 10;
+      }
+    }
+  } catch(e) {}
+  initConsentBanner();
+})();
+</script>
+<!-- INJECT:site-header.js:script -->
+</body>
+</html>

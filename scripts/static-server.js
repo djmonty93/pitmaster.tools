@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const root = path.resolve(process.cwd());
+const root = path.resolve(process.cwd(), 'dist');
 const port = 4173;
 
 const types = {
