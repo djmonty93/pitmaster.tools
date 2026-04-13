@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Pitmaster Tools | BBQ Calculators and Planning Guides</title>
+<meta name="description" content="Learn what Pitmaster Tools is, how the BBQ calculators are built, what the estimates mean, and how to use the site for smoking, serving, brining, charcoal planning, and catering.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://pitmaster.tools/about.html">
+<meta property="og:title" content="About Pitmaster Tools">
+<meta property="og:description" content="What Pitmaster Tools covers, how the calculators are built, and how to use the site for better BBQ planning.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://pitmaster.tools/about.html">
+<meta property="og:image" content="https://pitmaster.tools/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="About Pitmaster Tools">
+<meta name="twitter:description" content="What Pitmaster Tools covers, how the calculators are built, and how to use the site for better BBQ planning.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23EF9F27' d='M36 4c2 10-3 15-8 21-5 6-9 11-9 19 0 10 7 16 15 16 11 0 19-8 19-19 0-12-7-19-17-37z'/%3E%3Cpath fill='%23D78108' d='M33 27c1 6-2 9-5 12-3 3-5 6-5 10 0 6 4 10 9 10 7 0 12-5 12-12 0-7-4-11-11-20z'/%3E%3C/svg%3E">
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {'ad_storage':'denied','analytics_storage':'denied','wait_for_update':500});
+  (function(){
+    var c = document.cookie.match(/pitmaster_consent=([^;]+)/);
+    if(c && c[1] === 'accepted'){
+      window._gtagLoaded = true;
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-SJJVV37EWE';
+      document.head.appendChild(s);
+      s.onload = function(){
+        gtag('js', new Date());
+        gtag('config', 'G-SJJVV37EWE');
+        gtag('consent', 'update', {'ad_storage':'granted','analytics_storage':'granted'});
+      };
+    }
+  })();
+</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --amber: #EF9F27;
+  --amber-dark: #D78108;
+  --charcoal: #1C1C1C;
+  --card-bg: #fff;
+  --border: #E0D8CC;
+  --text: #1a1a1a;
+  --muted: #666;
+  --max: 960px;
+}
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  background: #F5F0E8;
+  color: var(--text);
+  line-height: 1.6;
+}
+header {
+  background: var(--charcoal);
+  padding: 0 1.5rem;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo { font-family: Georgia,"Times New Roman",serif; font-size: 1.5rem; font-weight: 700; color: #fff; letter-spacing: -0.02em; text-decoration: none; }
+.logo span { color: var(--amber); }
+.header-nav { display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; margin-left: auto; justify-content: flex-end; }
+.header-nav > a { color: #ccc; text-decoration: none; font-size: 1rem; font-weight: 600; transition: color .15s; white-space: nowrap; }
+.header-nav > a:hover, .header-nav > a:focus-visible { color: var(--amber); }
+.header-nav > a[aria-current="page"] { color: var(--amber); font-weight: 700; }
+.nav-dropdown { position: relative; }
+.nav-dropdown__trigger { background: none; border: none; color: #ccc; font-size: 1rem; font-weight: 600; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; cursor: pointer; font-family: inherit; }
+.nav-dropdown__trigger::after { content: '▾'; font-size: .7em; }
+.nav-dropdown__trigger:hover, .nav-dropdown__trigger:focus-visible { color: var(--amber); }
+.nav-dropdown__menu {
+  position: absolute; top: calc(100% + .75rem); right: 0; left: auto; transform: none;
+  background: #1e1e1e; border: 1px solid rgba(255,255,255,.12); border-radius: 8px;
+  padding: .4rem 0; min-width: 215px; list-style: none; margin: 0;
+  opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 200;
+  box-shadow: 0 8px 24px rgba(0,0,0,.5);
+}
+.nav-dropdown.is-open .nav-dropdown__menu,
+.nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
+.nav-dropdown__menu li { display: block; }
+.nav-dropdown__menu a { display: block; padding: .4rem 1rem; font-size: .92rem; color: #bbb; white-space: nowrap; transition: color .1s, background .1s; text-decoration: none; }
+.nav-dropdown__menu a:hover,
+.nav-dropdown__menu a:focus-visible { color: var(--amber); background: rgba(255,255,255,.04); outline: none; }
+.nav-dropdown__menu a[aria-current="page"] { color: var(--amber); font-weight: 700; }
+main { max-width: var(--max); margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+.page-hero { text-align: center; margin-bottom: 2rem; }
+.page-hero h1 { font-family: Georgia,"Times New Roman",serif; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.2; margin-bottom: .6rem; }
+.page-hero p { color: var(--muted); font-size: 1.05rem; max-width: 700px; margin: 0 auto; }
+.section-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+.card h2 {
+  font-family: Georgia,"Times New Roman",serif;
+  font-size: 1.2rem;
+  margin-bottom: .65rem;
+}
+.card p + p,
+.card p + ul,
+.card ul + p { margin-top: .75rem; }
+.card ul { padding-left: 1.2rem; }
+.lede {
+  max-width: 760px;
+  margin: 0 auto 1.5rem;
+  color: var(--muted);
+}
+.lede a,
+.card a,
+footer a { color: #9A5F08; }
+footer {
+  background: var(--charcoal);
+  color: #aaa;
+  text-align: center;
+  padding: 2rem 1.25rem;
+  font-size: .82rem;
+}
+footer nav { display: flex; justify-content: center; flex-wrap: wrap; gap: .75rem; margin: .75rem 0; }
+footer nav a { color: #aaa; text-decoration: none; }
+footer nav a:hover { color: var(--amber); }
+.footer-small { font-size: .75rem; color: #666; margin-top: .4rem; }
+@media (max-width: 600px) {
+  .page-hero h1 { font-size: 1.7rem; }
+  header { padding: .85rem 1rem; min-height: 52px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <a href="/" class="logo">Pitmaster<span> Tools</span></a>
+  <nav class="header-nav" aria-label="Site navigation">
+    <div class="nav-dropdown">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="tools.html">All Tools</a></li>
+        <li><a href="/">Meat Smoking Calculator</a></li>
+        <li><a href="brisket-calculator.html">Brisket Calculator</a></li>
+        <li><a href="pork-shoulder-calculator.html">Pork Shoulder Calculator</a></li>
+        <li><a href="rib-calculator.html">Rib Calculator</a></li>
+        <li><a href="turkey-smoking-calculator.html">Turkey Calculator</a></li>
+        <li><a href="meat-per-person.html">Meat Per Person</a></li>
+        <li><a href="cook-time-coordinator.html">Cook Time Coordinator</a></li>
+        <li><a href="charcoal-calculator.html">Charcoal Calculator</a></li>
+        <li><a href="brine-calculator.html">Brine Calculator</a></li>
+        <li><a href="dry-rub-calculator.html">Dry Rub Calculator</a></li>
+        <li><a href="bbq-cost-calculator.html">BBQ Cost Calculator</a></li>
+        <li><a href="catering-calculator.html">Catering Calculator</a></li>
+        <li><a href="brisket-yield-calculator.html">Brisket Yield Calculator</a></li>
+      </ul>
+    </div>
+    <a href="about.html" aria-current="page">About</a>
+  </nav>
+</header>
+
+<main>
+  <section class="page-hero">
+    <h1>About Pitmaster Tools</h1>
+    <p>Pitmaster Tools is a growing collection of free BBQ calculators built to make cook planning faster, clearer, and more repeatable for home smokers, weekend hosts, and small catering jobs.</p>
+  </section>
+
+  <p class="lede">The site started with a single <a href="/">meat smoking calculator</a> and expanded into a full set of planning tools for timing, yield, cost, brining, seasoning, charcoal management, and event prep. If you want the full index, start on <a href="tools.html">All Tools</a>.</p>
+
+  <section class="section-grid">
+    <article class="card">
+      <h2>What The Site Covers</h2>
+      <p>The calculators are organized around the actual flow of a cook. You can estimate smoking timelines for brisket, ribs, pork shoulder, turkey, and mixed cooks, then move into prep tools like the <a href="brine-calculator.html">brine calculator</a>, <a href="dry-rub-calculator.html">dry rub calculator</a>, and <a href="charcoal-calculator.html">charcoal calculator</a>.</p>
+      <p>For service planning, the site also includes the <a href="meat-per-person.html">meat per person calculator</a>, <a href="catering-calculator.html">catering calculator</a>, <a href="bbq-cost-calculator.html">BBQ cost calculator</a>, and <a href="brisket-yield-calculator.html">brisket yield calculator</a>.</p>
+    </article>
+
+    <article class="card">
+      <h2>How The Numbers Are Built</h2>
+      <p>The tools use published food-safety guidance, common pitmaster practices, and practical cooking ranges gathered from real-world BBQ sources. That means the numbers are designed to be useful planning estimates rather than a rigid promise that every cook will finish at the same minute.</p>
+      <p>Factors like airflow, humidity, grade, trim, pit stability, wrapping, and meat shape can move a cook faster or slower. That is why the calculators emphasize windows, rest times, and internal temperature targets instead of a single magic number.</p>
+    </article>
+  </section>
+
+  <section class="section-grid">
+    <article class="card">
+      <h2>What The Tools Are Best For</h2>
+      <ul>
+        <li>Planning backward from a serve time</li>
+        <li>Buying the right raw weight for a crowd</li>
+        <li>Scaling rubs and brines without guesswork</li>
+        <li>Estimating charcoal and fuel needs</li>
+        <li>Budgeting catering or backyard cook costs</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <h2>What The Site Does Not Replace</h2>
+      <p>Pitmaster Tools does not replace a calibrated thermometer, live pit monitoring, or common sense at the smoker. The final call on doneness still comes from temperature, tenderness, and texture. If a brisket probes tight or ribs fail the bend test, the clock is not the authority.</p>
+      <p>For the best results, treat every output as a planning aid and adjust in real time once the cook is underway.</p>
+    </article>
+  </section>
+
+  <section class="card">
+    <h2>How To Use The Site</h2>
+    <p>If you are new here, the fastest path is usually:</p>
+    <ul>
+      <li>Use the main <a href="/">meat smoking calculator</a> for a single cook timeline</li>
+      <li>Use <a href="cook-time-coordinator.html">Cook Time Coordinator</a> when multiple meats must finish together</li>
+      <li>Use <a href="meat-per-person.html">Meat Per Person</a> or <a href="catering-calculator.html">Catering Calculator</a> before buying meat</li>
+      <li>Use the prep calculators for salt, rub, and charcoal once your menu is locked</li>
+    </ul>
+    <p>You can browse everything from the <a href="tools.html">All Tools page</a>.</p>
+  </section>
+
+  <section class="card">
+    <h2>Policies And Contact</h2>
+    <p>For privacy details, see the <a href="privacy-policy.html">Privacy Policy</a>. For usage terms and disclaimers, see the <a href="terms-of-service.html">Terms of Service</a>.</p>
+    <p>If you have site questions, spot an issue, or want to suggest another calculator, email <a href="mailto:contact@pitmaster.tools">contact@pitmaster.tools</a>.</p>
+  </section>
+</main>
+
+<footer>
+  <div>© 2026 Pitmaster Tools. All rights reserved.</div>
+  <nav aria-label="Footer">
+    <a href="/">Meat Smoking Calculator</a>
+    <a href="tools.html">All Tools</a>
+    <a href="about.html" aria-current="page">About</a>
+    <a href="privacy-policy.html">Privacy Policy</a>
+    <a href="terms-of-service.html">Terms of Service</a>
+  </nav>
+  <div class="footer-small">Cook times and serving estimates are planning tools. Always verify doneness and food safety with a calibrated thermometer.</div>
+</footer>
+
+<script>
+(function(){
+  var dropdowns = document.querySelectorAll('.nav-dropdown');
+  function closeAll(){
+    dropdowns.forEach(function(dropdown){
+      dropdown.classList.remove('is-open');
+      var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    });
+  }
+  dropdowns.forEach(function(dropdown){
+    var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+    if (!trigger) return;
+    trigger.addEventListener('click', function(){
+      var isOpen = dropdown.classList.contains('is-open');
+      closeAll();
+      if (!isOpen) {
+        dropdown.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('.nav-dropdown')) closeAll();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeAll();
+  });
+})();
+</script>
+</body>
+</html>

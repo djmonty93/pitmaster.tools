@@ -150,19 +150,19 @@ header {
 }
 .logo { font-family: Georgia,"Times New Roman",serif; font-size: 1.5rem; font-weight: 700; color: #fff; letter-spacing: -0.02em; text-decoration: none; }
 .logo span { color: var(--amber); }
-.header-nav { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
-.header-nav a { color: #ccc; text-decoration: none; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; }
+.header-nav { display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; margin-left: auto; justify-content: flex-end; }
+.header-nav a { color: #ccc; text-decoration: none; font-size: 1rem; font-weight: 600; transition: color .15s; white-space: nowrap; }
 .header-nav a:hover, .header-nav a:focus-visible { color: var(--amber); }
 .header-nav a[aria-current="page"] { color: var(--amber); font-weight: 700; }
 .nav-dropdown { position: relative; }
-.nav-dropdown__trigger { background: none; border: none; color: #ccc; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; cursor: pointer; font-family: inherit; }
+.nav-dropdown__trigger { background: none; border: none; color: #ccc; font-size: 1rem; font-weight: 600; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; cursor: pointer; font-family: inherit; }
 .nav-dropdown__trigger::after { content: '▾'; font-size: .7em; }
 .nav-dropdown__trigger:hover, .nav-dropdown__trigger:focus-visible { color: var(--amber); }
 .nav-dropdown__trigger.is-current { color: var(--amber); font-weight: 700; }
-.nav-dropdown__menu { position: absolute; top: calc(100% + .75rem); left: 50%; transform: translateX(-50%); background: #1e1e1e; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: .4rem 0; min-width: 215px; list-style: none; margin: 0; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+.nav-dropdown__menu { position: absolute; top: calc(100% + .75rem); right: 0; left: auto; transform: none; background: #1e1e1e; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: .4rem 0; min-width: 215px; list-style: none; margin: 0; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
 .nav-dropdown.is-open .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
 .nav-dropdown__menu li { display: block; }
-.nav-dropdown__menu a { display: block; padding: .4rem 1rem; font-size: .82rem; color: #bbb; white-space: nowrap; transition: color .1s, background .1s; text-decoration: none; }
+.nav-dropdown__menu a { display: block; padding: .4rem 1rem; font-size: .92rem; color: #bbb; white-space: nowrap; transition: color .1s, background .1s; text-decoration: none; }
 .nav-dropdown__menu a:hover, .nav-dropdown__menu a:focus-visible { color: var(--amber); background: rgba(255,255,255,.04); outline: none; }
 .nav-dropdown__menu a[aria-current="page"] { color: var(--amber); font-weight: 700; }
 .unit-controls { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
@@ -301,7 +301,7 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
 a { color: inherit; }
 @media (max-width:640px) {
   header { padding: .75rem 1rem; }
-  .header-nav { display: none; }
+  .header-nav { display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; margin-left: auto; justify-content: flex-end; }
   .form-grid { grid-template-columns: 1fr; }
   .grade-toggle { grid-template-columns: 1fr; }
   .serving-toggle { grid-template-columns: 1fr; }
@@ -340,6 +340,7 @@ a { color: inherit; }
         <li><a href="brisket-yield-calculator.html" aria-current="page">Brisket Yield Calculator</a></li>
       </ul>
     </div>
+    <a href="about.html">About</a>
   </nav>
   <div class="unit-controls">
     <div class="unit-toggle" id="weightToggle" role="group" aria-label="Weight unit">
@@ -985,3 +986,5 @@ document.getElementById('cookieReject').addEventListener('click', function() {
 </script>
 </body>
 </html>
+
+

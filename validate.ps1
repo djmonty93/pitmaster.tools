@@ -69,6 +69,7 @@ function Test-LocalLinks {
 }
 
 $htmlFiles = @(
+  'about.html',
   'bbq-cost-calculator.html',
   'brisket-calculator.html',
   'brisket-yield-calculator.html',
