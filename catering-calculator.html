@@ -1101,6 +1101,10 @@ function initConsentBanner() {
     }
   } catch(e) {}
 
+  function refreshVisibleResults() {
+    if (document.getElementById('results').classList.contains('visible')) calculate();
+  }
+
   /* Weight toggle */
   document.getElementById('weightToggle').addEventListener('click', function(e) {
     var btn = e.target.closest('button');
@@ -1112,7 +1116,7 @@ function initConsentBanner() {
       b.classList.toggle('active', b.dataset.unit === val);
     });
     try { localStorage.setItem('pitmaster_wu', val); } catch(e) {}
-    if (document.getElementById('results').classList.contains('visible')) calculate();
+    refreshVisibleResults();
   });
 
   /* Service style toggle */
@@ -1127,6 +1131,7 @@ function initConsentBanner() {
         b.classList.toggle('active', active);
         b.setAttribute('aria-pressed', active ? 'true' : 'false');
       });
+      refreshVisibleResults();
     });
   });
 
@@ -1141,11 +1146,19 @@ function initConsentBanner() {
     appetiteBtns.forEach(function(b) {
       b.classList.toggle('active', b.dataset.appetite === val);
     });
+    refreshVisibleResults();
+  });
+
+  document.getElementById('withSides').addEventListener('change', refreshVisibleResults);
+
+  document.getElementById('meatRows').addEventListener('change', function(e) {
+    if (e.target.closest('.meat-row')) refreshVisibleResults();
   });
 
   /* Add meat row button */
   document.getElementById('addMeatBtn').addEventListener('click', function() {
     addMeatRow();
+    refreshVisibleResults();
   });
 
   /* Delete meat row (event delegation) */
@@ -1153,7 +1166,10 @@ function initConsentBanner() {
     var btn = e.target.closest('.meat-row-delete');
     if (!btn) return;
     var rowId = btn.dataset.row;
-    if (rowId) removeMeatRow(rowId);
+    if (rowId) {
+      removeMeatRow(rowId);
+      refreshVisibleResults();
+    }
   });
 
   /* Calculate button */
@@ -1163,6 +1179,7 @@ function initConsentBanner() {
   document.getElementById('guestCount').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') calculate();
   });
+  document.getElementById('guestCount').addEventListener('change', refreshVisibleResults);
 
   /* Add first default meat row */
   addMeatRow('brisket_sliced');

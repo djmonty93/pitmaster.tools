@@ -69,8 +69,11 @@ function Test-LocalLinks {
 }
 
 $htmlFiles = @(
+  'bbq-cost-calculator.html',
   'brisket-calculator.html',
+  'brisket-yield-calculator.html',
   'brine-calculator.html',
+  'catering-calculator.html',
   'cook-time-coordinator.html',
   'pork-shoulder-calculator.html',
   'index.html',
@@ -79,6 +82,7 @@ $htmlFiles = @(
   'meat-per-person.html',
   'privacy-policy.html',
   'rib-calculator.html',
+  'turkey-smoking-calculator.html',
   'terms-of-service.html'
 )
 
