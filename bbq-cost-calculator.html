@@ -156,12 +156,12 @@ header {
 .header-nav a:hover, .header-nav a:focus-visible { color: var(--amber); }
 .header-nav a[aria-current="page"] { color: var(--amber); font-weight: 700; }
 .nav-dropdown { position: relative; }
-.nav-dropdown__trigger { color: #ccc; text-decoration: none; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; }
+.nav-dropdown__trigger { background: none; border: none; color: #ccc; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; cursor: pointer; font-family: inherit; }
 .nav-dropdown__trigger::after { content: '▾'; font-size: .7em; }
 .nav-dropdown__trigger:hover, .nav-dropdown__trigger:focus-visible { color: var(--amber); }
-.nav-dropdown__trigger[aria-current="page"] { color: var(--amber); font-weight: 700; }
+.nav-dropdown__trigger.is-current { color: var(--amber); font-weight: 700; }
 .nav-dropdown__menu { position: absolute; top: calc(100% + .75rem); left: 50%; transform: translateX(-50%); background: #1e1e1e; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: .4rem 0; min-width: 215px; list-style: none; margin: 0; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
-.nav-dropdown:hover .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
+.nav-dropdown.is-open .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
 .nav-dropdown__menu li { display: block; }
 .nav-dropdown__menu a { display: block; padding: .4rem 1rem; font-size: .82rem; color: #bbb; white-space: nowrap; transition: color .1s, background .1s; text-decoration: none; }
 .nav-dropdown__menu a:hover, .nav-dropdown__menu a:focus-visible { color: var(--amber); background: rgba(255,255,255,.04); outline: none; }
@@ -324,8 +324,9 @@ a { color: inherit; }
   <a href="/" class="logo">Pitmaster<span> Tools</span></a>
   <nav class="header-nav" aria-label="Site navigation">
     <div class="nav-dropdown">
-      <a href="tools.html" class="nav-dropdown__trigger">Tools</a>
-      <ul class="nav-dropdown__menu" role="list">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="tools.html">All Tools</a></li>
         <li><a href="/">Meat Smoking Calculator</a></li>
         <li><a href="brisket-calculator.html">Brisket Calculator</a></li>
         <li><a href="pork-shoulder-calculator.html">Pork Shoulder Calculator</a></li>
@@ -501,9 +502,9 @@ a { color: inherit; }
   <!-- Editorial -->
   <section class="editorial-section" aria-labelledby="editorial-title">
     <h2 id="editorial-title">What Goes Into the Real Cost of a BBQ</h2>
-    <p>When people think about the cost of smoking meat, they usually think about the price tag at the butcher counter. But the full cost of a low-and-slow cook includes several line items that add up faster than most pitmasters expect. Understanding each category helps you plan smarter, price smarter for catering, and make an honest comparison to restaurant BBQ.</p>
+    <p>When people think about the cost of smoking meat, they usually think about the price tag at the butcher counter. But the full cost of a low-and-slow cook includes several line items that add up faster than most pitmasters expect. Understanding each category helps you plan smarter, price smarter for <a href="catering-calculator.html">catering</a>, and make an honest comparison to restaurant BBQ.</p>
 
-    <p>The five main cost categories in any BBQ cook are: meat, fuel (charcoal and wood), seasoning (rubs, injections, brines), consumables (foil, butcher paper, gloves, probes), and your own time. This calculator accounts for all of them. The one category that surprises people most is shrinkage — the weight lost during cooking — which we cover in detail below.</p>
+    <p>The five main cost categories in any BBQ cook are: meat, fuel (charcoal and wood), seasoning (rubs, injections, brines), consumables (foil, butcher paper, gloves, probes), and your own time. This calculator accounts for all of them. The one category that surprises people most is shrinkage — the weight lost during cooking — which we cover in detail below and break out even further in the <a href="brisket-yield-calculator.html">Brisket Yield Calculator</a>.</p>
 
     <h3>Meat Cost: The Biggest Variable</h3>
     <p>Meat is almost always the largest line item, typically representing 70–85% of total cook cost. The price per pound varies enormously depending on cut, grade, and market conditions. Here is a general range for common BBQ cuts at retail prices in the United States:</p>
@@ -531,8 +532,8 @@ a { color: inherit; }
     <p>These numbers assume proper cooking to safe internal temperatures. Overcooking increases yield loss; undercooking reduces it but also means collagen has not fully converted to gelatin. For the most accurate per-serving cost planning, weigh your finished product at pull time and compare to this calculator's estimate.</p>
 
     <h3>Fuel and Seasoning Costs</h3>
-    <p>Charcoal and wood costs are often underestimated. A long brisket cook at 250°F typically consumes 8–12 pounds of charcoal briquettes or 6–10 pounds of lump charcoal, plus 4–8 wood chunks for smoke flavor. At current prices, fuel for a single brisket cook runs $8–$20 depending on your setup. Offset smokers running on splits burn through wood much faster and can cost $15–$30 in fuel per cook.</p>
-    <p>Dry rub ingredients add $3–$10 per cook for a homemade rub, or $8–$15 if using a premium commercial rub at recommended application rates (typically 1–2 tablespoons per pound of meat). Injections add $3–$8 for beef tallow, phosphate mixtures, or commercial injection powders. Butcher paper or foil for wrapping runs $1–$3 per cook. These numbers are small individually but add $15–$35 to every serious cook.</p>
+    <p>Charcoal and wood costs are often underestimated. A long brisket cook at 250°F typically consumes 8–12 pounds of charcoal briquettes or 6–10 pounds of lump charcoal, plus 4–8 wood chunks for smoke flavor. At current prices, fuel for a single brisket cook runs $8–$20 depending on your setup. Offset smokers running on splits burn through wood much faster and can cost $15–$30 in fuel per cook. If you want a fuel estimate before pricing a cook, use the <a href="charcoal-calculator.html">Charcoal Calculator</a>.</p>
+    <p>Dry rub ingredients add $3–$10 per cook for a homemade rub, or $8–$15 if using a premium commercial rub at recommended application rates (typically 1–2 tablespoons per pound of meat). Injections add $3–$8 for beef tallow, phosphate mixtures, or commercial injection powders. Butcher paper or foil for wrapping runs $1–$3 per cook. These numbers are small individually but add $15–$35 to every serious cook. If you want to scale seasoning accurately before buying ingredients, use the <a href="dry-rub-calculator.html">Dry Rub Calculator</a>.</p>
 
     <h3>Is BBQ Cheaper Than Buying It?</h3>
     <p>The short answer is yes — dramatically so. Restaurant-quality smoked brisket in BBQ-centric cities like Austin, Kansas City, or Nashville runs $25–$35 per pound at the counter. A 1-pound plate of brisket, two sides, and a drink easily reaches $35–$50 per person. Even at premium USDA Prime brisket prices ($9–$12/lb raw), the all-in home cost for sliced brisket rarely exceeds $8–$12 per pound cooked — a 65–75% savings versus restaurant pricing.</p>
@@ -965,6 +966,38 @@ document.getElementById('cookieReject').addEventListener('click', function() {
     }
   } catch(err){}
   initConsentBanner();
+})();
+</script>
+<script>
+(function initNavDropdown(){
+  var dropdowns = document.querySelectorAll('.nav-dropdown');
+  if (!dropdowns.length) return;
+  function closeAll() {
+    dropdowns.forEach(function(dropdown){
+      dropdown.classList.remove('is-open');
+      var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    });
+  }
+  dropdowns.forEach(function(dropdown){
+    var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+    if (!trigger) return;
+    trigger.addEventListener('click', function(e){
+      e.stopPropagation();
+      var willOpen = !dropdown.classList.contains('is-open');
+      closeAll();
+      if (willOpen) {
+        dropdown.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('.nav-dropdown')) closeAll();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeAll();
+  });
 })();
 </script>
 </body>

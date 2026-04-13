@@ -82,6 +82,7 @@ $htmlFiles = @(
   'meat-per-person.html',
   'privacy-policy.html',
   'rib-calculator.html',
+  'tools.html',
   'turkey-smoking-calculator.html',
   'terms-of-service.html'
 )

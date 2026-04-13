@@ -148,12 +148,12 @@ header {
 .header-nav a:hover, .header-nav a:focus-visible { color: var(--amber); }
 .header-nav a[aria-current="page"] { color: var(--amber); font-weight: 700; }
 .nav-dropdown { position: relative; }
-.nav-dropdown__trigger { color: #ccc; text-decoration: none; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; }
+.nav-dropdown__trigger { background: none; border: none; color: #ccc; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; cursor: pointer; font-family: inherit; }
 .nav-dropdown__trigger::after { content: '▾'; font-size: .7em; }
 .nav-dropdown__trigger:hover, .nav-dropdown__trigger:focus-visible { color: var(--amber); }
-.nav-dropdown__trigger[aria-current="page"] { color: var(--amber); font-weight: 700; }
+.nav-dropdown__trigger.is-current { color: var(--amber); font-weight: 700; }
 .nav-dropdown__menu { position: absolute; top: calc(100% + .75rem); left: 50%; transform: translateX(-50%); background: #1e1e1e; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: .4rem 0; min-width: 215px; list-style: none; margin: 0; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
-.nav-dropdown:hover .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
+.nav-dropdown.is-open .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
 .nav-dropdown__menu li { display: block; }
 .nav-dropdown__menu a { display: block; padding: .4rem 1rem; font-size: .82rem; color: #bbb; white-space: nowrap; transition: color .1s, background .1s; text-decoration: none; }
 .nav-dropdown__menu a:hover, .nav-dropdown__menu a:focus-visible { color: var(--amber); background: rgba(255,255,255,.04); outline: none; }
@@ -679,8 +679,9 @@ footer a:focus-visible { text-decoration: underline; }
   <div class="logo">Pitmaster<span> Tools</span></div>
   <nav class="header-nav" aria-label="Site navigation">
     <div class="nav-dropdown">
-      <a href="tools.html" class="nav-dropdown__trigger">Tools</a>
-      <ul class="nav-dropdown__menu" role="list">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="tools.html">All Tools</a></li>
         <li><a href="/">Meat Smoking Calculator</a></li>
         <li><a href="brisket-calculator.html">Brisket Calculator</a></li>
         <li><a href="pork-shoulder-calculator.html">Pork Shoulder Calculator</a></li>
@@ -990,7 +991,7 @@ footer a:focus-visible { text-decoration: underline; }
     <p>The most reliable way to estimate a long barbecue cook is to start with a baseline rate, then adjust for the actual cut in front of you. Large roasts like brisket, pork butt, lamb shoulder, and chuck roast follow a per-pound method: multiply the cut’s average hours per pound by the raw weight, then leave margin for the stall, wrapping decisions, weather, and rest time. A 10-pound pork butt at 1.5 hours per pound is not a 15-hour promise, but it is a solid planning number.</p>
     <p>Other meats behave differently. Ribs, wings, chicken thighs, turkey legs, and several reverse-sear cuts rely on flat cook times because the shape, thickness, and bone structure matter more than raw scale weight. Two racks of ribs may weigh differently, but they still cook in roughly the same window because heat travels through a similar thickness of meat.</p>
     <h3>The stall explained</h3>
-    <p>The stall is the long plateau that usually appears once a large cut reaches roughly 150–170°F internal. Moisture evaporating from the surface cools the meat at nearly the same rate the smoker is heating it, while collagen is also beginning to break down into gelatin. On brisket and pork shoulder, the stall often lasts 2 to 5 hours depending on airflow, humidity, bark formation, and whether you wrap.</p>
+    <p>The stall is the long plateau that usually appears once a large cut reaches roughly 150–170°F internal. Moisture evaporating from the surface cools the meat at nearly the same rate the smoker is heating it, while collagen is also beginning to break down into gelatin. On <a href="brisket-calculator.html">brisket</a> and <a href="pork-shoulder-calculator.html">pork shoulder</a>, the stall often lasts 2 to 5 hours depending on airflow, humidity, bark formation, and whether you wrap.</p>
     <h3>Why pull temperature beats the clock</h3>
     <p>Time gets you close, but internal temperature and feel tell you when the meat is actually done. Pull temperature matters because connective tissue finishes rendering at specific internal ranges, not at a specific clock reading. Resting matters just as much. Once you pull the meat, resting allows carryover heat to settle, juices to redistribute, and the rendered collagen to thicken so slices stay moist instead of flooding the cutting board.</p>
   </section>
@@ -2106,7 +2107,38 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
   initShareButtons();
   initEmbedSection();
 })();
-
+})();
+</script>
+<script>
+(function initNavDropdown(){
+  var dropdowns = document.querySelectorAll('.nav-dropdown');
+  if (!dropdowns.length) return;
+  function closeAll() {
+    dropdowns.forEach(function(dropdown){
+      dropdown.classList.remove('is-open');
+      var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    });
+  }
+  dropdowns.forEach(function(dropdown){
+    var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+    if (!trigger) return;
+    trigger.addEventListener('click', function(e){
+      e.stopPropagation();
+      var willOpen = !dropdown.classList.contains('is-open');
+      closeAll();
+      if (willOpen) {
+        dropdown.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('.nav-dropdown')) closeAll();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeAll();
+  });
 })();
 </script>
 </body>

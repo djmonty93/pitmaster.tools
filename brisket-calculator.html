@@ -156,12 +156,12 @@ header {
 .header-nav a:hover, .header-nav a:focus-visible { color: var(--amber); }
 .header-nav a[aria-current="page"] { color: var(--amber); font-weight: 700; }
 .nav-dropdown { position: relative; }
-.nav-dropdown__trigger { color: #ccc; text-decoration: none; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; }
+.nav-dropdown__trigger { background: none; border: none; color: #ccc; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; cursor: pointer; font-family: inherit; }
 .nav-dropdown__trigger::after { content: '▾'; font-size: .7em; }
 .nav-dropdown__trigger:hover, .nav-dropdown__trigger:focus-visible { color: var(--amber); }
-.nav-dropdown__trigger[aria-current="page"] { color: var(--amber); font-weight: 700; }
+.nav-dropdown__trigger.is-current { color: var(--amber); font-weight: 700; }
 .nav-dropdown__menu { position: absolute; top: calc(100% + .75rem); left: 50%; transform: translateX(-50%); background: #1e1e1e; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: .4rem 0; min-width: 215px; list-style: none; margin: 0; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
-.nav-dropdown:hover .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
+.nav-dropdown.is-open .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
 .nav-dropdown__menu li { display: block; }
 .nav-dropdown__menu a { display: block; padding: .4rem 1rem; font-size: .82rem; color: #bbb; white-space: nowrap; transition: color .1s, background .1s; text-decoration: none; }
 .nav-dropdown__menu a:hover, .nav-dropdown__menu a:focus-visible { color: var(--amber); background: rgba(255,255,255,.04); outline: none; }
@@ -391,8 +391,9 @@ a { color: inherit; }
   <a href="/" class="logo">Pitmaster<span> Tools</span></a>
   <nav class="header-nav" aria-label="Site navigation">
     <div class="nav-dropdown">
-      <a href="tools.html" class="nav-dropdown__trigger">Tools</a>
-      <ul class="nav-dropdown__menu" role="list">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="tools.html">All Tools</a></li>
         <li><a href="/">Meat Smoking Calculator</a></li>
         <li><a href="brisket-calculator.html" aria-current="page">Brisket Calculator</a></li>
         <li><a href="pork-shoulder-calculator.html">Pork Shoulder Calculator</a></li>
@@ -544,7 +545,7 @@ a { color: inherit; }
   <section class="editorial-section" aria-labelledby="editorial-title">
     <h2 id="editorial-title">How Long to Smoke a Brisket</h2>
 
-    <p>Brisket is the most rewarding — and most demanding — cook in low-and-slow BBQ. The general rule of thumb is <strong>1.25 to 1.5 hours per pound at 225&#xB0;F</strong>. A full packer brisket weighing 14 to 16 pounds will take 17 to 22 hours from smoker on to pull. At 250&#xB0;F, that same brisket comes in closer to 14 to 18 hours. These numbers are averages; your actual time will depend on the thickness of the flat, your smoker's temperature consistency, and how you manage the stall.</p>
+    <p>Brisket is the most rewarding — and most demanding — cook in low-and-slow BBQ. The general rule of thumb is <strong>1.25 to 1.5 hours per pound at 225&#xB0;F</strong>. A full packer brisket weighing 14 to 16 pounds will take 17 to 22 hours from smoker on to pull. At 250&#xB0;F, that same brisket comes in closer to 14 to 18 hours. These numbers are averages; your actual time will depend on the thickness of the flat, your smoker's temperature consistency, and how you manage the stall. If you are trying to estimate usable sliced meat instead of clock time, the <a href="brisket-yield-calculator.html">Brisket Yield Calculator</a> breaks down packer, flat, point, and trim loss.</p>
 
     <p>The single most important rule: <strong>cook to temperature, not to time.</strong> A meat thermometer is not optional equipment for brisket — it is the cook. Pull brisket for slicing at 195&#xB0;F internal, or 205&#xB0;F if you are pulling or chopping. Use the probe test to confirm: when a thermometer probe slides into the thickest part of the flat with zero resistance — like pushing into warm butter — the brisket is done regardless of what the thermometer reads.</p>
 
@@ -570,7 +571,7 @@ a { color: inherit; }
 
     <p>Resting brisket is not a suggestion — it is a step as important as the cook itself. When brisket comes off the smoker, the muscle fibers are tightly contracted from hours of heat. During the rest, those fibers relax and reabsorb the juices that were pushed to the center during cooking. Slice too early, and the cutting board fills with juice that should have stayed in the meat.</p>
 
-    <p>The minimum rest is 90 minutes, loosely tented in foil. Two to four hours is ideal. For large events or catering situations, the faux Cambro method — wrapping the brisket tightly in foil, then in a thick beach towel, and placing it in a dry cooler — will safely hold a brisket at serving temperature for four to six hours, sometimes more. This technique gives you enormous flexibility on timing and is used at competition cook sites worldwide.</p>
+    <p>The minimum rest is 90 minutes, loosely tented in foil. Two to four hours is ideal. For large events or catering situations, the faux Cambro method — wrapping the brisket tightly in foil, then in a thick beach towel, and placing it in a dry cooler — will safely hold a brisket at serving temperature for four to six hours, sometimes more. This technique gives you enormous flexibility on timing and is used at competition cook sites worldwide. If you are serving a crowd, the <a href="catering-calculator.html">Catering Calculator</a> helps convert that finished brisket into realistic portions and shopping numbers.</p>
 
     <p>Do not skip the rest because the brisket probed done an hour early. That extra hour in the cooler makes it better, not worse. The calculator builds in a 90-minute rest by default and works backward from your serve time accordingly.</p>
 
@@ -1077,6 +1078,38 @@ document.getElementById('cookieReject').addEventListener('click', function() {
   } catch(err){}
 
   initConsentBanner();
+})();
+</script>
+<script>
+(function initNavDropdown(){
+  var dropdowns = document.querySelectorAll('.nav-dropdown');
+  if (!dropdowns.length) return;
+  function closeAll() {
+    dropdowns.forEach(function(dropdown){
+      dropdown.classList.remove('is-open');
+      var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    });
+  }
+  dropdowns.forEach(function(dropdown){
+    var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+    if (!trigger) return;
+    trigger.addEventListener('click', function(e){
+      e.stopPropagation();
+      var willOpen = !dropdown.classList.contains('is-open');
+      closeAll();
+      if (willOpen) {
+        dropdown.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('.nav-dropdown')) closeAll();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeAll();
+  });
 })();
 </script>
 </body>

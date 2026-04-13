@@ -130,12 +130,12 @@ header { background: var(--charcoal); padding: 0 1.5rem; min-height: 56px; displ
 .header-nav a:hover, .header-nav a:focus-visible { color: #fff; text-decoration: underline; }
 .header-nav a[aria-current="page"] { color: var(--amber); }
 .nav-dropdown { position: relative; }
-.nav-dropdown__trigger { color: #ccc; text-decoration: none; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; }
+.nav-dropdown__trigger { background: none; border: none; color: #ccc; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; cursor: pointer; font-family: inherit; }
 .nav-dropdown__trigger::after { content: '▾'; font-size: .7em; }
 .nav-dropdown__trigger:hover, .nav-dropdown__trigger:focus-visible { color: var(--amber); }
-.nav-dropdown__trigger[aria-current="page"] { color: var(--amber); font-weight: 700; }
+.nav-dropdown__trigger.is-current { color: var(--amber); font-weight: 700; }
 .nav-dropdown__menu { position: absolute; top: calc(100% + .75rem); left: 50%; transform: translateX(-50%); background: #1e1e1e; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: .4rem 0; min-width: 215px; list-style: none; margin: 0; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
-.nav-dropdown:hover .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
+.nav-dropdown.is-open .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
 .nav-dropdown__menu li { display: block; }
 .nav-dropdown__menu a { display: block; padding: .4rem 1rem; font-size: .82rem; color: #bbb; white-space: nowrap; transition: color .1s, background .1s; text-decoration: none; }
 .nav-dropdown__menu a:hover, .nav-dropdown__menu a:focus-visible { color: var(--amber); background: rgba(255,255,255,.04); outline: none; }
@@ -311,8 +311,9 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
   <a class="logo" href="/">Pitmaster<span> Tools</span></a>
   <nav class="header-nav" aria-label="Site navigation">
     <div class="nav-dropdown">
-      <a href="tools.html" class="nav-dropdown__trigger">Tools</a>
-      <ul class="nav-dropdown__menu" role="list">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="tools.html">All Tools</a></li>
         <li><a href="/">Meat Smoking Calculator</a></li>
         <li><a href="brisket-calculator.html">Brisket Calculator</a></li>
         <li><a href="pork-shoulder-calculator.html" aria-current="page">Pork Shoulder Calculator</a></li>
@@ -471,11 +472,11 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
     <h2>How Long to Smoke a Pork Shoulder</h2>
     <p>Pork shoulder — sold as either "Boston butt" (the upper portion) or "picnic shoulder" (the lower portion) — is one of the most forgiving cuts for the smoker. Unlike brisket, which punishes an extra degree or two of overcooking, pork shoulder has so much collagen and intramuscular fat that it tolerates a wide temperature window and rewards the patient cook who lets the process run its full course.</p>
     <p>The standard rule of thumb is 1.25 to 1.5 hours per pound at 225°F. An 8-pound boneless Boston butt will typically finish in 10 to 12 hours. A 10-pound bone-in shoulder can run 13 to 15 hours. These estimates assume a consistent cooker temperature, a preheated smoker, and a foil or butcher paper wrap around the stall. Add 15 to 20 minutes any time you open the lid for a significant period.</p>
-    <p>The safest approach is always to work backward from a serve time rather than forward from a start time. Add cook time plus rest time, count backward from when you want to eat, subtract 30 minutes for preheat, and set your alarm. If the cook runs short, the faux Cambro hold makes a 3-hour buffer essentially free.</p>
+    <p>The safest approach is always to work backward from a serve time rather than forward from a start time. Add cook time plus rest time, count backward from when you want to eat, subtract 30 minutes for preheat, and set your alarm. If the cook runs short, the faux Cambro hold makes a 3-hour buffer essentially free. If pork shoulder is only one part of the meal, the <a href="cook-time-coordinator.html">Cook Time Coordinator</a> helps line it up with your other meats.</p>
 
     <h3>Bone-In vs. Boneless</h3>
     <p>Bone-in pork shoulder is the classic choice for a reason. The bone — a dense femur running through the center of the butt — acts as a natural heat conductor, drawing warmth into the thickest part of the muscle and promoting even cooking. It also contributes collagen that dissolves into the surrounding meat over a long cook, adding body and richness to the finished pulled pork.</p>
-    <p>On the downside, bone-in shoulders take roughly 10 to 15% longer than boneless of the same stated weight, because that weight includes bone that contributes no yield. A 10-pound bone-in butt typically yields about 6 pounds of pulled pork once cooked and cleaned. A 10-pound boneless shoulder yields closer to 7 pounds.</p>
+    <p>On the downside, bone-in shoulders take roughly 10 to 15% longer than boneless of the same stated weight, because that weight includes bone that contributes no yield. A 10-pound bone-in butt typically yields about 6 pounds of pulled pork once cooked and cleaned. A 10-pound boneless shoulder yields closer to 7 pounds. For guest-count planning, the <a href="meat-per-person.html">Meat Per Person Calculator</a> converts that finished pork into realistic servings.</p>
     <p>The classic bone-in doneness test: grip the exposed bone end with a paper towel and wiggle. When the bone rotates freely with almost no resistance, the pork is ready to pull. It is a more intuitive test than chasing a temperature reading and works regardless of how the stall varied that day.</p>
 
     <h3>The Stall on Pork Butt</h3>
@@ -1022,6 +1023,38 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
     try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e){}
   })();
 
+})();
+</script>
+<script>
+(function initNavDropdown(){
+  var dropdowns = document.querySelectorAll('.nav-dropdown');
+  if (!dropdowns.length) return;
+  function closeAll() {
+    dropdowns.forEach(function(dropdown){
+      dropdown.classList.remove('is-open');
+      var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    });
+  }
+  dropdowns.forEach(function(dropdown){
+    var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+    if (!trigger) return;
+    trigger.addEventListener('click', function(e){
+      e.stopPropagation();
+      var willOpen = !dropdown.classList.contains('is-open');
+      closeAll();
+      if (willOpen) {
+        dropdown.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('.nav-dropdown')) closeAll();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeAll();
+  });
 })();
 </script>
 </body>

@@ -155,12 +155,12 @@ header {
 .header-nav a:hover, .header-nav a:focus-visible { color: var(--amber); }
 .header-nav a[aria-current="page"] { color: var(--amber); font-weight: 700; }
 .nav-dropdown { position: relative; }
-.nav-dropdown__trigger { color: #ccc; text-decoration: none; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; }
+.nav-dropdown__trigger { background: none; border: none; color: #ccc; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; cursor: pointer; font-family: inherit; }
 .nav-dropdown__trigger::after { content: '▾'; font-size: .7em; }
 .nav-dropdown__trigger:hover, .nav-dropdown__trigger:focus-visible { color: var(--amber); }
-.nav-dropdown__trigger[aria-current="page"] { color: var(--amber); font-weight: 700; }
+.nav-dropdown__trigger.is-current { color: var(--amber); font-weight: 700; }
 .nav-dropdown__menu { position: absolute; top: calc(100% + .75rem); left: 50%; transform: translateX(-50%); background: #1e1e1e; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: .4rem 0; min-width: 215px; list-style: none; margin: 0; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
-.nav-dropdown:hover .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
+.nav-dropdown.is-open .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
 .nav-dropdown__menu li { display: block; }
 .nav-dropdown__menu a { display: block; padding: .4rem 1rem; font-size: .82rem; color: #bbb; white-space: nowrap; transition: color .1s, background .1s; text-decoration: none; }
 .nav-dropdown__menu a:hover, .nav-dropdown__menu a:focus-visible { color: var(--amber); background: rgba(255,255,255,.04); outline: none; }
@@ -322,8 +322,9 @@ a { color: inherit; }
   <a href="/" class="logo">Pitmaster<span> Tools</span></a>
   <nav class="header-nav" aria-label="Site navigation">
     <div class="nav-dropdown">
-      <a href="tools.html" class="nav-dropdown__trigger">Tools</a>
-      <ul class="nav-dropdown__menu" role="list">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="tools.html">All Tools</a></li>
         <li><a href="/">Meat Smoking Calculator</a></li>
         <li><a href="brisket-calculator.html">Brisket Calculator</a></li>
         <li><a href="pork-shoulder-calculator.html">Pork Shoulder Calculator</a></li>
@@ -517,7 +518,7 @@ a { color: inherit; }
 
     <p>Yes — and not just for texture. The additional time needed to bring a brisket from 195&#xB0;F to 203&#xB0;F results in continued fat rendering and moisture evaporation. The difference is approximately 5 percentage points of yield.</p>
 
-    <p>At <strong>195&#xB0;F</strong>, the flat is fully tender but still holds together for clean slices. The collagen has converted to gelatin, the probe slides in with zero resistance, and the flat can be sliced without crumbling. This is the pull temperature for classic sliced brisket.</p>
+    <p>At <strong>195&#xB0;F</strong>, the flat is fully tender but still holds together for clean slices. The collagen has converted to gelatin, the probe slides in with zero resistance, and the flat can be sliced without crumbling. This is the pull temperature for classic sliced brisket, and the <a href="brisket-calculator.html">Brisket Calculator</a> is the right tool when you need the full cook timeline to hit that target cleanly.</p>
 
     <p>At <strong>203&#xB0;F</strong>, more fat has rendered out of both the flat and the point. The point becomes pullable — it tears into long, juicy strands with minimal effort. The flat at 203&#xB0;F is extremely tender but may not hold together for clean slices, depending on the individual brisket. This temperature is preferred when making burnt ends or pulled brisket, or when cooking the point separately from the flat.</p>
 
@@ -525,7 +526,7 @@ a { color: inherit; }
 
     <h3>How Much Brisket to Buy for a Party</h3>
 
-    <p>The quick math at 6 oz per serving: divide total guests by the number of servings per packer. A 15 lb Choice packer yields roughly 8.7 lbs of cooked brisket at 195&#xB0;F. At 6 oz per person, that is about 23 servings. For 50 guests, you need 3 packers. For 100 guests, 5 packers.</p>
+    <p>The quick math at 6 oz per serving: divide total guests by the number of servings per packer. A 15 lb Choice packer yields roughly 8.7 lbs of cooked brisket at 195&#xB0;F. At 6 oz per person, that is about 23 servings. For 50 guests, you need 3 packers. For 100 guests, 5 packers. If you are comparing brisket against pork, ribs, or mixed proteins for the same event, the <a href="meat-per-person.html">Meat Per Person Calculator</a> gives you the broader serving math.</p>
 
     <p>Always round up. Brisket shrinkage is variable — a brisket that stalls longer, cooks at a slightly higher temperature, or has an unusually thick fat cap will yield less than the average. Planning for 10 to 15% more than you think you need protects you from running short. Leftover brisket freezes beautifully and is excellent in tacos, hash, and sandwiches the next day.</p>
 
@@ -948,6 +949,38 @@ document.getElementById('cookieReject').addEventListener('click', function() {
   } catch(err){}
 
   initConsentBanner();
+})();
+</script>
+<script>
+(function initNavDropdown(){
+  var dropdowns = document.querySelectorAll('.nav-dropdown');
+  if (!dropdowns.length) return;
+  function closeAll() {
+    dropdowns.forEach(function(dropdown){
+      dropdown.classList.remove('is-open');
+      var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    });
+  }
+  dropdowns.forEach(function(dropdown){
+    var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+    if (!trigger) return;
+    trigger.addEventListener('click', function(e){
+      e.stopPropagation();
+      var willOpen = !dropdown.classList.contains('is-open');
+      closeAll();
+      if (willOpen) {
+        dropdown.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('.nav-dropdown')) closeAll();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeAll();
+  });
 })();
 </script>
 </body>
