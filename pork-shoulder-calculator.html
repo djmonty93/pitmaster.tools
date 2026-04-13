@@ -973,7 +973,7 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
 
   function setConsent(val){
     var expires = new Date(Date.now() + 365*24*3600*1000).toUTCString();
-    document.cookie = cookieKey + '=' + encodeURIComponent(val) + '; path=/; expires=' + expires + '; SameSite=Lax';
+    document.cookie = cookieKey + '=' + encodeURIComponent(val) + '; path=/; expires=' + expires + '; Secure; SameSite=Lax';
   }
 
   function loadAnalytics(){

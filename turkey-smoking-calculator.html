@@ -1044,7 +1044,7 @@ function loadGoogleServices() { loadAnalytics(); loadAds(); }
 // ── Cookie consent ────────────────────────────────────────────────────────────
 function setCookie(name, value, days) {
   var d = new Date(); d.setTime(d.getTime() + days * 86400000);
-  document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+  document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + d.toUTCString() + ';path=/;Secure;SameSite=Lax';
 }
 function getCookie(name) {
   var prefix = name + '=', parts = document.cookie ? document.cookie.split(';') : [];
