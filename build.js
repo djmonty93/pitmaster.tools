@@ -48,10 +48,9 @@ function injectPartials(html, sourceFile) {
   });
 }
 
-// ── Ensure dist/ exists ──────────────────────────────────────────────────────
-if (!fs.existsSync(DIST)) {
-  fs.mkdirSync(DIST);
-}
+// ── Recreate dist/ from a clean slate ───────────────────────────────────────
+fs.rmSync(DIST, { recursive: true, force: true });
+fs.mkdirSync(DIST, { recursive: true });
 
 // ── Build HTML files ─────────────────────────────────────────────────────────
 var htmlFiles = fs.readdirSync(SRC).filter(function(f) { return f.endsWith('.html'); });

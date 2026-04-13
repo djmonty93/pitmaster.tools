@@ -10,7 +10,7 @@ module.exports = defineConfig({
     headless: true
   },
   webServer: {
-    command: 'node scripts/static-server.js',
+    command: 'node build.js && node scripts/static-server.js',
     port: 4173,
     reuseExistingServer: true,
     timeout: 15000
