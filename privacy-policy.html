@@ -81,6 +81,21 @@ header {
   text-decoration: none;
 }
 .logo span { color: var(--amber); }
+.header-nav { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+.header-nav a { color: #ccc; text-decoration: none; font-size: .85rem; font-weight: 500; transition: color .15s; }
+.header-nav a:hover, .header-nav a:focus-visible { color: var(--amber); }
+.header-nav a[aria-current="page"] { color: var(--amber); font-weight: 700; }
+.nav-dropdown { position: relative; }
+.nav-dropdown__trigger { background: none; border: none; color: #ccc; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; cursor: pointer; font-family: inherit; }
+.nav-dropdown__trigger::after { content: '▾'; font-size: .7em; }
+.nav-dropdown__trigger:hover, .nav-dropdown__trigger:focus-visible { color: var(--amber); }
+.nav-dropdown__trigger.is-current { color: var(--amber); font-weight: 700; }
+.nav-dropdown__menu { position: absolute; top: calc(100% + .75rem); left: 50%; transform: translateX(-50%); background: #1e1e1e; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: .4rem 0; min-width: 215px; list-style: none; margin: 0; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+.nav-dropdown.is-open .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
+.nav-dropdown__menu li { display: block; }
+.nav-dropdown__menu a { display: block; padding: .4rem 1rem; font-size: .82rem; color: #bbb; white-space: nowrap; transition: color .1s, background .1s; text-decoration: none; }
+.nav-dropdown__menu a:hover, .nav-dropdown__menu a:focus-visible { color: var(--amber); background: rgba(255,255,255,.04); outline: none; }
+.nav-dropdown__menu a[aria-current="page"] { color: var(--amber); font-weight: 700; }
 .back-link {
   color: #fff;
   text-decoration: none;
@@ -156,7 +171,27 @@ footer a:focus-visible { text-decoration: underline; }
 <body>
 <header>
   <a class="logo" href="index.html">Pitmaster<span> Tools</span></a>
-  <a class="back-link" href="index.html">Back to calculator</a>
+  <nav class="header-nav" aria-label="Site navigation">
+    <div class="nav-dropdown">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="tools.html">All Tools</a></li>
+        <li><a href="/">Meat Smoking Calculator</a></li>
+        <li><a href="brisket-calculator.html">Brisket Calculator</a></li>
+        <li><a href="pork-shoulder-calculator.html">Pork Shoulder Calculator</a></li>
+        <li><a href="rib-calculator.html">Rib Calculator</a></li>
+        <li><a href="turkey-smoking-calculator.html">Turkey Calculator</a></li>
+        <li><a href="meat-per-person.html">Meat Per Person</a></li>
+        <li><a href="cook-time-coordinator.html">Cook Time Coordinator</a></li>
+        <li><a href="charcoal-calculator.html">Charcoal Calculator</a></li>
+        <li><a href="brine-calculator.html">Brine Calculator</a></li>
+        <li><a href="dry-rub-calculator.html">Dry Rub Calculator</a></li>
+        <li><a href="bbq-cost-calculator.html">BBQ Cost Calculator</a></li>
+        <li><a href="catering-calculator.html">Catering Calculator</a></li>
+        <li><a href="brisket-yield-calculator.html">Brisket Yield Calculator</a></li>
+      </ul>
+    </div>
+  </nav>
 </header>
 
 <main>
@@ -217,6 +252,8 @@ footer a:focus-visible { text-decoration: underline; }
   <nav aria-label="Footer">
     <a href="index.html">Calculator</a>
     <span>|</span>
+    <a href="tools.html">All Tools</a>
+    <span>|</span>
     <a href="terms-of-service.html">Terms of Service</a>
     <span>|</span>
     <a href="mailto:contact@pitmaster.tools">contact@pitmaster.tools</a>
@@ -224,5 +261,37 @@ footer a:focus-visible { text-decoration: underline; }
   <p class="footer-small">Cook times are estimates based on USDA guidelines and pitmaster consensus. Always verify doneness with a calibrated meat thermometer. Never rely solely on time.</p>
   <p class="footer-small">Last updated: April 11, 2026</p>
 </footer>
+<script>
+(function initNavDropdown(){
+  var dropdowns = document.querySelectorAll('.nav-dropdown');
+  if (!dropdowns.length) return;
+  function closeAll() {
+    dropdowns.forEach(function(dropdown){
+      dropdown.classList.remove('is-open');
+      var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    });
+  }
+  dropdowns.forEach(function(dropdown){
+    var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+    if (!trigger) return;
+    trigger.addEventListener('click', function(e){
+      e.stopPropagation();
+      var willOpen = !dropdown.classList.contains('is-open');
+      closeAll();
+      if (willOpen) {
+        dropdown.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('.nav-dropdown')) closeAll();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeAll();
+  });
+})();
+</script>
 </body>
 </html>

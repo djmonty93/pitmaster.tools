@@ -170,6 +170,17 @@ header {
 }
 .nav-links a:hover { color: #fff; background: rgba(255,255,255,.08); }
 .nav-links a[aria-current="page"] { color: var(--amber); }
+.nav-dropdown { position: relative; }
+.nav-dropdown__trigger { background: none; border: none; color: #ccc; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; cursor: pointer; font-family: inherit; }
+.nav-dropdown__trigger::after { content: '▾'; font-size: .7em; }
+.nav-dropdown__trigger:hover, .nav-dropdown__trigger:focus-visible { color: var(--amber); }
+.nav-dropdown__trigger.is-current { color: var(--amber); font-weight: 700; }
+.nav-dropdown__menu { position: absolute; top: calc(100% + .75rem); left: 50%; transform: translateX(-50%); background: #1e1e1e; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: .4rem 0; min-width: 215px; list-style: none; margin: 0; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+.nav-dropdown.is-open .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
+.nav-dropdown__menu li { display: block; }
+.nav-dropdown__menu a { display: block; padding: .4rem 1rem; font-size: .82rem; color: #bbb; white-space: nowrap; transition: color .1s, background .1s; text-decoration: none; }
+.nav-dropdown__menu a:hover, .nav-dropdown__menu a:focus-visible { color: var(--amber); background: rgba(255,255,255,.04); outline: none; }
+.nav-dropdown__menu a[aria-current="page"] { color: var(--amber); font-weight: 700; }
 @media (max-width: 700px) { .nav-links { display: none; } }
 .unit-controls { display: flex; align-items: center; gap: .4rem; }
 .unit-toggle { display: flex; background: #333; border-radius: 20px; padding: 3px; gap: 2px; }
@@ -477,11 +488,25 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
   <a href="/" class="logo">Pitmaster<span> Tools</span></a>
   <div class="header-right">
     <nav class="nav-links" aria-label="Site navigation">
-      <a href="/">Smoking Calculator</a>
-      <a href="brisket-calculator.html">Brisket</a>
-      <a href="pork-shoulder-calculator.html">Pork Shoulder</a>
-      <a href="rib-calculator.html" aria-current="page">Ribs</a>
-      <a href="cook-time-coordinator.html">Coordinator</a>
+      <div class="nav-dropdown">
+        <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+        <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+          <li><a href="tools.html">All Tools</a></li>
+          <li><a href="/">Meat Smoking Calculator</a></li>
+          <li><a href="brisket-calculator.html">Brisket Calculator</a></li>
+          <li><a href="pork-shoulder-calculator.html">Pork Shoulder Calculator</a></li>
+          <li><a href="rib-calculator.html" aria-current="page">Rib Calculator</a></li>
+          <li><a href="turkey-smoking-calculator.html">Turkey Calculator</a></li>
+          <li><a href="meat-per-person.html">Meat Per Person</a></li>
+          <li><a href="cook-time-coordinator.html">Cook Time Coordinator</a></li>
+          <li><a href="charcoal-calculator.html">Charcoal Calculator</a></li>
+          <li><a href="brine-calculator.html">Brine Calculator</a></li>
+          <li><a href="dry-rub-calculator.html">Dry Rub Calculator</a></li>
+          <li><a href="bbq-cost-calculator.html">BBQ Cost Calculator</a></li>
+          <li><a href="catering-calculator.html">Catering Calculator</a></li>
+          <li><a href="brisket-yield-calculator.html">Brisket Yield Calculator</a></li>
+        </ul>
+      </div>
     </nav>
     <div class="unit-controls" aria-label="Unit preferences">
       <div class="unit-toggle" id="tempToggle" role="group" aria-label="Temperature unit">
@@ -730,12 +755,12 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
     <h2 id="how-long-title">How Long to Smoke Ribs</h2>
     <p>Rib cook times depend almost entirely on rib type, rack thickness, and smoker temperature — not raw weight. Unlike brisket or pork shoulder, you cannot multiply a per-pound rate to get a reliable finish window. A 4-pound rack and a 6-pound rack of spare ribs cook in roughly the same time because heat travels through a similar thickness of meat and bone.</p>
     <p>At 225&#xB0;F, baby back ribs typically finish in 5 to 5.5 hours, spare ribs in 6 to 6.5 hours, and competition-trimmed ribs in about 5 hours. At 250&#xB0;F those windows compress by 10 to 15 percent. At 275&#xB0;F and above, cooks move faster but require more attention to prevent the bark from charring before the internal connective tissue has finished breaking down.</p>
-    <p>Beef plate ribs (dino bones) are the exception. These massive cuts — often 8 to 10 pounds per rack — behave more like a small brisket. They follow a loose per-pound rate, benefit from low-and-slow cooking at 225&#xB0;F to 250&#xB0;F, and finish around 203&#xB0;F internal when the probe slides between the bones with almost no resistance.</p>
+    <p>Beef plate ribs (dino bones) are the exception. These massive cuts — often 8 to 10 pounds per rack — behave more like a small <a href="brisket-calculator.html">brisket</a>. They follow a loose per-pound rate, benefit from low-and-slow cooking at 225&#xB0;F to 250&#xB0;F, and finish around 203&#xB0;F internal when the probe slides between the bones with almost no resistance.</p>
 
     <h3>The 3-2-1 Method Explained</h3>
     <p>The 3-2-1 method breaks a spare rib cook into three phases: three hours unwrapped on the smoker for smoke penetration and bark formation, two hours tightly wrapped in foil with butter, brown sugar, and a splash of apple juice to steam and tenderize, and one final hour back on the smoker unwrapped to firm up the bark and optionally apply a sauce glaze for the last 15 minutes.</p>
     <p>For baby back ribs and competition ribs, use the 2-2-1 variation. Baby backs are thinner and cook faster — three hours of unwrapped smoke would push them past the point of ideal texture before the wrap phase even begins. Two hours smoke, two hours wrapped, one hour unwrapped totals five hours and produces excellent results for baby backs.</p>
-    <p>Temperature adjustments apply to the total time, not individual phases. If you cook at 250&#xB0;F instead of 225&#xB0;F, each phase shortens proportionally. The calculator handles this automatically and shows you exact adjusted phase times for your smoker temperature.</p>
+    <p>Temperature adjustments apply to the total time, not individual phases. If you cook at 250&#xB0;F instead of 225&#xB0;F, each phase shortens proportionally. The calculator handles this automatically and shows you exact adjusted phase times for your smoker temperature. If you are serving ribs alongside larger cuts, the <a href="cook-time-coordinator.html">Cook Time Coordinator</a> is the better tool for the combined schedule.</p>
 
     <h3>How Do You Know When Ribs Are Done?</h3>
     <p>Three reliable doneness tests work better than temperature alone for pork ribs. The bend test is the most used: pick up the rack from one end with tongs and look for a 45-degree sag with slight cracking in the bark on the top side. A stiff rack that barely bends needs more time. The toothpick test checks for tenderness between the bones — a toothpick or probe should slide in with almost no resistance at the thickest point between the middle bones. Bone pullback is the visual tell: the meat should have pulled back at least a quarter inch from the ends of the bones along the length of the rack.</p>
@@ -828,16 +853,12 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
 <footer>
   <div style="font-family:Georgia,serif;font-size:1.1rem;font-weight:700;color:var(--amber);">Pitmaster Tools</div>
   <nav aria-label="Footer navigation">
-    <a href="/">Smoking Calculator</a>
-    <a href="rib-calculator.html">Rib Calculator</a>
-    <a href="brisket-calculator.html">Brisket</a>
-    <a href="pork-shoulder-calculator.html">Pork Shoulder</a>
-    <a href="cook-time-coordinator.html">Coordinator</a>
-    <a href="dry-rub-calculator.html">Dry Rub</a>
-    <a href="meat-per-person.html">Meat Per Person</a>
-    <a href="charcoal-calculator.html">Charcoal</a>
-    <a href="brine-calculator.html">Brine</a>
+    <a href="/">Calculator</a>
+    <span>|</span>
+    <a href="tools.html">All Tools</a>
+    <span>|</span>
     <a href="privacy-policy.html">Privacy Policy</a>
+    <span>|</span>
     <a href="terms-of-service.html">Terms</a>
   </nav>
   <div class="footer-small">
@@ -1325,6 +1346,38 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
   initUnits();
   initCookieBanner();
 
+})();
+</script>
+<script>
+(function initNavDropdown(){
+  var dropdowns = document.querySelectorAll('.nav-dropdown');
+  if (!dropdowns.length) return;
+  function closeAll() {
+    dropdowns.forEach(function(dropdown){
+      dropdown.classList.remove('is-open');
+      var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    });
+  }
+  dropdowns.forEach(function(dropdown){
+    var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+    if (!trigger) return;
+    trigger.addEventListener('click', function(e){
+      e.stopPropagation();
+      var willOpen = !dropdown.classList.contains('is-open');
+      closeAll();
+      if (willOpen) {
+        dropdown.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('.nav-dropdown')) closeAll();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeAll();
+  });
 })();
 </script>
 </body>

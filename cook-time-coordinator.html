@@ -138,6 +138,17 @@ header { background: var(--charcoal); padding: 0 1.5rem; min-height: 56px; displ
 .header-nav a { color: rgba(255,255,255,.85); text-decoration: none; font-size: .875rem; font-weight: 600; white-space: nowrap; }
 .header-nav a:hover, .header-nav a:focus-visible { color: #fff; text-decoration: underline; }
 .header-nav a[aria-current="page"] { color: var(--amber); }
+.nav-dropdown { position: relative; }
+.nav-dropdown__trigger { background: none; border: none; color: #ccc; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; cursor: pointer; font-family: inherit; }
+.nav-dropdown__trigger::after { content: '▾'; font-size: .7em; }
+.nav-dropdown__trigger:hover, .nav-dropdown__trigger:focus-visible { color: var(--amber); }
+.nav-dropdown__trigger.is-current { color: var(--amber); font-weight: 700; }
+.nav-dropdown__menu { position: absolute; top: calc(100% + .75rem); left: 50%; transform: translateX(-50%); background: #1e1e1e; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: .4rem 0; min-width: 215px; list-style: none; margin: 0; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+.nav-dropdown.is-open .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
+.nav-dropdown__menu li { display: block; }
+.nav-dropdown__menu a { display: block; padding: .4rem 1rem; font-size: .82rem; color: #bbb; white-space: nowrap; transition: color .1s, background .1s; text-decoration: none; }
+.nav-dropdown__menu a:hover, .nav-dropdown__menu a:focus-visible { color: var(--amber); background: rgba(255,255,255,.04); outline: none; }
+.nav-dropdown__menu a[aria-current="page"] { color: var(--amber); font-weight: 700; }
 .unit-controls { display: flex; align-items: center; gap: .5rem; }
 .unit-toggle { display: flex; background: #333; border-radius: 20px; padding: 3px; gap: 2px; }
 .unit-toggle button { background: none; border: none; color: #aaa; font-size: .75rem; font-weight: 600; padding: 4px 10px; border-radius: 16px; cursor: pointer; transition: background .15s, color .15s; letter-spacing: .03em; font-family: inherit; }
@@ -313,12 +324,25 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
 <header>
   <a class="logo" href="/">Pitmaster<span> Tools</span></a>
   <nav class="header-nav" aria-label="Site navigation">
-    <a href="/">Smoking Calculator</a>
-    <a href="meat-per-person.html">Serving Sizes</a>
-    <a href="dry-rub-calculator.html">Dry Rub</a>
-    <a href="charcoal-calculator.html">Charcoal</a>
-    <a href="brine-calculator.html">Brine</a>
-    <a href="cook-time-coordinator.html" aria-current="page">Coordinator</a>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="tools.html">All Tools</a></li>
+        <li><a href="/">Meat Smoking Calculator</a></li>
+        <li><a href="brisket-calculator.html">Brisket Calculator</a></li>
+        <li><a href="pork-shoulder-calculator.html">Pork Shoulder Calculator</a></li>
+        <li><a href="rib-calculator.html">Rib Calculator</a></li>
+        <li><a href="turkey-smoking-calculator.html">Turkey Calculator</a></li>
+        <li><a href="meat-per-person.html">Meat Per Person</a></li>
+        <li><a href="cook-time-coordinator.html" aria-current="page">Cook Time Coordinator</a></li>
+        <li><a href="charcoal-calculator.html">Charcoal Calculator</a></li>
+        <li><a href="brine-calculator.html">Brine Calculator</a></li>
+        <li><a href="dry-rub-calculator.html">Dry Rub Calculator</a></li>
+        <li><a href="bbq-cost-calculator.html">BBQ Cost Calculator</a></li>
+        <li><a href="catering-calculator.html">Catering Calculator</a></li>
+        <li><a href="brisket-yield-calculator.html">Brisket Yield Calculator</a></li>
+      </ul>
+    </div>
   </nav>
   <div class="unit-controls">
     <div class="unit-toggle" id="tempToggle" role="group" aria-label="Temperature unit">
@@ -408,8 +432,8 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
   <!-- Editorial -->
   <section class="editorial-section">
     <h2>How to Smoke Multiple Meats at the Same Time</h2>
-    <p>The secret to serving a brisket, a rack of ribs, and a chicken at the same time is not magic — it is working backward from a single serve time. Each cut has a known cook time at a given temperature and a required rest period before slicing or serving. Add those two windows together, count backward from serve time, and you know exactly when each meat needs to go on the smoker.</p>
-    <p>The coordinator above does this math for all your meats simultaneously and draws a visual timeline so you can see how the cook windows overlap. The longest cook (usually a brisket or whole pork butt) goes on first, and shorter cooks (ribs, chicken) are added progressively as the day goes on.</p>
+    <p>The secret to serving a <a href="brisket-calculator.html">brisket</a>, a rack of <a href="rib-calculator.html">ribs</a>, and a chicken at the same time is not magic — it is working backward from a single serve time. Each cut has a known cook time at a given temperature and a required rest period before slicing or serving. Add those two windows together, count backward from serve time, and you know exactly when each meat needs to go on the smoker.</p>
+    <p>The coordinator above does this math for all your meats simultaneously and draws a visual timeline so you can see how the cook windows overlap. The longest cook (usually a brisket or whole <a href="pork-shoulder-calculator.html">pork butt</a>) goes on first, and shorter cooks (ribs, chicken) are added progressively as the day goes on.</p>
 
     <h3>The Golden Rule: Cook Backward from Serve Time</h3>
     <p>Never plan a multi-meat cook forward from a start time. Planning forward ("I'll put the brisket on at midnight") leads to one of two outcomes: everything finishes two hours early and gets cold, or the brisket hits the stall and dinner is two hours late. Planning backward from serve time converts the problem into subtraction instead of prediction.</p>
@@ -420,7 +444,7 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
     <p>Temperature variation within the smoker matters: upper racks run 15–25°F hotter than lower racks in most offset smokers. Put cuts that benefit from slightly higher heat (chicken) at the top and longer-cooking cuts (brisket, pork butt) on the main lower rack.</p>
 
     <h3>The Faux Cambro: Your Best Tool for Multi-Meat Cooks</h3>
-    <p>When a long-cooking cut like brisket finishes before the rest of the cook, hold it in a faux Cambro: pull from the smoker, double-wrap tightly in foil, wrap in old bath towels, and place in a dry cooler. A brisket held this way stays above 140°F (the safe holding temperature) for 3–6 hours and actually improves during the hold as juices redistribute and collagen fully sets.</p>
+    <p>When a long-cooking cut like <a href="brisket-calculator.html">brisket</a> finishes before the rest of the cook, hold it in a faux Cambro: pull from the smoker, double-wrap tightly in foil, wrap in old bath towels, and place in a dry cooler. A brisket held this way stays above 140°F (the safe holding temperature) for 3–6 hours and actually improves during the hold as juices redistribute and collagen fully sets.</p>
     <p>This means you can target a brisket pull 3–4 hours before serve time without any quality loss — and use that buffer as insurance against the stall running long. Time your ribs and chicken to finish 20–30 minutes before serve time, resting uncovered on a wire rack.</p>
 
     <h3>How Additional Mass Affects Cook Time</h3>
@@ -540,6 +564,8 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
   <div>&#169; 2026 Pitmaster Tools. All rights reserved.</div>
   <nav aria-label="Footer">
     <a href="/">Calculator</a>
+    <span>|</span>
+    <a href="tools.html">All Tools</a>
     <span>|</span>
     <a href="privacy-policy.html">Privacy Policy</a>
     <span>|</span>
@@ -1047,6 +1073,38 @@ document.getElementById('cookieReject').addEventListener('click', function() {
   DEFAULT_ROWS.forEach(function(d) { addRow(d); });
 
   initConsentBanner();
+})();
+</script>
+<script>
+(function initNavDropdown(){
+  var dropdowns = document.querySelectorAll('.nav-dropdown');
+  if (!dropdowns.length) return;
+  function closeAll() {
+    dropdowns.forEach(function(dropdown){
+      dropdown.classList.remove('is-open');
+      var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    });
+  }
+  dropdowns.forEach(function(dropdown){
+    var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+    if (!trigger) return;
+    trigger.addEventListener('click', function(e){
+      e.stopPropagation();
+      var willOpen = !dropdown.classList.contains('is-open');
+      closeAll();
+      if (willOpen) {
+        dropdown.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('.nav-dropdown')) closeAll();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeAll();
+  });
 })();
 </script>
 </body>

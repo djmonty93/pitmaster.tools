@@ -155,6 +155,17 @@ header {
 .header-nav a { color: #ccc; text-decoration: none; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; }
 .header-nav a:hover, .header-nav a:focus-visible { color: var(--amber); }
 .header-nav a[aria-current="page"] { color: var(--amber); font-weight: 700; }
+.nav-dropdown { position: relative; }
+.nav-dropdown__trigger { background: none; border: none; color: #ccc; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; cursor: pointer; font-family: inherit; }
+.nav-dropdown__trigger::after { content: '▾'; font-size: .7em; }
+.nav-dropdown__trigger:hover, .nav-dropdown__trigger:focus-visible { color: var(--amber); }
+.nav-dropdown__trigger.is-current { color: var(--amber); font-weight: 700; }
+.nav-dropdown__menu { position: absolute; top: calc(100% + .75rem); left: 50%; transform: translateX(-50%); background: #1e1e1e; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: .4rem 0; min-width: 215px; list-style: none; margin: 0; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+.nav-dropdown.is-open .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
+.nav-dropdown__menu li { display: block; }
+.nav-dropdown__menu a { display: block; padding: .4rem 1rem; font-size: .82rem; color: #bbb; white-space: nowrap; transition: color .1s, background .1s; text-decoration: none; }
+.nav-dropdown__menu a:hover, .nav-dropdown__menu a:focus-visible { color: var(--amber); background: rgba(255,255,255,.04); outline: none; }
+.nav-dropdown__menu a[aria-current="page"] { color: var(--amber); font-weight: 700; }
 .unit-controls { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
 .unit-toggle { display: flex; background: #333; border-radius: 20px; padding: 3px; gap: 2px; }
 .unit-toggle button { background: none; border: none; color: #aaa; font-size: .75rem; font-weight: 600; padding: 4px 10px; border-radius: 16px; cursor: pointer; transition: background .15s,color .15s; letter-spacing: .03em; }
@@ -370,12 +381,25 @@ a { color: inherit; }
 <header>
   <a href="/" class="logo">Pitmaster<span> Tools</span></a>
   <nav class="header-nav" aria-label="Site navigation">
-    <a href="index.html">Smoking Calculator</a>
-    <a href="brisket-calculator.html">Brisket</a>
-    <a href="pork-shoulder-calculator.html">Pork Shoulder</a>
-    <a href="rib-calculator.html">Ribs</a>
-    <a href="charcoal-calculator.html">Charcoal</a>
-    <a href="turkey-smoking-calculator.html" aria-current="page">Turkey</a>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="tools.html">All Tools</a></li>
+        <li><a href="/">Meat Smoking Calculator</a></li>
+        <li><a href="brisket-calculator.html">Brisket Calculator</a></li>
+        <li><a href="pork-shoulder-calculator.html">Pork Shoulder Calculator</a></li>
+        <li><a href="rib-calculator.html">Rib Calculator</a></li>
+        <li><a href="turkey-smoking-calculator.html" aria-current="page">Turkey Calculator</a></li>
+        <li><a href="meat-per-person.html">Meat Per Person</a></li>
+        <li><a href="cook-time-coordinator.html">Cook Time Coordinator</a></li>
+        <li><a href="charcoal-calculator.html">Charcoal Calculator</a></li>
+        <li><a href="brine-calculator.html">Brine Calculator</a></li>
+        <li><a href="dry-rub-calculator.html">Dry Rub Calculator</a></li>
+        <li><a href="bbq-cost-calculator.html">BBQ Cost Calculator</a></li>
+        <li><a href="catering-calculator.html">Catering Calculator</a></li>
+        <li><a href="brisket-yield-calculator.html">Brisket Yield Calculator</a></li>
+      </ul>
+    </div>
   </nav>
   <div class="unit-controls">
     <div class="unit-toggle" id="tempToggle" role="group" aria-label="Temperature unit">
@@ -538,9 +562,9 @@ a { color: inherit; }
 
     <h3>Turkey Breast: The Lean Cut</h3>
 
-    <p>A bone-in turkey breast is arguably the most practical option for smaller gatherings: it feeds 4 to 6 people comfortably, cooks in 3 to 4 hours, and fits on any smoker that can hold a whole chicken. The cook rate is approximately 30 minutes per pound at 250&#xB0;F with no wrap.</p>
+    <p>A bone-in turkey breast is arguably the most practical option for smaller gatherings: it feeds 4 to 6 people comfortably, cooks in 3 to 4 hours, and fits on any smoker that can hold a whole chicken. The cook rate is approximately 30 minutes per pound at 250&#xB0;F with no wrap. If you need to scale that up for a holiday table, the <a href="meat-per-person.html">Meat Per Person Calculator</a> is the quickest way to estimate total turkey needed.</p>
 
-    <p>The challenge with turkey breast is that it is all white meat with almost no intramuscular fat. Every degree past 165&#xB0;F internal temperature makes the meat noticeably drier. <strong>Brining is mandatory.</strong> A wet brine of 1 cup kosher salt per gallon of water, held for 8 to 12 hours, saturates the muscle fibers with moisture and seasoning that survives the cook. A dry brine of 1.5 teaspoons kosher salt per pound, applied 24 hours ahead, achieves similar results with crispier skin. Either way, pull the breast at exactly 165&#xB0;F and rest for at least 20 minutes before slicing against the grain.</p>
+    <p>The challenge with turkey breast is that it is all white meat with almost no intramuscular fat. Every degree past 165&#xB0;F internal temperature makes the meat noticeably drier. <strong>Brining is mandatory.</strong> A wet brine of 1 cup kosher salt per gallon of water, held for 8 to 12 hours, saturates the muscle fibers with moisture and seasoning that survives the cook. A dry brine of 1.5 teaspoons kosher salt per pound, applied 24 hours ahead, achieves similar results with crispier skin. Either way, pull the breast at exactly 165&#xB0;F and rest for at least 20 minutes before slicing against the grain. For exact salt and water ratios, use the <a href="brine-calculator.html">Brine Calculator</a>.</p>
 
     <h3>Dark Meat Cuts: Legs, Thighs, and Wings</h3>
 
@@ -701,6 +725,8 @@ a { color: inherit; }
   <div>&#169; 2026 Pitmaster Tools. All rights reserved.</div>
   <nav aria-label="Footer">
     <a href="index.html">Calculator</a>
+    <span>|</span>
+    <a href="tools.html">All Tools</a>
     <span>|</span>
     <a href="privacy-policy.html">Privacy Policy</a>
     <span>|</span>
@@ -1090,6 +1116,38 @@ document.getElementById('cookieReject').addEventListener('click', function() {
   // Initialize weight group visibility for default cut
   updateWeightGroupVisibility();
   initConsentBanner();
+})();
+</script>
+<script>
+(function initNavDropdown(){
+  var dropdowns = document.querySelectorAll('.nav-dropdown');
+  if (!dropdowns.length) return;
+  function closeAll() {
+    dropdowns.forEach(function(dropdown){
+      dropdown.classList.remove('is-open');
+      var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    });
+  }
+  dropdowns.forEach(function(dropdown){
+    var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+    if (!trigger) return;
+    trigger.addEventListener('click', function(e){
+      e.stopPropagation();
+      var willOpen = !dropdown.classList.contains('is-open');
+      closeAll();
+      if (willOpen) {
+        dropdown.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('.nav-dropdown')) closeAll();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeAll();
+  });
 })();
 </script>
 </body>

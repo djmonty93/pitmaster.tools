@@ -170,6 +170,17 @@ header {
 }
 .header-nav a:hover,
 .header-nav a:focus-visible { color: #fff; text-decoration: underline; }
+.nav-dropdown { position: relative; }
+.nav-dropdown__trigger { background: none; border: none; color: #ccc; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; cursor: pointer; font-family: inherit; }
+.nav-dropdown__trigger::after { content: '▾'; font-size: .7em; }
+.nav-dropdown__trigger:hover, .nav-dropdown__trigger:focus-visible { color: var(--amber); }
+.nav-dropdown__trigger.is-current { color: var(--amber); font-weight: 700; }
+.nav-dropdown__menu { position: absolute; top: calc(100% + .75rem); left: 50%; transform: translateX(-50%); background: #1e1e1e; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: .4rem 0; min-width: 215px; list-style: none; margin: 0; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+.nav-dropdown.is-open .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
+.nav-dropdown__menu li { display: block; }
+.nav-dropdown__menu a { display: block; padding: .4rem 1rem; font-size: .82rem; color: #bbb; white-space: nowrap; transition: color .1s, background .1s; text-decoration: none; }
+.nav-dropdown__menu a:hover, .nav-dropdown__menu a:focus-visible { color: var(--amber); background: rgba(255,255,255,.04); outline: none; }
+.nav-dropdown__menu a[aria-current="page"] { color: var(--amber); font-weight: 700; }
 .unit-controls { display: flex; align-items: center; gap: .5rem; }
 .unit-toggle { display: flex; background: #333; border-radius: 20px; padding: 3px; gap: 2px; }
 .unit-toggle button { background: none; border: none; color: #aaa; font-size: .75rem; font-weight: 600; padding: 4px 10px; border-radius: 16px; cursor: pointer; transition: background .15s, color .15s; letter-spacing: .03em; font-family: inherit; }
@@ -566,9 +577,25 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
 <header>
   <a class="logo" href="/">Pitmaster<span> Tools</span></a>
   <nav class="header-nav" aria-label="Site navigation">
-    <a href="/">Smoking Calculator</a>
-    <a href="meat-per-person.html">Serving Sizes</a>
-    <a href="dry-rub-calculator.html" aria-current="page">Dry Rub</a>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="tools.html">All Tools</a></li>
+        <li><a href="/">Meat Smoking Calculator</a></li>
+        <li><a href="brisket-calculator.html">Brisket Calculator</a></li>
+        <li><a href="pork-shoulder-calculator.html">Pork Shoulder Calculator</a></li>
+        <li><a href="rib-calculator.html">Rib Calculator</a></li>
+        <li><a href="turkey-smoking-calculator.html">Turkey Calculator</a></li>
+        <li><a href="meat-per-person.html">Meat Per Person</a></li>
+        <li><a href="cook-time-coordinator.html">Cook Time Coordinator</a></li>
+        <li><a href="charcoal-calculator.html">Charcoal Calculator</a></li>
+        <li><a href="brine-calculator.html">Brine Calculator</a></li>
+        <li><a href="dry-rub-calculator.html" aria-current="page">Dry Rub Calculator</a></li>
+        <li><a href="bbq-cost-calculator.html">BBQ Cost Calculator</a></li>
+        <li><a href="catering-calculator.html">Catering Calculator</a></li>
+        <li><a href="brisket-yield-calculator.html">Brisket Yield Calculator</a></li>
+      </ul>
+    </div>
   </nav>
   <div class="unit-controls">
     <div class="unit-toggle" id="tempToggle" role="group" aria-label="Temperature unit">
@@ -699,7 +726,7 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
   <section class="editorial-section">
     <h2>How to Use a Dry Rub Calculator</h2>
 
-    <p>A dry rub calculator solves the most tedious part of competition and backyard BBQ: scaling a rub recipe to fit whatever weight of meat you happen to be cooking. A recipe written for a 10 lb brisket is useless without math if you are cooking a 14 lb brisket — and doing that conversion in your head while running a smoker at 5 AM is not ideal.</p>
+    <p>A dry rub calculator solves the most tedious part of competition and backyard BBQ: scaling a rub recipe to fit whatever weight of meat you happen to be cooking. A recipe written for a 10 lb brisket is useless without math if you are cooking a 14 lb brisket — and doing that conversion in your head while running a smoker at 5 AM is not ideal. If that brisket still needs its timeline, the <a href="brisket-calculator.html">Brisket Calculator</a> handles the cook schedule.</p>
 
     <p>This calculator works from a single principle: your rub should be a fixed percentage of your meat's raw weight. Enter that weight, choose a coverage level, and input your ingredient list. The calculator determines the total rub mass needed, then scales every ingredient proportionally so the ratios stay exactly right.</p>
 
@@ -731,14 +758,14 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
     <p>Timing matters as much as coverage. Salt begins drawing moisture from the meat immediately. That moisture dissolves the salt and then gets reabsorbed — a process called osmosis — which seasons the meat from inside rather than just the surface. This process benefits from time:</p>
 
     <ul>
-      <li><strong>Large cuts (brisket, pork butt, whole turkey):</strong> Apply 12–24 hours ahead. Wrap loosely and refrigerate. The dry surface you see when you pull it from the fridge is ideal — it will form bark faster in the smoker.</li>
-      <li><strong>Medium cuts (chicken quarters, ribs, pork loin):</strong> 2–4 hours minimum, overnight is better. Ribs benefit from overnight dry-brining especially when you want competition-style bite-through texture.</li>
+      <li><strong>Large cuts (<a href="brisket-calculator.html">brisket</a>, <a href="pork-shoulder-calculator.html">pork butt</a>, <a href="turkey-smoking-calculator.html">whole turkey</a>):</strong> Apply 12–24 hours ahead. Wrap loosely and refrigerate. The dry surface you see when you pull it from the fridge is ideal — it will form bark faster in the smoker.</li>
+      <li><strong>Medium cuts (chicken quarters, <a href="rib-calculator.html">ribs</a>, pork loin):</strong> 2–4 hours minimum, overnight is better. Ribs benefit from overnight dry-brining especially when you want competition-style bite-through texture.</li>
       <li><strong>Small cuts (chicken wings, steaks, chops):</strong> 30 minutes to 2 hours is enough. Longer can make the surface too salty, especially with table salt rubs.</li>
     </ul>
 
     <h3>Binding Agents</h3>
 
-    <p>Dry rubs adhere naturally to raw meat because the surface is slightly moist. But some pitmasters use a binder — a thin coat of mustard, olive oil, hot sauce, or Worcestershire — to help the rub stick more reliably, especially on very lean or very cold cuts. The binder burns off completely during cooking and does not meaningfully affect flavor. Yellow mustard is the most common; it adds negligible mustard flavor to the final product despite its strong smell raw.</p>
+    <p>Dry rubs adhere naturally to raw meat because the surface is slightly moist. But some pitmasters use a binder — a thin coat of mustard, olive oil, hot sauce, or Worcestershire — to help the rub stick more reliably, especially on very lean or very cold cuts. The binder burns off completely during cooking and does not meaningfully affect flavor. Yellow mustard is the most common; it adds negligible mustard flavor to the final product despite its strong smell raw. If you are salting in advance rather than seasoning right before the cook, the <a href="brine-calculator.html">Brine Calculator</a> will help you set up a dry brine or wet brine correctly.</p>
   </section>
 
   <!-- ============================================================
@@ -863,6 +890,8 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
   <div>&copy; 2026 Pitmaster Tools. All rights reserved.</div>
   <nav aria-label="Footer">
     <a href="/">Meat Smoking Calculator</a>
+    <span>|</span>
+    <a href="tools.html">All Tools</a>
     <span>|</span>
     <a href="privacy-policy.html">Privacy Policy</a>
     <span>|</span>
@@ -1303,6 +1332,38 @@ function initConsentBanner(){
   initConsentBanner();
 })();
 
+})();
+</script>
+<script>
+(function initNavDropdown(){
+  var dropdowns = document.querySelectorAll('.nav-dropdown');
+  if (!dropdowns.length) return;
+  function closeAll() {
+    dropdowns.forEach(function(dropdown){
+      dropdown.classList.remove('is-open');
+      var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    });
+  }
+  dropdowns.forEach(function(dropdown){
+    var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+    if (!trigger) return;
+    trigger.addEventListener('click', function(e){
+      e.stopPropagation();
+      var willOpen = !dropdown.classList.contains('is-open');
+      closeAll();
+      if (willOpen) {
+        dropdown.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('.nav-dropdown')) closeAll();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeAll();
+  });
 })();
 </script>
 

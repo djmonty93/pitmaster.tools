@@ -1,0 +1,11 @@
+{
+  "name": "pitmaster-tools",
+  "private": true,
+  "scripts": {
+    "browser:smoke": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.54.2",
+    "acorn": "^8.16.0"
+  }
+}

@@ -151,6 +151,17 @@ header {
 }
 .header-nav a:hover,
 .header-nav a:focus-visible { color: #fff; text-decoration: underline; }
+.nav-dropdown { position: relative; }
+.nav-dropdown__trigger { background: none; border: none; color: #ccc; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; cursor: pointer; font-family: inherit; }
+.nav-dropdown__trigger::after { content: '▾'; font-size: .7em; }
+.nav-dropdown__trigger:hover, .nav-dropdown__trigger:focus-visible { color: var(--amber); }
+.nav-dropdown__trigger.is-current { color: var(--amber); font-weight: 700; }
+.nav-dropdown__menu { position: absolute; top: calc(100% + .75rem); left: 50%; transform: translateX(-50%); background: #1e1e1e; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: .4rem 0; min-width: 215px; list-style: none; margin: 0; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+.nav-dropdown.is-open .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
+.nav-dropdown__menu li { display: block; }
+.nav-dropdown__menu a { display: block; padding: .4rem 1rem; font-size: .82rem; color: #bbb; white-space: nowrap; transition: color .1s, background .1s; text-decoration: none; }
+.nav-dropdown__menu a:hover, .nav-dropdown__menu a:focus-visible { color: var(--amber); background: rgba(255,255,255,.04); outline: none; }
+.nav-dropdown__menu a[aria-current="page"] { color: var(--amber); font-weight: 700; }
 main {
   max-width: 960px;
   margin: 0 auto;
@@ -565,8 +576,25 @@ footer a:focus-visible { text-decoration: underline; }
 <header>
   <a class="logo" href="/">Pitmaster<span> Tools</span></a>
   <nav class="header-nav" aria-label="Site navigation">
-    <a href="/">Smoking Calculator</a>
-    <a href="meat-per-person.html" aria-current="page">Serving Sizes</a>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="tools.html">All Tools</a></li>
+        <li><a href="/">Meat Smoking Calculator</a></li>
+        <li><a href="brisket-calculator.html">Brisket Calculator</a></li>
+        <li><a href="pork-shoulder-calculator.html">Pork Shoulder Calculator</a></li>
+        <li><a href="rib-calculator.html">Rib Calculator</a></li>
+        <li><a href="turkey-smoking-calculator.html">Turkey Calculator</a></li>
+        <li><a href="meat-per-person.html" aria-current="page">Meat Per Person</a></li>
+        <li><a href="cook-time-coordinator.html">Cook Time Coordinator</a></li>
+        <li><a href="charcoal-calculator.html">Charcoal Calculator</a></li>
+        <li><a href="brine-calculator.html">Brine Calculator</a></li>
+        <li><a href="dry-rub-calculator.html">Dry Rub Calculator</a></li>
+        <li><a href="bbq-cost-calculator.html">BBQ Cost Calculator</a></li>
+        <li><a href="catering-calculator.html">Catering Calculator</a></li>
+        <li><a href="brisket-yield-calculator.html">Brisket Yield Calculator</a></li>
+      </ul>
+    </div>
   </nav>
   <div class="unit-controls">
     <div class="unit-toggle" id="tempToggle" role="group" aria-label="Temperature unit">
@@ -842,14 +870,14 @@ footer a:focus-visible { text-decoration: underline; }
     <details class="faq-item">
       <summary>How many ribs per person?</summary>
       <div class="faq-body">
-        <p>Ribs are the one cut where bone count is more intuitive than weight. For baby back ribs and competition ribs, plan on <strong>3–4 bones per person</strong> — roughly half a rack. For spare ribs, 3 bones per person is standard. For beef plate ribs (dino bones), each bone can weigh over 1 lb and serves 1–2 people on its own. A full rack of 13 baby backs serves 2–3 people; a full rack of 12 St. Louis spare ribs serves 3–4 people.</p>
+        <p>Ribs are the one cut where bone count is more intuitive than weight. For baby back ribs and competition ribs, plan on <strong>3–4 bones per person</strong> — roughly half a rack. For spare ribs, 3 bones per person is standard. For beef plate ribs (dino bones), each bone can weigh over 1 lb and serves 1–2 people on its own. A full rack of 13 baby backs serves 2–3 people; a full rack of 12 St. Louis spare ribs serves 3–4 people. If ribs are your main protein, the <a href="rib-calculator.html">Rib Calculator</a> will give you the timing side of that cook.</p>
       </div>
     </details>
 
     <details class="faq-item">
       <summary>What is the difference between light, normal, and hungry serving sizes?</summary>
       <div class="faq-body">
-        <p>The three options correspond to <strong>4 oz, 6 oz, and 8 oz of cooked meat per person</strong>. Light (4 oz) is for events with multiple meats, heavy sides, or appetizers. Normal (6 oz) is the standard caterer's estimate — one moderate plate of a single meat. Hungry (8 oz) applies to meat-focused events or big eaters. When serving multiple proteins at a cookout, reduce each estimate by 30–40% and total them up so the combined cooked weight still reaches your target per person.</p>
+        <p>The three options correspond to <strong>4 oz, 6 oz, and 8 oz of cooked meat per person</strong>. Light (4 oz) is for events with multiple meats, heavy sides, or appetizers. Normal (6 oz) is the standard caterer's estimate — one moderate plate of a single meat. Hungry (8 oz) applies to meat-focused events or big eaters. When serving multiple proteins at a cookout, reduce each estimate by 30–40% and total them up so the combined cooked weight still reaches your target per person. If you are planning a full mixed-meat event, use the <a href="catering-calculator.html">Catering Calculator</a> for the combined shopping list.</p>
       </div>
     </details>
   </section>
@@ -896,6 +924,8 @@ footer a:focus-visible { text-decoration: underline; }
   <div>&copy; 2026 Pitmaster Tools. All rights reserved.</div>
   <nav aria-label="Footer">
     <a href="/">Meat Smoking Calculator</a>
+    <span>|</span>
+    <a href="tools.html">All Tools</a>
     <span>|</span>
     <a href="privacy-policy.html">Privacy Policy</a>
     <span>|</span>
@@ -1260,6 +1290,38 @@ function bindToggle(groupId, stateKey, buttons){
   initConsentBanner();
 })();
 
+})();
+</script>
+<script>
+(function initNavDropdown(){
+  var dropdowns = document.querySelectorAll('.nav-dropdown');
+  if (!dropdowns.length) return;
+  function closeAll() {
+    dropdowns.forEach(function(dropdown){
+      dropdown.classList.remove('is-open');
+      var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    });
+  }
+  dropdowns.forEach(function(dropdown){
+    var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+    if (!trigger) return;
+    trigger.addEventListener('click', function(e){
+      e.stopPropagation();
+      var willOpen = !dropdown.classList.contains('is-open');
+      closeAll();
+      if (willOpen) {
+        dropdown.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('.nav-dropdown')) closeAll();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeAll();
+  });
 })();
 </script>
 

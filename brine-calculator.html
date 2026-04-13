@@ -154,6 +154,17 @@ header {
 .header-nav a { color: rgba(255,255,255,.85); text-decoration: none; font-size: .875rem; font-weight: 600; white-space: nowrap; }
 .header-nav a:hover, .header-nav a:focus-visible { color: #fff; text-decoration: underline; }
 .header-nav a[aria-current="page"] { color: var(--amber); }
+.nav-dropdown { position: relative; }
+.nav-dropdown__trigger { background: none; border: none; color: #ccc; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; cursor: pointer; font-family: inherit; }
+.nav-dropdown__trigger::after { content: '▾'; font-size: .7em; }
+.nav-dropdown__trigger:hover, .nav-dropdown__trigger:focus-visible { color: var(--amber); }
+.nav-dropdown__trigger.is-current { color: var(--amber); font-weight: 700; }
+.nav-dropdown__menu { position: absolute; top: calc(100% + .75rem); left: 50%; transform: translateX(-50%); background: #1e1e1e; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: .4rem 0; min-width: 215px; list-style: none; margin: 0; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+.nav-dropdown.is-open .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
+.nav-dropdown__menu li { display: block; }
+.nav-dropdown__menu a { display: block; padding: .4rem 1rem; font-size: .82rem; color: #bbb; white-space: nowrap; transition: color .1s, background .1s; text-decoration: none; }
+.nav-dropdown__menu a:hover, .nav-dropdown__menu a:focus-visible { color: var(--amber); background: rgba(255,255,255,.04); outline: none; }
+.nav-dropdown__menu a[aria-current="page"] { color: var(--amber); font-weight: 700; }
 .unit-controls { display: flex; align-items: center; gap: .5rem; }
 .unit-toggle { display: flex; background: #333; border-radius: 20px; padding: 3px; gap: 2px; }
 .unit-toggle button { background: none; border: none; color: #aaa; font-size: .75rem; font-weight: 600; padding: 4px 10px; border-radius: 16px; cursor: pointer; transition: background .15s, color .15s; letter-spacing: .03em; font-family: inherit; }
@@ -322,11 +333,25 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
 <header>
   <a class="logo" href="/">Pitmaster<span> Tools</span></a>
   <nav class="header-nav" aria-label="Site navigation">
-    <a href="/">Smoking Calculator</a>
-    <a href="meat-per-person.html">Serving Sizes</a>
-    <a href="dry-rub-calculator.html">Dry Rub</a>
-    <a href="charcoal-calculator.html">Charcoal</a>
-    <a href="brine-calculator.html" aria-current="page">Brine</a>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="tools.html">All Tools</a></li>
+        <li><a href="/">Meat Smoking Calculator</a></li>
+        <li><a href="brisket-calculator.html">Brisket Calculator</a></li>
+        <li><a href="pork-shoulder-calculator.html">Pork Shoulder Calculator</a></li>
+        <li><a href="rib-calculator.html">Rib Calculator</a></li>
+        <li><a href="turkey-smoking-calculator.html">Turkey Calculator</a></li>
+        <li><a href="meat-per-person.html">Meat Per Person</a></li>
+        <li><a href="cook-time-coordinator.html">Cook Time Coordinator</a></li>
+        <li><a href="charcoal-calculator.html">Charcoal Calculator</a></li>
+        <li><a href="brine-calculator.html" aria-current="page">Brine Calculator</a></li>
+        <li><a href="dry-rub-calculator.html">Dry Rub Calculator</a></li>
+        <li><a href="bbq-cost-calculator.html">BBQ Cost Calculator</a></li>
+        <li><a href="catering-calculator.html">Catering Calculator</a></li>
+        <li><a href="brisket-yield-calculator.html">Brisket Yield Calculator</a></li>
+      </ul>
+    </div>
   </nav>
   <div class="unit-controls">
     <div class="unit-toggle" id="tempToggle" role="group" aria-label="Temperature unit">
@@ -473,12 +498,12 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
 
     <h3>How Wet Brining Works</h3>
     <p>A wet brine is a salt-water solution that meat is submerged in for several hours. Osmosis initially draws moisture out of the meat into the concentrated brine, then — as the salt begins to denature surface proteins — the process reverses and the brined solution is pulled back into the meat. The result is meat that is seasoned throughout and retains more moisture during the cook.</p>
-    <p>Wet brining is especially effective for poultry (chicken and turkey), lean pork cuts like loins and tenderloins, and whole fish. These cuts have less intramuscular fat and benefit most from added moisture. The tradeoff is surface wetness — a wet-brined bird needs to be dried thoroughly before cooking or the skin will steam rather than crisp.</p>
+    <p>Wet brining is especially effective for poultry (chicken and turkey), lean pork cuts like loins and tenderloins, and whole fish. These cuts have less intramuscular fat and benefit most from added moisture. The tradeoff is surface wetness — a wet-brined bird needs to be dried thoroughly before cooking or the skin will steam rather than crisp. If you are smoking a holiday bird, pair this with the <a href="turkey-smoking-calculator.html">Turkey Smoking Calculator</a> so the brine window and cook window line up cleanly.</p>
     <p>Brine concentration matters. A light 2% brine (equilibrium brining) is forgiving — you can leave meat in it for 24–48 hours without risk of over-salting, because the salt migrates until the meat and brine reach the same concentration. A strong 7% brine works faster but must be timed carefully; left too long, it produces a rubbery, overly salty result.</p>
 
     <h3>How Dry Brining Works</h3>
     <p>Dry brining applies kosher salt directly to the meat surface and lets it rest uncovered in the refrigerator. Within the first 30–60 minutes, the salt draws moisture to the surface and dissolves, forming a concentrated brine on the meat. Over the next several hours, this concentrated liquid reabsorbs into the meat, seasoning it deeply without adding extra water weight.</p>
-    <p>Dry brining is the preferred method for most BBQ cuts — especially brisket, pork butt, and ribs — because it preserves the natural flavor concentration and allows the surface to dry out completely, which is essential for bark formation. A well-dried surface develops a better pellicle (the tacky layer smoke adheres to) and produces a darker, more flavorful crust.</p>
+    <p>Dry brining is the preferred method for most BBQ cuts — especially <a href="brisket-calculator.html">brisket</a>, <a href="pork-shoulder-calculator.html">pork butt</a>, and <a href="rib-calculator.html">ribs</a> — because it preserves the natural flavor concentration and allows the surface to dry out completely, which is essential for bark formation. A well-dried surface develops a better pellicle (the tacky layer smoke adheres to) and produces a darker, more flavorful crust.</p>
     <p>The gold standard for dry brining is to apply the salt 24–72 hours before cooking and let the meat rest uncovered on a rack in the refrigerator. For large cuts like a 14-lb brisket, 48 hours gives the salt time to penetrate fully to the center.</p>
 
     <h3>Salt Type Makes a Major Difference</h3>
@@ -487,7 +512,7 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
 
     <h3>Sugar in a Brine</h3>
     <p>Adding sugar to a wet brine is optional but recommended for poultry and pork. A ratio of 50% sugar by weight of the salt provides the best balance — enough to round out the saltiness and promote caramelization without making the meat noticeably sweet. Brown sugar adds a subtle molasses depth. For brisket, sugar in a brine is usually omitted since beef fat and bark provide natural richness.</p>
-    <p>Do not add sugar to a dry brine if you plan to smoke at very high temperatures (above 325°F) — the surface sugar can burn before the meat finishes. For low-and-slow cooks at 225–275°F, a small amount of sugar in the dry rub (applied separately) is a better approach than adding it to the dry brine.</p>
+    <p>Do not add sugar to a dry brine if you plan to smoke at very high temperatures (above 325°F) — the surface sugar can burn before the meat finishes. For low-and-slow cooks at 225–275°F, a small amount of sugar in the <a href="dry-rub-calculator.html">dry rub</a> (applied separately) is a better approach than adding it to the dry brine.</p>
 
     <h3>After Brining: The Drying Step</h3>
     <p>Wet-brined meat should be removed from the brine, rinsed lightly, and patted completely dry with paper towels. Then it benefits from an uncovered rest on a wire rack in the refrigerator for 1–4 hours so the surface dries out. This step is frequently skipped and frequently regretted — a wet surface produces steam, not smoke adherence.</p>
@@ -623,6 +648,8 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
   <div>&#169; 2026 Pitmaster Tools. All rights reserved.</div>
   <nav aria-label="Footer">
     <a href="/">Calculator</a>
+    <span>|</span>
+    <a href="tools.html">All Tools</a>
     <span>|</span>
     <a href="privacy-policy.html">Privacy Policy</a>
     <span>|</span>
@@ -1057,6 +1084,38 @@ document.getElementById('cookieReject').addEventListener('click', function() {
     }
   } catch(e) {}
   initConsentBanner();
+})();
+</script>
+<script>
+(function initNavDropdown(){
+  var dropdowns = document.querySelectorAll('.nav-dropdown');
+  if (!dropdowns.length) return;
+  function closeAll() {
+    dropdowns.forEach(function(dropdown){
+      dropdown.classList.remove('is-open');
+      var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    });
+  }
+  dropdowns.forEach(function(dropdown){
+    var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+    if (!trigger) return;
+    trigger.addEventListener('click', function(e){
+      e.stopPropagation();
+      var willOpen = !dropdown.classList.contains('is-open');
+      closeAll();
+      if (willOpen) {
+        dropdown.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('.nav-dropdown')) closeAll();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeAll();
+  });
 })();
 </script>
 </body>

@@ -150,6 +150,17 @@ header {
 .header-nav a { color: #ccc; text-decoration: none; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; }
 .header-nav a:hover, .header-nav a:focus-visible { color: var(--amber); }
 .header-nav a[aria-current="page"] { color: var(--amber); font-weight: 700; }
+.nav-dropdown { position: relative; }
+.nav-dropdown__trigger { background: none; border: none; color: #ccc; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; cursor: pointer; font-family: inherit; }
+.nav-dropdown__trigger::after { content: '▾'; font-size: .7em; }
+.nav-dropdown__trigger:hover, .nav-dropdown__trigger:focus-visible { color: var(--amber); }
+.nav-dropdown__trigger.is-current { color: var(--amber); font-weight: 700; }
+.nav-dropdown__menu { position: absolute; top: calc(100% + .75rem); left: 50%; transform: translateX(-50%); background: #1e1e1e; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: .4rem 0; min-width: 215px; list-style: none; margin: 0; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+.nav-dropdown.is-open .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
+.nav-dropdown__menu li { display: block; }
+.nav-dropdown__menu a { display: block; padding: .4rem 1rem; font-size: .82rem; color: #bbb; white-space: nowrap; transition: color .1s, background .1s; text-decoration: none; }
+.nav-dropdown__menu a:hover, .nav-dropdown__menu a:focus-visible { color: var(--amber); background: rgba(255,255,255,.04); outline: none; }
+.nav-dropdown__menu a[aria-current="page"] { color: var(--amber); font-weight: 700; }
 .unit-controls { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
 .unit-toggle { display: flex; background: #333; border-radius: 20px; padding: 3px; gap: 2px; }
 .unit-toggle button { background: none; border: none; color: #aaa; font-size: .75rem; font-weight: 600; padding: 4px 10px; border-radius: 16px; cursor: pointer; transition: background .15s,color .15s; letter-spacing: .03em; font-family: inherit; }
@@ -386,11 +397,25 @@ a { color: inherit; }
 <header>
   <a class="logo" href="/">Pitmaster<span> Tools</span></a>
   <nav class="header-nav" aria-label="Site navigation">
-    <a href="/">Smoking Calculator</a>
-    <a href="meat-per-person.html">Meat Per Person</a>
-    <a href="bbq-cost-calculator.html">BBQ Cost</a>
-    <a href="brisket-calculator.html">Brisket</a>
-    <a href="catering-calculator.html" aria-current="page">Catering</a>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="tools.html">All Tools</a></li>
+        <li><a href="/">Meat Smoking Calculator</a></li>
+        <li><a href="brisket-calculator.html">Brisket Calculator</a></li>
+        <li><a href="pork-shoulder-calculator.html">Pork Shoulder Calculator</a></li>
+        <li><a href="rib-calculator.html">Rib Calculator</a></li>
+        <li><a href="turkey-smoking-calculator.html">Turkey Calculator</a></li>
+        <li><a href="meat-per-person.html">Meat Per Person</a></li>
+        <li><a href="cook-time-coordinator.html">Cook Time Coordinator</a></li>
+        <li><a href="charcoal-calculator.html">Charcoal Calculator</a></li>
+        <li><a href="brine-calculator.html">Brine Calculator</a></li>
+        <li><a href="dry-rub-calculator.html">Dry Rub Calculator</a></li>
+        <li><a href="bbq-cost-calculator.html">BBQ Cost Calculator</a></li>
+        <li><a href="catering-calculator.html" aria-current="page">Catering Calculator</a></li>
+        <li><a href="brisket-yield-calculator.html">Brisket Yield Calculator</a></li>
+      </ul>
+    </div>
   </nav>
   <div class="unit-controls">
     <div class="unit-toggle" id="weightToggle" role="group" aria-label="Weight unit">
@@ -494,7 +519,7 @@ a { color: inherit; }
   ============================================================ -->
   <section class="editorial-section" aria-labelledby="ed1">
     <h2 id="ed1">How Much BBQ Do You Need Per Person?</h2>
-    <p>The most fundamental question in BBQ catering is deceptively simple: how much raw meat do I need to buy? The answer is never the same as the cooked serving size you intend to put on a plate. Every cut of meat loses a significant percentage of its weight during a long smoke — moisture evaporates, fat renders out, and collagen converts to gelatin. A 10 lb brisket flat becomes roughly 6 lbs of cooked meat. A 12 lb bone-in pork shoulder yields about 7 to 8 lbs of pulled pork.</p>
+    <p>The most fundamental question in BBQ catering is deceptively simple: how much raw meat do I need to buy? The answer is never the same as the cooked serving size you intend to put on a plate. Every cut of meat loses a significant percentage of its weight during a long smoke — moisture evaporates, fat renders out, and collagen converts to gelatin. A 10 lb brisket flat becomes roughly 6 lbs of cooked meat. A 12 lb bone-in pork shoulder yields about 7 to 8 lbs of pulled pork. If you are planning a single-protein cook instead of a full event, the <a href="meat-per-person.html">Meat Per Person Calculator</a> is the simpler version of this same problem.</p>
     <p>The general formula used by professional BBQ caterers is: <strong>divide your target cooked serving weight by (1 minus the shrinkage percentage)</strong> to find the raw weight to purchase. For brisket with 40% shrinkage and a 6 oz serving, that math is: 6 oz ÷ 0.60 = 10 oz raw per person, or roughly 0.63 lbs. For 100 people, you need 63 lbs of raw brisket — about 4 to 5 whole briskets.</p>
     <p>This calculator runs that math for every meat you select, adjusts for appetite level and whether you are serving sides, and gives you whole-cut counts (racks, pieces, links) alongside raw weight so you can walk into a restaurant supply store or butcher with a precise shopping list.</p>
 
@@ -507,7 +532,7 @@ a { color: inherit; }
     <h2 id="ed2">Buffet vs. Plated Service</h2>
     <p>How you serve the food dramatically affects how much meat you need to buy. In plated service, each guest receives a pre-portioned plate with a fixed amount of meat — portion control is exact and waste is minimal. In buffet service, guests self-select and the math changes because guests tend to take larger portions of their favorites, especially when multiple meats are present.</p>
     <p>The upside of a multi-meat buffet is that <strong>per-meat portions decrease as the number of options increases</strong>. When guests face a buffet with brisket, pulled pork, and chicken quarters, no single meat needs to account for a full serving. Most professional caterers reduce each meat's serving size by 20 to 30% when offering three or more meats on a buffet. This calculator applies that adjustment automatically based on how many meats you select and whether you choose buffet or plated service.</p>
-    <p>For formal events — weddings, corporate dinners, charity galas — plated service gives you tighter cost control and a more refined presentation. For backyard cookouts, tailgates, family reunions, and church events, buffet service is both more practical and more fun. Guests love the freedom to pile their plates.</p>
+    <p>For formal events — weddings, corporate dinners, charity galas — plated service gives you tighter cost control and a more refined presentation. For backyard cookouts, tailgates, family reunions, and church events, buffet service is both more practical and more fun. Guests love the freedom to pile their plates. If you also need all of those meats to finish at the same hour, use the <a href="cook-time-coordinator.html">Cook Time Coordinator</a> alongside this page.</p>
 
     <h3>How the 20% Sides Reduction Works</h3>
     <p>When you check "serving with sides," this calculator reduces each meat's cooked serving target by 20%. The reasoning is straightforward: a guest who has filled part of their plate with baked beans, coleslaw, cornbread, and potato salad will eat less meat than a guest at a meat-only spread. This 20% reduction is a conservative estimate — some caterers reduce by as much as 30% when sides are abundant. The advantage of the conservative approach is that you will have modest leftovers rather than running short.</p>
@@ -663,6 +688,8 @@ a { color: inherit; }
   <div>&copy; 2026 Pitmaster Tools. All rights reserved.</div>
   <nav aria-label="Footer">
     <a href="/">Calculator</a>
+    <span>|</span>
+    <a href="tools.html">All Tools</a>
     <span>|</span>
     <a href="privacy-policy.html">Privacy Policy</a>
     <span>|</span>
@@ -1187,6 +1214,38 @@ function initConsentBanner() {
   initConsentBanner();
 })();
 
+})();
+</script>
+<script>
+(function initNavDropdown(){
+  var dropdowns = document.querySelectorAll('.nav-dropdown');
+  if (!dropdowns.length) return;
+  function closeAll() {
+    dropdowns.forEach(function(dropdown){
+      dropdown.classList.remove('is-open');
+      var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    });
+  }
+  dropdowns.forEach(function(dropdown){
+    var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+    if (!trigger) return;
+    trigger.addEventListener('click', function(e){
+      e.stopPropagation();
+      var willOpen = !dropdown.classList.contains('is-open');
+      closeAll();
+      if (willOpen) {
+        dropdown.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('.nav-dropdown')) closeAll();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeAll();
+  });
 })();
 </script>
 

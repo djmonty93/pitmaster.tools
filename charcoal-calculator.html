@@ -171,6 +171,17 @@ header {
 .header-nav a:hover,
 .header-nav a:focus-visible { color: #fff; text-decoration: underline; }
 .header-nav a[aria-current="page"] { color: var(--amber); }
+.nav-dropdown { position: relative; }
+.nav-dropdown__trigger { background: none; border: none; color: #ccc; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; cursor: pointer; font-family: inherit; }
+.nav-dropdown__trigger::after { content: '▾'; font-size: .7em; }
+.nav-dropdown__trigger:hover, .nav-dropdown__trigger:focus-visible { color: var(--amber); }
+.nav-dropdown__trigger.is-current { color: var(--amber); font-weight: 700; }
+.nav-dropdown__menu { position: absolute; top: calc(100% + .75rem); left: 50%; transform: translateX(-50%); background: #1e1e1e; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: .4rem 0; min-width: 215px; list-style: none; margin: 0; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+.nav-dropdown.is-open .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
+.nav-dropdown__menu li { display: block; }
+.nav-dropdown__menu a { display: block; padding: .4rem 1rem; font-size: .82rem; color: #bbb; white-space: nowrap; transition: color .1s, background .1s; text-decoration: none; }
+.nav-dropdown__menu a:hover, .nav-dropdown__menu a:focus-visible { color: var(--amber); background: rgba(255,255,255,.04); outline: none; }
+.nav-dropdown__menu a[aria-current="page"] { color: var(--amber); font-weight: 700; }
 .unit-controls { display: flex; align-items: center; gap: .5rem; }
 .unit-toggle { display: flex; background: #333; border-radius: 20px; padding: 3px; gap: 2px; }
 .unit-toggle button { background: none; border: none; color: #aaa; font-size: .75rem; font-weight: 600; padding: 4px 10px; border-radius: 16px; cursor: pointer; transition: background .15s, color .15s; letter-spacing: .03em; font-family: inherit; }
@@ -511,10 +522,25 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
 <header>
   <a class="logo" href="/">Pitmaster<span> Tools</span></a>
   <nav class="header-nav" aria-label="Site navigation">
-    <a href="/">Smoking Calculator</a>
-    <a href="meat-per-person.html">Serving Sizes</a>
-    <a href="dry-rub-calculator.html">Dry Rub</a>
-    <a href="charcoal-calculator.html" aria-current="page">Charcoal</a>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="tools.html">All Tools</a></li>
+        <li><a href="/">Meat Smoking Calculator</a></li>
+        <li><a href="brisket-calculator.html">Brisket Calculator</a></li>
+        <li><a href="pork-shoulder-calculator.html">Pork Shoulder Calculator</a></li>
+        <li><a href="rib-calculator.html">Rib Calculator</a></li>
+        <li><a href="turkey-smoking-calculator.html">Turkey Calculator</a></li>
+        <li><a href="meat-per-person.html">Meat Per Person</a></li>
+        <li><a href="cook-time-coordinator.html">Cook Time Coordinator</a></li>
+        <li><a href="charcoal-calculator.html" aria-current="page">Charcoal Calculator</a></li>
+        <li><a href="brine-calculator.html">Brine Calculator</a></li>
+        <li><a href="dry-rub-calculator.html">Dry Rub Calculator</a></li>
+        <li><a href="bbq-cost-calculator.html">BBQ Cost Calculator</a></li>
+        <li><a href="catering-calculator.html">Catering Calculator</a></li>
+        <li><a href="brisket-yield-calculator.html">Brisket Yield Calculator</a></li>
+      </ul>
+    </div>
   </nav>
   <div class="unit-controls">
     <div class="unit-toggle" id="tempToggle" role="group" aria-label="Temperature unit">
@@ -650,7 +676,7 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
     <h3>Snake / Fuse Method</h3>
     <p>The snake method arranges two rows of briquettes side by side in a C-shape or horseshoe around the perimeter of a kettle grill. You light one end with 10–15 lit coals and the fire slowly works its way around the snake over 6–10 hours, maintaining a remarkably consistent 225–275°F.</p>
     <p>The snake method is highly efficient because only a small section of coal is actively burning at any time. It is also more forgiving — you can add wood chunks at intervals along the snake and they will smoke as the fire reaches them. The major limitation is that the snake does not work well with kettle smokers smaller than 22 inches, and it is nearly impossible to build a functional snake with lump charcoal due to irregular shapes.</p>
-    <p>For snake cooks, the total charcoal you need is closely tied to duration. A 6-hour snake for ribs needs far less than a 10-hour snake for a pork butt.</p>
+    <p>For snake cooks, the total charcoal you need is closely tied to duration. A 6-hour snake for <a href="rib-calculator.html">ribs</a> needs far less than a 10-hour snake for a <a href="pork-shoulder-calculator.html">pork butt</a>.</p>
 
     <h3>Direct Heat</h3>
     <p>Direct-heat cooking puts all charcoal in a chimney and lights it together, producing a high-heat fire ideal for steaks, burgers, chicken, and shorter cooks at 300–400°F. Burn time is limited — a standard chimney full of briquettes (about 5–6 lbs) provides 45–75 minutes of cooking heat.</p>
@@ -666,7 +692,7 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
       <li><strong>Lid openings</strong> — every peek dumps 20–30 minutes of heat buildup. Minimize lid openings, especially in the first two hours.</li>
       <li><strong>Water pan</strong> — a full water pan absorbs heat and requires more fuel to maintain target temp; a dry or foil-lined pan runs hotter with less fuel.</li>
       <li><strong>Smoker air leaks</strong> — an older smoker with poor door or lid seals leaks heat and oxygen, driving higher burn rates and more variable temperatures.</li>
-      <li><strong>Large meat mass</strong> — a cold 18-lb packer brisket loads a lot of thermal mass into the cooking chamber and requires extra fuel in the first 1–2 hours to recover target temperature.</li>
+      <li><strong>Large meat mass</strong> — a cold 18-lb <a href="brisket-calculator.html">packer brisket</a> loads a lot of thermal mass into the cooking chamber and requires extra fuel in the first 1–2 hours to recover target temperature.</li>
     </ul>
   </section>
 
@@ -773,6 +799,8 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
   <div>&#169; 2026 Pitmaster Tools. All rights reserved.</div>
   <nav aria-label="Footer">
     <a href="/">Calculator</a>
+    <span>|</span>
+    <a href="tools.html">All Tools</a>
     <span>|</span>
     <a href="privacy-policy.html">Privacy Policy</a>
     <span>|</span>
@@ -1158,6 +1186,38 @@ document.getElementById('cookieReject').addEventListener('click', function() {
   } catch(e) {}
 
   initConsentBanner();
+})();
+</script>
+<script>
+(function initNavDropdown(){
+  var dropdowns = document.querySelectorAll('.nav-dropdown');
+  if (!dropdowns.length) return;
+  function closeAll() {
+    dropdowns.forEach(function(dropdown){
+      dropdown.classList.remove('is-open');
+      var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    });
+  }
+  dropdowns.forEach(function(dropdown){
+    var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+    if (!trigger) return;
+    trigger.addEventListener('click', function(e){
+      e.stopPropagation();
+      var willOpen = !dropdown.classList.contains('is-open');
+      closeAll();
+      if (willOpen) {
+        dropdown.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('.nav-dropdown')) closeAll();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeAll();
+  });
 })();
 </script>
 </body>
