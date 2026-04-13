@@ -46,6 +46,7 @@
     }
   })();
 </script>
+<link rel="stylesheet" href="site-header.css?v=1">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -81,21 +82,6 @@ header {
   text-decoration: none;
 }
 .logo span { color: var(--amber); }
-.header-nav { display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; margin-left: auto; justify-content: flex-end; }
-.header-nav a { color: #ccc; text-decoration: none; font-size: 1rem; font-weight: 600; transition: color .15s; white-space: nowrap; }
-.header-nav a:hover, .header-nav a:focus-visible { color: var(--amber); }
-.header-nav a[aria-current="page"] { color: var(--amber); font-weight: 700; }
-.nav-dropdown { position: relative; }
-.nav-dropdown__trigger { background: none; border: none; color: #ccc; font-size: 1rem; font-weight: 600; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; cursor: pointer; font-family: inherit; }
-.nav-dropdown__trigger::after { content: '▾'; font-size: .7em; }
-.nav-dropdown__trigger:hover, .nav-dropdown__trigger:focus-visible { color: var(--amber); }
-.nav-dropdown__trigger.is-current { color: var(--amber); font-weight: 700; }
-.nav-dropdown__menu { position: absolute; top: calc(100% + .75rem); right: 0; left: auto; transform: none; background: #1e1e1e; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: .4rem 0; min-width: 215px; list-style: none; margin: 0; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
-.nav-dropdown.is-open .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
-.nav-dropdown__menu li { display: block; }
-.nav-dropdown__menu a { display: block; padding: .4rem 1rem; font-size: .92rem; color: #bbb; white-space: nowrap; transition: color .1s, background .1s; text-decoration: none; }
-.nav-dropdown__menu a:hover, .nav-dropdown__menu a:focus-visible { color: var(--amber); background: rgba(255,255,255,.04); outline: none; }
-.nav-dropdown__menu a[aria-current="page"] { color: var(--amber); font-weight: 700; }
 .back-link {
   color: #fff;
   text-decoration: none;
@@ -262,38 +248,7 @@ footer a:focus-visible { text-decoration: underline; }
   <p class="footer-small">Cook times are estimates based on USDA guidelines and pitmaster consensus. Always verify doneness with a calibrated meat thermometer. Never rely solely on time.</p>
   <p class="footer-small">Last updated: April 11, 2026</p>
 </footer>
-<script>
-(function initNavDropdown(){
-  var dropdowns = document.querySelectorAll('.nav-dropdown');
-  if (!dropdowns.length) return;
-  function closeAll() {
-    dropdowns.forEach(function(dropdown){
-      dropdown.classList.remove('is-open');
-      var trigger = dropdown.querySelector('.nav-dropdown__trigger');
-      if (trigger) trigger.setAttribute('aria-expanded', 'false');
-    });
-  }
-  dropdowns.forEach(function(dropdown){
-    var trigger = dropdown.querySelector('.nav-dropdown__trigger');
-    if (!trigger) return;
-    trigger.addEventListener('click', function(e){
-      e.stopPropagation();
-      var willOpen = !dropdown.classList.contains('is-open');
-      closeAll();
-      if (willOpen) {
-        dropdown.classList.add('is-open');
-        trigger.setAttribute('aria-expanded', 'true');
-      }
-    });
-  });
-  document.addEventListener('click', function(e){
-    if (!e.target.closest('.nav-dropdown')) closeAll();
-  });
-  document.addEventListener('keydown', function(e){
-    if (e.key === 'Escape') closeAll();
-  });
-})();
-</script>
+<script src="site-header.js?v=1"></script>
 </body>
 </html>
 

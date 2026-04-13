@@ -17,6 +17,7 @@
 <meta name="twitter:description" content="Free brisket yield calculator. Enter packer weight and grade to get flat weight, point weight, trimmed raw weight, and cooked yield at 195°F and 203°F with estimated servings.">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23EF9F27' d='M36 4c2 10-3 15-8 21-5 6-9 11-9 19 0 10 7 16 15 16 11 0 19-8 19-19 0-12-7-19-17-37z'/%3E%3Cpath fill='%23D78108' d='M33 27c1 6-2 9-5 12-3 3-5 6-5 10 0 6 4 10 9 10 7 0 12-5 12-12 0-7-4-11-11-20z'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="site-header.css?v=1">
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
@@ -150,21 +151,6 @@ header {
 }
 .logo { font-family: Georgia,"Times New Roman",serif; font-size: 1.5rem; font-weight: 700; color: #fff; letter-spacing: -0.02em; text-decoration: none; }
 .logo span { color: var(--amber); }
-.header-nav { display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; margin-left: auto; justify-content: flex-end; }
-.header-nav a { color: #ccc; text-decoration: none; font-size: 1rem; font-weight: 600; transition: color .15s; white-space: nowrap; }
-.header-nav a:hover, .header-nav a:focus-visible { color: var(--amber); }
-.header-nav a[aria-current="page"] { color: var(--amber); font-weight: 700; }
-.nav-dropdown { position: relative; }
-.nav-dropdown__trigger { background: none; border: none; color: #ccc; font-size: 1rem; font-weight: 600; transition: color .15s; white-space: nowrap; display: flex; align-items: center; gap: .25rem; cursor: pointer; font-family: inherit; }
-.nav-dropdown__trigger::after { content: '▾'; font-size: .7em; }
-.nav-dropdown__trigger:hover, .nav-dropdown__trigger:focus-visible { color: var(--amber); }
-.nav-dropdown__trigger.is-current { color: var(--amber); font-weight: 700; }
-.nav-dropdown__menu { position: absolute; top: calc(100% + .75rem); right: 0; left: auto; transform: none; background: #1e1e1e; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: .4rem 0; min-width: 215px; list-style: none; margin: 0; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
-.nav-dropdown.is-open .nav-dropdown__menu, .nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
-.nav-dropdown__menu li { display: block; }
-.nav-dropdown__menu a { display: block; padding: .4rem 1rem; font-size: .92rem; color: #bbb; white-space: nowrap; transition: color .1s, background .1s; text-decoration: none; }
-.nav-dropdown__menu a:hover, .nav-dropdown__menu a:focus-visible { color: var(--amber); background: rgba(255,255,255,.04); outline: none; }
-.nav-dropdown__menu a[aria-current="page"] { color: var(--amber); font-weight: 700; }
 .unit-controls { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
 .unit-toggle { display: flex; background: #333; border-radius: 20px; padding: 3px; gap: 2px; }
 .unit-toggle button { background: none; border: none; color: #aaa; font-size: .75rem; font-weight: 600; padding: 4px 10px; border-radius: 16px; cursor: pointer; transition: background .15s,color .15s; letter-spacing: .03em; }
@@ -301,7 +287,6 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
 a { color: inherit; }
 @media (max-width:640px) {
   header { padding: .75rem 1rem; }
-  .header-nav { display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; margin-left: auto; justify-content: flex-end; }
   .form-grid { grid-template-columns: 1fr; }
   .grade-toggle { grid-template-columns: 1fr; }
   .serving-toggle { grid-template-columns: 1fr; }
@@ -952,39 +937,6 @@ document.getElementById('cookieReject').addEventListener('click', function() {
   initConsentBanner();
 })();
 </script>
-<script>
-(function initNavDropdown(){
-  var dropdowns = document.querySelectorAll('.nav-dropdown');
-  if (!dropdowns.length) return;
-  function closeAll() {
-    dropdowns.forEach(function(dropdown){
-      dropdown.classList.remove('is-open');
-      var trigger = dropdown.querySelector('.nav-dropdown__trigger');
-      if (trigger) trigger.setAttribute('aria-expanded', 'false');
-    });
-  }
-  dropdowns.forEach(function(dropdown){
-    var trigger = dropdown.querySelector('.nav-dropdown__trigger');
-    if (!trigger) return;
-    trigger.addEventListener('click', function(e){
-      e.stopPropagation();
-      var willOpen = !dropdown.classList.contains('is-open');
-      closeAll();
-      if (willOpen) {
-        dropdown.classList.add('is-open');
-        trigger.setAttribute('aria-expanded', 'true');
-      }
-    });
-  });
-  document.addEventListener('click', function(e){
-    if (!e.target.closest('.nav-dropdown')) closeAll();
-  });
-  document.addEventListener('keydown', function(e){
-    if (e.key === 'Escape') closeAll();
-  });
-})();
-</script>
+<script src="site-header.js?v=1"></script>
 </body>
 </html>
-
-
