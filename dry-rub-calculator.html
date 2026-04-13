@@ -1146,10 +1146,18 @@ document.addEventListener('keydown', _trapModalFocus);
 /* ============================================================
    COOKIE / CONSENT
    ============================================================ */
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 function setCookie(name, value, days){
   var exp = new Date();
   exp.setTime(exp.getTime() + days * 864e5);
-  document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + exp.toUTCString() + '; path=/; SameSite=Lax';
+  document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + exp.toUTCString() + '; path=/; Secure; SameSite=Lax';
 }
 function getCookie(name){
   var prefix = name + '=';
@@ -1212,6 +1220,8 @@ function initConsentBanner(){
         savedWu = 'kg';
       }
     }
+    if (savedTu && ['C', 'F'].indexOf(savedTu) === -1) savedTu = null;
+    if (savedWu && ['kg', 'lbs'].indexOf(savedWu) === -1) savedWu = null;
     if(savedTu){
       document.querySelectorAll('#tempToggle button').forEach(function(b){
         b.classList.toggle('active', b.dataset.unit === savedTu);

@@ -1018,9 +1018,17 @@ function loadAds() {
 function loadGoogleServices() { loadAnalytics(); loadAds(); }
 
 // ── Cookie consent ────────────────────────────────────────────────────────────
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 function setCookie(name, value, days) {
   var d = new Date(); d.setTime(d.getTime() + days * 86400000);
-  document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+  document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + d.toUTCString() + ';path=/;Secure;SameSite=Lax';
 }
 function getCookie(name) {
   var prefix = name + '=', parts = document.cookie ? document.cookie.split(';') : [];
@@ -1055,6 +1063,8 @@ document.getElementById('cookieReject').addEventListener('click', function() {
       var lang = navigator.language || 'en-US';
       if (shouldDefaultMetric(lang)) { savedTu = 'C'; savedWu = 'kg'; }
     }
+    if (savedTu && ['C', 'F'].indexOf(savedTu) === -1) savedTu = null;
+    if (savedWu && ['kg', 'lbs'].indexOf(savedWu) === -1) savedWu = null;
     if (savedTu) {
       state.tu = savedTu;
       document.querySelectorAll('#tempToggle button').forEach(function(b) { b.classList.toggle('active', b.dataset.unit === savedTu); });
