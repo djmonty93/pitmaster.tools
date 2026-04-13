@@ -1,0 +1,182 @@
+/* ============================================================
+   Shared site header — nav, dropdown, hamburger
+   Loaded BEFORE each page's <style> block (link tag precedes style).
+   Depends on --amber being defined in each page's :root — do not
+   define it here; pages own their own palette.
+   Do not duplicate .header-nav or .nav-dropdown rules in individual
+   page stylesheets.
+   ============================================================ */
+
+/* ----- Header nav container ----- */
+.header-nav {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-left: auto;
+  justify-content: flex-end;
+}
+
+.header-nav a {
+  color: #ccc;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: color .15s;
+  white-space: nowrap;
+}
+
+.header-nav a:hover,
+.header-nav a:focus-visible { color: var(--amber); }
+
+.header-nav a[aria-current="page"] { color: var(--amber); font-weight: 700; }
+
+/* ----- Dropdown ----- */
+.nav-dropdown { position: relative; }
+
+.nav-dropdown__trigger {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: color .15s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+}
+
+.nav-dropdown__trigger::after { content: '▾'; font-size: .7em; }
+
+.nav-dropdown__trigger:hover,
+.nav-dropdown__trigger:focus-visible { color: var(--amber); }
+
+.nav-dropdown__trigger.is-current { color: var(--amber); font-weight: 700; }
+
+.nav-dropdown__menu {
+  position: absolute;
+  top: calc(100% + .75rem);
+  right: 0;
+  left: auto;
+  transform: none;
+  background: #1e1e1e;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 8px;
+  padding: .4rem 0;
+  min-width: 215px;
+  list-style: none;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s;
+  z-index: 200;
+  box-shadow: 0 8px 24px rgba(0,0,0,.5);
+}
+
+.nav-dropdown.is-open .nav-dropdown__menu,
+.nav-dropdown:focus-within .nav-dropdown__menu { opacity: 1; pointer-events: auto; }
+
+.nav-dropdown__menu li { display: block; }
+
+.nav-dropdown__menu a {
+  display: block;
+  padding: .4rem 1rem;
+  font-size: .92rem;
+  color: #bbb;
+  white-space: nowrap;
+  transition: color .1s, background .1s;
+  text-decoration: none;
+}
+
+.nav-dropdown__menu a:hover,
+.nav-dropdown__menu a:focus-visible { color: var(--amber); background: rgba(255,255,255,.04); outline: none; }
+
+.nav-dropdown__menu a[aria-current="page"] { color: var(--amber); font-weight: 700; }
+
+/* ----- Mobile hamburger button (injected by site-header.js) ----- */
+.menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 8px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.menu-toggle:hover,
+.menu-toggle:focus-visible {
+  border-color: rgba(239,159,39,.75);
+  color: var(--amber);
+}
+
+.menu-toggle__bars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.menu-toggle__bars span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+/* ----- Mobile overrides ----- */
+@media (max-width: 700px) {
+  .menu-toggle { display: inline-flex; }
+
+  .header-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: .75rem;
+    margin-left: 0;
+    padding: .9rem 1rem 1rem;
+    background: var(--charcoal, #1a1a1a);
+    border-top: 1px solid rgba(255,255,255,.1);
+    box-shadow: 0 10px 24px rgba(0,0,0,.28);
+    z-index: 160;
+  }
+
+  .header-nav.is-open { display: flex; }
+
+  .header-nav a,
+  .nav-dropdown__trigger { width: 100%; text-align: left; }
+
+  .nav-dropdown { width: 100%; }
+
+  .nav-dropdown__trigger::after { margin-left: auto; }
+
+  .nav-dropdown__menu {
+    position: static;
+    right: auto;
+    left: auto;
+    transform: none;
+    width: 100%;
+    min-width: 0;
+    margin-top: .45rem;
+    opacity: 1;
+    pointer-events: auto;
+    display: none;
+    box-shadow: none;
+    background: rgba(255,255,255,.04);
+  }
+
+  .nav-dropdown.is-open .nav-dropdown__menu { display: block; }
+}
