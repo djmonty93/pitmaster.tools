@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brisket Yield Calculator — How Much Does Brisket Shrink When Smoked | Pitmaster Tools</title>
+<meta name="description" content="Free brisket yield calculator. Enter packer weight and grade to get flat weight, point weight, trimmed raw weight, and cooked yield at 195°F and 203°F with estimated servings.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://pitmaster.tools/brisket-yield-calculator.html">
+<meta property="og:title" content="Brisket Yield Calculator — How Much Does Brisket Shrink When Smoked">
+<meta property="og:description" content="Free brisket yield calculator. Enter packer weight and grade to get flat weight, point weight, trimmed raw weight, and cooked yield at 195°F and 203°F with estimated servings.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://pitmaster.tools/brisket-yield-calculator.html">
+<meta property="og:image" content="https://pitmaster.tools/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Brisket Yield Calculator — How Much Does Brisket Shrink When Smoked">
+<meta name="twitter:description" content="Free brisket yield calculator. Enter packer weight and grade to get flat weight, point weight, trimmed raw weight, and cooked yield at 195°F and 203°F with estimated servings.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23EF9F27' d='M36 4c2 10-3 15-8 21-5 6-9 11-9 19 0 10 7 16 15 16 11 0 19-8 19-19 0-12-7-19-17-37z'/%3E%3Cpath fill='%23D78108' d='M33 27c1 6-2 9-5 12-3 3-5 6-5 10 0 6 4 10 9 10 7 0 12-5 12-12 0-7-4-11-11-20z'/%3E%3C/svg%3E">
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {'ad_storage':'denied','analytics_storage':'denied','wait_for_update':500});
+  (function(){
+    var c = document.cookie.match(/pitmaster_consent=([^;]+)/);
+    if(c && c[1]==='accepted'){
+      window._gtagLoaded = true;
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-SJJVV37EWE';
+      document.head.appendChild(s);
+      s.onload = function(){
+        gtag('js', new Date());
+        gtag('config', 'G-SJJVV37EWE');
+        gtag('consent', 'update', {'ad_storage':'granted','analytics_storage':'granted'});
+      };
+    }
+  })();
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Brisket Yield Calculator",
+  "url": "https://pitmaster.tools/brisket-yield-calculator.html",
+  "description": "Calculate brisket flat weight, point weight, and cooked yield at 195\u00b0F and 203\u00b0F based on packer weight and USDA grade.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "isAccessibleForFree": true,
+  "browserRequirements": "Requires JavaScript enabled in a modern browser.",
+  "featureList": [
+    "Flat vs point weight split",
+    "Cooked yield at 195\u00b0F and 203\u00b0F",
+    "USDA grade yield comparison",
+    "Servings calculator",
+    "Packers needed for a party",
+    "lbs/kg unit toggle"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How much does a brisket shrink when smoked?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A packer brisket loses roughly 13% of its raw weight during trimming, then another 35\u201350% during the cook due to moisture loss and fat rendering. A 15 lb packer brisket will typically yield 7\u20139 lbs of cooked meat depending on USDA grade and target temperature."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the cooked yield percentage of a brisket?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Cooked yield ranges from 48\u201362% of the original packer weight. USDA Select yields approximately 53% at 195\u00b0F and 48% at 203\u00b0F. USDA Choice yields 58% and 53%. USDA Prime yields 62% and 57%. Higher grades retain more yield because intramuscular fat liquefies and bastes the meat rather than dripping away."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between the flat and the point on a brisket?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The flat is the leaner, rectangular muscle that makes up roughly 57\u201359% of a packer brisket by weight. It slices cleanly and is the source of classic Texas-style brisket slices. The point (also called the deckle or nose) is the thick, heavily marbled muscle at the thicker end, comprising 41\u201343% of packer weight. It is used for burnt ends and pulled or chopped brisket."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does USDA grade affect brisket yield?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, significantly. Prime brisket yields 62% at 195\u00b0F versus 53% for Select \u2014 a 9-percentage-point difference on a 15 lb packer equals nearly 1.4 lbs more cooked meat. The reason is marbling: Prime brisket has more intramuscular fat distributed throughout the muscle, which liquefies during the cook and keeps the meat moist and heavier. Select brisket has less marbling and loses more moisture as vapor."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many pounds of brisket do I need per person?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Plan for 1/3 to 1/2 lb of cooked brisket per person (5\u20138 oz) for a main course with sides. At 6 oz per person and a 58% yield from a Choice packer, a 15 lb packer yields about 14 servings. For a party, divide total guests by servings per packer and round up to a whole number of packers."
+      }
+    }
+  ]
+}
+</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --amber: #EF9F27;
+  --amber-dark: #C97F10;
+  --amber-light: #FEF3DE;
+  --charcoal: #1a1a1a;
+  --card-bg: #FFFFFF;
+  --card-border: #E8E0D0;
+  --text-muted: #6B6560;
+  --radius: 8px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --blue: #3B82F6;
+  --red: #EF4444;
+  --green: #22C55E;
+}
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  background: #F5F0E8;
+  color: #1a1a1a;
+  line-height: 1.6;
+}
+header {
+  background: var(--charcoal);
+  padding: 0 1.5rem;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo { font-family: Georgia,"Times New Roman",serif; font-size: 1.5rem; font-weight: 700; color: #fff; letter-spacing: -0.02em; text-decoration: none; }
+.logo span { color: var(--amber); }
+.header-nav { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+.header-nav a { color: #ccc; text-decoration: none; font-size: .85rem; font-weight: 500; transition: color .15s; white-space: nowrap; }
+.header-nav a:hover, .header-nav a:focus-visible { color: var(--amber); }
+.header-nav a[aria-current="page"] { color: var(--amber); font-weight: 700; }
+.unit-controls { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
+.unit-toggle { display: flex; background: #333; border-radius: 20px; padding: 3px; gap: 2px; }
+.unit-toggle button { background: none; border: none; color: #aaa; font-size: .75rem; font-weight: 600; padding: 4px 10px; border-radius: 16px; cursor: pointer; transition: background .15s,color .15s; letter-spacing: .03em; }
+.unit-toggle button.active { background: var(--amber); color: #fff; }
+.unit-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+main { max-width: 960px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+.page-hero { max-width: 760px; margin: 0 auto 1.5rem; text-align: center; }
+.page-hero h1 { font-family: Georgia,serif; font-size: clamp(1.8rem,4vw,2.8rem); line-height: 1.1; margin-bottom: .75rem; }
+.page-hero p { color: var(--text-muted); font-size: 1rem; }
+.section-title { font-family: Georgia,serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 1rem; color: var(--charcoal); display: flex; align-items: center; gap: .5rem; }
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--card-border); }
+.ad-slot { text-align: center; margin: 1.5rem 0; min-height: 90px; }
+.form-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.5rem; }
+.form-group { display: flex; flex-direction: column; gap: .35rem; }
+.form-group.full-width { grid-column: 1/-1; }
+.form-group label { font-size: .8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; }
+.form-group input[type="number"] {
+  border: 1.5px solid var(--card-border); border-radius: 6px; padding: .55rem .75rem; font-size: .95rem;
+  color: var(--charcoal); background: #FAFAF8; font-family: inherit; transition: border-color .15s;
+  width: 100%; appearance: none; -webkit-appearance: none;
+}
+.form-group input:focus:not(:focus-visible) { outline: none; border-color: var(--amber); background: #fff; }
+.form-group input:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; border-color: var(--amber); background: #fff; }
+.input-with-unit { display: flex; align-items: stretch; }
+.input-with-unit input { border-radius: 6px 0 0 6px; border-right: none; flex: 1; }
+.input-unit-label { display: flex; align-items: center; padding: 0 .75rem; background: #F0EBE3; border: 1.5px solid var(--card-border); border-left: none; border-radius: 0 6px 6px 0; font-size: .85rem; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+/* Grade toggle — 3 buttons */
+.grade-toggle { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .5rem; }
+.grade-btn { border: 2px solid var(--card-border); border-radius: 8px; padding: .75rem .5rem; background: #FAFAF8; text-align: center; cursor: pointer; font-family: inherit; transition: border-color .15s, background .15s; }
+.grade-btn.active { border-color: var(--amber); background: var(--amber-light); }
+.grade-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.gb-name { font-weight: 700; font-size: .95rem; display: block; margin-bottom: .15rem; }
+.gb-desc { font-size: .73rem; color: var(--text-muted); line-height: 1.35; }
+/* Serving size toggle — 3 buttons */
+.serving-toggle { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .5rem; }
+.serving-btn { border: 2px solid var(--card-border); border-radius: 8px; padding: .65rem .5rem; background: #FAFAF8; text-align: center; cursor: pointer; font-family: inherit; transition: border-color .15s, background .15s; }
+.serving-btn.active { border-color: var(--blue); background: #EFF6FF; }
+.serving-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.svb-name { font-weight: 700; font-size: .9rem; display: block; margin-bottom: .1rem; }
+.svb-desc { font-size: .73rem; color: var(--text-muted); }
+.calc-btn { width: 100%; margin-top: 1.25rem; padding: .875rem; background: var(--charcoal); color: #fff; border: none; border-radius: 6px; font-family: Georgia,serif; font-size: 1.05rem; font-weight: 700; letter-spacing: .02em; cursor: pointer; transition: background .15s,transform .1s; }
+.calc-btn:hover { background: #333; }
+.calc-btn:active { transform: scale(.99); }
+.calc-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.vmsg { margin-top: .75rem; padding: .6rem .875rem; border-radius: 6px; font-size: .875rem; display: none; }
+.vmsg.error { background: #FDECEA; border: 1px solid #F5C6C1; color: #922B21; display: block; }
+/* Results — inline (no modal) */
+#results { display: none; margin-bottom: 1.5rem; }
+#results.visible { display: block; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+#results.visible { animation: fadeUp .35s ease both; }
+/* Stat cards */
+.stat-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+.stat-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.25rem 1rem; box-shadow: var(--shadow); text-align: center; position: relative; overflow: hidden; }
+.stat-card::before { content: ''; position: absolute; top:0; left:0; right:0; height: 3px; }
+.stat-card.c-blue::before { background: var(--blue); }
+.stat-card.c-amber::before { background: var(--amber); }
+.stat-card.c-neutral::before { background: #9CA3AF; }
+.stat-card.c-green::before { background: var(--green); }
+.stat-card.c-red::before { background: var(--red); }
+.stat-card.c-purple::before { background: #A855F7; }
+.sc-icon { font-size: 1.5rem; margin-bottom: .35rem; display: block; }
+.sc-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin-bottom: .4rem; }
+.sc-value { font-family: Georgia,serif; font-size: 2rem; font-weight: 700; color: var(--charcoal); line-height: 1; }
+.sc-sub { font-size: .8rem; color: var(--text-muted); margin-top: .35rem; }
+.card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.25rem 1.5rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+/* Yield breakdown bar */
+.yield-bar-wrap { margin: 1.25rem 0 .5rem; }
+.yield-bar { display: flex; height: 28px; border-radius: 6px; overflow: hidden; width: 100%; }
+.yield-bar-seg { display: flex; align-items: center; justify-content: center; font-size: .72rem; font-weight: 700; color: #fff; transition: width .4s ease; min-width: 0; overflow: hidden; white-space: nowrap; }
+.yield-bar-seg.seg-flat { background: var(--amber); }
+.yield-bar-seg.seg-point { background: #854D0E; }
+.yield-bar-seg.seg-loss { background: #D1D5DB; color: #6B6560; }
+.yield-legend { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: .6rem; }
+.yield-legend-item { display: flex; align-items: center; gap: .4rem; font-size: .8rem; color: var(--text-muted); }
+.yield-legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+.yield-legend-dot.flat { background: var(--amber); }
+.yield-legend-dot.point { background: #854D0E; }
+.yield-legend-dot.loss { background: #D1D5DB; border: 1px solid #9CA3AF; }
+/* Shrinkage summary */
+.shrink-summary { background: var(--amber-light); border: 1px solid #F5DDA0; border-radius: var(--radius); padding: 1rem 1.15rem; font-size: .95rem; color: #5C3D02; line-height: 1.65; margin-bottom: 1.5rem; }
+/* Editorial */
+.editorial-section { margin: 2rem 0; }
+.editorial-section h2 { font-family: Georgia,serif; font-size: 1.55rem; margin-bottom: .85rem; }
+.editorial-section h3 { font-family: Georgia,serif; font-size: 1.1rem; margin: 1.25rem 0 .5rem; }
+.editorial-section p, .editorial-section li { color: #332F2B; line-height: 1.75; }
+.editorial-section p + p, .editorial-section p + h3, .editorial-section h3 + p,
+.editorial-section ul + p, .editorial-section p + ul { margin-top: .9rem; }
+.editorial-section ul { padding-left: 1.25rem; margin-top: .5rem; }
+.editorial-section li + li { margin-top: .3rem; }
+/* Reference table */
+.ref-table-wrap { overflow-x: auto; border: 1px solid var(--card-border); border-radius: var(--radius); background: #fff; box-shadow: var(--shadow); margin: 1rem 0; }
+.ref-table { width: 100%; border-collapse: collapse; min-width: 480px; }
+.ref-table th, .ref-table td { text-align: center; padding: .7rem .8rem; border-bottom: 1px solid #EFE7DA; font-size: .9rem; }
+.ref-table th:first-child, .ref-table td:first-child { text-align: left; font-weight: 700; }
+.ref-table thead th { background: #FAF5EC; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); position: sticky; top: 0; }
+.ref-table tbody tr:nth-child(even) { background: #FCFAF6; }
+/* FAQ */
+.faq-section { margin: 2rem 0; }
+.faq-section h2 { font-family: Georgia,serif; font-size: 1.55rem; margin-bottom: 1rem; }
+.faq-group { display: grid; gap: 1rem; }
+.faq-item { background: rgba(255,255,255,.78); border: 1px solid var(--card-border); border-radius: var(--radius); box-shadow: var(--shadow); }
+.faq-item summary { list-style: none; cursor: pointer; padding: 1rem 1.15rem; font-family: Georgia,serif; font-size: 1rem; font-weight: 700; }
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after { content: '+'; float: right; font-size: 1rem; }
+.faq-item[open] summary::after { content: '\2212'; }
+.faq-body { padding: 0 1.15rem 1rem; color: #332F2B; line-height: 1.75; font-size: .95rem; }
+/* Related tools */
+.related-tools { margin: 2rem 0; }
+.related-tools h2 { font-family: Georgia,serif; font-size: 1.35rem; margin-bottom: 1rem; }
+.tool-links { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.tool-link { display: flex; align-items: flex-start; gap: .85rem; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1rem 1.15rem; box-shadow: var(--shadow); text-decoration: none; color: inherit; transition: border-color .15s, box-shadow .15s; }
+.tool-link:hover, .tool-link:focus-visible { border-color: var(--amber); box-shadow: 0 4px 16px rgba(239,159,39,.18); }
+.tool-link-icon { font-size: 1.5rem; flex-shrink: 0; }
+.tool-link-name { font-weight: 700; font-size: .95rem; color: var(--charcoal); margin-bottom: .2rem; }
+.tool-link-desc { font-size: .82rem; color: var(--text-muted); line-height: 1.45; }
+/* Footer */
+footer { background: var(--charcoal); color: #fff; text-align: center; padding: 2rem 1rem; font-size: 13px; }
+footer nav { display: flex; justify-content: center; flex-wrap: wrap; gap: .75rem; margin: .75rem 0; }
+footer a { color: #fff; text-decoration: none; }
+footer a:hover, footer a:focus-visible { text-decoration: underline; }
+.footer-small { max-width: 720px; margin: .75rem auto 0; color: rgba(255,255,255,.85); line-height: 1.6; }
+/* Cookie banner */
+.cookie-banner { position: fixed; left: 0; right: 0; bottom: 0; z-index: 300; padding: 1rem; display: none; }
+.cookie-banner.visible { display: block; }
+.cookie-banner__inner { max-width: 960px; margin: 0 auto; background: #1a1a1a; color: #fff; border-radius: 12px; padding: 1rem 1.1rem; box-shadow: 0 10px 24px rgba(0,0,0,.28); display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; }
+.cookie-banner__text { flex: 1 1 360px; font-size: .95rem; }
+.cookie-banner__text a { color: var(--amber); text-decoration: underline; }
+.cookie-banner__actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+.cookie-banner__actions button { border: 1px solid transparent; border-radius: 999px; padding: .7rem 1rem; font: inherit; font-weight: 700; cursor: pointer; }
+.cookie-accept { background: var(--amber); color: #fff; }
+.cookie-reject { background: transparent; border-color: rgba(255,255,255,.28); color: #fff; }
+a { color: inherit; }
+@media (max-width:640px) {
+  header { padding: .75rem 1rem; }
+  .header-nav { display: none; }
+  .form-grid { grid-template-columns: 1fr; }
+  .grade-toggle { grid-template-columns: 1fr; }
+  .serving-toggle { grid-template-columns: 1fr; }
+  .stat-cards { grid-template-columns: 1fr; }
+  .tool-links { grid-template-columns: 1fr; }
+  .cookie-banner__inner { align-items: stretch; }
+  .cookie-banner__actions { width: 100%; }
+  .cookie-banner__actions button { flex: 1 1 140px; }
+}
+@media (max-width: 480px) {
+  .stat-cards { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">Pitmaster<span> Tools</span></a>
+  <nav class="header-nav" aria-label="Site navigation">
+    <a href="/">Smoking Calculator</a>
+    <a href="brisket-calculator.html">Brisket</a>
+    <a href="meat-per-person.html">Meat Per Person</a>
+    <a href="charcoal-calculator.html">Charcoal</a>
+    <a href="brisket-yield-calculator.html" aria-current="page">Brisket Yield</a>
+  </nav>
+  <div class="unit-controls">
+    <div class="unit-toggle" id="weightToggle" role="group" aria-label="Weight unit">
+      <button data-unit="lbs" class="active" type="button">lbs</button>
+      <button data-unit="kg" type="button">kg</button>
+    </div>
+  </div>
+</header>
+
+<div class="ad-slot" aria-hidden="true">
+  <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4265262608577453" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+</div>
+
+<main>
+  <section class="page-hero" aria-label="Page introduction">
+    <h1>Brisket Yield Calculator</h1>
+    <p>Enter packer weight and USDA grade to get flat weight, point weight, trimmed raw weight, cooked yield at 195&#xB0;F and 203&#xB0;F, estimated servings, and how many packers to buy for your party.</p>
+  </section>
+
+  <div class="form-card">
+    <p class="section-title">Packer Details</p>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="packerWeight">Packer Brisket Weight</label>
+        <div class="input-with-unit">
+          <input type="number" id="packerWeight" min="5" max="30" step="0.5" value="15" aria-label="Packer brisket weight">
+          <span class="input-unit-label" id="weightUnitLbl">lbs</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="numGuests">Guests to Feed</label>
+        <div class="input-with-unit">
+          <input type="number" id="numGuests" min="0" max="500" step="1" value="0" placeholder="0 = skip" aria-label="Number of guests">
+          <span class="input-unit-label">guests</span>
+        </div>
+      </div>
+
+      <div class="form-group full-width">
+        <label>USDA Grade</label>
+        <div class="grade-toggle" role="group" aria-label="USDA grade">
+          <button class="grade-btn" data-grade="select" type="button" aria-pressed="false">
+            <span class="gb-name">Select</span>
+            <span class="gb-desc">Leaner, less marbling. ~53% yield at 195&#xB0;F.</span>
+          </button>
+          <button class="grade-btn active" data-grade="choice" type="button" aria-pressed="true">
+            <span class="gb-name">Choice</span>
+            <span class="gb-desc">Most common grade. ~58% yield at 195&#xB0;F.</span>
+          </button>
+          <button class="grade-btn" data-grade="prime" type="button" aria-pressed="false">
+            <span class="gb-name">Prime</span>
+            <span class="gb-desc">Heavy marbling. ~62% yield at 195&#xB0;F.</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group full-width">
+        <label>Serving Size</label>
+        <div class="serving-toggle" role="group" aria-label="Serving size">
+          <button class="serving-btn" data-oz="4" type="button" aria-pressed="false">
+            <span class="svb-name">Light &mdash; 4 oz</span>
+            <span class="svb-desc">Side dishes heavy, appetizer spread</span>
+          </button>
+          <button class="serving-btn active" data-oz="6" type="button" aria-pressed="true">
+            <span class="svb-name">Normal &mdash; 6 oz</span>
+            <span class="svb-desc">Standard BBQ plate with sides</span>
+          </button>
+          <button class="serving-btn" data-oz="8" type="button" aria-pressed="false">
+            <span class="svb-name">Hungry &mdash; 8 oz</span>
+            <span class="svb-desc">Big eaters, few sides</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <button class="calc-btn" id="calcBtn" type="button">Calculate Brisket Yield</button>
+    <div class="vmsg" id="vmsg" role="alert" aria-live="polite"></div>
+  </div>
+
+  <div class="ad-slot" aria-hidden="true">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4265262608577453" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+  </div>
+
+  <!-- Results — inline -->
+  <div id="results" aria-live="polite" aria-label="Yield results">
+    <div class="stat-cards" id="statCards">
+      <div class="stat-card c-blue">
+        <span class="sc-icon" aria-hidden="true">&#x1F4CF;</span>
+        <div class="sc-label">Flat Weight</div>
+        <div class="sc-value" id="rFlat">&#x2014;</div>
+        <div class="sc-sub" id="rFlatSub">raw flat section</div>
+      </div>
+      <div class="stat-card c-amber">
+        <span class="sc-icon" aria-hidden="true">&#x1F525;</span>
+        <div class="sc-label">Point Weight</div>
+        <div class="sc-value" id="rPoint">&#x2014;</div>
+        <div class="sc-sub" id="rPointSub">raw point section</div>
+      </div>
+      <div class="stat-card c-neutral">
+        <span class="sc-icon" aria-hidden="true">&#x2702;&#xFE0F;</span>
+        <div class="sc-label">Trimmed Weight</div>
+        <div class="sc-value" id="rTrimmed">&#x2014;</div>
+        <div class="sc-sub">after fat cap trim</div>
+      </div>
+      <div class="stat-card c-green">
+        <span class="sc-icon" aria-hidden="true">&#x1F321;&#xFE0F;</span>
+        <div class="sc-label">Yield at 195&#xB0;F</div>
+        <div class="sc-value" id="rYield195">&#x2014;</div>
+        <div class="sc-sub" id="rYield195Sub">cooked weight</div>
+      </div>
+      <div class="stat-card c-red">
+        <span class="sc-icon" aria-hidden="true">&#x1F525;</span>
+        <div class="sc-label">Yield at 203&#xB0;F</div>
+        <div class="sc-value" id="rYield203">&#x2014;</div>
+        <div class="sc-sub" id="rYield203Sub">cooked weight</div>
+      </div>
+      <div class="stat-card c-purple" id="packersCard" style="display:none">
+        <span class="sc-icon" aria-hidden="true">&#x1F6D2;</span>
+        <div class="sc-label">Packers Needed</div>
+        <div class="sc-value" id="rPackers">&#x2014;</div>
+        <div class="sc-sub" id="rPackersSub"></div>
+      </div>
+    </div>
+
+    <!-- Yield breakdown bar -->
+    <div class="card">
+      <p class="section-title">Packer Weight Breakdown</p>
+      <div class="yield-bar-wrap">
+        <div class="yield-bar" id="yieldBar" role="img" aria-label="Yield breakdown bar chart">
+          <div class="yield-bar-seg seg-flat" id="barFlat" style="width:57%">Flat</div>
+          <div class="yield-bar-seg seg-point" id="barPoint" style="width:43%">Point</div>
+          <div class="yield-bar-seg seg-loss" id="barLoss" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="yield-legend">
+        <div class="yield-legend-item"><div class="yield-legend-dot flat"></div><span id="legendFlat">Flat: 57%</span></div>
+        <div class="yield-legend-item"><div class="yield-legend-dot point"></div><span id="legendPoint">Point: 43%</span></div>
+        <div class="yield-legend-item"><div class="yield-legend-dot loss"></div><span id="legendLoss">Fat/Trim Loss: 0%</span></div>
+      </div>
+    </div>
+
+    <!-- Shrinkage summary paragraph -->
+    <div class="shrink-summary" id="shrinkSummary" role="note"></div>
+  </div>
+
+  <!-- Editorial content -->
+  <section class="editorial-section" aria-labelledby="editorial-title">
+    <h2 id="editorial-title">Understanding Brisket Yield</h2>
+
+    <p>A packer brisket is the whole, untrimmed brisket as it comes from the processing facility. It consists of two muscles — the flat and the point — surrounded by a thick fat cap and separated internally by a layer of hard fat. When you buy a 15 lb packer brisket, you are not buying 15 lbs of edible meat. You are buying roughly 13 lbs of raw beef after trimming, and somewhere between 7 and 9 lbs of cooked, sliceable, ready-to-eat brisket. The rest is water, fat, and connective tissue that renders, evaporates, or gets trimmed away before the meat ever hits the smoker.</p>
+
+    <p>Understanding yield is the difference between running out of brisket at your party and having exactly enough. Pitmaster experience and USDA data give us reliable ranges by grade — the calculator above uses those ranges to give you precise estimates rather than rough guesses.</p>
+
+    <h3>USDA Grade and Yield</h3>
+
+    <p>The three USDA beef grades you will encounter at retail and wholesale — Select, Choice, and Prime — differ primarily in <strong>marbling</strong>, the intramuscular fat streaked through the muscle fibers. This marbling has a direct and significant impact on cooked yield.</p>
+
+    <ul>
+      <li><strong>USDA Select</strong> has minimal marbling. During the long cook, there is less intramuscular fat to baste the meat from the inside. More moisture evaporates, and the collagen is slower to convert. Yield at 195&#xB0;F is approximately 53% of packer weight.</li>
+      <li><strong>USDA Choice</strong> is the standard for most backyard cooks and BBQ restaurants. Moderate marbling keeps the meat moist through the stall and into the final hours of the cook. Yield at 195&#xB0;F is approximately 58%.</li>
+      <li><strong>USDA Prime</strong> has abundant marbling and is the grade used by most serious competition teams and high-end BBQ restaurants. The fat liquefies during the cook and essentially self-bastes the meat. Yield at 195&#xB0;F is approximately 62% — nearly 10 percentage points higher than Select.</li>
+    </ul>
+
+    <p>On a 15 lb packer brisket, that difference works out to roughly 1.4 lbs more cooked meat from Prime versus Select. At 6 oz per serving, that is two extra servings — enough to feed two more guests from the same packer.</p>
+
+    <h3>The Flat vs. The Point</h3>
+
+    <p>The flat is the larger, thinner, rectangular muscle that runs the length of the brisket. It makes up approximately 57 to 59% of the packer's raw weight depending on grade. The flat is leaner, more uniform in thickness, and ideal for slicing. Texas-style brisket plates are built around the flat — 1/4-inch slices cut against the grain, with a smoke ring and a tight bark.</p>
+
+    <p>The point (sometimes called the deckle or nose) is the smaller, thicker, heavily marbled muscle at the fat end of the packer. It makes up roughly 41 to 43% of packer weight. The point has far more intramuscular fat than the flat, which makes it exceptional for burnt ends — diced, sauced, and returned to the smoker for a caramelized bark on every surface. When the point is cooked to 203&#xB0;F and shredded, it becomes pulled brisket: rich, fatty, and intensely beefy.</p>
+
+    <p>On a 15 lb Choice packer, you can expect roughly 8.7 lbs of raw flat and 6.3 lbs of raw point before cooking. After the cook at 195&#xB0;F, those weights shrink substantially — but the point loses proportionally more because it renders more fat.</p>
+
+    <h3>195&#xB0;F vs. 203&#xB0;F: Does It Matter?</h3>
+
+    <p>Yes — and not just for texture. The additional time needed to bring a brisket from 195&#xB0;F to 203&#xB0;F results in continued fat rendering and moisture evaporation. The difference is approximately 5 percentage points of yield.</p>
+
+    <p>At <strong>195&#xB0;F</strong>, the flat is fully tender but still holds together for clean slices. The collagen has converted to gelatin, the probe slides in with zero resistance, and the flat can be sliced without crumbling. This is the pull temperature for classic sliced brisket.</p>
+
+    <p>At <strong>203&#xB0;F</strong>, more fat has rendered out of both the flat and the point. The point becomes pullable — it tears into long, juicy strands with minimal effort. The flat at 203&#xB0;F is extremely tender but may not hold together for clean slices, depending on the individual brisket. This temperature is preferred when making burnt ends or pulled brisket, or when cooking the point separately from the flat.</p>
+
+    <p>The yield difference matters when planning quantities. A Choice packer yielding 58% at 195&#xB0;F yields only 53% at 203&#xB0;F. On a 15 lb packer, that is 8.7 lbs versus 8.0 lbs — three-quarters of a pound less. When you are buying for a crowd, factor the target temperature into your quantity calculation.</p>
+
+    <h3>How Much Brisket to Buy for a Party</h3>
+
+    <p>The quick math at 6 oz per serving: divide total guests by the number of servings per packer. A 15 lb Choice packer yields roughly 8.7 lbs of cooked brisket at 195&#xB0;F. At 6 oz per person, that is about 23 servings. For 50 guests, you need 3 packers. For 100 guests, 5 packers.</p>
+
+    <p>Always round up. Brisket shrinkage is variable — a brisket that stalls longer, cooks at a slightly higher temperature, or has an unusually thick fat cap will yield less than the average. Planning for 10 to 15% more than you think you need protects you from running short. Leftover brisket freezes beautifully and is excellent in tacos, hash, and sandwiches the next day.</p>
+
+    <!-- Reference table -->
+    <h3>Cooked Yield Reference Table — At 195&#xB0;F</h3>
+    <p>Estimated cooked weight by packer weight and USDA grade. All figures in pounds.</p>
+    <div class="ref-table-wrap">
+      <table class="ref-table">
+        <thead>
+          <tr>
+            <th>Packer (lbs)</th>
+            <th>Select</th>
+            <th>Choice</th>
+            <th>Prime</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>10 lbs</td><td>5.3 lbs</td><td>5.8 lbs</td><td>6.2 lbs</td></tr>
+          <tr><td>12 lbs</td><td>6.4 lbs</td><td>7.0 lbs</td><td>7.4 lbs</td></tr>
+          <tr><td>14 lbs</td><td>7.4 lbs</td><td>8.1 lbs</td><td>8.7 lbs</td></tr>
+          <tr><td>16 lbs</td><td>8.5 lbs</td><td>9.3 lbs</td><td>9.9 lbs</td></tr>
+          <tr><td>18 lbs</td><td>9.5 lbs</td><td>10.4 lbs</td><td>11.2 lbs</td></tr>
+          <tr><td>20 lbs</td><td>10.6 lbs</td><td>11.6 lbs</td><td>12.4 lbs</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="ad-slot" aria-hidden="true">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4265262608577453" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+  </div>
+
+  <!-- FAQ -->
+  <section class="faq-section" aria-labelledby="faq-title">
+    <h2 id="faq-title">Frequently Asked Questions</h2>
+    <div class="faq-group">
+      <details class="faq-item">
+        <summary>How much does a brisket shrink when smoked?</summary>
+        <div class="faq-body">A packer brisket loses roughly 10 to 13% of its raw weight during trimming, then another 35 to 50% during the cook due to moisture evaporation and fat rendering. Total losses from packer weight to plate are 38 to 52% depending on grade and cook temperature. A 15 lb packer brisket will typically yield 7 to 9 lbs of cooked meat.</div>
+      </details>
+      <details class="faq-item">
+        <summary>What is the cooked yield percentage of a brisket?</summary>
+        <div class="faq-body">Cooked yield ranges from 48 to 62% of the original packer weight depending on USDA grade and target temperature. USDA Select yields approximately 53% at 195&#xB0;F and 48% at 203&#xB0;F. Choice yields 58% and 53%. Prime yields 62% and 57%. Higher grades retain more yield because intramuscular fat liquefies and bastes the meat rather than dripping away as vapor.</div>
+      </details>
+      <details class="faq-item">
+        <summary>What is the difference between the flat and the point on a brisket?</summary>
+        <div class="faq-body">The flat is the leaner, rectangular muscle that makes up roughly 57 to 59% of a packer brisket by raw weight. It slices cleanly and is the source of classic Texas-style brisket slices. The point (also called the deckle or nose) is the thick, heavily marbled muscle comprising 41 to 43% of packer weight. It is used for burnt ends and pulled or chopped brisket. On a whole packer you can cook both simultaneously and serve sliced flat alongside point burnt ends.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Does USDA grade affect brisket yield?</summary>
+        <div class="faq-body">Yes, significantly. Prime brisket yields approximately 62% at 195&#xB0;F versus 53% for Select &#x2014; a 9-percentage-point difference. On a 15 lb packer that equals nearly 1.4 lbs more cooked meat from Prime versus Select, or about 3 to 4 extra servings at 6 oz each. The reason is marbling: Prime brisket has more intramuscular fat distributed through the muscle, which liquefies during the cook and keeps the meat moist and heavier rather than evaporating away.</div>
+      </details>
+      <details class="faq-item">
+        <summary>How many pounds of brisket do I need per person?</summary>
+        <div class="faq-body">Plan for 1/3 to 1/2 lb (5 to 8 oz) of cooked brisket per person for a main course with sides. Six ounces is the standard BBQ plate serving. At 6 oz per person and a 58% yield from a Choice packer, a 15 lb packer yields about 23 servings. Always round up your packer count &#x2014; shrinkage varies and running short at a party is far worse than having leftovers. Leftover brisket freezes well and reheats beautifully.</div>
+      </details>
+    </div>
+  </section>
+
+  <!-- Related tools -->
+  <section class="related-tools" aria-labelledby="related-title">
+    <h2 id="related-title">More Pitmaster Tools</h2>
+    <div class="tool-links">
+      <a class="tool-link" href="/">
+        <span class="tool-link-icon" aria-hidden="true">&#x1F321;&#xFE0F;</span>
+        <div>
+          <div class="tool-link-name">Meat Smoking Calculator</div>
+          <div class="tool-link-desc">Cook times for 28 cuts with full timeline, wood pairings, and serving size math.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="brisket-calculator.html">
+        <span class="tool-link-icon" aria-hidden="true">&#x1F969;</span>
+        <div>
+          <div class="tool-link-name">Brisket Smoking Calculator</div>
+          <div class="tool-link-desc">Full smoking timeline working backward from serve time — light time, stall window, pull time.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="meat-per-person.html">
+        <span class="tool-link-icon" aria-hidden="true">&#x1F465;</span>
+        <div>
+          <div class="tool-link-name">Meat Per Person Calculator</div>
+          <div class="tool-link-desc">How much raw meat to buy per guest for any cut, any occasion.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="charcoal-calculator.html">
+        <span class="tool-link-icon" aria-hidden="true">&#x26B0;&#xFE0F;</span>
+        <div>
+          <div class="tool-link-name">Charcoal Calculator</div>
+          <div class="tool-link-desc">Exact charcoal amounts for Minion, Snake, or direct-heat cooks.</div>
+        </div>
+      </a>
+    </div>
+  </section>
+</main>
+
+<!-- Cookie consent banner -->
+<div class="cookie-banner" id="cookieBanner" role="dialog" aria-live="polite" aria-label="Cookie consent">
+  <div class="cookie-banner__inner">
+    <p class="cookie-banner__text">We use cookies for analytics and advertising. See our <a href="privacy-policy.html">Privacy Policy</a> for details.</p>
+    <div class="cookie-banner__actions">
+      <button class="cookie-accept" id="cookieAccept" type="button">Accept</button>
+      <button class="cookie-reject" id="cookieReject" type="button">Reject</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>&#169; 2026 Pitmaster Tools. All rights reserved.</div>
+  <nav aria-label="Footer">
+    <a href="/">Calculator</a>
+    <span>|</span>
+    <a href="privacy-policy.html">Privacy Policy</a>
+    <span>|</span>
+    <a href="terms-of-service.html">Terms of Service</a>
+    <span>|</span>
+    <a href="mailto:contact@pitmaster.tools">contact@pitmaster.tools</a>
+  </nav>
+  <p class="footer-small">Yield estimates are based on USDA data and pitmaster consensus averages. Actual yield will vary by individual brisket, trimming style, and cook execution. Always plan for 10&#x25; more than your estimate.</p>
+  <p class="footer-small">Last updated: April 12, 2026</p>
+</footer>
+
+<script>
+var SITE_URL = 'https://pitmaster.tools';
+var CONSENT_COOKIE_NAME = 'pitmaster_consent';
+var GA_MEASUREMENT_ID = 'G-SJJVV37EWE';
+var ADSENSE_CLIENT = 'ca-pub-4265262608577453';
+
+// ── Grade data ────────────────────────────────────────────────────────────────
+var GRADES = {
+  select: {
+    trimFactor: 0.87,
+    yield195:   0.53,
+    yield203:   0.48,
+    flatPct:    0.57,
+    pointPct:   0.43
+  },
+  choice: {
+    trimFactor: 0.88,
+    yield195:   0.58,
+    yield203:   0.53,
+    flatPct:    0.58,
+    pointPct:   0.42
+  },
+  prime: {
+    trimFactor: 0.90,
+    yield195:   0.62,
+    yield203:   0.57,
+    flatPct:    0.59,
+    pointPct:   0.41
+  }
+};
+
+// ── State ─────────────────────────────────────────────────────────────────────
+var state = { wu: 'lbs', grade: 'choice', servingOz: 6 };
+var analyticsLoaded = false;
+var adsLoaded = false;
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function shouldDefaultMetric(lang) {
+  var normalized = (lang || '').replace('_', '-');
+  if (!normalized) return false;
+  if (normalized.toLowerCase() === 'en') return false;
+  var parts = normalized.split('-');
+  var region = parts.length > 1 ? parts[parts.length - 1].toUpperCase() : '';
+  if (region) return ['US', 'LR', 'MM'].indexOf(region) === -1;
+  return parts[0].toLowerCase() !== 'en';
+}
+
+function fmtWt(lbs) {
+  if (state.wu === 'kg') return (lbs * 0.453592).toFixed(1) + ' kg';
+  return lbs.toFixed(1) + ' lbs';
+}
+
+function fmtWtShort(lbs) {
+  if (state.wu === 'kg') return (lbs * 0.453592).toFixed(1) + ' kg';
+  return lbs.toFixed(1);
+}
+
+// ── Calculate ─────────────────────────────────────────────────────────────────
+function calculate() {
+  var vmsg = document.getElementById('vmsg');
+  vmsg.className = 'vmsg';
+  vmsg.textContent = '';
+
+  var rawInput = parseFloat(document.getElementById('packerWeight').value);
+  if (!rawInput || rawInput <= 0) {
+    vmsg.textContent = 'Please enter a packer brisket weight greater than zero.';
+    vmsg.classList.add('error');
+    document.getElementById('packerWeight').focus();
+    return;
+  }
+
+  var packerLbs = state.wu === 'kg' ? rawInput / 0.453592 : rawInput;
+
+  if (packerLbs < 5 || packerLbs > 30) {
+    vmsg.textContent = 'Packer weight should be between 5 and 30 lbs (2.3 to 13.6 kg).';
+    vmsg.classList.add('error');
+    document.getElementById('packerWeight').focus();
+    return;
+  }
+
+  var numGuests = parseInt(document.getElementById('numGuests').value, 10) || 0;
+  var g = GRADES[state.grade];
+  var servingOz = state.servingOz;
+
+  var flatLbs    = packerLbs * g.flatPct;
+  var pointLbs   = packerLbs * g.pointPct;
+  var trimmedLbs = packerLbs * g.trimFactor;
+  var cooked195  = packerLbs * g.yield195;
+  var cooked203  = packerLbs * g.yield203;
+  var servings195 = (cooked195 * 16) / servingOz;
+  var servings203 = (cooked203 * 16) / servingOz;
+
+  var trimLossPct = Math.round((1 - g.trimFactor) * 100);
+
+  // Stat cards
+  var unitSuffix = state.wu === 'kg' ? ' kg' : ' lbs';
+
+  document.getElementById('rFlat').textContent     = '~' + fmtWtShort(flatLbs) + unitSuffix;
+  document.getElementById('rFlatSub').textContent  = 'raw flat (' + Math.round(g.flatPct * 100) + '% of packer)';
+  document.getElementById('rPoint').textContent    = '~' + fmtWtShort(pointLbs) + unitSuffix;
+  document.getElementById('rPointSub').textContent = 'raw point (' + Math.round(g.pointPct * 100) + '% of packer)';
+  document.getElementById('rTrimmed').textContent  = '~' + fmtWtShort(trimmedLbs) + unitSuffix;
+
+  document.getElementById('rYield195').textContent    = '~' + fmtWtShort(cooked195) + unitSuffix;
+  document.getElementById('rYield195Sub').textContent = '~' + Math.floor(servings195) + ' servings (' + servingOz + ' oz each)';
+  document.getElementById('rYield203').textContent    = '~' + fmtWtShort(cooked203) + unitSuffix;
+  document.getElementById('rYield203Sub').textContent = '~' + Math.floor(servings203) + ' servings (' + servingOz + ' oz each)';
+
+  // Packers needed
+  var packersCard = document.getElementById('packersCard');
+  if (numGuests > 0) {
+    var servingsPerPacker = Math.floor(servings195);
+    var packersNeeded = servingsPerPacker > 0 ? Math.ceil(numGuests / servingsPerPacker) : 1;
+    document.getElementById('rPackers').textContent  = escapeHtml(String(packersNeeded));
+    document.getElementById('rPackersSub').textContent = 'for ' + escapeHtml(String(numGuests)) + ' guests at ' + escapeHtml(String(servingOz)) + ' oz/serving';
+    packersCard.style.display = '';
+  } else {
+    packersCard.style.display = 'none';
+  }
+
+  // Yield breakdown bar — flat, point, fat/trim loss (% of packer)
+  var flatBarPct  = Math.round(g.flatPct * 100);
+  var pointBarPct = Math.round(g.pointPct * 100);
+  var lossBarPct  = 100 - flatBarPct - pointBarPct;
+
+  var barFlat  = document.getElementById('barFlat');
+  var barPoint = document.getElementById('barPoint');
+  var barLoss  = document.getElementById('barLoss');
+
+  barFlat.style.width  = flatBarPct + '%';
+  barPoint.style.width = pointBarPct + '%';
+  barLoss.style.width  = lossBarPct + '%';
+
+  barFlat.textContent  = flatBarPct > 10  ? 'Flat ' + flatBarPct + '%'   : '';
+  barPoint.textContent = pointBarPct > 10 ? 'Point ' + pointBarPct + '%' : '';
+  barLoss.textContent  = lossBarPct > 5   ? trimLossPct + '% fat' : '';
+
+  document.getElementById('legendFlat').textContent  = 'Flat: ' + flatBarPct + '%';
+  document.getElementById('legendPoint').textContent = 'Point: ' + pointBarPct + '%';
+  document.getElementById('legendLoss').textContent  = 'Fat/Trim loss: ' + trimLossPct + '%';
+
+  // Shrinkage summary
+  var cookLossPct = Math.round((1 - g.yield195) * 100);
+  var gradeLabel = state.grade.charAt(0).toUpperCase() + state.grade.slice(1);
+  var inputDisplayWt = state.wu === 'kg'
+    ? (rawInput).toFixed(1) + ' kg'
+    : rawInput.toFixed(1) + ' lbs';
+
+  var cookShrinkPct = Math.round((g.trimFactor - g.yield195) * 100);
+  var summary = 'A USDA ' + escapeHtml(gradeLabel) + ' packer brisket typically loses '
+    + escapeHtml(String(trimLossPct)) + '% in trimming and another '
+    + escapeHtml(String(cookShrinkPct)) + '% during the cook.'
+    + ' Your ' + escapeHtml(inputDisplayWt) + ' packer will yield roughly '
+    + escapeHtml(fmtWt(cooked195)) + ' of sliceable flat and point meat at 195\u00B0F'
+    + ' (\u2248\u202F' + escapeHtml(String(Math.floor(servings195))) + '\u202F servings at ' + escapeHtml(String(servingOz)) + '\u202Foz each).'
+    + ' At 203\u00B0F the yield drops to approximately ' + escapeHtml(fmtWt(cooked203)) + ' as more fat renders out.';
+
+  document.getElementById('shrinkSummary').textContent = summary;
+
+  // Show results
+  var resultsEl = document.getElementById('results');
+  resultsEl.classList.add('visible');
+  resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Grade toggle ──────────────────────────────────────────────────────────────
+document.querySelectorAll('.grade-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var grade = this.dataset.grade;
+    if (grade === state.grade) return;
+    state.grade = grade;
+    document.querySelectorAll('.grade-btn').forEach(function(b) {
+      var isActive = b.dataset.grade === grade;
+      b.classList.toggle('active', isActive);
+      b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+    if (document.getElementById('results').classList.contains('visible')) calculate();
+  });
+});
+
+// ── Serving toggle ────────────────────────────────────────────────────────────
+document.querySelectorAll('.serving-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var oz = parseInt(this.dataset.oz, 10);
+    if (oz === state.servingOz) return;
+    state.servingOz = oz;
+    document.querySelectorAll('.serving-btn').forEach(function(b) {
+      var isActive = parseInt(b.dataset.oz, 10) === oz;
+      b.classList.toggle('active', isActive);
+      b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+    if (document.getElementById('results').classList.contains('visible')) calculate();
+  });
+});
+
+// ── Weight unit toggle ────────────────────────────────────────────────────────
+document.getElementById('weightToggle').addEventListener('click', function(e) {
+  var btn = e.target.closest('button');
+  if (!btn) return;
+  var val = btn.dataset.unit;
+  if (val === state.wu) return;
+  var input = document.getElementById('packerWeight');
+  var cur = parseFloat(input.value);
+  if (!isNaN(cur)) {
+    input.value = val === 'kg'
+      ? Math.round(cur * 0.453592 * 10) / 10
+      : Math.round(cur / 0.453592 * 10) / 10;
+  }
+  state.wu = val;
+  document.getElementById('weightUnitLbl').textContent = val;
+  this.querySelectorAll('button').forEach(function(b) { b.classList.toggle('active', b.dataset.unit === val); });
+  try { localStorage.setItem('pitmaster_wu', val); } catch(err){}
+  if (document.getElementById('results').classList.contains('visible')) calculate();
+});
+
+// ── Calculate button ──────────────────────────────────────────────────────────
+document.getElementById('calcBtn').addEventListener('click', calculate);
+document.getElementById('packerWeight').addEventListener('keydown', function(e) { if (e.key === 'Enter') calculate(); });
+document.getElementById('numGuests').addEventListener('keydown', function(e) { if (e.key === 'Enter') calculate(); });
+
+// ── Analytics & Ads ───────────────────────────────────────────────────────────
+function loadAnalytics() {
+  if (analyticsLoaded || window._gtagLoaded) return;
+  analyticsLoaded = true;
+  gtag('consent', 'update', {'ad_storage':'granted','analytics_storage':'granted'});
+  var s = document.createElement('script'); s.async = true;
+  s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID;
+  document.head.appendChild(s);
+  gtag('js', new Date()); gtag('config', GA_MEASUREMENT_ID);
+}
+function loadAds() {
+  if (adsLoaded) return; adsLoaded = true;
+  var s = document.createElement('script'); s.async = true; s.crossOrigin = 'anonymous';
+  s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + ADSENSE_CLIENT;
+  document.head.appendChild(s);
+  (window.adsbygoogle = window.adsbygoogle || []).push({});
+}
+function loadGoogleServices() { loadAnalytics(); loadAds(); }
+
+// ── Cookie consent ────────────────────────────────────────────────────────────
+function setCookie(name, value, days) {
+  var d = new Date(); d.setTime(d.getTime() + days * 86400000);
+  document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+}
+function getCookie(name) {
+  var prefix = name + '=', parts = document.cookie ? document.cookie.split(';') : [];
+  for (var i = 0; i < parts.length; i++) {
+    var c = parts[i].trim();
+    if (c.indexOf(prefix) === 0) return decodeURIComponent(c.substring(prefix.length));
+  }
+  return null;
+}
+function initConsentBanner() {
+  var consent = getCookie(CONSENT_COOKIE_NAME);
+  if (consent === 'accepted') { loadGoogleServices(); return; }
+  if (consent === 'rejected') return;
+  document.getElementById('cookieBanner').classList.add('visible');
+}
+document.getElementById('cookieAccept').addEventListener('click', function() {
+  setCookie(CONSENT_COOKIE_NAME, 'accepted', 365);
+  document.getElementById('cookieBanner').classList.remove('visible');
+  loadGoogleServices();
+});
+document.getElementById('cookieReject').addEventListener('click', function() {
+  setCookie(CONSENT_COOKIE_NAME, 'rejected', 365);
+  document.getElementById('cookieBanner').classList.remove('visible');
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(function init() {
+  try {
+    var savedWu = localStorage.getItem('pitmaster_wu');
+    if (!savedWu) {
+      var lang = navigator.language || 'en-US';
+      if (shouldDefaultMetric(lang)) { savedWu = 'kg'; }
+    }
+    if (savedWu) {
+      state.wu = savedWu;
+      document.getElementById('weightUnitLbl').textContent = savedWu;
+      if (savedWu === 'kg') {
+        var inp = document.getElementById('packerWeight');
+        inp.value = Math.round(parseFloat(inp.value) * 0.453592 * 10) / 10;
+      }
+      document.querySelectorAll('#weightToggle button').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.unit === savedWu);
+      });
+    }
+  } catch(err){}
+
+  initConsentBanner();
+})();
+</script>
+</body>
+</html>
