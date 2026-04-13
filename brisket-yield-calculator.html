@@ -752,10 +752,10 @@ function calculate() {
     packersCard.style.display = 'none';
   }
 
-  // Yield breakdown bar — flat, point, fat/trim loss (% of packer)
-  var flatBarPct  = Math.round(g.flatPct * 100);
-  var pointBarPct = Math.round(g.pointPct * 100);
-  var lossBarPct  = 100 - flatBarPct - pointBarPct;
+  // Yield breakdown bar — trimmed flat, trimmed point, fat/trim loss (% of whole packer)
+  var flatBarPct  = Math.round(g.flatPct * g.trimFactor * 100);
+  var pointBarPct = Math.round(g.pointPct * g.trimFactor * 100);
+  var lossBarPct  = Math.max(0, 100 - flatBarPct - pointBarPct);
 
   var barFlat  = document.getElementById('barFlat');
   var barPoint = document.getElementById('barPoint');
@@ -769,8 +769,8 @@ function calculate() {
   barPoint.textContent = pointBarPct > 10 ? 'Point ' + pointBarPct + '%' : '';
   barLoss.textContent  = lossBarPct > 5   ? trimLossPct + '% fat' : '';
 
-  document.getElementById('legendFlat').textContent  = 'Flat: ' + flatBarPct + '%';
-  document.getElementById('legendPoint').textContent = 'Point: ' + pointBarPct + '%';
+  document.getElementById('legendFlat').textContent  = 'Flat after trim: ' + flatBarPct + '%';
+  document.getElementById('legendPoint').textContent = 'Point after trim: ' + pointBarPct + '%';
   document.getElementById('legendLoss').textContent  = 'Fat/Trim loss: ' + trimLossPct + '%';
 
   // Shrinkage summary
