@@ -110,6 +110,7 @@ function hideCookieBanner() {
 }
 function initConsentBanner() {
   var storedConsent = getCookie(CONSENT_COOKIE_NAME);
+  if (isEmbedMode()) { hideCookieBanner(); return; }
   document.getElementById('acceptCookies').addEventListener('click', function() {
     setConsentState('accepted');
   });
@@ -170,6 +171,13 @@ function initShareButtons() {
       copyLinkResetTimer = setTimeout(function() { copyBtn.textContent = 'Copy link'; copyBtn.classList.remove('copy-confirmed'); }, 2000);
     });
   });
+}
+function isEmbedMode() {
+  return /(?:^|[?&])embed=1(?:&|$)/.test(window.location.search);
+}
+function initEmbedMode() {
+  if (!isEmbedMode()) return;
+  document.body.classList.add('embed-mode');
 }
 function initEmbedSection() {
   var copyBtn = document.getElementById('copyEmbedBtn');

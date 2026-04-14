@@ -735,7 +735,7 @@
   <section class="embed-section no-print" aria-labelledby="embed-title">
     <h2 id="embed-title">Embed this calculator on your site</h2>
     <p>You're welcome to embed Pitmaster Tools on your BBQ blog or recipe site — free, forever.</p>
-    <textarea id="embedCode" readonly><iframe src="https://pitmaster.tools" width="100%" height="800" frameborder="0" title="Meat Smoking Calculator — Pitmaster Tools" loading="lazy"></iframe></textarea>
+    <textarea id="embedCode" readonly><iframe src="https://pitmaster.tools?embed=1" width="100%" height="800" frameborder="0" title="Meat Smoking Calculator — Pitmaster Tools" loading="lazy"></iframe></textarea>
     <button class="share-btn" id="copyEmbedBtn" type="button">Copy embed code</button>
     <p class="embed-note">No attribution required, but a link back to pitmaster.tools is appreciated.</p>
   </section>
@@ -1495,6 +1495,7 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
     }
   }catch(e){}
   onMeatChange();
+  initEmbedMode();
   initConsentBanner();
   initShareButtons();
   initEmbedSection();

@@ -537,6 +537,7 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
 <!-- INJECT:site-utils.js:script -->
 <script>
 (function(){
+  initEmbedMode();
   'use strict';
 
   /* ── Constants ── */
@@ -831,6 +832,9 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
     document.cookie = cookieKey + '=' + encodeURIComponent(val) + '; path=/; expires=' + expires + '; Secure; SameSite=Lax';
   }
 
+  if(isEmbedMode()){
+    banner.classList.remove('visible');
+  } else
   if(getConsent() === null){
     banner.classList.add('visible');
   }
