@@ -6,6 +6,33 @@ function trackPageErrors(page, bucket) {
   });
 }
 
+async function installCookieWriteTracker(context) {
+  await context.addInitScript(() => {
+    const writes = [];
+    const proto = window.Document && Document.prototype;
+    const cookieDescriptor = proto && Object.getOwnPropertyDescriptor(proto, 'cookie');
+
+    if (!cookieDescriptor || !cookieDescriptor.get || !cookieDescriptor.set) {
+      window.__cookieWrites = writes;
+      return;
+    }
+
+    Object.defineProperty(document, 'cookie', {
+      configurable: true,
+      get() {
+        return cookieDescriptor.get.call(document);
+      },
+      set(value) {
+        writes.push(String(value));
+        window.__cookieWrites = writes.slice();
+        return cookieDescriptor.set.call(document, value);
+      }
+    });
+
+    window.__cookieWrites = writes;
+  });
+}
+
 test('homepage loads, nav opens, and calculator shows results', async ({ page }) => {
   const errors = [];
   trackPageErrors(page, errors);
@@ -53,4 +80,43 @@ test('tools page loads, nav opens, and rejected consent path stays clean', async
   expect(errors).toEqual([]);
 
   await context.close();
+});
+
+test('embed homepage stays banner-free without attempting a consent write', async ({ browser }) => {
+  const context = await browser.newContext();
+  await installCookieWriteTracker(context);
+
+  const page = await context.newPage();
+  const errors = [];
+  trackPageErrors(page, errors);
+
+  await page.goto('/?embed=1');
+  await expect(page.locator('body')).toHaveClass(/embed-mode/);
+  await expect(page.locator('#cookieBanner')).not.toBeVisible();
+
+  const cookieWrites = await page.evaluate(() => window.__cookieWrites || []);
+  expect(cookieWrites.filter((value) => value.includes('pitmaster_consent'))).toEqual([]);
+
+  await page.goto('/');
+  await expect(page.locator('#cookieBanner.visible')).toBeVisible();
+  expect(errors).toEqual([]);
+
+  await context.close();
+});
+
+test('embed brisket flow keeps modal controls visible', async ({ page }) => {
+  const errors = [];
+  trackPageErrors(page, errors);
+
+  await page.goto('/brisket-calculator.html?embed=1');
+  await expect(page.locator('body')).toHaveClass(/embed-mode/);
+
+  await page.locator('#weight').fill('12');
+  await page.locator('#serveTime').fill('18:00');
+  await page.locator('#calcBtn').click();
+
+  await expect(page.locator('#results')).toBeVisible();
+  await expect(page.locator('#resultsClose')).toBeVisible();
+  await expect(page.locator('#printBtn')).toBeVisible();
+  expect(errors).toEqual([]);
 });

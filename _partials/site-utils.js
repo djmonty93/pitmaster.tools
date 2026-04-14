@@ -110,6 +110,7 @@ function hideCookieBanner() {
 }
 function initConsentBanner() {
   var storedConsent = getCookie(CONSENT_COOKIE_NAME);
+  if (isEmbedMode()) { hideCookieBanner(); return; }
   document.getElementById('acceptCookies').addEventListener('click', function() {
     setConsentState('accepted');
   });
@@ -171,15 +172,12 @@ function initShareButtons() {
     });
   });
 }
+function isEmbedMode() {
+  return /(?:^|[?&])embed=1(?:&|$)/.test(window.location.search);
+}
 function initEmbedMode() {
-  if (!/[?&]embed=1/.test(window.location.search)) return;
+  if (!isEmbedMode()) return;
   document.body.classList.add('embed-mode');
-  // Suppress cookie banner in embed context — no ads/analytics loaded anyway
-  // without consent, and the banner is hidden, so just silently mark as rejected
-  // if no prior consent decision exists.
-  if (!getCookie(CONSENT_COOKIE_NAME)) {
-    setCookie(CONSENT_COOKIE_NAME, 'rejected', CONSENT_COOKIE_DAYS);
-  }
 }
 function initEmbedSection() {
   var copyBtn = document.getElementById('copyEmbedBtn');
