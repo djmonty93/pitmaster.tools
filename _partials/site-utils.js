@@ -171,6 +171,16 @@ function initShareButtons() {
     });
   });
 }
+function initEmbedMode() {
+  if (!/[?&]embed=1/.test(window.location.search)) return;
+  document.body.classList.add('embed-mode');
+  // Suppress cookie banner in embed context — no ads/analytics loaded anyway
+  // without consent, and the banner is hidden, so just silently mark as rejected
+  // if no prior consent decision exists.
+  if (!getCookie(CONSENT_COOKIE_NAME)) {
+    setCookie(CONSENT_COOKIE_NAME, 'rejected', CONSENT_COOKIE_DAYS);
+  }
+}
 function initEmbedSection() {
   var copyBtn = document.getElementById('copyEmbedBtn');
   var textarea = document.getElementById('embedCode');

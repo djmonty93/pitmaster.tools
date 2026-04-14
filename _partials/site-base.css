@@ -226,6 +226,17 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
   .stat-cards { grid-template-columns: 1fr; }
 }
 
+/* ----- Embed mode (?embed=1) ----- */
+body.embed-mode header,
+body.embed-mode footer,
+body.embed-mode .cookie-banner,
+body.embed-mode .page-hero,
+body.embed-mode .ad-slot,
+body.embed-mode .embed-section,
+body.embed-mode .share-buttons,
+body.embed-mode .no-print { display: none !important; }
+body.embed-mode main { padding-top: .5rem; }
+
 /* ----- Print ----- */
 @media print {
   body { background: #fff !important; color: #000 !important; font-size: 12px; }
