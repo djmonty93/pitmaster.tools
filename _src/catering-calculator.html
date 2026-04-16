@@ -133,7 +133,6 @@
 .service-btn { flex: 1; border: 2px solid var(--card-border); border-radius: 8px; padding: .75rem 1rem; background: #FAFAF8; text-align: center; cursor: pointer; font-family: inherit; transition: border-color .15s, background .15s; }
 .service-btn.active { border-color: var(--amber); background: var(--amber-light); }
 .service-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
-.sb-icon { font-size: 1.35rem; display: block; margin-bottom: .2rem; }
 .sb-name { font-weight: 700; font-size: .9rem; display: block; margin-bottom: .1rem; }
 .sb-desc { font-size: .75rem; color: var(--text-muted); line-height: 1.4; }
 .sides-check { display: flex; align-items: center; gap: .6rem; cursor: pointer; user-select: none; font-size: .95rem; font-weight: 500; }
@@ -278,12 +277,10 @@
         <label>Serving Style</label>
         <div class="service-toggle" role="group" aria-label="Serving style">
           <button class="service-btn active" data-style="buffet" type="button" aria-pressed="true">
-            <span class="sb-icon">&#x1F37D;&#xFE0F;</span>
             <span class="sb-name">Buffet</span>
             <span class="sb-desc">Guests serve themselves; multiple meats reduce per-meat portions</span>
           </button>
           <button class="service-btn" data-style="plated" type="button" aria-pressed="false">
-            <span class="sb-icon">&#x1F374;</span>
             <span class="sb-name">Plated</span>
             <span class="sb-desc">Pre-portioned service; each guest gets a fixed plate</span>
           </button>
@@ -318,9 +315,7 @@
       Add another meat
     </button>
 
-    <button class="calc-btn" id="calcBtn" type="button">
-      &#x1F969; Calculate Catering Quantities
-    </button>
+    <button class="calc-btn" id="calcBtn" type="button">Calculate Catering Quantities</button>
     <div class="vmsg" id="vmsg" role="alert" aria-live="polite"></div>
   </div>
 
@@ -332,7 +327,7 @@
   <div id="results" aria-live="polite" aria-label="Catering results">
     <div class="results-inner">
       <div class="results-header">
-        <div class="results-title">&#x1F4CA; Your Catering Plan</div>
+        <div class="results-title">Your Catering Plan</div>
       </div>
       <div class="meat-cards" id="meatCards"></div>
       <div class="summary-card" id="summaryCard" aria-label="Summary">
@@ -469,28 +464,24 @@
     <h2 id="related-title">More Pitmaster Tools</h2>
     <div class="tool-links">
       <a class="tool-link" href="/">
-        <span class="tool-link-icon" aria-hidden="true">&#x1F321;&#xFE0F;</span>
         <div>
           <div class="tool-link-name">Meat Smoking Calculator</div>
           <div class="tool-link-desc">Full cook timeline, pull temps, and wood pairings for 28 cuts — backward from your serve time.</div>
         </div>
       </a>
       <a class="tool-link" href="meat-per-person.html">
-        <span class="tool-link-icon" aria-hidden="true">&#x1F356;</span>
         <div>
           <div class="tool-link-name">Meat Per Person</div>
           <div class="tool-link-desc">Raw weight to buy for a single cut with light, moderate, and hungry serving sizes.</div>
         </div>
       </a>
       <a class="tool-link" href="bbq-cost-calculator.html">
-        <span class="tool-link-icon" aria-hidden="true">&#x1F4B0;</span>
         <div>
           <div class="tool-link-name">BBQ Cost Calculator</div>
           <div class="tool-link-desc">Total ingredient cost, cost per serving, and cost per pound across all your meats.</div>
         </div>
       </a>
       <a class="tool-link" href="brisket-calculator.html">
-        <span class="tool-link-icon" aria-hidden="true">&#x1F969;</span>
         <div>
           <div class="tool-link-name">Brisket Calculator</div>
           <div class="tool-link-desc">Exact cook timeline for sliced or pulled brisket — light smoker time, stall window, rest, and serve.</div>
@@ -801,11 +792,11 @@ function renderResults(results, guests, totalRawLbs, totalCost, hasCost) {
     }
 
     var warnHtml = r.warningText
-      ? '<div class="meat-warn" role="alert">&#x26A0;&#xFE0F; ' + escapeHtml(r.warningText) + '</div>'
+      ? '<div class="meat-warn" role="alert">' + escapeHtml(r.warningText) + '</div>'
       : '';
 
     card.innerHTML =
-      '<div class="meat-card-header"><div class="meat-card-name">&#x1F356; ' + escapeHtml(r.name) + '</div></div>' +
+      '<div class="meat-card-header"><div class="meat-card-name">' + escapeHtml(r.name) + '</div></div>' +
       '<div class="meat-card-grid">' + statsHtml + '</div>' +
       warnHtml;
 

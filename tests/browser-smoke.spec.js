@@ -82,6 +82,24 @@ test('tools page loads, nav opens, and rejected consent path stays clean', async
   await context.close();
 });
 
+test('rib calculator loads with working navigation and responsive header controls', async ({ page }) => {
+  const errors = [];
+  trackPageErrors(page, errors);
+
+  await page.goto('/rib-calculator.html');
+  await expect(page.getByRole('heading', { level: 1, name: /rib smoking calculator/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Tools' })).toBeVisible();
+  await expect(page.getByRole('group', { name: /temperature unit/i })).toBeVisible();
+  await expect(page.getByRole('group', { name: /weight unit/i })).toBeVisible();
+
+  const trigger = page.locator('.nav-dropdown__trigger').first();
+  await trigger.click();
+  await expect(page.locator('.nav-dropdown__menu').getByRole('link', { name: 'All Tools' })).toBeVisible();
+  await page.keyboard.press('Escape');
+
+  expect(errors).toEqual([]);
+});
+
 test('embed homepage stays banner-free without attempting a consent write', async ({ browser }) => {
   const context = await browser.newContext();
   await installCookieWriteTracker(context);

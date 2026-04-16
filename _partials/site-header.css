@@ -8,28 +8,40 @@
    ============================================================ */
 
 /* ----- Header nav container ----- */
-.header-nav {
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: auto;
+}
+
+.header-nav,
+.nav-links {
   display: flex;
   gap: 1.25rem;
   align-items: center;
   flex-wrap: wrap;
-  margin-left: auto;
   justify-content: flex-end;
 }
 
-.header-nav a {
+.header-nav a,
+.nav-links a {
   color: #ccc;
   text-decoration: none;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: .95rem;
+  font-weight: 700;
+  letter-spacing: .02em;
   transition: color .15s;
   white-space: nowrap;
 }
 
 .header-nav a:hover,
-.header-nav a:focus-visible { color: var(--amber); }
+.header-nav a:focus-visible,
+.nav-links a:hover,
+.nav-links a:focus-visible { color: var(--amber); }
 
-.header-nav a[aria-current="page"] { color: var(--amber); font-weight: 700; }
+.header-nav a[aria-current="page"],
+.nav-links a[aria-current="page"] { color: var(--amber); font-weight: 800; }
 
 /* ----- Dropdown ----- */
 .nav-dropdown { position: relative; }
@@ -38,19 +50,26 @@
   background: none;
   border: none;
   color: #ccc;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: .95rem;
+  font-weight: 700;
   transition: color .15s;
   white-space: nowrap;
   display: flex;
   align-items: center;
-  gap: .25rem;
+  gap: .45rem;
   cursor: pointer;
   font-family: inherit;
   padding: 0;
 }
 
-.nav-dropdown__trigger::after { content: '▾'; font-size: .7em; }
+.nav-dropdown__trigger::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg) translateY(-1px);
+}
 
 .nav-dropdown__trigger:hover,
 .nav-dropdown__trigger:focus-visible { color: var(--amber); }
@@ -136,7 +155,12 @@
 @media (max-width: 700px) {
   .menu-toggle { display: inline-flex; }
 
-  .header-nav {
+  .header-right {
+    position: static;
+  }
+
+  .header-nav,
+  .nav-links {
     display: none;
     position: absolute;
     top: 100%;
@@ -154,9 +178,11 @@
     z-index: 160;
   }
 
-  .header-nav.is-open { display: flex; }
+  .header-nav.is-open,
+  .nav-links.is-open { display: flex; }
 
   .header-nav a,
+  .nav-links a,
   .nav-dropdown__trigger { width: 100%; text-align: left; }
 
   .nav-dropdown { width: 100%; }

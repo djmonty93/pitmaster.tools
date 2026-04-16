@@ -120,7 +120,6 @@
 .style-btn { border: 2px solid var(--card-border); border-radius: 8px; padding: .875rem 1rem; background: #FAFAF8; text-align: center; cursor: pointer; font-family: inherit; transition: border-color .15s, background .15s; }
 .style-btn.active { border-color: var(--amber); background: var(--amber-light); }
 .style-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
-.sb-icon { font-size: 1.35rem; display: block; margin-bottom: .25rem; }
 .sb-name { font-weight: 700; font-size: .95rem; display: block; margin-bottom: .1rem; }
 .sb-desc { font-size: .76rem; color: var(--text-muted); line-height: 1.4; }
 .wrap-toggle { display: flex; border: 1.5px solid var(--card-border); border-radius: 6px; overflow: hidden; }
@@ -213,12 +212,10 @@
     <p class="section-title">Brisket Style</p>
     <div class="style-toggle" role="group" aria-label="Brisket style">
       <button class="style-btn active" data-style="sliced" type="button" aria-pressed="true">
-        <span class="sb-icon">&#x1F969;</span>
         <span class="sb-name">Sliced Brisket</span>
         <span class="sb-desc">Pull at 195&#xB0;F. Ideal for Texas-style brisket with clean slices from the flat.</span>
       </button>
       <button class="style-btn" data-style="pulled" type="button" aria-pressed="false">
-        <span class="sb-icon">&#x1F356;</span>
         <span class="sb-name">Pulled Brisket</span>
         <span class="sb-desc">Pull at 205&#xB0;F. Fully rendered collagen for pulled or chopped brisket from the point.</span>
       </button>
@@ -276,19 +273,16 @@
 
       <div class="stat-cards">
         <div class="stat-card c1">
-          <span class="sc-icon">&#x1F550;</span>
           <div class="sc-label">Cook Time</div>
           <div class="sc-value" id="sCookTime">&#x2014;</div>
           <div class="sc-sub" id="sCookSub">hours</div>
         </div>
         <div class="stat-card c2">
-          <span class="sc-icon">&#x1F525;</span>
           <div class="sc-label">Light Smoker</div>
           <div class="sc-value" id="sLightTime">&#x2014;</div>
           <div class="sc-sub" id="sLightDay"></div>
         </div>
         <div class="stat-card c3">
-          <span class="sc-icon">&#x1F321;&#xFE0F;</span>
           <div class="sc-label">Pull Temp</div>
           <div class="sc-value" id="sPullTemp">&#x2014;</div>
           <div class="sc-sub">internal temp</div>
@@ -452,28 +446,24 @@
     <h2 id="related-title">More Pitmaster Tools</h2>
     <div class="tool-links">
       <a class="tool-link" href="/">
-        <span class="tool-link-icon">&#x1F321;&#xFE0F;</span>
         <div>
           <div class="tool-link-name">Meat Smoking Calculator</div>
           <div class="tool-link-desc">Cook times for 28 cuts with full timeline, wood pairings, and serving size math.</div>
         </div>
       </a>
       <a class="tool-link" href="pork-shoulder-calculator.html">
-        <span class="tool-link-icon">&#x1F416;</span>
         <div>
           <div class="tool-link-name">Pork Shoulder Calculator</div>
           <div class="tool-link-desc">Dedicated cook timeline for pulled pork and sliced pork shoulder.</div>
         </div>
       </a>
       <a class="tool-link" href="charcoal-calculator.html">
-        <span class="tool-link-icon">&#x26B0;&#xFE0F;</span>
         <div>
           <div class="tool-link-name">Charcoal Calculator</div>
           <div class="tool-link-desc">Exact charcoal amounts for Minion, Snake, or direct-heat cooks.</div>
         </div>
       </a>
       <a class="tool-link" href="cook-time-coordinator.html">
-        <span class="tool-link-icon">&#x1F4CB;</span>
         <div>
           <div class="tool-link-name">Cook Time Coordinator</div>
           <div class="tool-link-desc">Smoke multiple meats and sync all finish times to the same table.</div>
@@ -775,3 +765,4 @@ document.getElementById('cookieReject').addEventListener('click', function() {
 <!-- INJECT:site-header.js:script -->
 </body>
 </html>
+
