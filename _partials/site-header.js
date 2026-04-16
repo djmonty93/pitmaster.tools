@@ -51,6 +51,23 @@
       });
     });
 
+    nav.querySelectorAll('.nav-dropdown').forEach(function(dropdown){
+      var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+      if (!trigger) return;
+
+      trigger.addEventListener('click', function(event){
+        event.stopPropagation();
+
+        var isOpen = dropdown.classList.contains('is-open');
+        closeDropdowns(nav);
+
+        if (!isOpen) {
+          dropdown.classList.add('is-open');
+          trigger.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+
     document.addEventListener('click', function(event){
       if (!header.contains(event.target)) {
         // Always close open dropdowns (resets aria-expanded on desktop too)

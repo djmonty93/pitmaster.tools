@@ -120,7 +120,6 @@
 .brine-type-btn { border: 2px solid var(--card-border); border-radius: 8px; padding: 1rem; background: #FAFAF8; text-align: center; cursor: pointer; font-family: inherit; transition: border-color .15s, background .15s; }
 .brine-type-btn.active { border-color: var(--amber); background: var(--amber-light); }
 .brine-type-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
-.bt-icon { font-size: 1.5rem; display: block; margin-bottom: .3rem; }
 .bt-name { font-weight: 700; font-size: .95rem; display: block; margin-bottom: .15rem; }
 .bt-desc { font-size: .78rem; color: var(--text-muted); line-height: 1.4; }
 .form-group select, .form-group input[type="number"] {
@@ -231,12 +230,10 @@
     <p class="section-title">Brine Method</p>
     <div class="brine-type-toggle" role="group" aria-label="Brine type">
       <button class="brine-type-btn active" data-brine="wet" type="button" aria-pressed="true">
-        <span class="bt-icon">&#x1F4A7;</span>
         <span class="bt-name">Wet Brine</span>
         <span class="bt-desc">Submerge in salted water. Adds moisture; best for poultry and lean cuts.</span>
       </button>
       <button class="brine-type-btn" data-brine="dry" type="button" aria-pressed="false">
-        <span class="bt-icon">&#x1F9C2;</span>
         <span class="bt-name">Dry Brine</span>
         <span class="bt-desc">Salt rubbed directly on meat. Better bark; preferred for brisket and pork.</span>
       </button>
@@ -304,24 +301,21 @@
     <div class="results-modal" tabindex="-1">
       <div class="results-modal__header">
         <h2 class="results-modal__title" id="resultsModalTitle">Your Brine Recipe</h2>
-        <button class="results-close" id="resultsClose" aria-label="Close results">&times;</button>
+        <button class="results-close" id="resultsClose" aria-label="Close results">Close</button>
       </div>
 
       <div class="stat-cards">
         <div class="stat-card c1">
-          <span class="sc-icon" id="sc1Icon">&#x1F4A7;</span>
           <div class="sc-label" id="sc1Label">Water Needed</div>
           <div class="sc-value" id="sc1Value">—</div>
           <div class="sc-sub" id="sc1Sub"></div>
         </div>
         <div class="stat-card c2">
-          <span class="sc-icon">&#x1F9C2;</span>
           <div class="sc-label">Salt Amount</div>
           <div class="sc-value" id="scSalt">—</div>
           <div class="sc-sub" id="scSaltSub"></div>
         </div>
         <div class="stat-card c3">
-          <span class="sc-icon" id="sc3Icon">&#x1F36C;</span>
           <div class="sc-label" id="sc3Label">Optional Sugar</div>
           <div class="sc-value" id="sc3Value">—</div>
           <div class="sc-sub" id="sc3Sub"></div>
@@ -450,28 +444,24 @@
     <h2>More Pitmaster Tools</h2>
     <div class="tool-links">
       <a class="tool-link" href="/">
-        <span class="tool-link-icon">&#x1F321;&#xFE0F;</span>
         <div>
           <div class="tool-link-name">Meat Smoking Calculator</div>
           <div class="tool-link-desc">Cook times, temperatures, and wood pairings for 28 cuts.</div>
         </div>
       </a>
       <a class="tool-link" href="dry-rub-calculator.html">
-        <span class="tool-link-icon">&#x1F9C2;</span>
         <div>
           <div class="tool-link-name">Dry Rub Calculator</div>
           <div class="tool-link-desc">Scale any rub recipe to your exact meat weight and coverage.</div>
         </div>
       </a>
       <a class="tool-link" href="charcoal-calculator.html">
-        <span class="tool-link-icon">&#x26B0;&#xFE0F;</span>
         <div>
           <div class="tool-link-name">Charcoal Calculator</div>
           <div class="tool-link-desc">Exact charcoal amounts for Minion, Snake, or direct-heat cooks.</div>
         </div>
       </a>
       <a class="tool-link" href="meat-per-person.html">
-        <span class="tool-link-icon">&#x1F356;</span>
         <div>
           <div class="tool-link-name">Meat Per Person Calculator</div>
           <div class="tool-link-desc">Raw weight to buy for any crowd size and serving style.</div>
@@ -627,7 +617,6 @@ function calculate() {
     var sugarCups = sugarGrams / 200; // ~200g/cup granulated sugar
 
     // Stat card 1 — water
-    document.getElementById('sc1Icon').textContent = '\u{1F4A7}';
     document.getElementById('sc1Label').textContent = 'Water Needed';
     document.getElementById('sc1Value').textContent = fmtGal(waterGal, state.wu);
     document.getElementById('sc1Sub').textContent = state.wu === 'kg'
@@ -639,7 +628,6 @@ function calculate() {
     document.getElementById('scSaltSub').textContent = fmtG(saltGrams) + ' — ' + salt.name;
 
     // Stat card 3 — sugar
-    document.getElementById('sc3Icon').textContent = '\u{1F36C}';
     document.getElementById('sc3Label').textContent = 'Optional Sugar';
     if (includeSugar) {
       document.getElementById('sc3Value').textContent = fmtCups(sugarCups);
@@ -675,15 +663,15 @@ function calculate() {
     var badge = document.getElementById('timeBadge');
     if (hours < minHrs) {
       badge.className = 'time-badge warn';
-      badge.textContent = '\u26A0\uFE0F ' + hours + ' hr brine may be too short — minimum recommended: ' + minHrs + ' hrs for a ' + state.strength + ' brine';
+      badge.textContent = 'Review timing — ' + hours + ' hr brine may be too short. Minimum recommended: ' + minHrs + ' hrs for a ' + state.strength + ' brine';
     } else if (hours > maxHrs) {
       badge.className = 'time-badge err';
-      badge.textContent = '\u26D4 ' + hours + ' hrs exceeds the ' + maxHrs + '-hr maximum for a ' + state.strength + ' brine — risk of over-salting';
+      badge.textContent = 'Too long — ' + hours + ' hrs exceeds the ' + maxHrs + '-hr maximum for a ' + state.strength + ' brine';
       warnCard.style.display = 'block';
       warnCard.textContent = 'Over-brining at a ' + state.strength + ' concentration can make meat unpleasantly salty and cause a mushy texture. Reduce brine time or switch to a lighter concentration.';
     } else {
       badge.className = 'time-badge ok';
-      badge.textContent = '\u2705 ' + hours + ' hours is within the recommended ' + minHrs + '–' + maxHrs + '-hr range for a ' + state.strength + ' brine';
+      badge.textContent = 'Timing is on target — ' + hours + ' hours is within the recommended ' + minHrs + '–' + maxHrs + '-hr range for a ' + state.strength + ' brine';
     }
 
   } else {
@@ -701,7 +689,6 @@ function calculate() {
     var totalTbsp = totalTsp / 3;
 
     // Stat card 1 — application rate
-    document.getElementById('sc1Icon').textContent = '\u{1F969}';
     document.getElementById('sc1Label').textContent = 'Application Rate';
     document.getElementById('sc1Value').textContent = fmtTsp(tspPerLb) + ' / lb';
     document.getElementById('sc1Sub').textContent = state.wu === 'kg'
@@ -713,7 +700,6 @@ function calculate() {
     document.getElementById('scSaltSub').textContent = fmtG(totalG) + ' — ' + salt.name;
 
     // Stat card 3 — rest time
-    document.getElementById('sc3Icon').textContent = '\u23F0';
     document.getElementById('sc3Label').textContent = 'Planned Rest';
     document.getElementById('sc3Value').textContent = dryHours + ' hr' + (dryHours !== 1 ? 's' : '');
     document.getElementById('sc3Sub').textContent = dryHours >= 24 ? 'Excellent — full penetration' : dryHours >= 4 ? 'Good for thin cuts' : 'Minimum for surface seasoning';
@@ -742,10 +728,10 @@ function calculate() {
     var dbadge = document.getElementById('timeBadge');
     if (dryHours < recMin) {
       dbadge.className = 'time-badge warn';
-      dbadge.textContent = '\u26A0\uFE0F ' + dryHours + ' hr rest may be too short for ' + Math.round(weightLbs) + ' lbs — recommended minimum: ' + recMin + ' hrs';
+      dbadge.textContent = 'Review timing — ' + dryHours + ' hr rest may be too short for ' + Math.round(weightLbs) + ' lbs. Recommended minimum: ' + recMin + ' hrs';
     } else {
       dbadge.className = 'time-badge ok';
-      dbadge.textContent = '\u2705 ' + dryHours + ' hours is sufficient for ' + Math.round(weightLbs) + ' lbs of meat';
+      dbadge.textContent = 'Timing is on target — ' + dryHours + ' hours is sufficient for ' + Math.round(weightLbs) + ' lbs of meat';
     }
   }
 
@@ -862,3 +848,4 @@ document.getElementById('cookieReject').addEventListener('click', function() {
 <!-- INJECT:site-header.js:script -->
 </body>
 </html>
+

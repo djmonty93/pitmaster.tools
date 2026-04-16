@@ -161,7 +161,6 @@
   background: var(--amber-light);
 }
 .method-card:focus-within { outline: 2px solid var(--amber); outline-offset: 2px; }
-.method-icon { font-size: 1.5rem; display: block; margin-bottom: .35rem; }
 .method-name { font-weight: 700; font-size: .9rem; color: var(--charcoal); display: block; margin-bottom: .2rem; }
 .method-desc { font-size: .75rem; color: var(--text-muted); line-height: 1.4; }
 .coal-toggle {
@@ -204,7 +203,7 @@
   margin-bottom: .75rem;
   color: var(--charcoal);
 }
-.tips-list { list-style: none; padding: 0; }
+.tips-list { list-style: none; padding: 0; counter-reset: tip-step; }
 .tips-list li {
   display: flex;
   gap: .6rem;
@@ -214,9 +213,24 @@
   color: #333;
   padding: .4rem 0;
   border-bottom: 1px solid #F0EBE3;
+  counter-increment: tip-step;
 }
 .tips-list li:last-child { border-bottom: none; }
-.tip-icon { flex-shrink: 0; font-size: 1rem; margin-top: .05rem; }
+.tips-list li::before {
+  content: counter(tip-step);
+  flex-shrink: 0;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  background: var(--amber-light);
+  color: var(--amber-dark);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .72rem;
+  font-weight: 800;
+  margin-top: .05rem;
+}
 .warn-card {
   background: var(--yellow-warn);
   border: 1px solid var(--yellow-warn-border);
@@ -300,19 +314,16 @@
     <div class="method-cards" role="radiogroup" aria-label="Cook method">
       <label class="method-card selected" id="methodMinion">
         <input type="radio" name="method" value="minion" checked>
-        <span class="method-icon">&#x1F525;</span>
         <span class="method-name">Minion</span>
         <span class="method-desc">Unlit bed + lit coals on top. Best for long low-and-slow cooks 8–14 hrs.</span>
       </label>
       <label class="method-card" id="methodSnake">
         <input type="radio" name="method" value="snake">
-        <span class="method-icon">&#x1F40D;</span>
         <span class="method-name">Snake / Fuse</span>
         <span class="method-desc">C-shaped coal ring lit at one end. Stable 225–275°F for 6–10 hrs.</span>
       </label>
       <label class="method-card" id="methodDirect">
         <input type="radio" name="method" value="direct">
-        <span class="method-icon">&#x1F321;&#xFE0F;</span>
         <span class="method-name">Direct Heat</span>
         <span class="method-desc">All coals lit at once for higher-heat grilling and shorter cooks.</span>
       </label>
@@ -356,24 +367,21 @@
     <div class="results-modal" tabindex="-1">
       <div class="results-modal__header">
         <h2 class="results-modal__title" id="resultsModalTitle">Your Charcoal Estimate</h2>
-        <button class="results-close" id="resultsClose" aria-label="Close results">&times;</button>
+        <button class="results-close" id="resultsClose" aria-label="Close results">Close</button>
       </div>
 
       <div class="stat-cards">
         <div class="stat-card c1">
-          <span class="sc-icon">&#x26B0;&#xFE0F;</span>
           <div class="sc-label">Total to Load</div>
           <div class="sc-value" id="scTotal">—</div>
           <div class="sc-sub" id="scTotalSub"></div>
         </div>
         <div class="stat-card c2">
-          <span class="sc-icon">&#x1F525;</span>
           <div class="sc-label">Lit Starter Coals</div>
           <div class="sc-value" id="scLit">—</div>
           <div class="sc-sub" id="scLitSub"></div>
         </div>
         <div class="stat-card c3">
-          <span class="sc-icon">&#x23F1;&#xFE0F;</span>
           <div class="sc-label">Top-Up Rate</div>
           <div class="sc-value" id="scTopup">—</div>
           <div class="sc-sub" id="scTopupSub"></div>
@@ -487,21 +495,18 @@
     <h2>More Pitmaster Tools</h2>
     <div class="tool-links">
       <a class="tool-link" href="/">
-        <span class="tool-link-icon">&#x1F321;&#xFE0F;</span>
         <div>
           <div class="tool-link-name">Meat Smoking Calculator</div>
           <div class="tool-link-desc">Cook times, temperatures, and wood pairings for 28 cuts.</div>
         </div>
       </a>
       <a class="tool-link" href="dry-rub-calculator.html">
-        <span class="tool-link-icon">&#x1F9C2;</span>
         <div>
           <div class="tool-link-name">Dry Rub Calculator</div>
           <div class="tool-link-desc">Scale any rub recipe to your exact meat weight and coverage.</div>
         </div>
       </a>
       <a class="tool-link" href="meat-per-person.html">
-        <span class="tool-link-icon">&#x1F356;</span>
         <div>
           <div class="tool-link-name">Meat Per Person Calculator</div>
           <div class="tool-link-desc">Raw weight to buy for any crowd size and serving style.</div>
@@ -561,11 +566,11 @@ var METHODS = {
     topupBr:       0.50,  // lbs/hr top-up after 2 hrs (if needed)
     topupLu:       0.40,
     tips: [
-      { icon: '1\uFE0F\u20E3', text: 'Fill charcoal bowl with <strong>unlit</strong> coal first. Make a small depression or pocket near the center.' },
-      { icon: '2\uFE0F\u20E3', text: 'Light your starter coals in a chimney until fully ashed over (~15 min), then pour directly on top of the unlit bed.' },
-      { icon: '3\uFE0F\u20E3', text: 'Add wood chunks <em>around</em> the unlit coals — they will smoke as the fire spreads to them.' },
-      { icon: '4\uFE0F\u20E3', text: 'Close all vents to ~25% intake, 50% exhaust. Let temp stabilize for 20–30 min before putting meat on.' },
-      { icon: '\u26A0\uFE0F', text: 'Avoid opening the lid in the first hour — the fire is still establishing and temp is rising naturally.' }
+      { text: 'Fill charcoal bowl with <strong>unlit</strong> coal first. Make a small depression or pocket near the center.' },
+      { text: 'Light your starter coals in a chimney until fully ashed over (~15 min), then pour directly on top of the unlit bed.' },
+      { text: 'Add wood chunks <em>around</em> the unlit coals — they will smoke as the fire spreads to them.' },
+      { text: 'Close all vents to ~25% intake, 50% exhaust. Let temp stabilize for 20–30 min before putting meat on.' },
+      { text: 'Avoid opening the lid in the first hour — the fire is still establishing and temp is rising naturally.' }
     ]
   },
   snake: {
@@ -575,11 +580,11 @@ var METHODS = {
     topupBr:       0,    // no top-up; snake self-feeds
     topupLu:       0,
     tips: [
-      { icon: '1\uFE0F\u20E3', text: 'Arrange two rows of briquettes side-by-side in a C-shape around the inside edge of a 22" kettle. Two briquettes wide, two high.' },
-      { icon: '2\uFE0F\u20E3', text: 'Place wood chunks every 6–8 inches along the snake — they will smoke as the fire reaches them over several hours.' },
-      { icon: '3\uFE0F\u20E3', text: 'Light 10–12 briquettes in a chimney until ashed over, then place them at one end of the snake to start the burn.' },
-      { icon: '4\uFE0F\u20E3', text: 'Put a foil drip pan with water in the center of the coal grate. Set the cooking grate and place meat over the drip pan, away from coals.' },
-      { icon: '\u26A0\uFE0F', text: 'Snake works best with standard-size briquettes (Kingsford Blue). Mini or irregular briquettes build poor contact and burn unevenly.' }
+      { text: 'Arrange two rows of briquettes side-by-side in a C-shape around the inside edge of a 22" kettle. Two briquettes wide, two high.' },
+      { text: 'Place wood chunks every 6–8 inches along the snake — they will smoke as the fire reaches them over several hours.' },
+      { text: 'Light 10–12 briquettes in a chimney until ashed over, then place them at one end of the snake to start the burn.' },
+      { text: 'Put a foil drip pan with water in the center of the coal grate. Set the cooking grate and place meat over the drip pan, away from coals.' },
+      { text: 'Snake works best with standard-size briquettes (Kingsford Blue). Mini or irregular briquettes build poor contact and burn unevenly.' }
     ]
   },
   direct: {
@@ -589,11 +594,11 @@ var METHODS = {
     topupBr:       0,
     topupLu:       0,
     tips: [
-      { icon: '1\uFE0F\u20E3', text: 'Fill a chimney with your calculated charcoal amount and light from the bottom with a firestarter or crumpled newspaper.' },
-      { icon: '2\uFE0F\u20E3', text: 'Wait until the top coals are at least half ashed over (~15–20 min for briquettes, 10–12 min for lump). Dump onto the coal grate.' },
-      { icon: '3\uFE0F\u20E3', text: 'Spread coals into a two-zone setup: pile high on one side for searing, leave the other side empty for indirect finishing.' },
-      { icon: '4\uFE0F\u20E3', text: 'If your cook is longer than 60–90 min, have a second chimney ready to light partway through so you can add hot coals without dropping temp.' },
-      { icon: '\u26A0\uFE0F', text: 'For cooks over 2 hrs at direct heat, refuel with a lit second chimney — do not add raw unlit coals mid-cook as they release unpleasant smoke.' }
+      { text: 'Fill a chimney with your calculated charcoal amount and light from the bottom with a firestarter or crumpled newspaper.' },
+      { text: 'Wait until the top coals are at least half ashed over (~15–20 min for briquettes, 10–12 min for lump). Dump onto the coal grate.' },
+      { text: 'Spread coals into a two-zone setup: pile high on one side for searing, leave the other side empty for indirect finishing.' },
+      { text: 'If your cook is longer than 60–90 min, have a second chimney ready to light partway through so you can add hot coals without dropping temp.' },
+      { text: 'For cooks over 2 hrs at direct heat, refuel with a lit second chimney — do not add raw unlit coals mid-cook as they release unpleasant smoke.' }
     ]
   }
 };
@@ -693,7 +698,7 @@ function calculate() {
   tipsList.innerHTML = '';
   m.tips.forEach(function(tip) {
     var li = document.createElement('li');
-    li.innerHTML = '<span class="tip-icon">' + tip.icon + '</span><span>' + tip.text + '</span>';
+    li.innerHTML = '<span>' + tip.text + '</span>';
     tipsList.appendChild(li);
   });
 
@@ -835,3 +840,4 @@ document.getElementById('cookieReject').addEventListener('click', function() {
 <!-- INJECT:site-header.js:script -->
 </body>
 </html>
+

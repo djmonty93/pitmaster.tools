@@ -40,28 +40,103 @@
 <!-- INJECT:site-header.css -->
 <!-- INJECT:site-base.css -->
 <style>
-.tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.1rem; margin-bottom: .5rem; }
-.tool-card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); padding: 1.3rem 1.25rem; display: flex; flex-direction: column; gap: .6rem; transition: box-shadow .15s, transform .15s; }
-.tool-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.1); transform: translateY(-2px); }
-.tool-card__icon { font-size: 1.6rem; line-height: 1; }
-.tool-card__name { font-size: 1rem; font-weight: 700; color: var(--text); text-decoration: none; }
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 1.15rem;
+  margin-bottom: .8rem;
+}
+.tool-card {
+  background: linear-gradient(180deg, rgba(255,255,255,.94) 0%, rgba(248,244,237,.92) 100%);
+  border-radius: 18px;
+  border: 1px solid rgba(213,204,189,.9);
+  padding: 1.4rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+  transition: box-shadow .15s, transform .15s, border-color .15s;
+  position: relative;
+  overflow: hidden;
+  min-height: 220px;
+}
+.tool-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--amber) 0%, #d6b271 100%);
+}
+.tool-card:hover {
+  box-shadow: 0 22px 44px rgba(24,23,20,.1);
+  transform: translateY(-3px);
+  border-color: #d8b475;
+}
+.tool-card__name {
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-size: 1.18rem;
+  font-weight: 700;
+  color: var(--charcoal);
+  text-decoration: none;
+  line-height: 1.2;
+}
 .tool-card__name:hover { color: var(--amber-dark); }
-.tool-card__desc { font-size: .875rem; color: var(--muted); line-height: 1.5; flex: 1; }
-.tool-card__link { display: inline-block; margin-top: auto; padding: .45rem 1rem; background: var(--amber); color: #fff; font-size: .82rem; font-weight: 700; border-radius: 6px; text-decoration: none; transition: background .15s; width: fit-content; }
-.tool-card__link:hover, .tool-card__link:focus-visible { background: var(--amber-dark); }
-.intro-section { margin-top: 3rem; }
-.intro-section h2 { font-family: Georgia,"Times New Roman",serif; font-size: 1.4rem; font-weight: 700; margin-bottom: .75rem; }
-.intro-section p { color: var(--muted); margin-bottom: .9rem; max-width: 720px; }
-.cookie-banner__btns { display: flex; gap: .6rem; flex-shrink: 0; }
-.cookie-btn { padding: .45rem 1.1rem; border: none; border-radius: 6px; font-size: .82rem; font-weight: 700; cursor: pointer; }
-.cookie-btn--accept { background: var(--amber); color: #fff; }
-.cookie-btn--reject { background: #333; color: #ccc; }
+.tool-card__desc {
+  font-size: .93rem;
+  color: #5a534b;
+  line-height: 1.68;
+  flex: 1;
+}
+.tool-card__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: auto;
+  padding: .72rem 1.1rem;
+  background: #181714;
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 800;
+  border-radius: 999px;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  transition: box-shadow .15s, transform .15s;
+  width: fit-content;
+}
+.tool-card__link:hover, .tool-card__link:focus-visible {
+  box-shadow: 0 12px 22px rgba(24,23,20,.16);
+  transform: translateY(-1px);
+}
+.intro-section {
+  margin-top: 3rem;
+  padding: 1.6rem 1.65rem;
+  background: rgba(255,255,255,.72);
+  border: 1px solid rgba(213,204,189,.9);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+.intro-section h2 {
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-size: 1.55rem;
+  font-weight: 700;
+  margin-bottom: .85rem;
+}
+.intro-section p {
+  color: #514b44;
+  margin-bottom: .95rem;
+  max-width: 760px;
+  line-height: 1.72;
+}
 footer nav a { color: #aaa; text-decoration: none; }
 footer nav a:hover { color: var(--amber); }
 @media (max-width: 600px) {
   .page-hero h1 { font-size: 1.5rem; }
   .tools-grid { grid-template-columns: 1fr; }
-  header { padding: 0 1rem; min-height: 52px; }
+  header { padding: 0 1rem; min-height: 60px; }
+  .tool-card { min-height: 0; }
+  .intro-section { padding: 1.25rem; }
 }
 </style>
 </head>
@@ -99,31 +174,27 @@ footer nav a:hover { color: var(--amber); }
 <main>
   <div class="page-hero">
     <h1>All BBQ Calculators</h1>
-    <p>Free tools for every stage of the cook — from prep and seasoning through serving and cost.</p>
+    <p>Plan cook timelines, serving quantities, ingredient ratios, fuel loads, and catering budgets from one professional BBQ calculator library.</p>
   </div>
 
   <h2 class="section-title">Cut Calculators</h2>
   <div class="tools-grid">
     <div class="tool-card">
-      <div class="tool-card__icon">🥩</div>
       <a href="brisket-calculator.html" class="tool-card__name">Brisket Calculator</a>
       <p class="tool-card__desc">Full cook timeline for flat, point, and packer briskets — stall window, wrap options, and exact start time working backward from serve time.</p>
       <a href="brisket-calculator.html" class="tool-card__link">Open Calculator</a>
     </div>
     <div class="tool-card">
-      <div class="tool-card__icon">🐷</div>
       <a href="pork-shoulder-calculator.html" class="tool-card__name">Pork Shoulder Calculator</a>
       <p class="tool-card__desc">Pull times and stall windows for pork butt and shoulder. Supports bone-in toggle, pulled or sliced style, and any smoker temperature.</p>
       <a href="pork-shoulder-calculator.html" class="tool-card__link">Open Calculator</a>
     </div>
     <div class="tool-card">
-      <div class="tool-card__icon">🍖</div>
       <a href="rib-calculator.html" class="tool-card__name">Rib Calculator</a>
       <p class="tool-card__desc">Baby back, spare, competition, and beef ribs with standard or 3-2-1 method timelines. Baby back uses 2-2-1; spare uses 3-2-1.</p>
       <a href="rib-calculator.html" class="tool-card__link">Open Calculator</a>
     </div>
     <div class="tool-card">
-      <div class="tool-card__icon">🦃</div>
       <a href="turkey-smoking-calculator.html" class="tool-card__name">Turkey Calculator</a>
       <p class="tool-card__desc">Whole turkey, spatchcocked, breast, legs, thighs, and wings — exact cook times from 225°F to 325°F and a full start-to-serve schedule.</p>
       <a href="turkey-smoking-calculator.html" class="tool-card__link">Open Calculator</a>
@@ -133,25 +204,21 @@ footer nav a:hover { color: var(--amber); }
   <h2 class="section-title">Planning &amp; Timing</h2>
   <div class="tools-grid">
     <div class="tool-card">
-      <div class="tool-card__icon">📊</div>
       <a href="/" class="tool-card__name">Meat Smoking Calculator</a>
       <p class="tool-card__desc">The complete BBQ planner: 28 cuts, full cook timeline, serving math, wood pairings, unit toggles, and a printable results sheet.</p>
       <a href="/" class="tool-card__link">Open Calculator</a>
     </div>
     <div class="tool-card">
-      <div class="tool-card__icon">⏱️</div>
       <a href="cook-time-coordinator.html" class="tool-card__name">Cook Time Coordinator</a>
       <p class="tool-card__desc">Stagger up to 6 different meats to all land on the table at the same time. CSS Gantt chart shows every cut's start window at a glance.</p>
       <a href="cook-time-coordinator.html" class="tool-card__link">Open Calculator</a>
     </div>
     <div class="tool-card">
-      <div class="tool-card__icon">👥</div>
       <a href="meat-per-person.html" class="tool-card__name">Meat Per Person</a>
       <p class="tool-card__desc">How much raw meat to buy for any number of guests. Accounts for shrinkage by cut so you never run short at the table.</p>
       <a href="meat-per-person.html" class="tool-card__link">Open Calculator</a>
     </div>
     <div class="tool-card">
-      <div class="tool-card__icon">🍽️</div>
       <a href="catering-calculator.html" class="tool-card__name">Catering Calculator</a>
       <p class="tool-card__desc">Multi-meat planning for events up to 500 people. Calculates ribs by racks, chicken by pieces, and includes optional cost estimates.</p>
       <a href="catering-calculator.html" class="tool-card__link">Open Calculator</a>
@@ -161,19 +228,16 @@ footer nav a:hover { color: var(--amber); }
   <h2 class="section-title">Ingredient Calculators</h2>
   <div class="tools-grid">
     <div class="tool-card">
-      <div class="tool-card__icon">🧂</div>
       <a href="dry-rub-calculator.html" class="tool-card__name">Dry Rub Calculator</a>
       <p class="tool-card__desc">Scale any rub recipe to the right total weight for your meat. Supports up to 8 ingredients in tsp, tbsp, cup, oz, or grams.</p>
       <a href="dry-rub-calculator.html" class="tool-card__link">Open Calculator</a>
     </div>
     <div class="tool-card">
-      <div class="tool-card__icon">💧</div>
       <a href="brine-calculator.html" class="tool-card__name">Brine Calculator</a>
       <p class="tool-card__desc">Exact water, salt, and sugar for wet brining — or dry-brine salt amounts. Supports Diamond Crystal, Morton kosher, table, and sea salt.</p>
       <a href="brine-calculator.html" class="tool-card__link">Open Calculator</a>
     </div>
     <div class="tool-card">
-      <div class="tool-card__icon">🔥</div>
       <a href="charcoal-calculator.html" class="tool-card__name">Charcoal Calculator</a>
       <p class="tool-card__desc">Starting charcoal, lit coals, and top-up amounts for Minion, Snake, or direct-heat methods. Covers lump and briquettes.</p>
       <a href="charcoal-calculator.html" class="tool-card__link">Open Calculator</a>
@@ -183,13 +247,11 @@ footer nav a:hover { color: var(--amber); }
   <h2 class="section-title">Cost &amp; Yield</h2>
   <div class="tools-grid">
     <div class="tool-card">
-      <div class="tool-card__icon">💰</div>
       <a href="bbq-cost-calculator.html" class="tool-card__name">BBQ Cost Calculator</a>
       <p class="tool-card__desc">Total cook cost, cost per pound cooked, and cost per serving — accounting for meat, rub, fuel, and optional time value.</p>
       <a href="bbq-cost-calculator.html" class="tool-card__link">Open Calculator</a>
     </div>
     <div class="tool-card">
-      <div class="tool-card__icon">📐</div>
       <a href="brisket-yield-calculator.html" class="tool-card__name">Brisket Yield Calculator</a>
       <p class="tool-card__desc">Flat weight, point weight, and cooked yield at 195°F and 203°F by USDA grade. Tells you exactly how many packer briskets to buy for a crowd.</p>
       <a href="brisket-yield-calculator.html" class="tool-card__link">Open Calculator</a>
@@ -249,5 +311,6 @@ footer nav a:hover { color: var(--amber); }
 <!-- INJECT:site-header.js:script -->
 </body>
 </html>
+
 
 

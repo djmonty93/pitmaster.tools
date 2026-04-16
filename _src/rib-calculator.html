@@ -138,7 +138,6 @@
 .rib-card:hover { border-color: var(--amber); background: var(--amber-light); }
 .rib-radio:checked + .rib-card { border-color: var(--amber); background: var(--amber-light); }
 .rib-radio:focus-visible + .rib-card { outline: 2px solid var(--amber); outline-offset: 2px; }
-.rib-card-icon { font-size: 1.5rem; line-height: 1; }
 .rib-card-name { font-size: .78rem; font-weight: 700; color: var(--charcoal); line-height: 1.3; }
 .rib-card-sub { font-size: .68rem; color: var(--text-muted); line-height: 1.3; }
 .method-toggle { display: flex; border: 1.5px solid var(--card-border); border-radius: 6px; overflow: hidden; }
@@ -238,7 +237,7 @@
 <header>
   <a href="/" class="logo">Pitmaster<span> Tools</span></a>
   <div class="header-right">
-    <nav class="nav-links" aria-label="Site navigation">
+    <nav class="header-nav" aria-label="Site navigation">
       <div class="nav-dropdown">
         <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
         <ul class="nav-dropdown__menu" id="tools-menu" role="list">
@@ -293,7 +292,6 @@
         <label>
           <input type="radio" class="rib-radio" name="ribType" value="baby-back" checked>
           <span class="rib-card">
-            <span class="rib-card-icon">&#x1F356;</span>
             <span class="rib-card-name">Baby Back Ribs</span>
             <span class="rib-card-sub">Leaner, 5–5.5 hrs</span>
           </span>
@@ -301,7 +299,6 @@
         <label>
           <input type="radio" class="rib-radio" name="ribType" value="spare">
           <span class="rib-card">
-            <span class="rib-card-icon">&#x1F969;</span>
             <span class="rib-card-name">Spare Ribs</span>
             <span class="rib-card-sub">Meatier, 6–6.5 hrs</span>
           </span>
@@ -309,7 +306,6 @@
         <label>
           <input type="radio" class="rib-radio" name="ribType" value="competition">
           <span class="rib-card">
-            <span class="rib-card-icon">&#x1F3C6;</span>
             <span class="rib-card-name">Competition</span>
             <span class="rib-card-sub">Trimmed, 5 hrs</span>
           </span>
@@ -317,7 +313,6 @@
         <label>
           <input type="radio" class="rib-radio" name="ribType" value="beef">
           <span class="rib-card">
-            <span class="rib-card-icon">&#x1F9B4;</span>
             <span class="rib-card-name">Beef Ribs (Dino)</span>
             <span class="rib-card-sub">Plate ribs, by weight</span>
           </span>
@@ -380,26 +375,23 @@
     <div class="results-modal" tabindex="-1" id="resultsModalInner">
       <div class="results-modal__header no-print">
         <div class="results-modal__title" id="resultsModalTitle">Your rib smoking timeline</div>
-        <button class="results-close" id="closeResultsBtn" type="button" aria-label="Close results">&#xD7;</button>
+        <button class="results-close" id="closeResultsBtn" type="button" aria-label="Close results">Close</button>
       </div>
       <div id="print-header-modal" style="display:none"></div>
 
       <!-- Standard: 3 stat cards -->
       <div class="stat-cards" id="statCardsEl">
         <div class="stat-card c1">
-          <span class="sc-icon">&#x23F1;</span>
           <div class="sc-label">Total Cook Time</div>
           <div class="sc-value" id="sCookTime">&#x2014;</div>
           <div class="sc-sub">hours</div>
         </div>
         <div class="stat-card c2">
-          <span class="sc-icon">&#x1F525;</span>
           <div class="sc-label">Light Smoker At</div>
           <div class="sc-value" id="sStartTime">&#x2014;</div>
           <div class="sc-sub" id="sStartDay"></div>
         </div>
         <div class="stat-card c3">
-          <span class="sc-icon">&#x1F321;&#xFE0F;</span>
           <div class="sc-label">Pull Temperature</div>
           <div class="sc-value" id="sPullTemp">&#x2014;</div>
           <div class="sc-sub">internal</div>
@@ -1079,3 +1071,4 @@
 <!-- INJECT:site-header.js:script -->
 </body>
 </html>
+

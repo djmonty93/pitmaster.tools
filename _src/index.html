@@ -445,23 +445,20 @@
     <div class="results-modal" tabindex="-1">
       <div class="results-modal__header no-print">
         <div class="results-modal__title" id="resultsModalTitle">Your smoking timeline</div>
-        <button class="results-close" id="closeResultsBtn" type="button" aria-label="Close results">×</button>
+        <button class="results-close" id="closeResultsBtn" type="button" aria-label="Close results">Close</button>
       </div>
     <div class="stat-cards">
       <div class="stat-card c1">
-        <span class="sc-icon">&#x23F1;</span>
         <div class="sc-label">Total Cook Time</div>
         <div class="sc-value" id="sCookTime">&#x2014;</div>
         <div class="sc-sub">hours</div>
       </div>
       <div class="stat-card c2">
-        <span class="sc-icon">&#x1F525;</span>
         <div class="sc-label">Light Smoker At</div>
         <div class="sc-value" id="sStartTime">&#x2014;</div>
         <div class="sc-sub" id="sStartDay"></div>
       </div>
       <div class="stat-card c3">
-        <span class="sc-icon">&#x1F321;</span>
         <div class="sc-label">Pull Temperature</div>
         <div class="sc-value" id="sPullTemp">&#x2014;</div>
         <div class="sc-sub" id="sPullSub">internal</div>
@@ -1299,7 +1296,7 @@ function render(cut, inp){
   var warnEl=document.getElementById('mcWarn');
   if(rMin>cut.maxLbs){
     var n=Math.ceil(rMin/cut.maxLbs);
-    warnEl.textContent='\u26A0 This cook may require '+n+' cuts/pieces. Multiple pieces in one smoker may affect airflow and add 10\u201320% cook time.';
+    warnEl.textContent='Large cook notice: this plan may require '+n+' cuts or pieces. Multiple pieces in one smoker may affect airflow and add 10\u201320% cook time.';
     warnEl.classList.add('visible');
   } else { warnEl.classList.remove('visible'); }
 
@@ -1406,8 +1403,8 @@ function calc(){
   var w=wLbs(), np=parseInt(document.getElementById('numPeople').value);
   if(!w||w<=0){ setMsg('Please enter a weight greater than 0.','error'); return; }
   if(!np||np<1){ setMsg('Please enter at least 1 person.','error'); return; }
-  if(w>30)        setMsg('\u26A0 '+dW(w)+' is very large. Double-check your entry.','warn');
-  else if(np>100) setMsg('\u26A0 '+np+' people is a large crowd cook.','warn');
+  if(w>30)        setMsg('Check your entry: '+dW(w)+' is very large.','warn');
+  else if(np>100) setMsg('Large crowd notice: '+np+' people will likely require multiple cuts or smokers.','warn');
   else            setMsg('');
   var sd=serveDate();
   if(!sd){ setMsg('Please enter a serving time.','error'); return; }
@@ -1505,5 +1502,6 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
 <!-- INJECT:site-header.js:script -->
 </body>
 </html>
+
 
 
