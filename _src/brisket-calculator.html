@@ -121,7 +121,7 @@
 .style-btn.active { border-color: var(--amber); background: var(--amber-light); }
 .style-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .sb-name { font-weight: 700; font-size: .95rem; display: block; margin-bottom: .1rem; }
-.sb-desc { font-size: .76rem; color: var(--text-muted); line-height: 1.4; }
+.sb-desc { font-size: .8rem; color: var(--text-muted); line-height: 1.4; }
 .wrap-toggle { display: flex; border: 1.5px solid var(--card-border); border-radius: 6px; overflow: hidden; }
 .wrap-toggle button { flex: 1; border: none; background: #FAFAF8; color: var(--text-muted); font-family: inherit; font-size: .875rem; font-weight: 600; padding: .55rem .5rem; cursor: pointer; transition: background .15s,color .15s; border-right: 1px solid var(--card-border); line-height: 1.2; }
 .wrap-toggle button:last-child { border-right: none; }
@@ -138,7 +138,7 @@
 .tl-dot.red { background: var(--red); }
 .tl-dot.green { background: var(--green); }
 .tl-time { font-weight: 700; font-size: .9rem; min-width: 90px; font-variant-numeric: tabular-nums; }
-.tl-day { font-size: .72rem; color: var(--text-muted); }
+.tl-day { font-size: .8rem; color: var(--text-muted); }
 .tl-label { font-weight: 600; font-size: .9rem; }
 .tl-sub { font-size: .8rem; color: var(--text-muted); margin-top: .1rem; }
 .print-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
@@ -150,7 +150,7 @@
 .ref-table { width: 100%; border-collapse: collapse; min-width: 480px; }
 .ref-table th, .ref-table td { text-align: center; padding: .7rem .8rem; border-bottom: 1px solid #EFE7DA; font-size: .9rem; }
 .ref-table th:first-child, .ref-table td:first-child { text-align: left; font-weight: 700; }
-.ref-table thead th { background: #FAF5EC; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); position: sticky; top: 0; }
+.ref-table thead th { background: #FAF5EC; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); position: sticky; top: 0; }
 .ref-table tbody tr:nth-child(even) { background: #FCFAF6; }
 .faq-section { margin: 2rem 0; }
 .faq-section h2 { font-family: Georgia,serif; font-size: 1.55rem; margin-bottom: 1rem; }
@@ -161,6 +161,7 @@
 </head>
 <body>
 
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <header>
   <a href="/" class="logo">Pitmaster<span> Tools</span></a>
   <div class="header-right">
@@ -199,7 +200,7 @@
   </div>
 </header>
 
-<main>
+<main id="main-content">
   <div id="print-header">
     <div class="print-title" id="ptitle">Brisket Smoking Timeline</div>
     <div class="pm" id="pmeta"></div>
@@ -245,9 +246,9 @@
       <div class="form-group full-width">
         <label>Wrap Method</label>
         <div class="wrap-toggle" role="group" aria-label="Wrap method">
-          <button data-wrap="foil" class="active" type="button" aria-pressed="true">Foil<br><small style="font-weight:400;font-size:.72rem">Texas Crutch</small></button>
-          <button data-wrap="paper" type="button" aria-pressed="false">Butcher Paper<br><small style="font-weight:400;font-size:.72rem">Best bark</small></button>
-          <button data-wrap="none" type="button" aria-pressed="false">No Wrap<br><small style="font-weight:400;font-size:.72rem">Maximum bark</small></button>
+          <button data-wrap="foil" class="active" type="button" aria-pressed="true">Foil<br><small style="font-weight:400;font-size:.8rem">Texas Crutch</small></button>
+          <button data-wrap="paper" type="button" aria-pressed="false">Butcher Paper<br><small style="font-weight:400;font-size:.8rem">Best bark</small></button>
+          <button data-wrap="none" type="button" aria-pressed="false">No Wrap<br><small style="font-weight:400;font-size:.8rem">Maximum bark</small></button>
         </div>
       </div>
 
@@ -297,7 +298,7 @@
       </div>
 
       <div style="margin-top:1rem" class="no-print">
-        <button class="print-btn" id="printBtn" type="button">
+        <button class="print-btn" id="printBtn" type="button" aria-label="Print results">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <polyline points="6 9 6 2 18 2 18 9"/>
             <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>

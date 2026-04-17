@@ -7,6 +7,24 @@
    page stylesheets.
    ============================================================ */
 
+/* ----- Skip to content ----- */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 9999;
+  padding: .5rem 1rem;
+  background: #fff;
+  color: #1a1a1a;
+  font-size: .9rem;
+  font-weight: 700;
+  border: 2px solid #1a1a1a;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: top .1s;
+}
+.skip-link:focus { top: 0.5rem; }
+
 /* ----- Header nav container ----- */
 .header-right {
   display: flex;

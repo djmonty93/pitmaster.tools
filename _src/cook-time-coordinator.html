@@ -132,7 +132,7 @@
 .meat-row-del:hover { background: #FECACA; color: #991B1B; }
 .meat-row-del:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .col-labels { display: grid; grid-template-columns: 2fr 5.5rem 6rem 7rem 2rem; gap: .5rem; padding: 0 .75rem; margin-bottom: .25rem; }
-.col-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
+.col-label { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
 .meat-actions { display: flex; gap: 1rem; align-items: center; margin-top: .5rem; }
 .add-meat-btn { background: none; border: 1.5px dashed var(--card-border); border-radius: 6px; padding: .5rem 1rem; font-family: inherit; font-size: .875rem; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: border-color .15s, color .15s; }
 .add-meat-btn:hover { border-color: var(--amber); color: var(--amber-dark); }
@@ -144,7 +144,7 @@
 .results-close:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .summary-strip { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
 .summary-chip { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); box-shadow: var(--shadow); padding: .75rem 1.25rem; }
-.summary-chip .chip-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin-bottom: .2rem; }
+.summary-chip .chip-label { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin-bottom: .2rem; }
 .summary-chip .chip-val { font-family: Georgia,serif; font-size: 1.3rem; font-weight: 700; }
 .gantt-section { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 1.5rem; }
 .gantt-section h3 { font-family: Georgia,serif; font-size: 1rem; font-weight: 700; padding: 1rem 1.25rem .5rem; border-bottom: 1px solid var(--card-border); }
@@ -153,13 +153,13 @@
 .gantt-row:last-of-type { margin-bottom: 0; }
 .gantt-meat-label { font-size: .8rem; font-weight: 700; min-width: 140px; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
 .gantt-track { flex: 1; min-width: 400px; height: 28px; background: #F5F0E8; border-radius: 4px; position: relative; }
-.gantt-bar { position: absolute; top: 0; height: 100%; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: .68rem; font-weight: 700; color: #fff; overflow: hidden; white-space: nowrap; padding: 0 4px; min-width: 4px; }
+.gantt-bar { position: absolute; top: 0; height: 100%; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 700; color: #fff; overflow: hidden; white-space: nowrap; padding: 0 4px; min-width: 4px; }
 .gantt-bar.preheat { background: #3B82F6; }
 .gantt-bar.cook    { background: var(--amber); }
 .gantt-bar.rest    { background: var(--green); }
 .gantt-time-axis { display: flex; font-size: .7rem; color: var(--text-muted); margin-top: .35rem; padding-left: calc(140px + .75rem); }
 .gantt-tick { flex: 1; text-align: left; white-space: nowrap; }
-.gantt-legend { display: flex; gap: 1.25rem; flex-wrap: wrap; padding: .5rem 1.25rem 1rem; font-size: .78rem; color: var(--text-muted); }
+.gantt-legend { display: flex; gap: 1.25rem; flex-wrap: wrap; padding: .5rem 1.25rem 1rem; font-size: .8rem; color: var(--text-muted); }
 .gantt-legend span { display: flex; align-items: center; gap: .4rem; }
 .legend-dot { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
 .schedule-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
@@ -172,7 +172,7 @@
 .sched-row:last-child { border-bottom: none; }
 .sched-row .sr-label { color: var(--text-muted); font-size: .8rem; }
 .sched-row .sr-time { font-weight: 700; font-variant-numeric: tabular-nums; }
-.sched-row .sr-day { font-size: .72rem; color: var(--text-muted); margin-left: .25rem; }
+.sched-row .sr-day { font-size: .8rem; color: var(--text-muted); margin-left: .25rem; }
 .sched-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: .4rem; flex-shrink: 0; }
 .sched-dot.blue   { background: var(--blue); }
 .sched-dot.amber  { background: var(--amber); }
@@ -187,7 +187,7 @@
 .ref-table-wrap h2 { font-family: Georgia,serif; font-size: 1.3rem; font-weight: 700; margin-bottom: .5rem; }
 .ref-table-wrap p { font-size: .88rem; color: var(--text-muted); margin-bottom: 1rem; }
 .ref-table { width: 100%; border-collapse: collapse; font-size: .88rem; background: var(--card-bg); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--card-border); }
-.ref-table th { background: var(--charcoal); color: #fff; text-align: left; padding: .65rem .9rem; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.ref-table th { background: var(--charcoal); color: #fff; text-align: left; padding: .65rem .9rem; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
 .ref-table td { padding: .6rem .9rem; border-bottom: 1px solid #F0EBE3; font-size: .88rem; }
 .ref-table tr:last-child td { border-bottom: none; }
 .ref-table tr:nth-child(even) td { background: #FAFAF8; }
@@ -215,6 +215,7 @@
 </head>
 <body>
 
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <header>
   <a class="logo" href="/">Pitmaster<span> Tools</span></a>
   <div class="header-right">
@@ -253,7 +254,7 @@
   </div>
 </header>
 
-<main>
+<main id="main-content">
   <div class="page-hero">
     <h1>Cook Time Coordinator</h1>
     <p>Smoking multiple meats at once? Add each cut below, set a single serve time, and get a staggered start schedule so everything finishes together.</p>
@@ -785,7 +786,7 @@ function calculate() {
       '</div>';
 
     var meta = document.createElement('div');
-    meta.style.cssText = 'font-size:.75rem;color:var(--text-muted);padding:.4rem 1rem .75rem;line-height:1.5';
+    meta.style.cssText = 'font-size:.8rem;color:var(--text-muted);padding:.4rem 1rem .75rem;line-height:1.5';
     meta.textContent = tempLabel(m.temp) + ' \u2022 ' + wrapLabel + ' \u2022 Pull at ' + dT(m.cut.pullTemp) + ' internal';
     card.querySelector('.schedule-card__body').appendChild(meta);
 

@@ -134,7 +134,7 @@
 .service-btn.active { border-color: var(--amber); background: var(--amber-light); }
 .service-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .sb-name { font-weight: 700; font-size: .9rem; display: block; margin-bottom: .1rem; }
-.sb-desc { font-size: .75rem; color: var(--text-muted); line-height: 1.4; }
+.sb-desc { font-size: .8rem; color: var(--text-muted); line-height: 1.4; }
 .sides-check { display: flex; align-items: center; gap: .6rem; cursor: pointer; user-select: none; font-size: .95rem; font-weight: 500; }
 .sides-check input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--amber); cursor: pointer; flex-shrink: 0; }
 .meat-rows { display: flex; flex-direction: column; gap: .75rem; }
@@ -165,15 +165,15 @@
 .meat-card-name { font-family: Georgia,serif; font-size: 1.05rem; font-weight: 700; }
 .meat-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .5rem; }
 .mcs { background: #F9F5EE; border: 1px solid var(--card-border); border-radius: 6px; padding: .6rem .75rem; }
-.mcs-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--text-muted); margin-bottom: .2rem; }
+.mcs-label { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--text-muted); margin-bottom: .2rem; }
 .mcs-value { font-size: 1rem; font-weight: 700; color: var(--charcoal); line-height: 1.2; }
-.mcs-sub { font-size: .78rem; color: var(--text-muted); margin-top: .15rem; }
+.mcs-sub { font-size: .8rem; color: var(--text-muted); margin-top: .15rem; }
 .meat-warn { margin-top: .75rem; padding: .65rem .9rem; background: var(--yellow-warn); border: 1px solid var(--yellow-warn-border); border-radius: 6px; font-size: .875rem; color: #6D4C00; }
 .summary-card { background: var(--charcoal); color: #fff; border-radius: var(--radius); padding: 1.25rem 1.5rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
 .summary-card h3 { font-family: Georgia,serif; font-size: 1rem; font-weight: 700; margin-bottom: 1rem; color: rgba(255,255,255,.85); text-transform: uppercase; letter-spacing: .06em; }
 .summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; }
 .sum-item { }
-.sum-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: rgba(255,255,255,.6); margin-bottom: .25rem; }
+.sum-label { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: rgba(255,255,255,.6); margin-bottom: .25rem; }
 .sum-value { font-family: Georgia,serif; font-size: 1.5rem; font-weight: 700; line-height: 1; }
 .sum-sub { font-size: .8rem; color: rgba(255,255,255,.65); margin-top: .2rem; }
 .editorial-section p { margin-bottom: .85rem; line-height: 1.75; font-size: .95rem; color: #332F2B; }
@@ -192,7 +192,7 @@
   border: 1px solid var(--card-border);
   min-width: 480px;
 }
-.ref-table th { background: var(--charcoal); color: #fff; text-align: left; padding: .65rem .9rem; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.ref-table th { background: var(--charcoal); color: #fff; text-align: left; padding: .65rem .9rem; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
 .ref-table td { padding: .6rem .9rem; border-bottom: 1px solid #F0EBE3; vertical-align: middle; }
 .ref-table tr:last-child td { border-bottom: none; }
 .ref-table tr:nth-child(even) td { background: #FAFAF8; }
@@ -224,6 +224,7 @@
 </head>
 <body>
 
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <header>
   <a class="logo" href="/">Pitmaster<span> Tools</span></a>
   <div class="header-right">
@@ -258,7 +259,7 @@
   </div>
 </header>
 
-<main>
+<main id="main-content">
 
   <section class="page-hero" aria-label="Page introduction">
     <h1>BBQ Catering Calculator</h1>
@@ -272,7 +273,7 @@
       <div class="form-group">
         <label for="guestCount">Number of Guests</label>
         <input type="number" id="guestCount" min="1" max="500" value="50" aria-describedby="guestCountHint">
-        <span id="guestCountHint" style="font-size:.78rem;color:var(--text-muted);">Between 1 and 500 guests</span>
+        <span id="guestCountHint" style="font-size:.8rem;color:var(--text-muted);">Between 1 and 500 guests</span>
       </div>
 
       <div class="form-group">

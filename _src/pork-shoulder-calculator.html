@@ -128,7 +128,7 @@ select.form-select:focus-visible { outline: 2px solid var(--amber); outline-offs
 .checkbox-row { display: flex; align-items: center; gap: .6rem; cursor: pointer; }
 .checkbox-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--amber); cursor: pointer; }
 .checkbox-row span { font-size: .9rem; font-weight: 600; }
-.checkbox-hint { font-size: .78rem; color: var(--text-muted); margin-top: .2rem; }
+.checkbox-hint { font-size: .8rem; color: var(--text-muted); margin-top: .2rem; }
 input[type="time"].form-time { width: 100%; padding: .6rem .75rem; border: 1.5px solid var(--card-border); border-radius: 6px; background: #FAFAF8; font-family: inherit; font-size: 1rem; color: var(--charcoal); transition: border-color .15s; }
 input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .calc-btn:focus-visible { outline: 2px solid var(--amber-dark); outline-offset: 2px; }
@@ -139,9 +139,9 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
 .stat-card.c2 .stat-card__bar { background: var(--amber); }
 .stat-card.c3 .stat-card__bar { background: var(--red); }
 .stat-card__body { padding: .75rem 1rem; }
-.stat-card__label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin-bottom: .2rem; }
+.stat-card__label { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin-bottom: .2rem; }
 .stat-card__val { font-family: Georgia,serif; font-size: 1.5rem; font-weight: 700; line-height: 1.1; }
-.stat-card__sub { font-size: .78rem; color: var(--text-muted); margin-top: .15rem; }
+.stat-card__sub { font-size: .8rem; color: var(--text-muted); margin-top: .15rem; }
 .tl-list { list-style: none; margin-bottom: 1.25rem; }
 .tl-item { display: flex; gap: .75rem; padding: .75rem 0; border-bottom: 1px solid var(--card-border); }
 .tl-item:last-child { border-bottom: none; }
@@ -154,7 +154,7 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
 .tl-content { flex: 1; min-width: 0; }
 .tl-time-row { display: flex; align-items: baseline; gap: .4rem; margin-bottom: .1rem; }
 .tl-time { font-weight: 700; font-size: 1rem; font-variant-numeric: tabular-nums; }
-.tl-day { font-size: .78rem; color: var(--text-muted); }
+.tl-day { font-size: .8rem; color: var(--text-muted); }
 .tl-label { font-weight: 700; font-size: .9rem; }
 .tl-sub { font-size: .82rem; color: var(--text-muted); line-height: 1.45; margin-top: .1rem; }
 .tl-section-head { font-family: Georgia,serif; font-size: 1rem; font-weight: 700; margin-bottom: .75rem; }
@@ -166,7 +166,7 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
 .ref-table-wrap h2 { font-family: Georgia,serif; font-size: 1.3rem; font-weight: 700; margin-bottom: .5rem; }
 .ref-table-wrap p { font-size: .88rem; color: var(--text-muted); margin-bottom: 1rem; }
 .ref-table { width: 100%; border-collapse: collapse; font-size: .88rem; background: var(--card-bg); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--card-border); }
-.ref-table th { background: var(--charcoal); color: #fff; text-align: left; padding: .65rem .9rem; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.ref-table th { background: var(--charcoal); color: #fff; text-align: left; padding: .65rem .9rem; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
 .ref-table td { padding: .6rem .9rem; border-bottom: 1px solid #F0EBE3; font-size: .88rem; }
 .ref-table tr:last-child td { border-bottom: none; }
 .ref-table tr:nth-child(even) td { background: #FAFAF8; }
@@ -194,6 +194,7 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
 </head>
 <body>
 
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <header>
   <a class="logo" href="/">Pitmaster<span> Tools</span></a>
   <div class="header-right">
@@ -232,7 +233,7 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
   </div>
 </header>
 
-<main>
+<main id="main-content">
   <div class="page-hero">
     <h1>Pork Shoulder Smoking Calculator</h1>
     <p>Enter your pork butt details and serve time. The calculator works backward to give you a precise cook timeline with stall prediction.</p>

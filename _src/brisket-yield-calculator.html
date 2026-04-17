@@ -128,13 +128,13 @@
 .grade-btn.active { border-color: var(--amber); background: var(--amber-light); }
 .grade-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .gb-name { font-weight: 700; font-size: .95rem; display: block; margin-bottom: .15rem; }
-.gb-desc { font-size: .73rem; color: var(--text-muted); line-height: 1.35; }
+.gb-desc { font-size: .8rem; color: var(--text-muted); line-height: 1.35; }
 .serving-toggle { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .5rem; }
 .serving-btn { border: 2px solid var(--card-border); border-radius: 8px; padding: .65rem .5rem; background: #FAFAF8; text-align: center; cursor: pointer; font-family: inherit; transition: border-color .15s, background .15s; }
 .serving-btn.active { border-color: var(--blue); background: #EFF6FF; }
 .serving-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 .svb-name { font-weight: 700; font-size: .9rem; display: block; margin-bottom: .1rem; }
-.svb-desc { font-size: .73rem; color: var(--text-muted); }
+.svb-desc { font-size: .8rem; color: var(--text-muted); }
 .calc-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .stat-card.c-blue::before { background: var(--blue); }
 .stat-card.c-amber::before { background: var(--amber); }
@@ -144,7 +144,7 @@
 .stat-card.c-purple::before { background: #A855F7; }
 .yield-bar-wrap { margin: 1.25rem 0 .5rem; }
 .yield-bar { display: flex; height: 28px; border-radius: 6px; overflow: hidden; width: 100%; }
-.yield-bar-seg { display: flex; align-items: center; justify-content: center; font-size: .72rem; font-weight: 700; color: #fff; transition: width .4s ease; min-width: 0; overflow: hidden; white-space: nowrap; }
+.yield-bar-seg { display: flex; align-items: center; justify-content: center; font-size: .8rem; font-weight: 700; color: #fff; transition: width .4s ease; min-width: 0; overflow: hidden; white-space: nowrap; }
 .yield-bar-seg.seg-flat { background: var(--amber); }
 .yield-bar-seg.seg-point { background: #854D0E; }
 .yield-bar-seg.seg-loss { background: #D1D5DB; color: #6B6560; }
@@ -163,7 +163,7 @@
 .ref-table { width: 100%; border-collapse: collapse; min-width: 480px; }
 .ref-table th, .ref-table td { text-align: center; padding: .7rem .8rem; border-bottom: 1px solid #EFE7DA; font-size: .9rem; }
 .ref-table th:first-child, .ref-table td:first-child { text-align: left; font-weight: 700; }
-.ref-table thead th { background: #FAF5EC; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); position: sticky; top: 0; }
+.ref-table thead th { background: #FAF5EC; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); position: sticky; top: 0; }
 .ref-table tbody tr:nth-child(even) { background: #FCFAF6; }
 .faq-section { margin: 2rem 0; }
 .faq-section h2 { font-family: Georgia,serif; font-size: 1.55rem; margin-bottom: 1rem; }
@@ -176,6 +176,7 @@
 </head>
 <body>
 
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <header>
   <a href="/" class="logo">Pitmaster<span> Tools</span></a>
   <div class="header-right">
@@ -210,7 +211,7 @@
   </div>
 </header>
 
-<main>
+<main id="main-content">
   <section class="page-hero" aria-label="Page introduction">
     <h1>Brisket Yield Calculator</h1>
     <p>Enter packer weight and USDA grade to get flat weight, point weight, trimmed raw weight, cooked yield at 195&#xB0;F and 203&#xB0;F, estimated servings, and how many packers to buy for your party.</p>
