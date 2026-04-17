@@ -162,7 +162,7 @@
 }
 .method-card:focus-within { outline: 2px solid var(--amber); outline-offset: 2px; }
 .method-name { font-weight: 700; font-size: .9rem; color: var(--charcoal); display: block; margin-bottom: .2rem; }
-.method-desc { font-size: .75rem; color: var(--text-muted); line-height: 1.4; }
+.method-desc { font-size: .8rem; color: var(--text-muted); line-height: 1.4; }
 .coal-toggle {
   display: flex;
   border: 1.5px solid var(--card-border);
@@ -227,7 +227,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: .72rem;
+  font-size: .8rem;
   font-weight: 800;
   margin-top: .05rem;
 }
@@ -248,7 +248,7 @@
 .ref-table-wrap { margin-top: 2.5rem; overflow-x: auto; }
 .ref-table-wrap h2 { font-family: Georgia,serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; }
 .ref-table { width: 100%; border-collapse: collapse; font-size: .88rem; background: var(--card-bg); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--card-border); }
-.ref-table th { background: var(--charcoal); color: #fff; text-align: left; padding: .65rem .9rem; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.ref-table th { background: var(--charcoal); color: #fff; text-align: left; padding: .65rem .9rem; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
 .ref-table td { padding: .6rem .9rem; border-bottom: 1px solid #F0EBE3; vertical-align: middle; font-size: .88rem; }
 .ref-table tr:last-child td { border-bottom: none; }
 .ref-table tr:nth-child(even) td { background: #FAFAF8; }
@@ -267,6 +267,7 @@
 </head>
 <body>
 
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <header>
   <a class="logo" href="/">Pitmaster<span> Tools</span></a>
   <div class="header-right">
@@ -305,7 +306,7 @@
   </div>
 </header>
 
-<main>
+<main id="main-content">
   <div class="page-hero">
     <h1>Charcoal Calculator</h1>
     <p>Enter your cook method, target temperature, and cook duration to find out exactly how much charcoal to load — briquettes or lump.</p>
@@ -347,12 +348,12 @@
           <option value="300">300&#xB0;F — High Smoke</option>
           <option value="350">350&#xB0;F — Direct / Grilling</option>
         </select>
-        <span id="tempHint" style="font-size:.78rem;color:var(--text-muted);margin-top:.2rem">Smoker grate temp, not dome temp</span>
+        <span id="tempHint" style="font-size:.8rem;color:var(--text-muted);margin-top:.2rem">Smoker grate temp, not dome temp</span>
       </div>
       <div class="form-group">
         <label for="cookDuration">Cook Duration (hours)</label>
         <input type="number" id="cookDuration" value="8" min="1" max="20" step="0.5" aria-describedby="durationHint">
-        <span id="durationHint" style="font-size:.78rem;color:var(--text-muted);margin-top:.2rem">1–20 hours</span>
+        <span id="durationHint" style="font-size:.8rem;color:var(--text-muted);margin-top:.2rem">1–20 hours</span>
       </div>
     </div>
 

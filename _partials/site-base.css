@@ -22,6 +22,7 @@ body.modal-open { overflow: hidden; }
 :root {
   --amber: #EF9F27;
   --amber-dark: #C97F10;
+  --link-text: #9A5F08;
   --amber-light: #FDF3E0;
   --charcoal: #1a1a1a;
   --card-bg: #FFFFFF;
@@ -121,7 +122,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.5rem; }
 .form-group { display: flex; flex-direction: column; gap: .35rem; }
 .form-group.full-width { grid-column: 1/-1; }
-.form-group label { font-size: .8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; }
+.form-group label { font-size: .825rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; }
 .form-group select,
 .form-group input[type="number"],
 .form-group input[type="time"] {
@@ -231,7 +232,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
 .stat-card.c2::before { background: var(--amber); }
 .stat-card.c3::before { background: var(--red); }
 .sc-label {
-  font-size: .7rem;
+  font-size: .75rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: .14em;
@@ -264,6 +265,10 @@ main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
 .editorial-section h3 { font-family: Georgia,serif; font-size: 1.1rem; margin: 1.1rem 0 .5rem; }
 .editorial-section p,
 .editorial-section li { color: #332F2B; line-height: 1.75; }
+.editorial-section a { color: var(--link-text); text-decoration: underline; }
+.editorial-section a:hover { color: var(--charcoal); }
+.faq-answer a { color: var(--link-text); text-decoration: underline; }
+.faq-answer a:hover { color: var(--charcoal); }
 .editorial-section p + p,
 .editorial-section p + h3,
 .editorial-section h3 + p,
@@ -321,7 +326,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
 .tool-link-desc { font-size: .84rem; color: var(--text-muted); line-height: 1.55; }
 
 /* ----- Footer ----- */
-footer { background: #181714; color: #fff; text-align: center; padding: 2.3rem 1rem; font-size: 13px; }
+footer { background: #181714; color: #fff; text-align: center; padding: 2.3rem 1rem; font-size: 14px; }
 footer nav { display: flex; justify-content: center; flex-wrap: wrap; gap: .75rem; margin: .75rem 0; }
 footer a { color: #fff; text-decoration: none; }
 footer a:hover, footer a:focus-visible { text-decoration: underline; }

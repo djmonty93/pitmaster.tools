@@ -110,7 +110,7 @@
 .serving-toggle button { flex: 1; border: none; background: #FAFAF8; color: var(--text-muted); font-family: inherit; font-size: .875rem; font-weight: 600; padding: .55rem .5rem; cursor: pointer; transition: background .15s,color .15s; border-right: 1px solid var(--card-border); line-height: 1.2; }
 .serving-toggle button:last-child { border-right: none; }
 .serving-toggle button.active { background: var(--amber); color: #fff; }
-.serving-toggle button .sz { display: block; font-size: .7rem; font-weight: 400; opacity: .85; }
+.serving-toggle button .sz { display: block; font-size: .75rem; font-weight: 400; opacity: .85; }
 #two-phase-section { display: none; grid-column: 1/-1; background: #FBF7F0; border: 1px solid #EDD9AA; border-radius: 6px; padding: 1rem; margin-top: .25rem; }
 #two-phase-section.visible { display: grid; }
 .tp-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -134,7 +134,7 @@
 .tl-dot.red   { background: var(--red);   color: var(--red); }
 .tl-dot.green { background: var(--green); color: var(--green); }
 .tl-dot.gray  { background: #AAA; color: #AAA; }
-.tl-time { font-size: .78rem; font-weight: 700; color: var(--text-muted); letter-spacing: .04em; text-transform: uppercase; }
+.tl-time { font-size: .8rem; font-weight: 700; color: var(--text-muted); letter-spacing: .04em; text-transform: uppercase; }
 .tl-label { font-size: .95rem; font-weight: 600; color: var(--charcoal); }
 .tl-sub { font-size: .8rem; color: var(--text-muted); margin-top: 1px; }
 .tl-item + .tl-item { border-top: 1px solid #F5F0E8; }
@@ -142,8 +142,8 @@
 .tip-card p { font-size: .9rem; line-height: 1.65; color: #333; }
 .wlist { display: flex; flex-direction: column; gap: .6rem; margin-top: .25rem; }
 .wpill { display: inline-flex; flex-direction: column; gap: 1px; }
-.wname { display: inline-block; background: var(--amber-light); border: 1px solid #EDD9AA; color: var(--amber-dark); font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 3px 10px; border-radius: 12px; margin-bottom: 1px; }
-.wflavor { font-size: .82rem; color: var(--text-muted); padding-left: 4px; }
+.wname { display: inline-block; background: var(--amber-light); border: 1px solid #EDD9AA; color: var(--link-text); font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 3px 10px; border-radius: 12px; margin-bottom: 1px; }
+.wflavor { font-size: .85rem; color: var(--text-muted); padding-left: 4px; }
 .about-section {
   max-width: 960px;
   margin: 0 auto 2rem;
@@ -255,6 +255,7 @@
 </head>
 <body>
 
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <header>
   <a href="/" class="logo">Pitmaster<span> Tools</span></a>
   <div class="header-right">
@@ -293,7 +294,7 @@
   </div>
 </header>
 
-<main>
+<main id="main-content">
   <div id="print-header">
     <div class="print-title" id="ptitle">Pitmaster Tools Results</div>
     <div class="pm" id="pmeta"></div>
@@ -406,7 +407,7 @@
         </div>
       </div>
 
-      <div id="two-phase-section">
+      <div id="two-phase-section" aria-live="polite">
         <div class="tp-inner">
           <h4>Sear Phase</h4>
           <div class="form-group">
@@ -467,29 +468,29 @@
       </div>
     </div>
 
-    <div class="card">
-      <h3 class="section-title">Serving Size Math</h3>
+    <div class="card" role="region" aria-labelledby="sectionServingMath">
+      <h3 class="section-title" id="sectionServingMath">Serving Size Math</h3>
       <div class="srows" id="srowsEl"></div>
       <div class="mc-warn" id="mcWarn"></div>
     </div>
 
-    <div class="card">
-      <h3 class="section-title">Cook Timeline</h3>
+    <div class="card" role="region" aria-labelledby="sectionCookTimeline">
+      <h3 class="section-title" id="sectionCookTimeline">Cook Timeline</h3>
       <div class="timeline" id="tlEl"></div>
     </div>
 
     <div class="tw-grid">
-      <div class="card tip-card" style="margin-bottom:0">
-        <h3 class="section-title">Pitmaster Tip</h3>
+      <div class="card tip-card" role="region" aria-labelledby="sectionPitmasterTip" style="margin-bottom:0">
+        <h3 class="section-title" id="sectionPitmasterTip">Pitmaster Tip</h3>
         <p id="tipEl"></p>
       </div>
-      <div class="card woods-card" style="margin-bottom:0">
-        <h3 class="section-title">Wood Pairings</h3>
+      <div class="card woods-card" role="region" aria-labelledby="sectionWoodPairings" style="margin-bottom:0">
+        <h3 class="section-title" id="sectionWoodPairings">Wood Pairings</h3>
         <div class="wlist" id="woodsEl"></div>
       </div>
     </div>
     <div style="margin-top:1rem">
-      <button class="print-btn" id="printBtn">
+      <button class="print-btn" id="printBtn" type="button" aria-label="Print timeline">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="6 9 6 2 18 2 18 9"/>
           <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
