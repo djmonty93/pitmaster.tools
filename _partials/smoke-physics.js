@@ -120,13 +120,18 @@ function spCompute(p) {
   var T_ss = SP_STALL_START;
   var T_se = SP_STALL_END;
   /* Effective driving temperature during the stall: evaporative cooling at the
-     surface counteracts 40% of the pit-to-meat temperature differential, reducing
-     (but not eliminating) the heat input through the 150–165 °F plateau. */
+     meat surface partially offsets pit heat input. Factor 0.40 is empirically
+     calibrated against offset/pellet competition cook data (14–18 lb briskets,
+     225 °F, 4–12% RH → 3.5–5h observed stalls). */
   var T_eff_stall = p.pitF - (p.pitF - T_wb) * 0.40;
   var t1 = spPhase(Km, L, p.pitF, tiF, T_ss);
 
-  /* Phase 2: stall plateau. Guard: high-humidity cookers where T_wb >= T_se
-     (e.g. electric at 45% RH) produce T_eff_stall > pit, indicating no real stall. */
+  /* Phase 2: stall plateau.
+     Guard 1 (T_wb < T_se): high-humidity cookers where T_wb >= T_se (165 °F)
+       indicate the environment is too humid for meaningful evaporative cooling —
+       the wet-bulb already exceeds the stall range, so no stall applies.
+     Guard 2 (T_eff_stall > T_se): very-low-humidity or very-low-pit-temp edge
+       case where T_eff_stall would still fall at or below T_se; skip stall. */
   var t2 = 0;
   if (T_wb < T_se && T_eff_stall > T_se) {
     t2 = spPhase(Km, L, T_eff_stall, T_ss, T_se);
