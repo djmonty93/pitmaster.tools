@@ -50,9 +50,10 @@ function spGetL(kmKey, weightLbs) {
     case 'pork-butt':       return 1.9;
     case 'spare-ribs':      return 0.75;
     case 'baby-back-ribs':  return 0.50;
-    case 'whole-chicken':   return 2.8 + 0.15 * weightLbs;
-    case 'turkey-breast':   return 1.8 + 0.10 * weightLbs;
-    case 'whole-turkey':    return 3.5 + 0.12 * weightLbs;
+    case 'whole-chicken':      return 1.0 + 0.10 * weightLbs;
+    case 'spatchcock-chicken': return 1.2 + 0.05 * weightLbs;
+    case 'turkey-breast':      return 1.0 + 0.08 * weightLbs;
+    case 'whole-turkey':       return 1.5 + 0.05 * weightLbs;
     case 'lamb-shoulder':   return 1.0 + 0.07 * weightLbs;
     default:                return 1.5;
   }
