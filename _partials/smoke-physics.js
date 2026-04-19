@@ -119,14 +119,18 @@ function spCompute(p) {
   /* Unwrapped stall path: 3 phases */
   var T_ss = SP_STALL_START;
   var T_se = SP_STALL_END;
+  /* Effective driving temperature during the stall: evaporative cooling at the
+     surface counteracts 40% of the pit-to-meat temperature differential, reducing
+     (but not eliminating) the heat input through the 150–165 °F plateau. */
+  var T_eff_stall = p.pitF - (p.pitF - T_wb) * 0.40;
   var t1 = spPhase(Km, L, p.pitF, tiF, T_ss);
 
-  /* Phase 2: stall plateau driven by wet-bulb.
-     Guard: if T_wb >= T_se, the pit is hot/humid enough that no true stall occurs. */
+  /* Phase 2: stall plateau. Guard: high-humidity cookers where T_wb >= T_se
+     (e.g. electric at 45% RH) produce T_eff_stall > pit, indicating no real stall. */
   var t2 = 0;
-  if (T_wb < T_se && T_wb < T_ss) {
-    t2 = spPhase(Km, L, T_wb, T_ss, T_se);
-    if (!isFinite(t2)) t2 = 0;
+  if (T_wb < T_se && T_eff_stall > T_se) {
+    t2 = spPhase(Km, L, T_eff_stall, T_ss, T_se);
+    if (!isFinite(t2) || t2 < 0) t2 = 0;
   }
 
   var t3 = spPhase(Km, L, p.pitF, T_se, p.tfF);
@@ -162,7 +166,8 @@ function spResolve(p) {
   var wrapMethod = p.wrapMethod || 'none';
   var wrapTriggerF = p.wrapTriggerF || SP_STALL_START;
   var wrapActive = (wrapMethod === 'foil' || wrapMethod === 'paper');
-  var stallActive = hasStall && T_wb < SP_STALL_START && T_wb < SP_STALL_END && p.tfF > SP_STALL_START;
+  var T_eff_stall = p.pitF - (p.pitF - T_wb) * 0.40;
+  var stallActive = hasStall && T_wb < SP_STALL_END && T_eff_stall > SP_STALL_END && p.tfF > SP_STALL_START;
   var t = 0;
 
   if (p.currentF >= p.tfF) {
@@ -182,10 +187,10 @@ function spResolve(p) {
     t = spPhase(Km, L, p.pitF, p.currentF, p.tfF);
   } else if (p.currentF < SP_STALL_START) {
     t = spPhase(Km, L, p.pitF, p.currentF, SP_STALL_START)
-      + spPhase(Km, L, T_wb, SP_STALL_START, SP_STALL_END)
+      + spPhase(Km, L, T_eff_stall, SP_STALL_START, SP_STALL_END)
       + spPhase(Km, L, p.pitF, SP_STALL_END, p.tfF);
   } else {
-    t = spPhase(Km, L, T_wb, p.currentF, SP_STALL_END)
+    t = spPhase(Km, L, T_eff_stall, p.currentF, SP_STALL_END)
       + spPhase(Km, L, p.pitF, SP_STALL_END, p.tfF);
   }
 
