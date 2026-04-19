@@ -862,16 +862,19 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
     document.getElementById('currentTemp').value = '';
 
     // ── Timeline ──
-    var wrapNote = wrap === 'none' ? 'No wrap \u2014 full bark development (plateau ~' + T_wb_disp + ')' : wrap === 'paper' ? 'Wrap in butcher paper now to shorten stall while preserving bark' : 'Wrap tightly in foil now to push through the stall quickly';
+    var wrapNote = wrap === 'none'  ? 'No wrap \u2014 full bark development (plateau ~' + T_wb_disp + ')'
+                : wrap === 'paper' ? 'Wrap in butcher paper now. Leave wrapped until pull temp.'
+                :                    'Wrap tightly in foil now. Leave wrapped until pull temp.';
 
+    // Wrapped cooks: one stall event (wrap action). Unwrapped: two events (start + end).
     var events = [
       { dot: 'blue',  time: light,      label: 'Light smoker / preheat', sub: 'Target smoker temp: ' + fmtTemp(temp) + ' \u2014 allow 30 min to stabilize' },
       { dot: 'amber', time: meatOn,     label: 'Meat goes on smoker', sub: rawW.toFixed(1) + ' ' + weightUnit + ' ' + (boneIn ? 'bone-in' : 'boneless') + ' \u2014 fat side up or down per your preference' },
-      { dot: 'red',   time: stallStart, label: 'Stall begins', sub: 'Internal reaches ' + fmtTemp(150) + '\u2013' + fmtTemp(165) + ' \u2014 ' + wrapNote },
-      { dot: 'amber', time: stallEnd,   label: wrap !== 'none' ? 'Stall ends / unwrap if desired' : 'Stall ends', sub: 'Temperature climbs again toward target' },
+      { dot: 'red',   time: stallStart, label: wrap !== 'none' ? 'Stall \u2014 wrap now' : 'Stall begins', sub: 'Internal reaches ' + fmtTemp(150) + '\u2013' + fmtTemp(165) + ' \u2014 ' + wrapNote },
+      wrap === 'none' ? { dot: 'amber', time: stallEnd, label: 'Stall ends', sub: 'Temperature climbs again toward target' } : null,
       { dot: 'amber', time: pull,       label: 'Pull from smoker \u2014 begin rest', sub: 'Target internal: ' + fmtTemp(style.pullTemp) + ' \u2014 rest ' + style.restMinutes + ' min minimum (faux Cambro holds up to 4 hrs)' },
       { dot: 'green', time: serve,      label: 'Serve', sub: 'Pull, slice, or chop to order' }
-    ];
+    ].filter(Boolean);
 
     tlList.innerHTML = '';
     events.forEach(function(ev){
