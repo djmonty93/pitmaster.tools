@@ -181,6 +181,18 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
 .cookie-accept:hover { background: var(--amber-dark); }
 .cookie-reject:hover { color: #fff; border-color: rgba(255,255,255,.5) !important; }
 .cookie-accept:focus-visible, .cookie-reject:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.phase-list { list-style:none; padding:0; margin:0; }
+.phase-row { display:flex; justify-content:space-between; align-items:baseline; padding:.45rem 0; border-bottom:1px solid #F0EBE3; font-size:.9rem; }
+.phase-row:last-child { border-bottom:none; }
+.phase-lbl { color:var(--text-muted); }
+.phase-val { font-weight:700; color:var(--charcoal); }
+.resolve-row { display:flex; gap:.75rem; align-items:center; margin-bottom:.5rem; }
+.resolve-row input { flex:1; min-width:0; }
+.calc-btn--sm { white-space:nowrap; padding:.5rem 1rem; background:var(--amber); color:#fff; border:none; border-radius:6px; font-family:inherit; font-size:.875rem; font-weight:700; cursor:pointer; letter-spacing:.04em; }
+.calc-btn--sm:hover { background:var(--amber-dark); }
+.resolve-result { font-size:.9rem; font-weight:600; color:var(--charcoal); min-height:1.2em; }
+.resolve-result.error { color:var(--red); }
+.model-note { font-size:.8rem; color:var(--text-muted); line-height:1.6; margin:.75rem 0 0; padding:.75rem; background:#FAF7F2; border:1px solid #EDE5D8; border-radius:6px; }
 @media (max-width: 640px) {
   header { padding: .9rem 1rem; }
   .form-grid { grid-template-columns: 1fr; }
@@ -278,12 +290,23 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
       </div>
 
       <div class="form-group">
+        <label for="cookerType">Cooker Type</label>
+        <select id="cookerType" class="form-select" aria-label="Cooker type">
+          <option value="pellet">Pellet grill</option>
+          <option value="offset">Offset stick-burner</option>
+          <option value="kamado">Kamado (BGE / Kamado Joe)</option>
+          <option value="kettle">Kettle (Weber / PK)</option>
+          <option value="electric">Water-pan electric (Masterbuilt / Bradley)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
         <label>Bone-In?</label>
         <label class="checkbox-row">
           <input type="checkbox" id="boneIn">
           <span>Bone-in pork shoulder</span>
         </label>
-        <p class="checkbox-hint">Adds ~10% to cook time. Use bone-wiggle test for doneness.</p>
+        <p class="checkbox-hint">The bone-wiggle test is the best doneness indicator.</p>
       </div>
 
       <div class="form-group">
@@ -345,8 +368,30 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
         </div>
       </div>
 
+      <div class="card" id="phaseBreakdown" style="display:none;margin-bottom:1rem">
+        <h3 class="section-title">Cook Phases</h3>
+        <ul class="phase-list">
+          <li class="phase-row"><span class="phase-lbl">Heat-up to stall</span><span class="phase-val" id="phT1">—</span></li>
+          <li class="phase-row" id="phT2Row"><span class="phase-lbl">Estimated stall</span><span class="phase-val" id="phT2">—</span></li>
+          <li class="phase-row"><span class="phase-lbl">Post-stall finish</span><span class="phase-val" id="phT3">—</span></li>
+          <li class="phase-row" id="phWbRow"><span class="phase-lbl">Stall plateau (wet-bulb)</span><span class="phase-val" id="phWb">—</span></li>
+        </ul>
+      </div>
+
+      <div class="card live-resolve no-print" style="margin-bottom:1rem">
+        <h3 class="section-title">Have a current temp reading?</h3>
+        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:.75rem">Enter it to recalculate remaining time based on where the pork is right now.</p>
+        <div class="resolve-row">
+          <input type="number" id="currentTemp" placeholder="e.g. 158" min="32" max="220" aria-label="Current internal temperature">
+          <button class="calc-btn--sm" type="button" onclick="resolveNow()">Recalculate</button>
+        </div>
+        <p id="resolveResult" class="resolve-result" aria-live="polite"></p>
+      </div>
+
       <p class="tl-section-head">Step-by-Step Timeline</p>
       <ul class="tl-list" id="tlList" aria-label="Cook timeline"></ul>
+
+      <p class="model-note">This estimate assumes steady pit temperature and average meat geometry. It does not account for collagen breakdown variability, fat content differences, meat grade, or smoker heat distribution. Always cook to internal temperature, not to the clock. Build in a 1&#x2013;2 hour buffer and use a faux cambro hold if you finish early.</p>
 
       <div style="text-align:center;margin-top:.75rem">
         <button class="calc-btn" id="editBtn" type="button" style="max-width:300px">Edit Inputs</button>
@@ -530,6 +575,7 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
 </div>
 
 <!-- INJECT:site-utils.js:script -->
+<!-- INJECT:smoke-physics.js:script -->
 <script>
 (function(){
   initEmbedMode();
@@ -537,10 +583,11 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
 
   /* ── Constants ── */
   var STYLES = {
-    pulled: { name: 'Pork Butt (Pulled)', cookRate: 1.5, pullTemp: 203, restMinutes: 60, stallLo: 150, stallHi: 165 },
-    sliced: { name: 'Pork Butt (Sliced)', cookRate: 1.5, pullTemp: 185, restMinutes: 45, stallLo: 150, stallHi: 165 }
+    pulled: { name: 'Pork Butt (Pulled)', pullTemp: 203, restMinutes: 60 },
+    sliced: { name: 'Pork Butt (Sliced)', pullTemp: 185, restMinutes: 45 }
   };
-  var TM = { 225: 1.0, 250: 0.85, 275: 0.75, 300: 0.65 };
+
+  var _lastPhysicsParams = null;
 
   /* ── Unit state ── */
   var tempUnit = 'F';
@@ -686,12 +733,15 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
     return 'Day +' + diff;
   }
 
-  function cookHrs(style, wLbs, temp, boneIn, wrap){
-    var h = style.cookRate * wLbs * (TM[temp] || 1.0);
-    if(boneIn) h *= 1.10;
-    if(wrap === 'none') h *= 1.10;
-    else if(wrap === 'paper') h *= 1.05;
-    return h;
+  function resolveNow() {
+    var resEl = document.getElementById('resolveResult');
+    if (!_lastPhysicsParams) { resEl.textContent = 'Calculate first.'; return; }
+    var rawCur = parseFloat(document.getElementById('currentTemp').value);
+    if (isNaN(rawCur)) { resEl.textContent = 'Enter a temperature reading.'; resEl.className = 'resolve-result error'; return; }
+    var curF = tempUnit === 'C' ? rawCur * 9/5 + 32 : rawCur;
+    var r = spResolve(Object.assign({}, _lastPhysicsParams, { currentF: curF }));
+    resEl.className = 'resolve-result' + (r.error ? ' error' : '');
+    resEl.textContent = r.error ? r.error : 'Approximately ' + spFmtHrs(r.remainingH) + ' remaining';
   }
 
   function fmtTemp(f){
@@ -754,38 +804,79 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
     var nowMinute = new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours(), today.getMinutes(), 0, 0);
     if(serve < nowMinute) serve.setDate(serve.getDate() + 1);
 
-    var hrs = cookHrs(style, wLbs, temp, boneIn, wrap);
+    var rh = SP_COOKER_RH[document.getElementById('cookerType').value] || 12;
+    var physics = spCompute({
+      kmKey: 'pork-butt',
+      weightLbs: wLbs,
+      thicknessIn: 0,
+      pitF: temp,
+      rh: rh,
+      tiF: 38,
+      tfF: style.pullTemp,
+      hasStall: true,
+      wrapTriggerF: 150,
+      wrapMethod: wrap
+    });
+
+    if (physics.error) { showError(physics.error); return; }
+
+    _lastPhysicsParams = { kmKey: 'pork-butt', weightLbs: wLbs, thicknessIn: 0, pitF: temp, rh: rh, tfF: style.pullTemp };
+
+    var hrs = physics.totalH;
     var restMs = style.restMinutes * 60000;
     var cookMs = hrs * 3600000;
 
-    var pull = new Date(serve.getTime() - restMs);
+    var pull   = new Date(serve.getTime() - restMs);
     var meatOn = new Date(serve.getTime() - restMs - cookMs);
-    var light = new Date(meatOn.getTime() - 30 * 60000);
+    var light  = new Date(meatOn.getTime() - 30 * 60000);
 
-    // Stall timing
-    var stallBase = wrap === 'none' ? cookMs / 1.10 : wrap === 'paper' ? cookMs / 1.05 : cookMs;
-    var stallStart = new Date(meatOn.getTime() + stallBase * 0.40);
-    var stallEnd = new Date(meatOn.getTime() + cookMs * 0.65);
+    // Phase-based stall window
+    var t1Ms = physics.t1h * 3600000;
+    var t2Ms = physics.t2h * 3600000;
+    var stallStart = new Date(meatOn.getTime() + t1Ms);
+    var stallEnd   = new Date(meatOn.getTime() + t1Ms + t2Ms);
 
     var totalHrs = hrs + style.restMinutes / 60;
+    var T_wb_disp = Math.round(tempUnit === 'C' ? (physics.T_wb - 32) * 5 / 9 : physics.T_wb) + (tempUnit === 'C' ? '\u00B0C' : '\u00B0F');
 
     // ── Stat cards ──
-    statCookTime.textContent = fmtHrs(totalHrs);
-    statCookSub.textContent = fmtHrs(hrs) + ' cook + ' + style.restMinutes + ' min rest';
+    statCookTime.textContent = spFmtHrs(totalHrs);
+    statCookSub.textContent = spFmtHrs(hrs) + ' cook + ' + style.restMinutes + ' min rest';
     statStartTime.textContent = fmtTime(meatOn);
     statStartDay.textContent = dayLabel(meatOn, today);
     statPullTemp.textContent = fmtTemp(style.pullTemp);
 
+    // ── Phase breakdown ──
+    var pbEl = document.getElementById('phaseBreakdown');
+    pbEl.style.display = '';
+    document.getElementById('phT1').textContent = spFmtHrs(physics.t1h);
+    var t2Row = document.getElementById('phT2Row');
+    if (physics.t2h > 0.05) {
+      t2Row.style.display = '';
+      document.getElementById('phT2').textContent = spFmtHrs(physics.t2h);
+    } else { t2Row.style.display = 'none'; }
+    document.getElementById('phT3').textContent = spFmtHrs(physics.t3h > 0 ? physics.t3h : hrs - physics.t1h);
+    var phWbRow = document.getElementById('phWbRow');
+    if (wrap === 'none' && physics.t2h > 0.05) {
+      phWbRow.style.display = '';
+      document.getElementById('phWb').textContent = '~' + T_wb_disp + ' plateau';
+    } else { phWbRow.style.display = 'none'; }
+
+    // Clear live re-solve
+    document.getElementById('resolveResult').textContent = '';
+    document.getElementById('resolveResult').className = 'resolve-result';
+    document.getElementById('currentTemp').value = '';
+
     // ── Timeline ──
-    var wrapNote = wrap === 'none' ? 'No wrap — full bark development, longest stall' : wrap === 'paper' ? 'Wrap in butcher paper now to shorten stall while preserving bark' : 'Wrap tightly in foil now to push through the stall quickly';
+    var wrapNote = wrap === 'none' ? 'No wrap \u2014 full bark development (plateau ~' + T_wb_disp + ')' : wrap === 'paper' ? 'Wrap in butcher paper now to shorten stall while preserving bark' : 'Wrap tightly in foil now to push through the stall quickly';
 
     var events = [
-      { dot: 'blue',  time: light,    label: 'Light smoker / preheat', sub: 'Target smoker temp: ' + fmtTemp(temp) + ' — allow 30 min to stabilize' },
-      { dot: 'amber', time: meatOn,   label: 'Meat goes on smoker', sub: (rawW.toFixed(1)) + ' ' + weightUnit + ' ' + (boneIn ? 'bone-in' : 'boneless') + ' — fat side up or down per your preference' },
-      { dot: 'red',   time: stallStart, label: 'Stall begins', sub: 'Internal reaches ' + fmtTemp(style.stallLo) + '\u2013' + fmtTemp(style.stallHi) + ' \u2014 temperature plateau. ' + wrapNote },
-      { dot: 'amber', time: stallEnd,  label: 'Stall ends' + (wrap !== 'none' ? ' / unwrap if desired' : ''), sub: 'Temperature climbs again toward target' },
-      { dot: 'amber', time: pull,     label: 'Pull from smoker \u2014 begin rest', sub: 'Target internal: ' + fmtTemp(style.pullTemp) + ' \u2014 rest ' + style.restMinutes + ' min minimum (faux Cambro holds up to 4 hrs)' },
-      { dot: 'green', time: serve,    label: 'Serve', sub: 'Pull, slice, or chop to order' }
+      { dot: 'blue',  time: light,      label: 'Light smoker / preheat', sub: 'Target smoker temp: ' + fmtTemp(temp) + ' \u2014 allow 30 min to stabilize' },
+      { dot: 'amber', time: meatOn,     label: 'Meat goes on smoker', sub: rawW.toFixed(1) + ' ' + weightUnit + ' ' + (boneIn ? 'bone-in' : 'boneless') + ' \u2014 fat side up or down per your preference' },
+      { dot: 'red',   time: stallStart, label: 'Stall begins', sub: 'Internal reaches ' + fmtTemp(150) + '\u2013' + fmtTemp(165) + ' \u2014 ' + wrapNote },
+      { dot: 'amber', time: stallEnd,   label: wrap !== 'none' ? 'Stall ends / unwrap if desired' : 'Stall ends', sub: 'Temperature climbs again toward target' },
+      { dot: 'amber', time: pull,       label: 'Pull from smoker \u2014 begin rest', sub: 'Target internal: ' + fmtTemp(style.pullTemp) + ' \u2014 rest ' + style.restMinutes + ' min minimum (faux Cambro holds up to 4 hrs)' },
+      { dot: 'green', time: serve,      label: 'Serve', sub: 'Pull, slice, or chop to order' }
     ];
 
     tlList.innerHTML = '';

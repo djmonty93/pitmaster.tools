@@ -142,6 +142,19 @@
 .tl-label { font-weight: 600; font-size: .9rem; }
 .tl-sub { font-size: .8rem; color: var(--text-muted); margin-top: .1rem; }
 .print-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.phase-list { list-style:none; padding:0; margin:0; }
+.phase-row { display:flex; justify-content:space-between; align-items:baseline; padding:.45rem 0; border-bottom:1px solid #F0EBE3; font-size:.9rem; }
+.phase-row:last-child { border-bottom:none; }
+.phase-lbl { color:var(--text-muted); }
+.phase-val { font-weight:700; color:var(--charcoal); }
+.live-resolve { }
+.resolve-row { display:flex; gap:.75rem; align-items:center; margin-bottom:.5rem; }
+.resolve-row input { flex:1; min-width:0; }
+.calc-btn--sm { white-space:nowrap; padding:.5rem 1rem; background:var(--amber); color:#fff; border:none; border-radius:6px; font-family:inherit; font-size:.875rem; font-weight:700; cursor:pointer; letter-spacing:.04em; }
+.calc-btn--sm:hover { background:var(--amber-dark); }
+.resolve-result { font-size:.9rem; font-weight:600; color:var(--charcoal); min-height:1.2em; }
+.resolve-result.error { color:var(--red); }
+.model-note { font-size:.8rem; color:var(--text-muted); line-height:1.6; margin:.75rem 0 0; padding:.75rem; background:#FAF7F2; border:1px solid #EDE5D8; border-radius:6px; }
 .editorial-section p + p, .editorial-section p + h3, .editorial-section h3 + p,
 .editorial-section ul + p, .editorial-section p + ul { margin-top: .9rem; }
 .editorial-section ul { padding-left: 1.25rem; margin-top: .5rem; }
@@ -243,6 +256,22 @@
         </select>
       </div>
 
+      <div class="form-group">
+        <label for="cookerType">Cooker Type</label>
+        <select id="cookerType" aria-label="Cooker type">
+          <option value="pellet">Pellet grill</option>
+          <option value="offset">Offset stick-burner</option>
+          <option value="kamado">Kamado (BGE / Kamado Joe)</option>
+          <option value="kettle">Kettle (Weber / PK)</option>
+          <option value="electric">Water-pan electric (Masterbuilt / Bradley)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="meatThickness">Flat Thickness <span style="font-weight:400;font-size:.8rem;color:var(--text-muted)">(inches, optional)</span></label>
+        <input type="number" id="meatThickness" min="0" max="6" step="0.25" placeholder="Leave blank to estimate from weight" aria-label="Flat thickness in inches, optional">
+      </div>
+
       <div class="form-group full-width">
         <label>Wrap Method</label>
         <div class="wrap-toggle" role="group" aria-label="Wrap method">
@@ -292,10 +321,32 @@
         </div>
       </div>
 
+      <div class="card" id="phaseBreakdown" style="display:none">
+        <h3 class="section-title">Cook Phases</h3>
+        <ul class="phase-list">
+          <li class="phase-row"><span class="phase-lbl">Heat-up to stall</span><span class="phase-val" id="phT1">—</span></li>
+          <li class="phase-row" id="phT2Row"><span class="phase-lbl">Estimated stall</span><span class="phase-val" id="phT2">—</span></li>
+          <li class="phase-row"><span class="phase-lbl">Post-stall finish</span><span class="phase-val" id="phT3">—</span></li>
+          <li class="phase-row" id="phWbRow"><span class="phase-lbl">Stall plateau (wet-bulb)</span><span class="phase-val" id="phWb">—</span></li>
+        </ul>
+      </div>
+
+      <div class="card live-resolve no-print">
+        <h3 class="section-title">Have a current temp reading?</h3>
+        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:.75rem">Enter it to recalculate remaining time based on where the brisket is right now.</p>
+        <div class="resolve-row">
+          <input type="number" id="currentTemp" placeholder="e.g. 145" min="32" max="220" aria-label="Current internal temperature">
+          <button class="calc-btn--sm" type="button" onclick="resolveNow()">Recalculate</button>
+        </div>
+        <p id="resolveResult" class="resolve-result" aria-live="polite"></p>
+      </div>
+
       <div class="card">
         <h3 class="section-title">Cook Timeline</h3>
         <ul class="tl-list" id="tlList" aria-label="Cook timeline"></ul>
       </div>
+
+      <p class="model-note">This estimate assumes steady pit temperature and average meat geometry. It does not account for collagen breakdown variability, fat content differences, meat grade, or smoker heat distribution. Always cook to internal temperature, not to the clock. Build in a 1&#x2013;2 hour buffer and use a faux cambro hold if you finish early.</p>
 
       <div style="margin-top:1rem" class="no-print">
         <button class="print-btn" id="printBtn" type="button" aria-label="Print results">
@@ -505,21 +556,13 @@
 </footer>
 
 <!-- INJECT:site-utils.js:script -->
+<!-- INJECT:smoke-physics.js:script -->
 <script>
 
 var CUTS = {
-  sliced: { name: 'Brisket (Sliced)', cookRate: 1.5, pullTemp: 195, restMinutes: 90, stallLo: 150, stallHi: 170 },
-  pulled: { name: 'Brisket (Pulled)', cookRate: 1.5, pullTemp: 205, restMinutes: 90, stallLo: 150, stallHi: 170 }
+  sliced: { name: 'Brisket (Sliced)', pullTemp: 195, restMinutes: 90 },
+  pulled: { name: 'Brisket (Pulled)', pullTemp: 205, restMinutes: 90 }
 };
-
-var TM = { 225: 1.0, 250: 0.85, 275: 0.75, 300: 0.65 };
-
-function cookHrs(wLbs, temp, wrap) {
-  var h = 1.5 * wLbs * (TM[temp] || 1.0);
-  if (wrap === 'none') h *= 1.10;
-  else if (wrap === 'paper') h *= 1.05;
-  return h;
-}
 
 // ── State ─────────────────────────────────────────────────────────────────────
 var state = { style: 'sliced', wrap: 'foil', tu: 'F', wu: 'lbs' };
@@ -580,7 +623,31 @@ function calculate() {
   }
 
   var cut = CUTS[state.style];
-  var totalCookHrs = cookHrs(weightLbs, temp, wrap);
+  var rh  = SP_COOKER_RH[document.getElementById('cookerType').value] || 12;
+  var thk = parseFloat(document.getElementById('meatThickness').value) || 0;
+
+  var physics = spCompute({
+    kmKey: 'brisket-packer',
+    weightLbs: weightLbs,
+    thicknessIn: thk,
+    pitF: temp,
+    rh: rh,
+    tiF: 38,
+    tfF: cut.pullTemp,
+    hasStall: true,
+    wrapTriggerF: 150,
+    wrapMethod: wrap
+  });
+
+  if (physics.error) {
+    vmsg.textContent = physics.error;
+    vmsg.classList.add('error');
+    return;
+  }
+
+  _lastPhysicsParams = { kmKey: 'brisket-packer', weightLbs: weightLbs, thicknessIn: thk, pitF: temp, rh: rh, tfF: cut.pullTemp };
+
+  var totalCookHrs = physics.totalH;
   var cookMs = totalCookHrs * 3600000;
   var restMs = cut.restMinutes * 60000;
 
@@ -591,28 +658,29 @@ function calculate() {
   var nowMinute = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), 0, 0);
   if (serve < nowMinute) serve.setDate(serve.getDate() + 1);
 
-  var pull = new Date(serve.getTime() - restMs);
+  var pull   = new Date(serve.getTime() - restMs);
   var meatOn = new Date(pull.getTime() - cookMs);
-  var light = new Date(meatOn.getTime() - 30 * 60000);
+  var light  = new Date(meatOn.getTime() - 30 * 60000);
 
-  // Stall window
-  var stallBase = wrap === 'none' ? cookMs / 1.10 : wrap === 'paper' ? cookMs / 1.05 : cookMs;
-  var stallStart = new Date(meatOn.getTime() + stallBase * 0.40);
-  var stallEnd   = new Date(meatOn.getTime() + cookMs * 0.65);
+  // Phase-based stall window from physics model
+  var t1Ms = physics.t1h * 3600000;
+  var t2Ms = physics.t2h * 3600000;
+  var stallStart = new Date(meatOn.getTime() + t1Ms);
+  var stallEnd   = new Date(meatOn.getTime() + t1Ms + t2Ms);
 
-  var lightDay = dayLabel(serve, light);
-  var meatOnDay = dayLabel(serve, meatOn);
+  var lightDay      = dayLabel(serve, light);
+  var meatOnDay     = dayLabel(serve, meatOn);
   var stallStartDay = dayLabel(serve, stallStart);
-  var stallEndDay = dayLabel(serve, stallEnd);
-  var pullDay = dayLabel(serve, pull);
+  var stallEndDay   = dayLabel(serve, stallEnd);
+  var pullDay       = dayLabel(serve, pull);
 
-  // Stall wrap note
+  // Stall notes
+  var T_wb_disp = Math.round(state.tu === 'C' ? (physics.T_wb - 32) * 5 / 9 : physics.T_wb) + (state.tu === 'C' ? '\u00B0C' : '\u00B0F');
   var stallNote = '';
-  if (wrap === 'foil') stallNote = 'Internal reaches ' + fmtTemp(cut.stallLo) + '\u2013' + fmtTemp(cut.stallHi) + ' \u2014 temperature plateau begins. Wrap tightly in foil now (Texas Crutch).';
-  else if (wrap === 'paper') stallNote = 'Internal reaches ' + fmtTemp(cut.stallLo) + '\u2013' + fmtTemp(cut.stallHi) + ' \u2014 temperature plateau begins. Wrap in butcher paper now.';
-  else stallNote = 'Internal reaches ' + fmtTemp(cut.stallLo) + '\u2013' + fmtTemp(cut.stallHi) + ' \u2014 temperature plateau begins. Hold steady \u2014 no wrap, trust the process.';
-
-  var stallEndNote = wrap === 'none' ? 'Temperature climbs again' : 'Temperature climbs again \u2014 leave wrapped until pull temp';
+  if (wrap === 'foil') stallNote = 'Internal reaches ' + fmtTemp(150) + ' \u2014 temperature plateau begins. Wrap tightly in foil now (Texas Crutch).';
+  else if (wrap === 'paper') stallNote = 'Internal reaches ' + fmtTemp(150) + ' \u2014 temperature plateau begins. Wrap in butcher paper now.';
+  else stallNote = 'Internal reaches ' + fmtTemp(150) + ' \u2014 plateau driven by evaporative cooling (~' + T_wb_disp + ' wet-bulb). Hold steady \u2014 no wrap.';
+  var stallEndNote = wrap === 'none' ? 'Temperature climbs again past ' + fmtTemp(165) : 'Temperature climbs again \u2014 leave wrapped until pull temp';
 
   // Build timeline
   var events = [
@@ -640,17 +708,56 @@ function calculate() {
   });
 
   // Stat cards
-  document.getElementById('sCookTime').textContent = totalCookHrs.toFixed(1);
-  document.getElementById('sCookSub').textContent = 'hours at ' + fmtSmokerTemp(temp);
+  document.getElementById('sCookTime').textContent = spFmtHrs(totalCookHrs);
+  document.getElementById('sCookSub').textContent = 'at ' + fmtSmokerTemp(temp);
   document.getElementById('sLightTime').textContent = fmtTime(light);
   document.getElementById('sLightDay').textContent = lightDay ? lightDay : 'today';
   document.getElementById('sPullTemp').textContent = fmtTemp(cut.pullTemp);
+
+  // Phase breakdown
+  var pbEl = document.getElementById('phaseBreakdown');
+  pbEl.style.display = '';
+  document.getElementById('phT1').textContent = spFmtHrs(physics.t1h);
+  var t2Row = document.getElementById('phT2Row');
+  if (physics.t2h > 0.05) {
+    t2Row.style.display = '';
+    document.getElementById('phT2').textContent = spFmtHrs(physics.t2h);
+  } else {
+    t2Row.style.display = 'none';
+  }
+  document.getElementById('phT3').textContent = spFmtHrs(physics.t3h > 0 ? physics.t3h : physics.totalH - physics.t1h);
+  var phWbRow = document.getElementById('phWbRow');
+  if (wrap === 'none' && physics.t2h > 0.05) {
+    phWbRow.style.display = '';
+    document.getElementById('phWb').textContent = '~' + T_wb_disp + ' plateau';
+  } else {
+    phWbRow.style.display = 'none';
+  }
+
+  // Clear live re-solve result
+  document.getElementById('resolveResult').textContent = '';
+  document.getElementById('resolveResult').className = 'resolve-result';
+  document.getElementById('currentTemp').value = '';
 
   // Print header
   document.getElementById('ptitle').textContent = cut.name + ' Smoking Timeline';
   document.getElementById('pmeta').textContent = weightLbs.toFixed(1) + ' lbs \u2014 ' + temp + '\u00B0F \u2014 serve ' + fmtTime(serve);
 
   openResultsModal();
+}
+
+// ── Live re-solve ─────────────────────────────────────────────────────────────
+var _lastPhysicsParams = null;
+
+function resolveNow() {
+  var resEl = document.getElementById('resolveResult');
+  if (!_lastPhysicsParams) { resEl.textContent = 'Calculate first.'; return; }
+  var rawCur = parseFloat(document.getElementById('currentTemp').value);
+  if (isNaN(rawCur)) { resEl.textContent = 'Enter a temperature reading.'; resEl.className = 'resolve-result error'; return; }
+  var curF = state.tu === 'C' ? rawCur * 9/5 + 32 : rawCur;
+  var r = spResolve(Object.assign({}, _lastPhysicsParams, { currentF: curF }));
+  resEl.className = 'resolve-result' + (r.error ? ' error' : '');
+  resEl.textContent = r.error ? r.error : 'Approximately ' + spFmtHrs(r.remainingH) + ' remaining';
 }
 
 // ── Style toggle ──────────────────────────────────────────────────────────────

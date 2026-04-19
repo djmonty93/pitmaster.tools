@@ -151,6 +151,14 @@
 .faq-body { padding: 0 1.15rem 1rem; color: #332F2B; line-height: 1.75; font-size: .95rem; }
 .related-tools h2 { font-family: Georgia,serif; font-size: 1.35rem; margin-bottom: 1rem; }
 #print-header { display: none; }
+.resolve-row { display: flex; gap: .5rem; margin-top: .75rem; }
+.resolve-row input { flex: 1; padding: .55rem .75rem; border: 1.5px solid var(--card-border); border-radius: 6px; font-size: .95rem; font-family: inherit; }
+.resolve-row input:focus { outline: 2px solid var(--amber); outline-offset: 2px; border-color: var(--amber); }
+.calc-btn--sm { padding: .55rem 1rem; background: var(--amber); color: #fff; border: none; border-radius: 6px; font-family: inherit; font-size: .875rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.calc-btn--sm:hover { background: #D78108; }
+.calc-btn--sm:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.resolve-result { margin-top: .5rem; font-size: .9rem; font-weight: 600; color: var(--charcoal); min-height: 1.4em; }
+.model-note { font-size: .8rem; color: var(--text-muted); line-height: 1.6; margin-top: 1.25rem; padding: .875rem 1rem; background: #FAFAF8; border: 1px solid var(--card-border); border-radius: var(--radius); }
 </style>
 </head>
 <body>
@@ -238,6 +246,17 @@
         </select>
       </div>
 
+      <div class="form-group">
+        <label for="cookerType">Cooker Type</label>
+        <select id="cookerType" aria-label="Cooker type">
+          <option value="pellet">Pellet grill</option>
+          <option value="offset">Offset stick-burner</option>
+          <option value="kamado">Kamado (BGE / Kamado Joe)</option>
+          <option value="kettle">Kettle (Weber / PK)</option>
+          <option value="electric">Water-pan electric (Masterbuilt / Bradley)</option>
+        </select>
+      </div>
+
       <div class="form-group full-width">
         <label>Wrap Method</label>
         <div class="wrap-toggle" role="group" aria-label="Wrap method">
@@ -291,6 +310,18 @@
         <h3 class="section-title">Cook Timeline</h3>
         <ul class="tl-list" id="tlList" aria-label="Cook timeline"></ul>
       </div>
+
+      <div class="card" id="liveResolve" style="display:none;">
+        <h3 class="section-title">Have a current temp reading?</h3>
+        <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:.25rem;">Enter it to recalculate remaining time.</p>
+        <div class="resolve-row">
+          <input type="number" id="currentTemp" placeholder="e.g. 130" min="32" max="220">
+          <button class="calc-btn--sm" type="button" onclick="resolveNow()">Recalculate</button>
+        </div>
+        <p class="resolve-result" id="resolveResult"></p>
+      </div>
+
+      <p class="model-note">This estimate uses a physics-based heat diffusion model calibrated to real cook data. Turkey times vary with starting temperature and how cold the bird goes into the smoker. Always cook to internal temperature — not to the clock.</p>
 
       <div style="margin-top:1rem" class="no-print">
         <button class="print-btn" id="printBtn" type="button" aria-label="Print results">
@@ -509,24 +540,21 @@
 </footer>
 
 <!-- INJECT:site-utils.js:script -->
+<!-- INJECT:smoke-physics.js:script -->
 <script>
 
+/* byWeight=true: uses spCompute with kmKey + weight → L lookup
+   byWeight=false: uses spCompute with fixedL (bone-in dark meat flat estimate) */
 var CUTS = {
-  'whole-turkey':        { name: 'Whole Turkey',                cookRate: 0.60, flatHours: null, pullTemp: 165, restMinutes: 35, byWeight: true  },
-  'whole-turkey-spatch': { name: 'Whole Turkey (Spatchcocked)', cookRate: 0.45, flatHours: null, pullTemp: 165, restMinutes: 25, byWeight: true  },
-  'turkey-breast':       { name: 'Turkey Breast',               cookRate: 0.50, flatHours: null, pullTemp: 165, restMinutes: 20, byWeight: true  },
-  'turkey-leg':          { name: 'Turkey Leg',                  cookRate: null, flatHours: 2.25, pullTemp: 175, restMinutes: 15, byWeight: false },
-  'turkey-thighs':       { name: 'Turkey Thighs',               cookRate: null, flatHours: 2.50, pullTemp: 175, restMinutes: 15, byWeight: false },
-  'turkey-wings':        { name: 'Turkey Wings',                cookRate: null, flatHours: 2.00, pullTemp: 165, restMinutes: 10, byWeight: false }
+  'whole-turkey':        { name: 'Whole Turkey',                kmKey: 'whole-turkey',       hasStall: false, pullTemp: 165, restMinutes: 35, byWeight: true  },
+  'whole-turkey-spatch': { name: 'Whole Turkey (Spatchcocked)', kmKey: 'spatchcock-chicken', hasStall: false, pullTemp: 165, restMinutes: 25, byWeight: true  },
+  'turkey-breast':       { name: 'Turkey Breast',               kmKey: 'turkey-breast',      hasStall: false, pullTemp: 165, restMinutes: 20, byWeight: true  },
+  'turkey-leg':          { name: 'Turkey Leg',                  kmKey: 'whole-chicken',      hasStall: false, pullTemp: 175, restMinutes: 15, byWeight: false, fixedL: 1.1 },
+  'turkey-thighs':       { name: 'Turkey Thighs',               kmKey: 'whole-chicken',      hasStall: false, pullTemp: 175, restMinutes: 15, byWeight: false, fixedL: 1.2 },
+  'turkey-wings':        { name: 'Turkey Wings',                kmKey: 'whole-chicken',      hasStall: false, pullTemp: 165, restMinutes: 10, byWeight: false, fixedL: 1.0 }
 };
 
-var TM   = { 225: 1.0, 250: 0.85, 275: 0.75, 300: 0.65, 325: 0.58 };
-var WRAP = { foil: 1.00, paper: 1.05, none: 1.10 };
-
-function cookHrs(cut, wLbs, tempF, wrapKey) {
-  var base = cut.cookRate ? cut.cookRate * wLbs : cut.flatHours;
-  return base * TM[tempF] * WRAP[wrapKey];
-}
+var _lastPhysicsParams = null;
 
 // ── State ─────────────────────────────────────────────────────────────────────
 var state = { cutKey: 'whole-turkey', wrap: 'none', tu: 'F', wu: 'lbs' };
@@ -578,7 +606,7 @@ function calculate() {
   vmsg.textContent = '';
 
   var cut = CUTS[state.cutKey];
-  var weightLbs = 15; // default for flat-time cuts
+  var weightLbs = 15;
   if (cut.byWeight) {
     var rawWeight = parseFloat(document.getElementById('weight').value);
     if (!rawWeight || rawWeight <= 0) {
@@ -590,8 +618,9 @@ function calculate() {
     weightLbs = state.wu === 'kg' ? rawWeight / 0.453592 : rawWeight;
   }
 
-  var temp = parseInt(document.getElementById('smokerTemp').value, 10);
-  var wrap = state.wrap;
+  var tempF = parseInt(document.getElementById('smokerTemp').value, 10);
+  var cookerType = document.getElementById('cookerType').value;
+  var rh = SP_COOKER_RH[cookerType] || 12;
   var serveVal = document.getElementById('serveTime').value;
 
   if (!serveVal) {
@@ -601,11 +630,39 @@ function calculate() {
     return;
   }
 
-  var totalCookHrs = cookHrs(cut, weightLbs, temp, wrap);
-  var cookMs  = totalCookHrs * 3600000;
-  var restMs  = cut.restMinutes * 60000;
+  var thicknessIn = cut.fixedL || 0;
+  var result = spCompute({
+    kmKey: cut.kmKey,
+    weightLbs: weightLbs,
+    thicknessIn: thicknessIn,
+    pitF: tempF,
+    rh: rh,
+    tiF: 38,
+    tfF: cut.pullTemp,
+    hasStall: cut.hasStall,
+    wrapTriggerF: 150,
+    wrapMethod: state.wrap
+  });
 
-  // Build serve date from today, rolling past times to tomorrow.
+  if (result.error) {
+    vmsg.textContent = result.error;
+    vmsg.classList.add('error');
+    return;
+  }
+
+  _lastPhysicsParams = {
+    kmKey: cut.kmKey,
+    weightLbs: weightLbs,
+    thicknessIn: thicknessIn,
+    pitF: tempF,
+    rh: rh,
+    tfF: cut.pullTemp
+  };
+
+  var totalCookHrs = result.totalH;
+  var cookMs = totalCookHrs * 3600000;
+  var restMs = cut.restMinutes * 60000;
+
   var now = new Date();
   var parts = serveVal.split(':');
   var serve = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
@@ -615,33 +672,16 @@ function calculate() {
   var pull   = new Date(serve.getTime() - restMs);
   var meatOn = new Date(pull.getTime() - cookMs);
   var light  = new Date(meatOn.getTime() - 30 * 60000);
-
-  // Wrap check event at 60% of cook time
   var wrapCheck = new Date(meatOn.getTime() + cookMs * 0.60);
 
-  var lightDay    = dayLabel(serve, light);
-  var meatOnDay   = dayLabel(serve, meatOn);
-  var wrapCheckDay = dayLabel(serve, wrapCheck);
-  var pullDay     = dayLabel(serve, pull);
+  var weightStr = cut.byWeight ? weightLbs.toFixed(1) + ' lbs ' + escapeHtml(cut.name) : escapeHtml(cut.name);
 
-  // Wrap check tip
-  var wrapCheckNote = 'Check internal temp. If browning too fast, tent loosely with foil.';
-
-  // Weight display string for timeline
-  var weightStr = '';
-  if (cut.byWeight) {
-    weightStr = weightLbs.toFixed(1) + ' lbs ' + escapeHtml(cut.name);
-  } else {
-    weightStr = escapeHtml(cut.name);
-  }
-
-  // Build timeline
   var events = [
-    { dot: 'blue',  time: light,     day: lightDay,     label: 'Light smoker / preheat',       sub: 'Target: ' + escapeHtml(fmtSmokerTemp(temp)) + ' stable before turkey goes on' },
-    { dot: 'amber', time: meatOn,    day: meatOnDay,    label: 'Turkey goes on smoker',         sub: weightStr },
-    { dot: 'amber', time: wrapCheck, day: wrapCheckDay, label: 'Wrap check (60% done)',         sub: wrapCheckNote },
-    { dot: 'red',   time: pull,      day: pullDay,      label: 'Pull from smoker \u2014 begin rest', sub: 'Target internal: ' + escapeHtml(fmtTemp(cut.pullTemp)) + ' \u2014 rest ' + cut.restMinutes + ' min loosely tented' },
-    { dot: 'green', time: serve,     day: '',           label: 'Serve',                         sub: 'Slice against the grain and enjoy' }
+    { dot: 'blue',  time: light,     day: dayLabel(serve, light),      label: 'Light smoker / preheat',          sub: 'Target: ' + escapeHtml(fmtSmokerTemp(tempF)) + ' stable before turkey goes on' },
+    { dot: 'amber', time: meatOn,    day: dayLabel(serve, meatOn),     label: 'Turkey goes on smoker',            sub: weightStr },
+    { dot: 'amber', time: wrapCheck, day: dayLabel(serve, wrapCheck),  label: 'Wrap check (60% done)',            sub: 'Check internal temp. If browning too fast, tent loosely with foil.' },
+    { dot: 'red',   time: pull,      day: dayLabel(serve, pull),       label: 'Pull from smoker \u2014 begin rest', sub: 'Target internal: ' + escapeHtml(fmtTemp(cut.pullTemp)) + ' \u2014 rest ' + cut.restMinutes + ' min loosely tented' },
+    { dot: 'green', time: serve,     day: '',                          label: 'Serve',                            sub: 'Slice against the grain and enjoy' }
   ];
 
   var tlList = document.getElementById('tlList');
@@ -660,17 +700,17 @@ function calculate() {
     tlList.appendChild(li);
   });
 
-  // Stat cards
-  document.getElementById('sCookTime').textContent = totalCookHrs.toFixed(1);
-  document.getElementById('sCookSub').textContent = 'hours at ' + fmtSmokerTemp(temp);
+  document.getElementById('sCookTime').textContent = spFmtHrs(totalCookHrs);
+  document.getElementById('sCookSub').textContent = 'at ' + fmtSmokerTemp(tempF);
   document.getElementById('sLightTime').textContent = fmtTime(light);
-  document.getElementById('sLightDay').textContent = lightDay ? lightDay : 'today';
+  document.getElementById('sLightDay').textContent = dayLabel(serve, light) || 'today';
   document.getElementById('sPullTemp').textContent = fmtTemp(cut.pullTemp);
 
-  // Print header
   document.getElementById('ptitle').textContent = cut.name + ' Smoking Timeline';
   var metaWeight = cut.byWeight ? weightLbs.toFixed(1) + ' lbs \u2014 ' : '';
-  document.getElementById('pmeta').textContent = metaWeight + temp + '\u00B0F \u2014 serve ' + fmtTime(serve);
+  document.getElementById('pmeta').textContent = metaWeight + tempF + '\u00B0F \u2014 serve ' + fmtTime(serve);
+
+  document.getElementById('liveResolve').style.display = '';
 
   openResultsModal();
 }
@@ -761,6 +801,27 @@ document.getElementById('cookieReject').addEventListener('click', function() {
   setCookie(CONSENT_COOKIE_NAME, 'rejected', 365);
   document.getElementById('cookieBanner').classList.remove('visible');
 });
+
+// ── Live re-solve ─────────────────────────────────────────────────────────────
+function resolveNow() {
+  if (!_lastPhysicsParams) return;
+  var input = document.getElementById('currentTemp');
+  var resultEl = document.getElementById('resolveResult');
+  var rawT = parseFloat(input.value);
+  if (isNaN(rawT)) { resultEl.textContent = 'Enter a temperature reading first.'; return; }
+  var currentF = state.tu === 'C' ? rawT * 9 / 5 + 32 : rawT;
+  var r = spResolve({
+    kmKey: _lastPhysicsParams.kmKey,
+    weightLbs: _lastPhysicsParams.weightLbs,
+    thicknessIn: _lastPhysicsParams.thicknessIn,
+    pitF: _lastPhysicsParams.pitF,
+    rh: _lastPhysicsParams.rh,
+    currentF: currentF,
+    tfF: _lastPhysicsParams.tfF
+  });
+  resultEl.textContent = r.error ? r.error : 'Estimated time remaining: ' + spFmtHrs(r.remainingH);
+}
+window.resolveNow = resolveNow;
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 (function init() {

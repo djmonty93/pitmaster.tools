@@ -251,6 +251,14 @@
   text-decoration: underline;
 }
 #print-header { display: none; }
+.resolve-row { display: flex; gap: .5rem; margin-top: .75rem; }
+.resolve-row input { flex: 1; padding: .55rem .75rem; border: 1.5px solid var(--card-border); border-radius: 6px; font-size: .95rem; font-family: inherit; }
+.resolve-row input:focus { outline: 2px solid var(--amber); outline-offset: 2px; border-color: var(--amber); }
+.calc-btn--sm { padding: .55rem 1rem; background: var(--amber); color: #fff; border: none; border-radius: 6px; font-family: inherit; font-size: .875rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.calc-btn--sm:hover { background: #D78108; }
+.calc-btn--sm:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.resolve-result { margin-top: .5rem; font-size: .9rem; font-weight: 600; color: var(--charcoal); min-height: 1.4em; }
+.model-note { font-size: .8rem; color: var(--text-muted); line-height: 1.6; margin-top: 1.25rem; padding: .875rem 1rem; background: #FAFAF8; border: 1px solid var(--card-border); border-radius: var(--radius); }
 </style>
 </head>
 <body>
@@ -360,6 +368,17 @@
           <option value="250">250&#xB0;F</option>
           <option value="275">275&#xB0;F</option>
           <option value="300">300&#xB0;F</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="cookerType">Cooker Type</label>
+        <select id="cookerType">
+          <option value="pellet">Pellet grill</option>
+          <option value="offset">Offset stick-burner</option>
+          <option value="kamado">Kamado (BGE / Kamado Joe)</option>
+          <option value="kettle">Kettle (Weber / PK)</option>
+          <option value="electric">Water-pan electric (Masterbuilt / Bradley)</option>
         </select>
       </div>
 
@@ -478,6 +497,18 @@
       <h3 class="section-title" id="sectionCookTimeline">Cook Timeline</h3>
       <div class="timeline" id="tlEl"></div>
     </div>
+
+    <div class="card" id="liveResolve" style="display:none;">
+      <h3 class="section-title">Have a current temp reading?</h3>
+      <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:.25rem;">Enter it to recalculate remaining time.</p>
+      <div class="resolve-row">
+        <input type="number" id="currentTemp" placeholder="e.g. 145" min="32" max="220">
+        <button class="calc-btn--sm" type="button" onclick="resolveNow()">Recalculate</button>
+      </div>
+      <p class="resolve-result" id="resolveResult"></p>
+    </div>
+
+    <p class="model-note" id="modelNote" style="display:none;">This estimate uses a physics-based heat diffusion model calibrated to real cook data. It assumes steady pit temperature and average meat geometry. Always cook to internal temperature — not to the clock alone. Build in a 1–2 hour buffer and use a faux cambro hold if you finish early.</p>
 
     <div class="tw-grid">
       <div class="card tip-card" role="region" aria-labelledby="sectionPitmasterTip" style="margin-bottom:0">
@@ -784,6 +815,7 @@
 </div>
 
 <!-- INJECT:site-utils.js:script -->
+<!-- INJECT:smoke-physics.js:script -->
 <script>
 (function () {
 'use strict';
@@ -1168,6 +1200,24 @@ var TM  = {225:1.0, 250:0.85, 275:0.75, 300:0.65};
 var SOZ = {light:4,   normal:6,   hungry:8};
 var SG  = {light:113, normal:170, hungry:227};
 
+/* Physics model — only applied to weight-based (cookRate) low-slow cuts */
+var PHYSICS_KEYS = {
+  'brisket-sliced':      { kmKey: 'brisket-packer', hasStall: true  },
+  'brisket-pulled':      { kmKey: 'brisket-packer', hasStall: true  },
+  'pork-butt-sliced':    { kmKey: 'pork-butt',      hasStall: true  },
+  'pork-butt-pulled':    { kmKey: 'pork-butt',      hasStall: true  },
+  'pork-loin':           { kmKey: 'pork-loin',      hasStall: false },
+  'beef-ribs':           { kmKey: 'spare-ribs',     hasStall: true  },
+  'whole-chicken':       { kmKey: 'whole-chicken',  hasStall: false },
+  'whole-turkey':        { kmKey: 'whole-turkey',   hasStall: false },
+  'whole-turkey-spatch': { kmKey: 'spatchcock-chicken', hasStall: false },
+  'turkey-breast':       { kmKey: 'turkey-breast',  hasStall: false },
+  'lamb-shoulder':       { kmKey: 'lamb-shoulder',  hasStall: true  },
+  'pork-belly':          { kmKey: 'pork-butt',      hasStall: true  },
+  'beef-chuck':          { kmKey: 'brisket-packer', hasStall: true  }
+};
+var _lastPhysicsParams = null;
+
 /* ============================================================
    STATE
    ============================================================ */
@@ -1214,10 +1264,21 @@ function cookHrs(cut, wLbs, temp, boneIn, inj, wrap){
   return h;
 }
 
+function getPhysicsResult(cutKey, cut, wLbs, tempF, wrap, rh) {
+  var pk = PHYSICS_KEYS[cutKey];
+  if (!pk || cut.cookRate === null) return null; // skip flat-time & two-phase
+  var r = spCompute({
+    kmKey: pk.kmKey, weightLbs: wLbs, thicknessIn: 0,
+    pitF: tempF, rh: rh, tiF: 38, tfF: cut.pullTemp,
+    hasStall: pk.hasStall, wrapTriggerF: 150, wrapMethod: wrap
+  });
+  return r.error ? null : r;
+}
+
 /* ============================================================
    TIMELINE
    ============================================================ */
-function buildTL(cut, serve, hrs, wrap, grill){
+function buildTL(cut, serve, hrs, wrap, grill, physicsResult){
   var ev=[], restMs=cut.restMinutes*60000;
   var stv = parseInt(document.getElementById('smokerTemp').value);
 
@@ -1228,11 +1289,15 @@ function buildTL(cut, serve, hrs, wrap, grill){
     ev.push({t:ls, l:'Light smoker / preheat',   s:'Target: '+dT(stv), c:'blue'});
     ev.push({t:on, l:'Meat goes on smoker',       s:'',                 c:'amber'});
     if(cut.stall){
-      /* Stall onset depends on internal temp (~150°F), not wrap strategy — compute from un-wrapped base hours.
-         Wrap affects stall duration, not onset, so stall-end still uses total adjusted cook time. */
-      var baseMs=wrap==='none'?cMs/1.10:wrap==='paper'?cMs/1.05:cMs;
-      var sb=new Date(on.getTime()+baseMs*0.40);
-      var se=new Date(on.getTime()+cMs*0.65);
+      var sb, se;
+      if (physicsResult && physicsResult.t1h > 0) {
+        sb = new Date(on.getTime() + physicsResult.t1h * 3600000);
+        se = new Date(sb.getTime() + physicsResult.t2h * 3600000);
+      } else {
+        var baseMs=wrap==='none'?cMs/1.10:wrap==='paper'?cMs/1.05:cMs;
+        sb=new Date(on.getTime()+baseMs*0.40);
+        se=new Date(on.getTime()+cMs*0.65);
+      }
       var sn=cut.stallLo ? 'Internal reaches '+dT(cut.stallLo)+'\u2013'+dT(cut.stallHi)+' \u2014 temperature plateau begins' : '';
       var wn= wrap==='foil'  ? ' \u2014 wrap in foil now (Texas Crutch)'
             : wrap==='paper' ? ' \u2014 wrap in butcher paper now' : '';
@@ -1269,10 +1334,28 @@ function buildTL(cut, serve, hrs, wrap, grill){
    RENDER
    ============================================================ */
 function render(cut, inp){
-  var h = cookHrs(cut, inp.wLbs, inp.temp, inp.boneIn, inp.inj, inp.wrap);
+  var rh = SP_COOKER_RH[inp.cookerType] || 12;
+  var physicsResult = getPhysicsResult(inp.cutKey, cut, inp.wLbs, inp.temp, inp.wrap, rh);
+  var h = physicsResult ? physicsResult.totalH : cookHrs(cut, inp.wLbs, inp.temp, inp.boneIn, inp.inj, inp.wrap);
+
+  if (physicsResult) {
+    _lastPhysicsParams = {
+      kmKey: PHYSICS_KEYS[inp.cutKey].kmKey,
+      weightLbs: inp.wLbs,
+      thicknessIn: 0,
+      pitF: inp.temp,
+      rh: rh,
+      tfF: cut.pullTemp
+    };
+    document.getElementById('liveResolve').style.display = '';
+    document.getElementById('modelNote').style.display = '';
+  } else {
+    document.getElementById('liveResolve').style.display = 'none';
+    document.getElementById('modelNote').style.display = 'none';
+  }
 
   /* Build timeline first so stat card derives start time from the same source of truth */
-  var evs = buildTL(cut, inp.serve, h, inp.wrap, inp.grill);
+  var evs = buildTL(cut, inp.serve, h, inp.wrap, inp.grill, physicsResult);
   var lst = evs[0].t; /* first event is always "Light smoker / preheat" */
 
   /* stat cards */
@@ -1412,13 +1495,37 @@ function calc(){
   var sd=serveDate();
   if(!sd){ setMsg('Please enter a serving time.','error'); return; }
   render(c,{
-    wLbs:w, temp:parseInt(document.getElementById('smokerTemp').value),
+    cutKey:k, wLbs:w, temp:parseInt(document.getElementById('smokerTemp').value),
+    cookerType:document.getElementById('cookerType').value,
     serve:sd, wrap:document.getElementById('wrapMethod').value,
     boneIn:document.getElementById('boneIn').value==='yes',
     inj:document.getElementById('injected').value==='yes',
     np:np, grill:document.getElementById('grillType').value
   });
 }
+
+/* ============================================================
+   LIVE RE-SOLVE
+   ============================================================ */
+function resolveNow() {
+  if (!_lastPhysicsParams) return;
+  var input = document.getElementById('currentTemp');
+  var resultEl = document.getElementById('resolveResult');
+  var rawT = parseFloat(input.value);
+  if (isNaN(rawT)) { resultEl.textContent = 'Enter a temperature reading first.'; return; }
+  var currentF = state.tu === 'C' ? rawT * 9 / 5 + 32 : rawT;
+  var r = spResolve({
+    kmKey: _lastPhysicsParams.kmKey,
+    weightLbs: _lastPhysicsParams.weightLbs,
+    thicknessIn: _lastPhysicsParams.thicknessIn,
+    pitF: _lastPhysicsParams.pitF,
+    rh: _lastPhysicsParams.rh,
+    currentF: currentF,
+    tfF: _lastPhysicsParams.tfF
+  });
+  resultEl.textContent = r.error ? r.error : 'Estimated time remaining: ' + spFmtHrs(r.remainingH);
+}
+window.resolveNow = resolveNow;
 
 /* ============================================================
    EVENTS

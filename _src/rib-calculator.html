@@ -230,6 +230,19 @@
   .results-modal { padding: 1rem; }
   .phase-cards { grid-template-columns: 1fr; }
 }
+.phase-list { list-style: none; padding: 0; margin: 0; }
+.phase-row { display: flex; justify-content: space-between; align-items: center; padding: .5rem 0; border-bottom: 1px solid #F5F0E8; }
+.phase-row:last-child { border-bottom: none; }
+.phase-lbl { font-size: .875rem; color: var(--text-muted); }
+.phase-val { font-size: .875rem; font-weight: 700; color: var(--charcoal); }
+.resolve-row { display: flex; gap: .5rem; margin-top: .75rem; }
+.resolve-row input { flex: 1; padding: .55rem .75rem; border: 1.5px solid var(--card-border); border-radius: 6px; font-size: .95rem; font-family: inherit; }
+.resolve-row input:focus { outline: 2px solid var(--amber); outline-offset: 2px; border-color: var(--amber); }
+.calc-btn--sm { padding: .55rem 1rem; background: var(--amber); color: #fff; border: none; border-radius: 6px; font-family: inherit; font-size: .875rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.calc-btn--sm:hover { background: #D78108; }
+.calc-btn--sm:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.resolve-result { margin-top: .5rem; font-size: .9rem; font-weight: 600; color: var(--charcoal); min-height: 1.4em; }
+.model-note { font-size: .8rem; color: var(--text-muted); line-height: 1.6; margin-top: 1.25rem; padding: .875rem 1rem; background: #FAFAF8; border: 1px solid var(--card-border); border-radius: var(--radius); }
 </style>
 </head>
 <body>
@@ -341,6 +354,17 @@
         </div>
 
         <div class="form-group">
+          <label for="cookerType">Cooker Type</label>
+          <select id="cookerType">
+            <option value="pellet">Pellet grill</option>
+            <option value="offset">Offset stick-burner</option>
+            <option value="kamado">Kamado (BGE / Kamado Joe)</option>
+            <option value="kettle">Kettle (Weber / PK)</option>
+            <option value="electric">Water-pan electric (Masterbuilt / Bradley)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
           <label for="smokerTemp">Smoker Temperature</label>
           <select id="smokerTemp">
             <option value="225">225&#xB0;F</option>
@@ -422,6 +446,28 @@
         <h3 class="section-title">Cook Timeline</h3>
         <div class="timeline" id="tlEl" aria-label="Cook timeline"></div>
       </div>
+
+      <div class="card" id="phaseBreakdown" style="display:none;">
+        <h3 class="section-title">Cook Phases</h3>
+        <ul class="phase-list">
+          <li class="phase-row"><span class="phase-lbl">Heat-up to stall</span><span class="phase-val" id="phT1">—</span></li>
+          <li class="phase-row" id="stallRow"><span class="phase-lbl">Estimated stall plateau</span><span class="phase-val" id="phT2">—</span></li>
+          <li class="phase-row"><span class="phase-lbl">Post-stall finish</span><span class="phase-val" id="phT3">—</span></li>
+          <li class="phase-row"><span class="phase-lbl">Stall plateau temp</span><span class="phase-val" id="phWb">—</span></li>
+        </ul>
+      </div>
+
+      <div class="card" id="liveResolve" style="display:none;">
+        <h3 class="section-title">Have a current temp reading?</h3>
+        <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:.25rem;">Enter it to recalculate remaining time.</p>
+        <div class="resolve-row">
+          <input type="number" id="currentTemp" placeholder="e.g. 145" min="32" max="220">
+          <button class="calc-btn--sm" type="button" onclick="resolveNow()">Recalculate</button>
+        </div>
+        <p class="resolve-result" id="resolveResult"></p>
+      </div>
+
+      <p class="model-note">This estimate uses a physics-based heat diffusion model calibrated to real cook data. It does not account for bone geometry, fat content variation, or uneven smoker heat. Always cook to doneness tests — bend test, toothpick, and internal temperature — not to the clock alone.</p>
 
       <div class="share-buttons no-print" aria-label="Share options">
         <a class="share-btn" href="https://pinterest.com/pin/create/button/?url=https://pitmaster.tools/rib-calculator.html&description=Free+rib+smoking+calculator" target="_blank" rel="noopener noreferrer">Share on Pinterest</a>
@@ -626,18 +672,18 @@
 </div>
 
 <!-- INJECT:site-utils.js:script -->
+<!-- INJECT:smoke-physics.js:script -->
 <script>
 (function() {
   'use strict';
 
   /* ---- Data ---- */
   var RIBS = {
-    'baby-back':   { name: 'Baby Back Ribs',    flatHours: 5.5,  pullTemp: 195, restMinutes: 20, p1: 2, p2: 2, p3: 1 },
-    'spare':       { name: 'Spare Ribs',         flatHours: 6.5,  pullTemp: 198, restMinutes: 20, p1: 3, p2: 2, p3: 1 },
-    'competition': { name: 'Competition Ribs',   flatHours: 5.0,  pullTemp: 190, restMinutes: 20, p1: 2, p2: 2, p3: 1 },
-    'beef':        { name: 'Beef Ribs (Dino)',   cookRate: 0.75,  pullTemp: 203, restMinutes: 45 }
+    'baby-back':   { name: 'Baby Back Ribs',  kmKey: 'baby-back-ribs', pullTemp: 195, restMinutes: 20 },
+    'spare':       { name: 'Spare Ribs',       kmKey: 'spare-ribs',     pullTemp: 198, restMinutes: 20 },
+    'competition': { name: 'Competition Ribs', kmKey: 'baby-back-ribs', pullTemp: 190, restMinutes: 20 },
+    'beef':        { name: 'Beef Ribs (Dino)', kmKey: 'spare-ribs',     pullTemp: 203, restMinutes: 45 }
   };
-  var TM = { 225: 1.0, 250: 0.85, 275: 0.75, 300: 0.65 };
 
   /* ---- Unit state ---- */
   var tempUnit = localStorage.getItem('pitmaster_tu') || 'F';
@@ -671,6 +717,7 @@
 
   /* ---- Method toggle state ---- */
   var method = 'standard'; // 'standard' | '321'
+  var _lastPhysicsParams = null;
 
   /* ---- Helper: selected rib type ---- */
   function getSelectedRib() {
@@ -865,10 +912,10 @@
 
     var ribKey = getSelectedRib();
     var rib = RIBS[ribKey];
-    var tempVal = parseInt(smokerTempSel.value, 10);
-    var tm = TM[tempVal] || 1.0;
+    var tempF = parseInt(smokerTempSel.value, 10);
+    var cookerType = document.getElementById('cookerType').value;
+    var rh = SP_COOKER_RH[cookerType] || 12;
 
-    // Parse serve time
     var serveParts = serveTimeInput.value.split(':');
     if (serveParts.length < 2 || !serveTimeInput.value) {
       vmsg.className = 'vmsg error';
@@ -876,11 +923,12 @@
       return;
     }
     var now = new Date();
-    var serve = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(serveParts[0], 10), parseInt(serveParts[1], 10));
-    var nowMinute = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), 0, 0);
+    var serve = new Date(now.getFullYear(), now.getMonth(), now.getDate(),
+      parseInt(serveParts[0], 10), parseInt(serveParts[1], 10));
+    var nowMinute = new Date(now.getFullYear(), now.getMonth(), now.getDate(),
+      now.getHours(), now.getMinutes(), 0, 0);
     if (serve < nowMinute) serve.setDate(serve.getDate() + 1);
 
-    // Beef ribs: get weight
     var weightLbs = 8;
     if (ribKey === 'beef') {
       var rawW = parseFloat(beefWeightInput.value);
@@ -892,105 +940,136 @@
       weightLbs = (weightUnit === 'kg') ? rawW * 2.20462 : rawW;
     }
 
-    // Compute cook hours
-    var hrs;
-    if (rib.flatHours) {
-      hrs = rib.flatHours * tm;
-    } else {
-      hrs = rib.cookRate * weightLbs * tm;
+    var wrapMethod = (method === '321' && ribKey !== 'beef') ? 'foil' : 'none';
+
+    var result = spCompute({
+      kmKey: rib.kmKey,
+      weightLbs: weightLbs,
+      thicknessIn: 0,
+      pitF: tempF,
+      rh: rh,
+      tiF: 38,
+      tfF: rib.pullTemp,
+      hasStall: true,
+      wrapTriggerF: 150,
+      wrapMethod: wrapMethod
+    });
+
+    if (result.error) {
+      vmsg.className = 'vmsg error';
+      vmsg.textContent = result.error;
+      return;
     }
 
+    _lastPhysicsParams = {
+      kmKey: rib.kmKey,
+      weightLbs: weightLbs,
+      thicknessIn: 0,
+      pitF: tempF,
+      rh: rh,
+      tfF: rib.pullTemp
+    };
+
+    var totalCookHrs = result.totalH;
+    var cookMs = totalCookHrs * 3600000;
     var restMs = rib.restMinutes * 60000;
-    var cookMs = hrs * 3600000;
 
     if (method === '321' && ribKey !== 'beef') {
-      // 3-2-1 / 2-2-1 calculation
-      var p1Base = rib.p1, p2Base = rib.p2, p3Base = rib.p3;
-      var totalBase = p1Base + p2Base + p3Base;
-      var ratio = (totalBase * tm) / totalBase; // = tm
-      var p1Adj = p1Base * ratio;
-      var p2Adj = p2Base * ratio;
-      var p3Adj = p3Base * ratio;
-      var adjustedTotal = p1Adj + p2Adj + p3Adj;
+      // 3-2-1 / 2-2-1: physics t1h = pre-wrap, t3h = wrapped phase split 2:1
+      var p1h = result.t1h;
+      var p2h = result.t3h * (2 / 3);
+      var p3h = result.t3h * (1 / 3);
 
       var phase3End = new Date(serve.getTime() - restMs);
-      var phase3Start = new Date(phase3End.getTime() - p3Adj * 3600000);
-      var phase2Start = new Date(phase3Start.getTime() - p2Adj * 3600000);
-      var phase1Start = new Date(phase2Start.getTime() - p1Adj * 3600000);
+      var phase3Start = new Date(phase3End.getTime() - p3h * 3600000);
+      var phase2Start = new Date(phase3Start.getTime() - p2h * 3600000);
+      var phase1Start = new Date(phase2Start.getTime() - p1h * 3600000);
       var lightSmoker = new Date(phase1Start.getTime() - 30 * 60000);
 
-      // Stat display: hide standard cards, show phase cards
       statCardsEl.style.display = 'none';
       phaseCardsEl.style.display = '';
+      document.getElementById('phaseBreakdown').style.display = 'none';
+      document.getElementById('liveResolve').style.display = '';
 
       var methodName = (ribKey === 'spare') ? '3-2-1' : '2-2-1';
 
-      document.getElementById('phaseNum1').textContent = fmtHrs(p1Adj);
+      document.getElementById('phaseNum1').textContent = spFmtHrs(p1h);
       document.getElementById('phaseLabel1').textContent = 'Phase 1 — Smoke';
       document.getElementById('phaseDesc1').textContent = 'Unwrapped — smoke penetration and bark formation';
 
-      document.getElementById('phaseNum2').textContent = fmtHrs(p2Adj);
+      document.getElementById('phaseNum2').textContent = spFmtHrs(p2h);
       document.getElementById('phaseLabel2').textContent = 'Phase 2 — Wrap';
       document.getElementById('phaseDesc2').textContent = 'Foil-wrapped with butter, brown sugar, and apple juice';
 
-      document.getElementById('phaseNum3').textContent = fmtHrs(p3Adj);
+      document.getElementById('phaseNum3').textContent = spFmtHrs(p3h);
       document.getElementById('phaseLabel3').textContent = 'Phase 3 — Finish';
       document.getElementById('phaseDesc3').textContent = 'Unwrapped — firm bark, optional sauce glaze last 15 min';
 
-      // Timeline
       tlEl.innerHTML = '';
-      var today = new Date();
       var events = [
-        { color: 'blue', time: lightSmoker, label: 'Light smoker / preheat', sub: 'Get smoker up to temp and running clean' },
-        { color: 'blue', time: phase1Start, label: 'Ribs go on — Phase 1', sub: fmtHrs(p1Adj) + ' unwrapped — smoke penetration and bark formation' },
-        { color: 'amber', time: phase2Start, label: 'Wrap in foil — Phase 2', sub: fmtHrs(p2Adj) + ' tightly wrapped with butter, brown sugar, and a splash of apple juice — tenderizing' },
-        { color: 'red', time: phase3Start, label: 'Unwrap — Phase 3', sub: fmtHrs(p3Adj) + ' back on smoker — firm up bark, optional sauce glaze last 15 min' },
-        { color: 'amber', time: phase3End, label: 'Pull from smoker — rest ' + rib.restMinutes + ' min', sub: 'Target internal: ' + fmtTemp(rib.pullTemp) + ' — probe between bones' },
-        { color: 'green', time: serve, label: 'Serve', sub: rib.name + ' — ' + methodName + ' method' }
+        { color: 'blue',  time: lightSmoker, label: 'Light smoker / preheat',    sub: 'Get smoker up to temp and running clean' },
+        { color: 'blue',  time: phase1Start, label: 'Ribs go on — Phase 1',       sub: spFmtHrs(p1h) + ' unwrapped — smoke penetration and bark formation' },
+        { color: 'amber', time: phase2Start, label: 'Wrap in foil — Phase 2',     sub: spFmtHrs(p2h) + ' tightly wrapped with butter, brown sugar, and apple juice' },
+        { color: 'red',   time: phase3Start, label: 'Unwrap — Phase 3',           sub: spFmtHrs(p3h) + ' back on smoker — firm up bark, optional sauce glaze last 15 min' },
+        { color: 'amber', time: phase3End,   label: 'Pull from smoker — rest ' + rib.restMinutes + ' min', sub: 'Target internal: ' + fmtTemp(rib.pullTemp) + ' — probe between bones' },
+        { color: 'green', time: serve,       label: 'Serve',                      sub: rib.name + ' — ' + methodName + ' method' }
       ];
-      events.forEach(function(ev, i) {
-        tlEl.appendChild(tlItem(ev.color, ev.time, ev.label, ev.sub, i));
-      });
+      events.forEach(function(ev, i) { tlEl.appendChild(tlItem(ev.color, ev.time, ev.label, ev.sub, i)); });
 
     } else {
       // Standard method
       var pull = new Date(serve.getTime() - restMs);
-      var meatOn = new Date(serve.getTime() - restMs - cookMs);
+      var meatOn = new Date(pull.getTime() - cookMs);
       var light = new Date(meatOn.getTime() - 30 * 60000);
-      var wrapCheck = new Date(meatOn.getTime() + cookMs * 0.6);
 
-      // Show stat cards, hide phase cards
       statCardsEl.style.display = '';
       phaseCardsEl.style.display = 'none';
 
-      sCookTime.textContent = fmtHrs(hrs);
+      sCookTime.textContent = spFmtHrs(totalCookHrs);
       sStartTime.textContent = fmtTime(light);
       sStartDay.textContent = fmtDay(light, new Date());
       sPullTemp.textContent = pullTempDisplay(rib.pullTemp);
 
-      // Timeline
+      var phaseBk = document.getElementById('phaseBreakdown');
+      phaseBk.style.display = '';
+      document.getElementById('phT1').textContent = spFmtHrs(result.t1h);
+      var stallRowEl = document.getElementById('stallRow');
+      if (result.t2h > 0) {
+        stallRowEl.style.display = '';
+        document.getElementById('phT2').textContent = spFmtHrs(result.t2h);
+      } else {
+        stallRowEl.style.display = 'none';
+      }
+      document.getElementById('phT3').textContent = spFmtHrs(result.t3h);
+      var wbF = result.T_wb;
+      document.getElementById('phWb').textContent = tempUnit === 'C'
+        ? Math.round((wbF - 32) * 5 / 9) + '\u00B0C'
+        : Math.round(wbF) + '\u00B0F';
+
+      document.getElementById('liveResolve').style.display = '';
+
+      var stallStartT = new Date(meatOn.getTime() + result.t1h * 3600000);
+      var stallEndT = new Date(stallStartT.getTime() + result.t2h * 3600000);
       tlEl.innerHTML = '';
-      var today2 = new Date();
       var evs = [
-        { color: 'blue',  time: light,     label: 'Light smoker / preheat',                         sub: 'Get smoker to temp and running clean smoke' },
-        { color: 'amber', time: meatOn,    label: 'Ribs go on smoker',                               sub: rib.name + ' — standard method' },
-        { color: 'amber', time: wrapCheck, label: 'Wrap check',                                      sub: 'Check for 45\u00B0 bend test and pullback from bone' },
-        { color: 'amber', time: pull,      label: 'Pull from smoker — rest ' + rib.restMinutes + ' min', sub: 'Target internal: ' + fmtTemp(rib.pullTemp) + ' — probe between bones' },
-        { color: 'green', time: serve,     label: 'Serve',                                           sub: rib.name }
+        { color: 'blue',  time: light,   label: 'Light smoker / preheat', sub: 'Get smoker to temp and running clean smoke' },
+        { color: 'amber', time: meatOn,  label: 'Ribs go on smoker',      sub: rib.name + ' — standard method' }
       ];
-      evs.forEach(function(ev, i) {
-        tlEl.appendChild(tlItem(ev.color, ev.time, ev.label, ev.sub, i));
-      });
+      if (result.t2h > 0) {
+        evs.push({ color: 'amber', time: stallStartT, label: 'Stall may begin (~' + fmtTemp(150) + ')', sub: 'Temperature plateaus for ' + spFmtHrs(result.t2h) + ' — driven by evaporative cooling' });
+        evs.push({ color: 'amber', time: stallEndT,   label: 'Stall ends (~' + fmtTemp(165) + ')',      sub: 'Temperature climbs again toward pull temp' });
+      } else {
+        evs.push({ color: 'amber', time: stallStartT, label: 'Bend test / wrap check', sub: 'Check for 45\u00B0 bend test and pullback from bone' });
+      }
+      evs.push({ color: 'amber', time: pull,  label: 'Pull from smoker — rest ' + rib.restMinutes + ' min', sub: 'Target internal: ' + fmtTemp(rib.pullTemp) + ' — probe between bones' });
+      evs.push({ color: 'green', time: serve, label: 'Serve', sub: rib.name });
+      evs.forEach(function(ev, i) { tlEl.appendChild(tlItem(ev.color, ev.time, ev.label, ev.sub, i)); });
     }
 
-    // Open modal
     document.body.classList.add('modal-open');
     resultsEl.classList.add('visible');
     resultsEl.scrollTop = 0;
-    // Focus the modal for accessibility
     setTimeout(function() { resultsModal.focus(); }, 50);
-
-    // Analytics
   }
 
   calcBtn.addEventListener('click', calculate);
@@ -1058,6 +1137,27 @@
       break;
     }
   }
+
+  /* ---- Live re-solve ---- */
+  function resolveNow() {
+    if (!_lastPhysicsParams) return;
+    var input = document.getElementById('currentTemp');
+    var resultEl = document.getElementById('resolveResult');
+    var rawT = parseFloat(input.value);
+    if (isNaN(rawT)) { resultEl.textContent = 'Enter a temperature reading first.'; return; }
+    var currentF = tempUnit === 'C' ? rawT * 9 / 5 + 32 : rawT;
+    var r = spResolve({
+      kmKey: _lastPhysicsParams.kmKey,
+      weightLbs: _lastPhysicsParams.weightLbs,
+      thicknessIn: _lastPhysicsParams.thicknessIn,
+      pitF: _lastPhysicsParams.pitF,
+      rh: _lastPhysicsParams.rh,
+      currentF: currentF,
+      tfF: _lastPhysicsParams.tfF
+    });
+    resultEl.textContent = r.error ? r.error : 'Estimated time remaining: ' + spFmtHrs(r.remainingH);
+  }
+  window.resolveNow = resolveNow;
 
   /* ---- Footer year ---- */
   document.getElementById('fyear').textContent = new Date().getFullYear();
