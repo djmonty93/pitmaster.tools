@@ -172,8 +172,15 @@ function spResolve(p) {
   var wrapTriggerF = p.wrapTriggerF || SP_STALL_START;
   var wrapActive = (wrapMethod === 'foil' || wrapMethod === 'paper');
   var T_eff_stall = p.pitF - (p.pitF - T_wb) * 0.40;
-  var stallActive = hasStall && T_wb < SP_STALL_END && T_eff_stall > SP_STALL_END && p.tfF > SP_STALL_START;
+  /* Mirror spCompute: omit tfF > SP_STALL_START guard so both functions treat
+     hasStall meats with low pull temps identically (spPhase returns Infinity,
+     caught by the isFinite guard below). */
+  var stallActive = hasStall && T_wb < SP_STALL_END && T_eff_stall > SP_STALL_END;
   var t = 0;
+
+  if (T_wb >= p.pitF) {
+    return { remainingH: 0, error: 'Pit temperature is too low to cook. Raise smoker temperature.' };
+  }
 
   if (p.currentF >= p.tfF) {
     return { remainingH: 0, error: 'Temperature already at or above pull temperature.' };
