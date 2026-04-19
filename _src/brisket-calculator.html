@@ -645,7 +645,17 @@ function calculate() {
     return;
   }
 
-  _lastPhysicsParams = { kmKey: 'brisket-packer', weightLbs: weightLbs, thicknessIn: thk, pitF: temp, rh: rh, tfF: cut.pullTemp };
+  _lastPhysicsParams = {
+    kmKey: 'brisket-packer',
+    weightLbs: weightLbs,
+    thicknessIn: thk,
+    pitF: temp,
+    rh: rh,
+    tfF: cut.pullTemp,
+    hasStall: true,
+    wrapMethod: wrap,
+    wrapTriggerF: 150
+  };
 
   var totalCookHrs = physics.totalH;
   var cookMs = totalCookHrs * 3600000;

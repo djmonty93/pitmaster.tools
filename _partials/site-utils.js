@@ -111,10 +111,12 @@ function hideCookieBanner() {
 function initConsentBanner() {
   var storedConsent = getCookie(CONSENT_COOKIE_NAME);
   if (isEmbedMode()) { hideCookieBanner(); return; }
-  document.getElementById('acceptCookies').addEventListener('click', function() {
+  var acceptBtn = document.getElementById('acceptCookies') || document.getElementById('cookieAccept');
+  var rejectBtn = document.getElementById('rejectCookies') || document.getElementById('cookieReject');
+  if (acceptBtn) acceptBtn.addEventListener('click', function() {
     setConsentState('accepted');
   });
-  document.getElementById('rejectCookies').addEventListener('click', function() {
+  if (rejectBtn) rejectBtn.addEventListener('click', function() {
     setConsentState('rejected');
   });
   if (storedConsent === 'accepted') { updateConsentGranted(); loadGoogleServices(); hideCookieBanner(); return; }

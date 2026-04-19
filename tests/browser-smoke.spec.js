@@ -6,6 +6,12 @@ function trackPageErrors(page, bucket) {
   });
 }
 
+function parseDurationText(text) {
+  const hours = text.match(/(\d+)h/);
+  const minutes = text.match(/(\d+)m/);
+  return (hours ? parseInt(hours[1], 10) * 60 : 0) + (minutes ? parseInt(minutes[1], 10) : 0);
+}
+
 async function installCookieWriteTracker(context) {
   await context.addInitScript(() => {
     const writes = [];
@@ -139,5 +145,132 @@ test('embed brisket flow keeps modal controls visible', async ({ page }) => {
   await expect(page.locator('#results')).toBeVisible();
   await expect(page.locator('#resultsClose')).toBeVisible();
   await expect(page.locator('#printBtn')).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test('pork shoulder live resolve recalculates without throwing', async ({ page }) => {
+  const errors = [];
+  trackPageErrors(page, errors);
+
+  await page.goto('/pork-shoulder-calculator.html');
+  await page.locator('#weight').fill('8');
+  await page.locator('#serveTime').fill('18:00');
+  await page.locator('#calcBtn').click();
+
+  await expect(page.locator('#results')).toBeVisible();
+  await page.locator('#currentTemp').fill('160');
+  await page.getByRole('button', { name: /^recalculate$/i }).click();
+
+  await expect(page.locator('#resolveResult')).toContainText(/remaining/i);
+  expect(errors).toEqual([]);
+});
+
+test('wrapped brisket re-solve stays usable inside the stall band', async ({ page }) => {
+  const errors = [];
+  trackPageErrors(page, errors);
+
+  await page.goto('/brisket-calculator.html');
+
+  const result = await page.evaluate(() => spResolve({
+      kmKey: 'brisket-packer',
+      weightLbs: 12,
+      thicknessIn: 0,
+      pitF: 250,
+      rh: 4,
+      currentF: 155,
+      tfF: 195,
+      hasStall: true,
+      wrapMethod: 'foil',
+      wrapTriggerF: 150
+    }));
+
+  expect(result.error).toBeNull();
+  expect(result.remainingH).toBeGreaterThan(0);
+  expect(errors).toEqual([]);
+});
+
+test('homepage keeps physics-backed control states honest', async ({ page }) => {
+  const errors = [];
+  trackPageErrors(page, errors);
+
+  await page.goto('/');
+
+  await page.locator('#meatType').selectOption('whole-turkey');
+  await expect(page.locator('#wrapMethod')).not.toBeVisible();
+
+  await page.locator('#meatType').selectOption('pork-butt-pulled');
+  await expect(page.locator('#wrapMethod')).toBeVisible();
+
+  await page.locator('#weight').fill('8');
+  await page.locator('#serveTime').fill('18:00');
+  await page.locator('#boneIn').selectOption('no');
+  await page.locator('#injected').selectOption('no');
+  await page.locator('#calcBtn').click();
+  await expect(page.locator('#results')).toBeVisible();
+  const baselineCookTime = await page.locator('#sCookTime').textContent();
+
+  await page.locator('#closeResultsBtn').click();
+  await page.locator('#boneIn').selectOption('yes');
+  await page.locator('#calcBtn').click();
+  await expect(page.locator('#results')).toBeVisible();
+  const boneInCookTime = await page.locator('#sCookTime').textContent();
+
+  expect(boneInCookTime).not.toBe(baselineCookTime);
+  expect(errors).toEqual([]);
+});
+
+test('homepage live resolve reflects bone-in scaling for physics-backed cuts', async ({ page }) => {
+  const errors = [];
+  trackPageErrors(page, errors);
+
+  await page.goto('/');
+  await page.locator('#meatType').selectOption('pork-butt-pulled');
+  await page.locator('#weight').fill('8');
+  await page.locator('#serveTime').fill('18:00');
+  await page.locator('#boneIn').selectOption('no');
+  await page.locator('#calcBtn').click();
+  await expect(page.locator('#results')).toBeVisible();
+  await page.locator('#currentTemp').fill('160');
+  await page.getByRole('button', { name: /^recalculate$/i }).click();
+  const bonelessRemaining = parseDurationText(await page.locator('#resolveResult').textContent());
+
+  await page.locator('#closeResultsBtn').click();
+  await page.locator('#boneIn').selectOption('yes');
+  await page.locator('#calcBtn').click();
+  await expect(page.locator('#results')).toBeVisible();
+  await page.locator('#currentTemp').fill('160');
+  await page.getByRole('button', { name: /^recalculate$/i }).click();
+  const boneInRemaining = parseDurationText(await page.locator('#resolveResult').textContent());
+
+  expect(boneInRemaining).toBeGreaterThan(bonelessRemaining);
+  expect(errors).toEqual([]);
+});
+
+test('pork shoulder live resolve reflects the bone-in modifier', async ({ page }) => {
+  const errors = [];
+  trackPageErrors(page, errors);
+
+  await page.goto('/pork-shoulder-calculator.html');
+  if (await page.locator('#cookieReject').isVisible()) {
+    await page.locator('#cookieReject').click();
+  }
+  await page.locator('#weight').fill('8');
+  await page.locator('#serveTime').fill('18:00');
+  await page.locator('#boneIn').uncheck();
+  await page.locator('#calcBtn').click();
+  await expect(page.locator('#results')).toBeVisible();
+  await page.locator('#currentTemp').fill('160');
+  await page.getByRole('button', { name: /^recalculate$/i }).click();
+  const bonelessRemaining = parseDurationText(await page.locator('#resolveResult').textContent());
+
+  await page.locator('#editBtn').click();
+  await page.locator('#boneIn').check();
+  await page.locator('#calcBtn').click();
+  await expect(page.locator('#results')).toBeVisible();
+  await page.locator('#currentTemp').fill('160');
+  await page.getByRole('button', { name: /^recalculate$/i }).click();
+  const boneInRemaining = parseDurationText(await page.locator('#resolveResult').textContent());
+
+  expect(boneInRemaining).toBeGreaterThan(bonelessRemaining);
   expect(errors).toEqual([]);
 });

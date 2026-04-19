@@ -135,20 +135,59 @@ function spCompute(p) {
   return { t1h: t1, t2h: t2, t3h: t3, totalH: t1 + t2 + t3, T_wb: T_wb, L: L, error: null };
 }
 
+/* ── Shared result scaling ────────────────────────────────────────────────────
+   Preserve phase ratios when a calculator applies a simple time modifier. */
+function spScaleResult(result, factor) {
+  if (!result || !isFinite(factor) || factor <= 0 || factor === 1) return result;
+  return {
+    t1h: (result.t1h || 0) * factor,
+    t2h: (result.t2h || 0) * factor,
+    t3h: (result.t3h || 0) * factor,
+    totalH: (result.totalH || 0) * factor,
+    T_wb: result.T_wb,
+    L: result.L,
+    error: result.error || null
+  };
+}
+
 /* ── Live re-solve ───────────────────────────────────────────────────────────
-  params: { kmKey, thicknessIn, weightLbs, pitF, rh, currentF, tfF }
+  params: { kmKey, thicknessIn, weightLbs, pitF, rh, currentF, tfF, hasStall, wrapMethod, wrapTriggerF }
   returns: { remainingH, error } */
 function spResolve(p) {
   var Km   = SP_KM[p.kmKey] || 1.70;
   var L    = (p.thicknessIn > 0) ? p.thicknessIn : spGetL(p.kmKey, p.weightLbs || 10);
   var T_wb = wetBulb_F(p.pitF, p.rh || 12);
-  var inStall = (p.currentF >= SP_STALL_START && p.currentF <= SP_STALL_END);
-  var T_eff   = inStall ? T_wb : p.pitF;
+  var hasStall = !!p.hasStall;
+  var wrapMethod = p.wrapMethod || 'none';
+  var wrapTriggerF = p.wrapTriggerF || SP_STALL_START;
+  var wrapActive = (wrapMethod === 'foil' || wrapMethod === 'paper');
+  var stallActive = hasStall && T_wb < SP_STALL_START && T_wb < SP_STALL_END && p.tfF > SP_STALL_START;
+  var t = 0;
 
   if (p.currentF >= p.tfF) {
     return { remainingH: 0, error: 'Temperature already at or above pull temperature.' };
   }
-  var t = spPhase(Km, L, T_eff, p.currentF, p.tfF);
+
+  if (!hasStall) {
+    t = spPhase(Km, L, p.pitF, p.currentF, p.tfF);
+  } else if (wrapActive) {
+    if (p.currentF < wrapTriggerF) {
+      t = spPhase(Km, L, p.pitF, p.currentF, wrapTriggerF)
+        + spPhase(Km, L, p.pitF, wrapTriggerF, p.tfF);
+    } else {
+      t = spPhase(Km, L, p.pitF, p.currentF, p.tfF);
+    }
+  } else if (!stallActive || p.currentF >= SP_STALL_END) {
+    t = spPhase(Km, L, p.pitF, p.currentF, p.tfF);
+  } else if (p.currentF < SP_STALL_START) {
+    t = spPhase(Km, L, p.pitF, p.currentF, SP_STALL_START)
+      + spPhase(Km, L, T_wb, SP_STALL_START, SP_STALL_END)
+      + spPhase(Km, L, p.pitF, SP_STALL_END, p.tfF);
+  } else {
+    t = spPhase(Km, L, T_wb, p.currentF, SP_STALL_END)
+      + spPhase(Km, L, p.pitF, SP_STALL_END, p.tfF);
+  }
+
   if (!isFinite(t) || t < 0) {
     return { remainingH: 0, error: 'Cannot calculate — check pit and target temperatures.' };
   }

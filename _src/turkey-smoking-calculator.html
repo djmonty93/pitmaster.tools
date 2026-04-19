@@ -599,6 +599,20 @@ function updateWeightGroupVisibility() {
   }
 }
 
+function updateWrapVisibility() {
+  var wrapGroup = document.querySelector('.wrap-toggle').closest('.form-group');
+  var showWrap = CUTS[state.cutKey].hasStall;
+  wrapGroup.style.display = showWrap ? '' : 'none';
+  if (!showWrap && state.wrap !== 'none') {
+    state.wrap = 'none';
+    document.querySelectorAll('.wrap-toggle button').forEach(function(btn) {
+      var active = btn.dataset.wrap === 'none';
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+  }
+}
+
 // ── Calculate ─────────────────────────────────────────────────────────────────
 function calculate() {
   var vmsg = document.getElementById('vmsg');
@@ -656,7 +670,10 @@ function calculate() {
     thicknessIn: thicknessIn,
     pitF: tempF,
     rh: rh,
-    tfF: cut.pullTemp
+    tfF: cut.pullTemp,
+    hasStall: cut.hasStall,
+    wrapMethod: state.wrap,
+    wrapTriggerF: 150
   };
 
   var totalCookHrs = result.totalH;
@@ -735,6 +752,7 @@ document.getElementById('cutSelect').addEventListener('change', function() {
     }
   }
   updateWeightGroupVisibility();
+  updateWrapVisibility();
   if (document.getElementById('results').classList.contains('visible')) calculate();
 });
 
@@ -854,6 +872,7 @@ window.resolveNow = resolveNow;
 
   // Initialize weight group visibility for default cut
   updateWeightGroupVisibility();
+  updateWrapVisibility();
   initEmbedMode();
   initConsentBanner();
 })();

@@ -1336,6 +1336,12 @@ function buildTL(cut, serve, hrs, wrap, grill, physicsResult){
 function render(cut, inp){
   var rh = SP_COOKER_RH[inp.cookerType] || 12;
   var physicsResult = getPhysicsResult(inp.cutKey, cut, inp.wLbs, inp.temp, inp.wrap, rh);
+  if (physicsResult) {
+    var timeFactor = 1;
+    if (inp.boneIn && cut.boneInOk) timeFactor *= 1.10;
+    if (inp.inj) timeFactor *= 0.95;
+    physicsResult = spScaleResult(physicsResult, timeFactor);
+  }
   var h = physicsResult ? physicsResult.totalH : cookHrs(cut, inp.wLbs, inp.temp, inp.boneIn, inp.inj, inp.wrap);
 
   if (physicsResult) {
@@ -1345,7 +1351,11 @@ function render(cut, inp){
       thicknessIn: 0,
       pitF: inp.temp,
       rh: rh,
-      tfF: cut.pullTemp
+      tfF: cut.pullTemp,
+      hasStall: PHYSICS_KEYS[inp.cutKey].hasStall,
+      wrapMethod: inp.wrap,
+      wrapTriggerF: 150,
+      resolveScale: timeFactor
     };
     document.getElementById('liveResolve').style.display = '';
     document.getElementById('modelNote').style.display = '';
@@ -1475,6 +1485,13 @@ function updTP(cut){
 function updBI(key){
   document.getElementById('boneInGroup').style.display=D[key].boneInOk?'':'none';
 }
+function updWrap(key){
+  var group = document.getElementById('wrapMethod').closest('.form-group');
+  var physicsCfg = PHYSICS_KEYS[key];
+  var showWrap = !(physicsCfg && !physicsCfg.hasStall);
+  group.style.display = showWrap ? '' : 'none';
+  if (!showWrap) document.getElementById('wrapMethod').value = 'none';
+}
 function updSzLabels(){
   document.getElementById('szLight').textContent =state.wu==='kg'?'113g':'4 oz';
   document.getElementById('szNormal').textContent=state.wu==='kg'?'170g':'6 oz';
@@ -1482,7 +1499,7 @@ function updSzLabels(){
 }
 function onMeatChange(){
   var k=document.getElementById('meatType').value, c=D[k];
-  updTempOpts(c); updTP(c); updBI(k);
+  updTempOpts(c); updTP(c); updBI(k); updWrap(k);
 }
 function calc(){
   var k=document.getElementById('meatType').value, c=D[k];
@@ -1523,6 +1540,9 @@ function resolveNow() {
     currentF: currentF,
     tfF: _lastPhysicsParams.tfF
   });
+  if (!r.error && _lastPhysicsParams.resolveScale && _lastPhysicsParams.resolveScale !== 1) {
+    r.remainingH *= _lastPhysicsParams.resolveScale;
+  }
   resultEl.textContent = r.error ? r.error : 'Estimated time remaining: ' + spFmtHrs(r.remainingH);
 }
 window.resolveNow = resolveNow;

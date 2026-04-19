@@ -740,9 +740,13 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
     if (isNaN(rawCur)) { resEl.textContent = 'Enter a temperature reading.'; resEl.className = 'resolve-result error'; return; }
     var curF = tempUnit === 'C' ? rawCur * 9/5 + 32 : rawCur;
     var r = spResolve(Object.assign({}, _lastPhysicsParams, { currentF: curF }));
+    if (!r.error && _lastPhysicsParams.resolveScale && _lastPhysicsParams.resolveScale !== 1) {
+      r.remainingH *= _lastPhysicsParams.resolveScale;
+    }
     resEl.className = 'resolve-result' + (r.error ? ' error' : '');
     resEl.textContent = r.error ? r.error : 'Approximately ' + spFmtHrs(r.remainingH) + ' remaining';
   }
+  window.resolveNow = resolveNow;
 
   function fmtTemp(f){
     if(tempUnit === 'C') return Math.round((f - 32) * 5/9) + '\u00B0C';
@@ -820,7 +824,21 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
 
     if (physics.error) { showError(physics.error); return; }
 
-    _lastPhysicsParams = { kmKey: 'pork-butt', weightLbs: wLbs, thicknessIn: 0, pitF: temp, rh: rh, tfF: style.pullTemp };
+    var resolveScale = boneIn ? 1.10 : 1;
+    if (resolveScale !== 1) physics = spScaleResult(physics, resolveScale);
+
+    _lastPhysicsParams = {
+      kmKey: 'pork-butt',
+      weightLbs: wLbs,
+      thicknessIn: 0,
+      pitF: temp,
+      rh: rh,
+      tfF: style.pullTemp,
+      hasStall: true,
+      wrapMethod: wrap,
+      wrapTriggerF: 150,
+      resolveScale: resolveScale
+    };
 
     var hrs = physics.totalH;
     var restMs = style.restMinutes * 60000;
