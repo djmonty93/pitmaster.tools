@@ -14,6 +14,7 @@ const types = {
   '.js': 'text/javascript; charset=UTF-8',
   '.css': 'text/css; charset=UTF-8',
   '.ico': 'image/x-icon',
+  '.png': 'image/png',
   '.svg': 'image/svg+xml'
 };
 

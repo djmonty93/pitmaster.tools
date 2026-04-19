@@ -122,6 +122,12 @@ if (-not (Test-Path (Join-Path $distRoot 'favicon.ico'))) {
   Write-Host 'OK FILE dist/favicon.ico'
 }
 
+if (-not (Test-Path (Join-Path $distRoot 'og-image.png'))) {
+  Add-Error('Missing og-image.png in dist/.')
+} else {
+  Write-Host 'OK FILE dist/og-image.png'
+}
+
 Test-XmlFile (Join-Path $distRoot 'sitemap.xml')
 Test-JsonFile 'wrangler.jsonc'
 Test-LocalLinks -BaseDirectory $distRoot -Paths $htmlFiles

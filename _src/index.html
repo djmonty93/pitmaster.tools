@@ -1552,16 +1552,7 @@ window.resolveNow = resolveNow;
    ============================================================ */
 document.getElementById('calcBtn').addEventListener('click',calc);
 document.getElementById('printBtn').addEventListener('click',function(){window.print();});
-document.getElementById('closeResultsBtn').addEventListener('click',closeResultsModal);
 document.getElementById('meatType').addEventListener('change',onMeatChange);
-document.getElementById('results').addEventListener('click',function(e){
-  if(e.target === this) closeResultsModal();
-});
-document.addEventListener('keydown',function(e){
-  if(e.key === 'Escape' && document.getElementById('results').classList.contains('visible')){
-    closeResultsModal();
-  }
-});
 
 document.getElementById('tempToggle').addEventListener('click',function(e){
   var btn=e.target.closest('button'); if(!btn) return;
@@ -1624,6 +1615,7 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
   onMeatChange();
   initEmbedMode();
   initConsentBanner();
+  initResultsModal();
   initShareButtons();
   initEmbedSection();
 })();

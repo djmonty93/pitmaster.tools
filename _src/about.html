@@ -21,21 +21,6 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('consent', 'default', {'ad_storage':'denied','analytics_storage':'denied','wait_for_update':500});
-  (function(){
-    var c = document.cookie.match(/pitmaster_consent=([^;]+)/);
-    if(c && c[1] === 'accepted'){
-      window._gtagLoaded = true;
-      var s = document.createElement('script');
-      s.async = true;
-      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-SJJVV37EWE';
-      document.head.appendChild(s);
-      s.onload = function(){
-        gtag('js', new Date());
-        gtag('config', 'G-SJJVV37EWE');
-        gtag('consent', 'update', {'ad_storage':'granted','analytics_storage':'granted'});
-      };
-    }
-  })();
 </script>
 <!-- INJECT:site-header.css -->
 <!-- INJECT:site-base.css -->
@@ -154,6 +139,16 @@ footer nav a:hover { color: var(--amber); }
   </section>
 </main>
 
+<div class="cookie-banner" id="cookieBanner" role="dialog" aria-live="polite" aria-label="Cookie consent">
+  <div class="cookie-banner__inner">
+    <p class="cookie-banner__text">We use cookies for analytics and personalized ads. See our <a href="privacy-policy.html">Privacy Policy</a>.</p>
+    <div class="cookie-banner__actions">
+      <button class="cookie-accept" id="acceptCookies" type="button">Accept all</button>
+      <button class="cookie-reject" id="rejectCookies" type="button">Reject non-essential</button>
+    </div>
+  </div>
+</div>
+
 <footer>
   <div>© 2026 Pitmaster Tools. All rights reserved.</div>
   <nav aria-label="Footer">
@@ -166,6 +161,10 @@ footer nav a:hover { color: var(--amber); }
   <div class="footer-small">Cook times and serving estimates are planning tools. Always verify doneness and food safety with a calibrated thermometer.</div>
 </footer>
 
+<!-- INJECT:site-utils.js:script -->
+<script>
+(function(){ initEmbedMode(); initConsentBanner(); })();
+</script>
 <!-- INJECT:site-header.js:script -->
 </body>
 </html>

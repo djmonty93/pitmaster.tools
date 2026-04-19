@@ -39,6 +39,45 @@ async function installCookieWriteTracker(context) {
   });
 }
 
+async function newRejectedConsentContext(browser) {
+  const context = await browser.newContext();
+  await context.addCookies([
+    {
+      name: 'pitmaster_consent',
+      value: 'rejected',
+      url: 'http://127.0.0.1:4173'
+    }
+  ]);
+  return context;
+}
+
+async function newAcceptedConsentContext(browser) {
+  const context = await browser.newContext();
+  await context.addCookies([
+    {
+      name: 'pitmaster_consent',
+      value: 'accepted',
+      url: 'http://127.0.0.1:4173'
+    }
+  ]);
+  return context;
+}
+
+async function getThirdPartyScriptCounts(page) {
+  return page.evaluate(() => ({
+    ga: Array.from(document.scripts).filter((script) => (script.src || '').includes('googletagmanager.com/gtag/js')).length,
+    ads: Array.from(document.scripts).filter((script) => (script.src || '').includes('pagead2.googlesyndication.com/pagead/js/adsbygoogle.js')).length
+  }));
+}
+
+async function expectMeaningfulText(locator) {
+  const text = ((await locator.textContent()) || '').replace(/\s+/g, ' ').trim();
+  expect(text).not.toBe('');
+  expect(text).not.toMatch(/^[—-]+$/);
+  expect(text).not.toMatch(/\b(?:NaN|Infinity|undefined|null)\b/i);
+  return text;
+}
+
 test('homepage loads, nav opens, and calculator shows results', async ({ page }) => {
   const errors = [];
   trackPageErrors(page, errors);
@@ -131,6 +170,41 @@ test('embed homepage stays banner-free without attempting a consent write', asyn
   await context.close();
 });
 
+test('accepted consent loads each third-party script once', async ({ browser }) => {
+  const context = await newAcceptedConsentContext(browser);
+  const page = await context.newPage();
+  const errors = [];
+  trackPageErrors(page, errors);
+
+  await page.goto('/');
+  await expect.poll(async () => (await getThirdPartyScriptCounts(page)).ga).toBe(1);
+  await expect.poll(async () => (await getThirdPartyScriptCounts(page)).ads).toBe(1);
+  expect(errors).toEqual([]);
+
+  await context.close();
+});
+
+test('embed mode never loads third-party scripts even with accepted consent', async ({ browser }) => {
+  const context = await newAcceptedConsentContext(browser);
+  const page = await context.newPage();
+  const errors = [];
+  trackPageErrors(page, errors);
+
+  await page.goto('/?embed=1');
+  await expect(page.locator('body')).toHaveClass(/embed-mode/);
+  await expect(page.locator('#cookieBanner')).not.toBeVisible();
+  expect(await getThirdPartyScriptCounts(page)).toEqual({ ga: 0, ads: 0 });
+  expect(errors).toEqual([]);
+
+  await context.close();
+});
+
+test('og image asset is published', async ({ request }) => {
+  const response = await request.get('http://127.0.0.1:4173/og-image.png');
+  expect(response.ok()).toBeTruthy();
+  expect(response.headers()['content-type']).toContain('image/png');
+});
+
 test('embed brisket flow keeps modal controls visible', async ({ page }) => {
   const errors = [];
   trackPageErrors(page, errors);
@@ -145,6 +219,62 @@ test('embed brisket flow keeps modal controls visible', async ({ page }) => {
   await expect(page.locator('#results')).toBeVisible();
   await expect(page.locator('#resultsClose')).toBeVisible();
   await expect(page.locator('#printBtn')).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test('homepage results modal traps keyboard focus', async ({ page }) => {
+  const errors = [];
+  trackPageErrors(page, errors);
+
+  await page.goto('/');
+  await page.locator('#meatType').selectOption('brisket-sliced');
+  await page.locator('#weight').fill('12');
+  await page.locator('#serveTime').fill('18:00');
+  await page.locator('#calcBtn').click();
+  await expect(page.locator('#results')).toBeVisible();
+
+  const initialState = await page.evaluate(() => {
+    const modal = document.querySelector('.results-modal');
+    const selector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const focusable = Array.from(modal.querySelectorAll(selector));
+    focusable[focusable.length - 1].focus();
+    return { count: focusable.length };
+  });
+  expect(initialState.count).toBeGreaterThan(1);
+
+  await page.keyboard.press('Tab');
+  const afterTab = await page.evaluate(() => {
+    const modal = document.querySelector('.results-modal');
+    const selector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const focusable = Array.from(modal.querySelectorAll(selector));
+    return {
+      activeIndex: focusable.indexOf(document.activeElement),
+      count: focusable.length,
+      inside: !!document.activeElement.closest('.results-modal')
+    };
+  });
+  expect(afterTab.inside).toBe(true);
+  expect(afterTab.activeIndex).toBe(0);
+
+  await page.evaluate(() => {
+    const modal = document.querySelector('.results-modal');
+    const selector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const focusable = Array.from(modal.querySelectorAll(selector));
+    focusable[0].focus();
+  });
+  await page.keyboard.press('Shift+Tab');
+  const afterShiftTab = await page.evaluate(() => {
+    const modal = document.querySelector('.results-modal');
+    const selector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const focusable = Array.from(modal.querySelectorAll(selector));
+    return {
+      activeIndex: focusable.indexOf(document.activeElement),
+      count: focusable.length,
+      inside: !!document.activeElement.closest('.results-modal')
+    };
+  });
+  expect(afterShiftTab.inside).toBe(true);
+  expect(afterShiftTab.activeIndex).toBe(afterShiftTab.count - 1);
   expect(errors).toEqual([]);
 });
 
@@ -273,4 +403,174 @@ test('pork shoulder live resolve reflects the bone-in modifier', async ({ page }
 
   expect(boneInRemaining).toBeGreaterThan(bonelessRemaining);
   expect(errors).toEqual([]);
+});
+
+test('each calculator produces meaningful result values', async ({ browser }) => {
+  const context = await newRejectedConsentContext(browser);
+  const page = await context.newPage();
+  const errors = [];
+  trackPageErrors(page, errors);
+
+  const calculators = [
+    {
+      name: 'homepage',
+      path: '/',
+      validate: async () => {
+        await page.locator('#calcBtn').click();
+        await expect(page.locator('#results')).toBeVisible();
+        await expectMeaningfulText(page.locator('#sCookTime'));
+        await expectMeaningfulText(page.locator('#sPullTemp'));
+        expect(await page.locator('#tlEl .tl-item').count()).toBeGreaterThan(0);
+      }
+    },
+    {
+      name: 'bbq cost calculator',
+      path: '/bbq-cost-calculator.html',
+      validate: async () => {
+        await page.locator('#pricePerUnit').fill('6.00');
+        await page.locator('#calcBtn').click();
+        await expect(page.locator('#results')).toBeVisible();
+        await expectMeaningfulText(page.locator('#sTotalCost'));
+        await expectMeaningfulText(page.locator('#sCostPerServing'));
+        await expectMeaningfulText(page.locator('#sCostPerLb'));
+        await expectMeaningfulText(page.locator('#sServingsAvail'));
+        expect(await page.locator('#breakdownBody tr').count()).toBeGreaterThan(0);
+      }
+    },
+    {
+      name: 'brine calculator',
+      path: '/brine-calculator.html',
+      validate: async () => {
+        await page.locator('#calcBtn').click();
+        await expect(page.locator('#results')).toBeVisible();
+        await expectMeaningfulText(page.locator('#sc1Value'));
+        await expectMeaningfulText(page.locator('#scSalt'));
+        await expectMeaningfulText(page.locator('#sc3Value'));
+        await expectMeaningfulText(page.locator('#timeBadge'));
+        expect(await page.locator('#detailRows .detail-row').count()).toBeGreaterThan(0);
+      }
+    },
+    {
+      name: 'brisket calculator',
+      path: '/brisket-calculator.html',
+      validate: async () => {
+        await page.locator('#calcBtn').click();
+        await expect(page.locator('#results')).toBeVisible();
+        await expectMeaningfulText(page.locator('#sCookTime'));
+        await expectMeaningfulText(page.locator('#sPullTemp'));
+        expect(await page.locator('#tlList .tl-item').count()).toBeGreaterThan(0);
+      }
+    },
+    {
+      name: 'brisket yield calculator',
+      path: '/brisket-yield-calculator.html',
+      validate: async () => {
+        await page.locator('#calcBtn').click();
+        await expect(page.locator('#results')).toBeVisible();
+        await expectMeaningfulText(page.locator('#rFlat'));
+        await expectMeaningfulText(page.locator('#rYield195'));
+        await expectMeaningfulText(page.locator('#rYield203'));
+        await expectMeaningfulText(page.locator('#shrinkSummary'));
+      }
+    },
+    {
+      name: 'catering calculator',
+      path: '/catering-calculator.html',
+      validate: async () => {
+        await page.locator('#calcBtn').click();
+        await expect(page.locator('#results')).toBeVisible();
+        expect(await page.locator('#meatCards .meat-card').count()).toBeGreaterThan(0);
+        expect(await page.locator('#summaryGrid .sum-item').count()).toBeGreaterThan(0);
+        await expectMeaningfulText(page.locator('#summaryGrid .sum-item .sum-value').first());
+      }
+    },
+    {
+      name: 'charcoal calculator',
+      path: '/charcoal-calculator.html',
+      validate: async () => {
+        await page.locator('#calcBtn').click();
+        await expect(page.locator('#results')).toBeVisible();
+        await expectMeaningfulText(page.locator('#scTotal'));
+        await expectMeaningfulText(page.locator('#scLit'));
+        await expectMeaningfulText(page.locator('#scTopup'));
+        expect(await page.locator('#tipsList li').count()).toBeGreaterThan(0);
+      }
+    },
+    {
+      name: 'cook time coordinator',
+      path: '/cook-time-coordinator.html',
+      validate: async () => {
+        await page.locator('#calcBtn').click();
+        await expect(page.locator('#results')).toBeVisible();
+        expect(await page.locator('#ganttRows .gantt-row').count()).toBeGreaterThan(0);
+        expect(await page.locator('#scheduleGrid .schedule-card').count()).toBeGreaterThan(0);
+        await expectMeaningfulText(page.locator('#scheduleGrid .schedule-card__hrs').first());
+      }
+    },
+    {
+      name: 'dry rub calculator',
+      path: '/dry-rub-calculator.html',
+      validate: async () => {
+        await page.locator('#calcBtn').click();
+        await expect(page.locator('#results')).toBeVisible();
+        await expectMeaningfulText(page.locator('#statTotal'));
+        await expectMeaningfulText(page.locator('#statCoverage'));
+        await expectMeaningfulText(page.locator('#statIngredients'));
+        expect(await page.locator('#rubTableBody tr').count()).toBeGreaterThan(0);
+      }
+    },
+    {
+      name: 'meat per person calculator',
+      path: '/meat-per-person.html',
+      validate: async () => {
+        await page.locator('#calcBtn').click();
+        await expect(page.locator('#results')).toBeVisible();
+        await expectMeaningfulText(page.locator('#statRaw'));
+        await expectMeaningfulText(page.locator('#statCooked'));
+        await expectMeaningfulText(page.locator('#statShrink'));
+        expect(await page.locator('#detailRows .srow').count()).toBeGreaterThan(0);
+      }
+    },
+    {
+      name: 'pork shoulder calculator',
+      path: '/pork-shoulder-calculator.html',
+      validate: async () => {
+        await page.locator('#calcBtn').click();
+        await expect(page.locator('#results')).toBeVisible();
+        await expectMeaningfulText(page.locator('#statCookTime'));
+        await expectMeaningfulText(page.locator('#statPullTemp'));
+        expect(await page.locator('#tlList .tl-item').count()).toBeGreaterThan(0);
+      }
+    },
+    {
+      name: 'rib calculator',
+      path: '/rib-calculator.html',
+      validate: async () => {
+        await page.locator('#calcBtn').click();
+        await expect(page.locator('#results')).toBeVisible();
+        await expectMeaningfulText(page.locator('#sCookTime'));
+        await expectMeaningfulText(page.locator('#sPullTemp'));
+        expect(await page.locator('#tlEl .tl-item').count()).toBeGreaterThan(0);
+      }
+    },
+    {
+      name: 'turkey calculator',
+      path: '/turkey-smoking-calculator.html',
+      validate: async () => {
+        await page.locator('#calcBtn').click();
+        await expect(page.locator('#results')).toBeVisible();
+        await expectMeaningfulText(page.locator('#sCookTime'));
+        await expectMeaningfulText(page.locator('#sPullTemp'));
+        expect(await page.locator('#tlList .tl-item').count()).toBeGreaterThan(0);
+      }
+    }
+  ];
+
+  for (const calculator of calculators) {
+    await page.goto(calculator.path);
+    await calculator.validate();
+  }
+
+  expect(errors).toEqual([]);
+  await context.close();
 });

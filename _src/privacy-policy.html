@@ -25,26 +25,6 @@
     'analytics_storage': 'denied',
     'wait_for_update': 500
   });
-  (function(){
-    var prefix = 'pitmaster_consent=';
-    var cookies = document.cookie ? document.cookie.split(';') : [];
-    for(var i = 0; i < cookies.length; i++){
-      var cookie = cookies[i].trim();
-      if(cookie.indexOf(prefix) !== 0) continue;
-      if(decodeURIComponent(cookie.substring(prefix.length)) !== 'accepted') break;
-      gtag('consent', 'update', {
-        'ad_storage': 'granted',
-        'analytics_storage': 'granted'
-      });
-      var script = document.createElement('script');
-      script.async = true;
-      script.src = 'https://www.googletagmanager.com/gtag/js?id=G-SJJVV37EWE';
-      document.head.appendChild(script);
-      gtag('js', new Date());
-      gtag('config', 'G-SJJVV37EWE');
-      break;
-    }
-  })();
 </script>
 <!-- INJECT:site-header.css -->
 <!-- INJECT:site-base.css -->
@@ -161,6 +141,16 @@ ul { padding-left: 1.25rem; }
   </section>
 </main>
 
+<div class="cookie-banner" id="cookieBanner" role="dialog" aria-live="polite" aria-label="Cookie consent">
+  <div class="cookie-banner__inner">
+    <p class="cookie-banner__text">We use cookies for analytics and personalized ads. See our <a href="privacy-policy.html">Privacy Policy</a>.</p>
+    <div class="cookie-banner__actions">
+      <button class="cookie-accept" id="acceptCookies" type="button">Accept all</button>
+      <button class="cookie-reject" id="rejectCookies" type="button">Reject non-essential</button>
+    </div>
+  </div>
+</div>
+
 <footer>
   <div>© 2026 Pitmaster Tools. All rights reserved.</div>
   <nav aria-label="Footer">
@@ -175,6 +165,10 @@ ul { padding-left: 1.25rem; }
   <p class="footer-small">Cook times are estimates based on USDA guidelines and pitmaster consensus. Always verify doneness with a calibrated meat thermometer. Never rely solely on time.</p>
   <p class="footer-small">Last updated: April 11, 2026</p>
 </footer>
+<!-- INJECT:site-utils.js:script -->
+<script>
+(function(){ initEmbedMode(); initConsentBanner(); })();
+</script>
 <!-- INJECT:site-header.js:script -->
 </body>
 </html>

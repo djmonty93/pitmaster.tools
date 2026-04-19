@@ -18,6 +18,7 @@ var adsLoaded = false;
 var copyLinkResetTimer = null;
 var copyEmbedResetTimer = null;
 var _modalPrevFocus = null;
+var _resultsModalKeydownBound = false;
 
 /* ----- Utility ----- */
 function escapeHtml(str) {
@@ -69,7 +70,12 @@ function ensureThirdPartyHints() {
   });
 }
 function loadAnalytics() {
-  if (analyticsLoaded || GA_MEASUREMENT_ID === 'GA_MEASUREMENT_ID') return;
+  if (GA_MEASUREMENT_ID === 'GA_MEASUREMENT_ID') return;
+  if (document.querySelector('script[src="https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(GA_MEASUREMENT_ID) + '"]')) {
+    analyticsLoaded = true;
+    return;
+  }
+  if (analyticsLoaded) return;
   analyticsLoaded = true;
   var script = document.createElement('script');
   script.async = true;
@@ -79,6 +85,10 @@ function loadAnalytics() {
   gtag('config', GA_MEASUREMENT_ID);
 }
 function loadAds() {
+  if (document.querySelector('script[src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + encodeURIComponent(ADSENSE_CLIENT) + '"]')) {
+    adsLoaded = true;
+    return;
+  }
   if (adsLoaded) return;
   adsLoaded = true;
   var script = document.createElement('script');
@@ -88,6 +98,7 @@ function loadAds() {
   document.head.appendChild(script);
 }
 function loadGoogleServices() {
+  if (isEmbedMode()) return;
   ensureThirdPartyHints();
   loadAnalytics();
   loadAds();
@@ -103,12 +114,15 @@ function setConsentState(value) {
   hideCookieBanner();
 }
 function showCookieBanner() {
-  document.getElementById('cookieBanner').classList.add('visible');
+  var banner = document.getElementById('cookieBanner');
+  if (banner) banner.classList.add('visible');
 }
 function hideCookieBanner() {
-  document.getElementById('cookieBanner').classList.remove('visible');
+  var banner = document.getElementById('cookieBanner');
+  if (banner) banner.classList.remove('visible');
 }
 function initConsentBanner() {
+  if (!document.getElementById('cookieBanner')) return;
   var storedConsent = getCookie(CONSENT_COOKIE_NAME);
   if (isEmbedMode()) { hideCookieBanner(); return; }
   var acceptBtn = document.getElementById('acceptCookies') || document.getElementById('cookieAccept');
@@ -154,6 +168,26 @@ function _trapModalFocus(e) {
   } else {
     if (document.activeElement === last) { e.preventDefault(); first.focus(); }
   }
+}
+function initResultsModal() {
+  var results = document.getElementById('results');
+  if (!results || results.dataset.modalInit === '1') return;
+
+  var closeButtons = results.querySelectorAll('.results-close, #resultsClose, #closeResultsBtn');
+  Array.prototype.forEach.call(closeButtons, function(btn) {
+    btn.addEventListener('click', closeResultsModal);
+  });
+
+  results.addEventListener('click', function(e) {
+    if (e.target === results) closeResultsModal();
+  });
+
+  if (!_resultsModalKeydownBound) {
+    document.addEventListener('keydown', _trapModalFocus);
+    _resultsModalKeydownBound = true;
+  }
+
+  results.dataset.modalInit = '1';
 }
 
 /* ----- Share / copy buttons ----- */

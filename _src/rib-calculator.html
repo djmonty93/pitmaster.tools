@@ -21,21 +21,6 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('consent', 'default', {'ad_storage':'denied','analytics_storage':'denied','wait_for_update':500});
-  (function(){
-    var prefix = 'pitmaster_consent=';
-    var cookies = document.cookie ? document.cookie.split(';') : [];
-    for(var i=0;i<cookies.length;i++){
-      var c=cookies[i].trim();
-      if(c.indexOf(prefix)!==0) continue;
-      if(decodeURIComponent(c.substring(prefix.length))!=='accepted') break;
-      gtag('consent','update',{'ad_storage':'granted','analytics_storage':'granted'});
-      var s=document.createElement('script'); s.async=true;
-      s.src='https://www.googletagmanager.com/gtag/js?id=G-SJJVV37EWE';
-      document.head.appendChild(s);
-      gtag('js',new Date()); gtag('config','G-SJJVV37EWE');
-      window._gtagLoaded=true; break;
-    }
-  })();
 </script>
 <script type="application/ld+json">
 {
@@ -713,7 +698,6 @@
   var sPullTemp = document.getElementById('sPullTemp');
   var tlEl = document.getElementById('tlEl');
   var copyLinkBtn = document.getElementById('copyLinkBtn');
-  var cookieBanner = document.getElementById('cookieBanner');
 
   /* ---- Method toggle state ---- */
   var method = 'standard'; // 'standard' | '321'
@@ -1119,27 +1103,6 @@
       }, 2500);
     });
   });
-
-  /* ---- Cookie / analytics ---- */
-  function loadAnalytics() {
-    if (window._gtagLoaded) return;
-    var prefix = 'pitmaster_consent=';
-    var cookies = document.cookie ? document.cookie.split(';') : [];
-    for (var i = 0; i < cookies.length; i++) {
-      var c = cookies[i].trim();
-      if (c.indexOf(prefix) !== 0) continue;
-      if (decodeURIComponent(c.substring(prefix.length)) !== 'accepted') break;
-      gtag('consent', 'update', {'ad_storage':'granted','analytics_storage':'granted'});
-      var s = document.createElement('script');
-      s.async = true;
-      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-SJJVV37EWE';
-      document.head.appendChild(s);
-      gtag('js', new Date());
-      gtag('config', 'G-SJJVV37EWE');
-      window._gtagLoaded = true;
-      break;
-    }
-  }
 
   /* ---- Live re-solve ---- */
   function resolveNow() {

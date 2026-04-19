@@ -21,21 +21,6 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('consent', 'default', {'ad_storage':'denied','analytics_storage':'denied','wait_for_update':500});
-  (function(){
-    var prefix = 'pitmaster_consent=';
-    var cookies = document.cookie ? document.cookie.split(';') : [];
-    for(var i=0;i<cookies.length;i++){
-      var c=cookies[i].trim();
-      if(c.indexOf(prefix)!==0) continue;
-      if(decodeURIComponent(c.substring(prefix.length))!=='accepted') break;
-      gtag('consent','update',{'ad_storage':'granted','analytics_storage':'granted'});
-      var s=document.createElement('script'); s.async=true;
-      s.src='https://www.googletagmanager.com/gtag/js?id=G-SJJVV37EWE';
-      document.head.appendChild(s);
-      gtag('js',new Date()); gtag('config','G-SJJVV37EWE');
-      window._gtagLoaded=true; break;
-    }
-  })();
 </script>
 <script type="application/ld+json">
 {
@@ -578,7 +563,6 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
 <!-- INJECT:smoke-physics.js:script -->
 <script>
 (function(){
-  initEmbedMode();
   'use strict';
 
   /* ── Constants ── */
@@ -765,15 +749,7 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
   }
 
   /* ── Modal ── */
-  var _prevFocus = null;
-  var _focusable = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-
-  resultsClose.addEventListener('click', closeResultsModal);
   editBtn.addEventListener('click', closeResultsModal);
-
-  resultsEl.addEventListener('click', function(e){
-    if(e.target === resultsEl) closeResultsModal();
-  });
 
   /* ── Calculate ── */
   calcBtn.addEventListener('click', function(){
@@ -917,48 +893,9 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
     openResultsModal();
   });
 
-  /* ── Cookie banner ── */
-  var banner = document.getElementById('cookieBanner');
-  var cookieKey = 'pitmaster_consent';
-
-  function getConsent(){
-    var prefix = cookieKey + '=';
-    var cookies = document.cookie ? document.cookie.split(';') : [];
-    for(var i = 0; i < cookies.length; i++){
-      var c = cookies[i].trim();
-      if(c.indexOf(prefix) === 0) return decodeURIComponent(c.substring(prefix.length));
-    }
-    return null;
-  }
-
-  function setConsent(val){
-    var expires = new Date(Date.now() + 365*24*3600*1000).toUTCString();
-    document.cookie = cookieKey + '=' + encodeURIComponent(val) + '; path=/; expires=' + expires + '; Secure; SameSite=Lax';
-  }
-
-  if(isEmbedMode()){
-    banner.classList.remove('visible');
-  } else
-  if(getConsent() === null){
-    banner.classList.add('visible');
-  }
-
-  document.getElementById('cookieAccept').addEventListener('click', function(){
-    setConsent('accepted');
-    banner.classList.remove('visible');
-    loadAnalytics();
-  });
-  document.getElementById('cookieReject').addEventListener('click', function(){
-    setConsent('rejected');
-    banner.classList.remove('visible');
-  });
-
-  /* ── AdSense init ── */
-  (function(){
-    if(typeof window.adsbygoogle === 'undefined') window.adsbygoogle = [];
-    try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e){}
-    try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e){}
-  })();
+  initEmbedMode();
+  initConsentBanner();
+  initResultsModal();
 
 })();
 </script>

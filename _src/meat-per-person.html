@@ -798,18 +798,9 @@ function bindToggle(groupId, stateKey, buttons){
   });
 
   /* Modal close */
-  document.getElementById('closeResultsBtn').addEventListener('click', closeResultsModal);
-  document.getElementById('results').addEventListener('click', function(e){
-    if(e.target === this) closeResultsModal();
-  });
-  document.addEventListener('keydown', function(e){
-    if(e.key === 'Escape' && document.getElementById('results').classList.contains('visible')){
-      closeResultsModal();
-    }
-  });
-
   initEmbedMode();
   initConsentBanner();
+  initResultsModal();
 })();
 
 })();

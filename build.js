@@ -23,7 +23,6 @@ const DIST     = 'dist';
 const STATIC_ASSETS = [
   'favicon.ico', 'robots.txt', 'sitemap.xml', 'ads.txt',
   '_headers', '_redirects', 'og-image.png',
-  'validate.ps1', 'wrangler.jsonc', 'playwright.config.js',
 ];
 
 // ── Load partials ───────────────────────────────────────────────────────────

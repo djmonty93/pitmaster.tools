@@ -21,21 +21,6 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('consent', 'default', {'ad_storage':'denied','analytics_storage':'denied','wait_for_update':500});
-  (function(){
-    var prefix = 'pitmaster_consent=';
-    var cookies = document.cookie ? document.cookie.split(';') : [];
-    for(var i=0;i<cookies.length;i++){
-      var c=cookies[i].trim();
-      if(c.indexOf(prefix)!==0) continue;
-      if(decodeURIComponent(c.substring(prefix.length))!=='accepted') break;
-      gtag('consent','update',{'ad_storage':'granted','analytics_storage':'granted'});
-      var s=document.createElement('script'); s.async=true;
-      s.src='https://www.googletagmanager.com/gtag/js?id=G-SJJVV37EWE';
-      document.head.appendChild(s);
-      gtag('js',new Date()); gtag('config','G-SJJVV37EWE');
-      window._gtagLoaded=true; break;
-    }
-  })();
 </script>
 <script type="application/ld+json">
 {
@@ -832,20 +817,7 @@ document.getElementById('calcBtn').addEventListener('click', calculate);
 document.getElementById('weight').addEventListener('keydown', function(e) { if (e.key === 'Enter') calculate(); });
 document.getElementById('serveTime').addEventListener('keydown', function(e) { if (e.key === 'Enter') calculate(); });
 
-// ── Modal close ───────────────────────────────────────────────────────────────
-document.getElementById('resultsClose').addEventListener('click', closeResultsModal);
-document.getElementById('results').addEventListener('click', function(e) { if (e.target === this) closeResultsModal(); });
 document.getElementById('printBtn').addEventListener('click', function() { window.print(); });
-
-document.getElementById('cookieAccept').addEventListener('click', function() {
-  setCookie(CONSENT_COOKIE_NAME, 'accepted', 365);
-  document.getElementById('cookieBanner').classList.remove('visible');
-  loadGoogleServices();
-});
-document.getElementById('cookieReject').addEventListener('click', function() {
-  setCookie(CONSENT_COOKIE_NAME, 'rejected', 365);
-  document.getElementById('cookieBanner').classList.remove('visible');
-});
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 (function init() {
@@ -880,6 +852,7 @@ document.getElementById('cookieReject').addEventListener('click', function() {
 
   initEmbedMode();
   initConsentBanner();
+  initResultsModal();
 })();
 </script>
 <!-- INJECT:site-header.js:script -->
