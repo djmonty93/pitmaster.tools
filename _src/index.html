@@ -1299,10 +1299,11 @@ function buildTL(cut, serve, hrs, wrap, grill, physicsResult){
         se=new Date(on.getTime()+cMs*0.65);
       }
       var sn=cut.stallLo ? 'Internal reaches '+dT(cut.stallLo)+'\u2013'+dT(cut.stallHi)+' \u2014 temperature plateau begins' : '';
-      var wn= wrap==='foil'  ? ' \u2014 wrap in foil now (Texas Crutch)'
-            : wrap==='paper' ? ' \u2014 wrap in butcher paper now' : '';
-      ev.push({t:sb, l:'Stall begins', s:sn+wn, c:'red'});
-      ev.push({t:se, l:wrap!=='none'?'Stall ends / unwrap':'Stall ends', s:'Temperature climbs again', c:'amber'});
+      var wn= wrap==='foil'  ? ' \u2014 wrap in foil now (Texas Crutch). Leave wrapped until pull temp.'
+            : wrap==='paper' ? ' \u2014 wrap in butcher paper now. Leave wrapped until pull temp.' : '';
+      // Wrapped cooks: one event (wrap action). Unwrapped: two events bookending the stall.
+      ev.push({t:sb, l:wrap!=='none'?'Stall \u2014 wrap now':'Stall begins', s:sn+wn, c:'red'});
+      if(wrap==='none') ev.push({t:se, l:'Stall ends', s:'Temperature climbs again', c:'amber'});
     }
     var pull=new Date(serve-restMs);
     ev.push({t:pull, l:'Pull from smoker \u2014 begin rest', s:'Target internal: '+dT(cut.pullTemp)+' \u2014 rest '+cut.restMinutes+' min loosely tented', c:'amber'});

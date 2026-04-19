@@ -672,20 +672,19 @@ function calculate() {
   // Stall notes
   var T_wb_disp = Math.round(state.tu === 'C' ? (physics.T_wb - 32) * 5 / 9 : physics.T_wb) + (state.tu === 'C' ? '\u00B0C' : '\u00B0F');
   var stallNote = '';
-  if (wrap === 'foil') stallNote = 'Internal reaches ' + fmtTemp(150) + ' \u2014 temperature plateau begins. Wrap tightly in foil now (Texas Crutch).';
-  else if (wrap === 'paper') stallNote = 'Internal reaches ' + fmtTemp(150) + ' \u2014 temperature plateau begins. Wrap in butcher paper now.';
+  if (wrap === 'foil') stallNote = 'Internal reaches ' + fmtTemp(150) + ' \u2014 wrap tightly in foil now (Texas Crutch). Leave wrapped until pull temp.';
+  else if (wrap === 'paper') stallNote = 'Internal reaches ' + fmtTemp(150) + ' \u2014 wrap in butcher paper now. Leave wrapped until pull temp.';
   else stallNote = 'Internal reaches ' + fmtTemp(150) + ' \u2014 plateau driven by evaporative cooling (~' + T_wb_disp + ' wet-bulb). Hold steady \u2014 no wrap.';
-  var stallEndNote = wrap === 'none' ? 'Temperature climbs again past ' + fmtTemp(165) : 'Temperature climbs again \u2014 leave wrapped until pull temp';
 
-  // Build timeline
+  // Build timeline — wrapped cooks get one stall event (wrap action); unwrapped get two (start + end)
   var events = [
-    { dot: 'blue',  time: light,      day: lightDay,      label: 'Light smoker / preheat',       sub: 'Target: ' + fmtSmokerTemp(temp) + ' stable before meat goes on' },
-    { dot: 'amber', time: meatOn,     day: meatOnDay,     label: 'Meat goes on smoker',           sub: weightLbs.toFixed(1) + ' lbs brisket \u2014 fat side up or down per your setup' },
-    { dot: 'red',   time: stallStart, day: stallStartDay, label: 'Stall begins',                  sub: stallNote },
-    { dot: 'amber', time: stallEnd,   day: stallEndDay,   label: wrap === 'none' ? 'Stall ends' : 'Stall ends / unwrap', sub: stallEndNote },
+    { dot: 'blue',  time: light,      day: lightDay,      label: 'Light smoker / preheat',            sub: 'Target: ' + fmtSmokerTemp(temp) + ' stable before meat goes on' },
+    { dot: 'amber', time: meatOn,     day: meatOnDay,     label: 'Meat goes on smoker',               sub: weightLbs.toFixed(1) + ' lbs brisket \u2014 fat side up or down per your setup' },
+    { dot: 'red',   time: stallStart, day: stallStartDay, label: wrap !== 'none' ? 'Stall \u2014 wrap now' : 'Stall begins', sub: stallNote },
+    wrap === 'none' ? { dot: 'amber', time: stallEnd, day: stallEndDay, label: 'Stall ends', sub: 'Temperature climbs again past ' + fmtTemp(165) } : null,
     { dot: 'amber', time: pull,       day: pullDay,       label: 'Pull from smoker \u2014 begin rest', sub: 'Target internal: ' + fmtTemp(cut.pullTemp) + ' \u2014 rest 90 min loosely tented' },
-    { dot: 'green', time: serve,      day: '',            label: 'Serve',                          sub: 'Slice against the grain 1/4\u201D thick \u2014 enjoy' }
-  ];
+    { dot: 'green', time: serve,      day: '',            label: 'Serve',                              sub: 'Slice against the grain 1/4\u201D thick \u2014 enjoy' }
+  ].filter(Boolean);
 
   var tlList = document.getElementById('tlList');
   tlList.innerHTML = '';
