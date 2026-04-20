@@ -10,3 +10,4 @@
 /tests/* /404.html 404
 /node_modules/* /404.html 404
 /.npm-cache/* /404.html 404
+/*.html /:splat 301
