@@ -1,0 +1,34 @@
+# Pitmaster Tools
+> Free BBQ calculators for smoking times, yield, serving, brining, seasoning, charcoal, and catering.
+
+Pitmaster Tools provides browser-based calculators for low-and-slow BBQ cooking. All tools are free, require no account, and run entirely client-side.
+
+## Tools
+
+- Meat Smoking Calculator: https://pitmaster.tools/ — smoking times, timelines, wood pairings, serving estimates for brisket, pork butt, ribs, chicken, turkey
+- Brisket Calculator: https://pitmaster.tools/brisket-calculator.html — cook time, stall prediction, wrap-method adjustment, sliced vs. pulled
+- Pork Shoulder Calculator: https://pitmaster.tools/pork-shoulder-calculator.html — pulled pork and sliced pork butt cook times, stall, and timeline
+- Rib Calculator: https://pitmaster.tools/rib-calculator.html — baby back and spare rib times, 3-2-1 method, doneness indicators
+- Turkey Smoking Calculator: https://pitmaster.tools/turkey-smoking-calculator.html — spatchcock and whole turkey cook times, temp targets
+- Meat Per Person Calculator: https://pitmaster.tools/meat-per-person.html — raw-to-cooked yield, serving estimates for any crowd size
+- Cook Time Coordinator: https://pitmaster.tools/cook-time-coordinator.html — multi-meat simultaneous finish timing
+- Brine Calculator: https://pitmaster.tools/brine-calculator.html — wet and dry brine ratios by weight
+- Dry Rub Calculator: https://pitmaster.tools/dry-rub-calculator.html — scale any rub recipe to exact meat weight
+- Charcoal Calculator: https://pitmaster.tools/charcoal-calculator.html — charcoal and wood chunk estimates by cook length and smoker type
+- BBQ Cost Calculator: https://pitmaster.tools/bbq-cost-calculator.html — cost per serving and total cook budget
+- Catering Calculator: https://pitmaster.tools/catering-calculator.html — raw weight, sides, and total cost for catered events
+- Brisket Yield Calculator: https://pitmaster.tools/brisket-yield-calculator.html — how much brisket to buy for a target cooked yield
+
+## Key Facts
+
+- Brisket cooks at ~1.25–1.5 hrs/lb at 225°F; pull at 195°F (sliced) or 205°F (pulled)
+- Pork shoulder: ~1.5 hrs/lb at 225°F; pull at 205°F for pulled pork
+- Baby back ribs: 4–5 hrs at 225°F; spare ribs: 5–6 hrs
+- Brisket loses ~40% weight during cooking; pork butt ~35%
+- Minimum brisket rest: 90 minutes; ideal rest: 2–4 hours
+- Safe minimum internal temperature for poultry: 165°F (USDA)
+- Safe minimum for pork: 145°F with 3-minute rest (USDA)
+
+## Contact
+
+contact@pitmaster.tools
