@@ -58,7 +58,12 @@ function getCookie(name) {
 
 /* ----- Google services ----- */
 function updateConsentGranted() {
-  gtag('consent', 'update', { 'ad_storage': 'granted', 'analytics_storage': 'granted' });
+  gtag('consent', 'update', {
+    'ad_storage': 'granted',
+    'analytics_storage': 'granted',
+    'ad_user_data': 'granted',
+    'ad_personalization': 'granted'
+  });
 }
 function ensureThirdPartyHints() {
   ['https://www.googletagmanager.com', 'https://pagead2.googlesyndication.com'].forEach(function(url) {

@@ -78,6 +78,18 @@ async function expectMeaningfulText(locator) {
   return text;
 }
 
+async function dismissCookieBanner(page) {
+  const reject = page.locator('#cookieReject');
+  if (await reject.isVisible()) {
+    await reject.click();
+  }
+}
+
+async function getTimelineLabels(page, containerSelector) {
+  return (await page.locator(`${containerSelector} .tl-label`).allTextContents())
+    .map((text) => text.replace(/\s+/g, ' ').trim());
+}
+
 test('homepage loads, nav opens, and calculator shows results', async ({ page }) => {
   const errors = [];
   trackPageErrors(page, errors);
@@ -319,6 +331,39 @@ test('wrapped brisket re-solve stays usable inside the stall band', async ({ pag
   expect(errors).toEqual([]);
 });
 
+test('brisket timeline distinguishes wrapped and unwrapped stall events', async ({ page }) => {
+  const errors = [];
+  trackPageErrors(page, errors);
+
+  await page.goto('/brisket-calculator.html');
+  await dismissCookieBanner(page);
+  await page.locator('#weight').fill('12');
+  await page.locator('#serveTime').fill('18:00');
+  await page.locator('#calcBtn').click();
+  await expect(page.locator('#results')).toBeVisible();
+
+  let labels = await getTimelineLabels(page, '#tlList');
+  expect(labels).toContain('Stall — wrap now');
+  expect(labels).not.toContain('Stall ends');
+  await expect(page.locator('#tlList .tl-item')).toHaveCount(5);
+  await expect(page.locator('#tlList .tl-item').filter({ hasText: 'Stall — wrap now' }).locator('.tl-sub'))
+    .toContainText(/leave wrapped until pull temp/i);
+
+  await page.locator('#resultsClose').click();
+  await page.locator('.wrap-toggle button[data-wrap="none"]').click();
+  await page.locator('#calcBtn').click();
+  await expect(page.locator('#results')).toBeVisible();
+
+  labels = await getTimelineLabels(page, '#tlList');
+  expect(labels).toContain('Stall begins');
+  expect(labels).toContain('Stall ends');
+  expect(labels).not.toContain('Stall — wrap now');
+  await expect(page.locator('#tlList .tl-item')).toHaveCount(6);
+  await expect(page.locator('#tlList .tl-item').filter({ hasText: 'Stall begins' }).locator('.tl-sub'))
+    .toContainText(/hold steady — no wrap/i);
+  expect(errors).toEqual([]);
+});
+
 test('homepage keeps physics-backed control states honest', async ({ page }) => {
   const errors = [];
   trackPageErrors(page, errors);
@@ -376,6 +421,38 @@ test('homepage live resolve reflects bone-in scaling for physics-backed cuts', a
   expect(errors).toEqual([]);
 });
 
+test('homepage timeline distinguishes wrapped and unwrapped stall events', async ({ page }) => {
+  const errors = [];
+  trackPageErrors(page, errors);
+
+  await page.goto('/');
+  await dismissCookieBanner(page);
+  await page.locator('#meatType').selectOption('brisket-sliced');
+  await page.locator('#weight').fill('12');
+  await page.locator('#serveTime').fill('18:00');
+  await page.locator('#calcBtn').click();
+  await expect(page.locator('#results')).toBeVisible();
+
+  let labels = await getTimelineLabels(page, '#tlEl');
+  expect(labels).toContain('Stall — wrap now');
+  expect(labels).not.toContain('Stall ends');
+  await expect(page.locator('#tlEl .tl-item')).toHaveCount(5);
+  await expect(page.locator('#tlEl .tl-item').filter({ hasText: 'Stall — wrap now' }).locator('.tl-sub'))
+    .toContainText(/leave wrapped until pull temp/i);
+
+  await page.locator('#closeResultsBtn').click();
+  await page.locator('#wrapMethod').selectOption('none');
+  await page.locator('#calcBtn').click();
+  await expect(page.locator('#results')).toBeVisible();
+
+  labels = await getTimelineLabels(page, '#tlEl');
+  expect(labels).toContain('Stall begins');
+  expect(labels).toContain('Stall ends');
+  expect(labels).not.toContain('Stall — wrap now');
+  await expect(page.locator('#tlEl .tl-item')).toHaveCount(6);
+  expect(errors).toEqual([]);
+});
+
 test('pork shoulder live resolve reflects the bone-in modifier', async ({ page }) => {
   const errors = [];
   trackPageErrors(page, errors);
@@ -402,6 +479,39 @@ test('pork shoulder live resolve reflects the bone-in modifier', async ({ page }
   const boneInRemaining = parseDurationText(await page.locator('#resolveResult').textContent());
 
   expect(boneInRemaining).toBeGreaterThan(bonelessRemaining);
+  expect(errors).toEqual([]);
+});
+
+test('pork shoulder timeline distinguishes wrapped and unwrapped stall events', async ({ page }) => {
+  const errors = [];
+  trackPageErrors(page, errors);
+
+  await page.goto('/pork-shoulder-calculator.html');
+  await dismissCookieBanner(page);
+  await page.locator('#weight').fill('8');
+  await page.locator('#serveTime').fill('18:00');
+  await page.locator('#calcBtn').click();
+  await expect(page.locator('#results')).toBeVisible();
+
+  let labels = await getTimelineLabels(page, '#tlList');
+  expect(labels).toContain('Stall — wrap now');
+  expect(labels).not.toContain('Stall ends');
+  await expect(page.locator('#tlList .tl-item')).toHaveCount(5);
+  await expect(page.locator('#tlList .tl-item').filter({ hasText: 'Stall — wrap now' }).locator('.tl-sub'))
+    .toContainText(/leave wrapped until pull temp/i);
+
+  await page.locator('#resultsClose').click();
+  await page.locator('#wrapToggle button[data-wrap="none"]').click();
+  await page.locator('#calcBtn').click();
+  await expect(page.locator('#results')).toBeVisible();
+
+  labels = await getTimelineLabels(page, '#tlList');
+  expect(labels).toContain('Stall begins');
+  expect(labels).toContain('Stall ends');
+  expect(labels).not.toContain('Stall — wrap now');
+  await expect(page.locator('#tlList .tl-item')).toHaveCount(6);
+  await expect(page.locator('#tlList .tl-item').filter({ hasText: 'Stall begins' }).locator('.tl-sub'))
+    .toContainText(/no wrap — full bark development/i);
   expect(errors).toEqual([]);
 });
 
