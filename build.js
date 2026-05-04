@@ -22,7 +22,7 @@ const DIST     = 'dist';
 // Static assets to copy from repo root to dist/
 const STATIC_ASSETS = [
   'favicon.ico', 'robots.txt', 'sitemap.xml', 'ads.txt',
-  '_headers', '_redirects', 'og-image.png',
+  '_headers', '_redirects', 'og-image.png', 'llms.txt',
 ];
 
 // ── Load partials ───────────────────────────────────────────────────────────
