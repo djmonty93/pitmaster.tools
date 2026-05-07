@@ -59,10 +59,21 @@ function Test-LocalLinks {
         continue
       }
 
-      $resolved = if ($cleanTarget.StartsWith('/')) {
-        Join-Path $BaseDirectory $cleanTarget.TrimStart('/')
+      # Root URL '/' resolves to index.html
+      if ($cleanTarget -eq '/') {
+        $resolved = Join-Path $BaseDirectory 'index.html'
+      } elseif ($cleanTarget.StartsWith('/')) {
+        $resolved = Join-Path $BaseDirectory $cleanTarget.TrimStart('/')
       } else {
-        Join-Path (Split-Path -Parent $fullPath) $cleanTarget
+        $resolved = Join-Path (Split-Path -Parent $fullPath) $cleanTarget
+      }
+
+      # Clean URLs (no extension) resolve to <target>.html
+      if (-not (Test-Path $resolved) -and -not [System.IO.Path]::HasExtension($resolved)) {
+        $resolvedHtml = "$resolved.html"
+        if (Test-Path $resolvedHtml) {
+          $resolved = $resolvedHtml
+        }
       }
 
       if (-not (Test-Path $resolved)) {
