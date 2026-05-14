@@ -143,11 +143,27 @@ function normalize(data: z.infer<typeof OpenMeteoResponse>): WeatherDay[] {
     // A day is only usable if we have both high and low temperatures; the
     // entire score depends on them. Other daily fields fall back to 0 when
     // missing — the score will simply not credit those signals.
-    const high = daily.temperature_2m_max[i];
-    const low = daily.temperature_2m_min[i];
-    if (high === null || high === undefined || low === null || low === undefined) {
-      continue;
+    //
+    // null vs undefined: null is the model saying "no data" (skip the day,
+    // try fewer days), undefined means the column is shorter than the time
+    // series — a structural defect we treat as malformed so the adapter
+    // can fail over.
+    if (
+      i >= daily.temperature_2m_max.length ||
+      i >= daily.temperature_2m_min.length
+    ) {
+      throw new WeatherError(
+        'open-meteo',
+        'malformed',
+        `temperature column shorter than time series at index ${i}`
+      );
     }
+    // After the length check above, both indices are in-bounds; TS's
+    // `noUncheckedIndexedAccess` still types them as `number | null |
+    // undefined`, so we narrow explicitly.
+    const high = daily.temperature_2m_max[i] as number | null;
+    const low = daily.temperature_2m_min[i] as number | null;
+    if (high === null || low === null) continue;
 
     const dayHourly = hoursForDay(hourly, date);
     const day: WeatherDay = {
