@@ -4,6 +4,7 @@
 
 export interface Env {
   ASSETS: Fetcher;
+  WEATHER_KV: KVNamespace;
 }
 
 export default {
