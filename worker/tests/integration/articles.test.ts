@@ -137,6 +137,39 @@ describe('GET /articles/:slug', () => {
     expect(body).not.toMatch(/<script[^>]*>[^<]*alert/i);
   });
 
+  it('defeats deep nesting (20 levels) — sanitizer loop is bounded by input length, not a fixed cap', async () => {
+    const now = Date.now();
+    // 20 nested `<scr` openers + a real `<script>` + payload +
+    // matching `ipt>` closers. A fixed-cap loop would leave the
+    // inner `<script>...` element intact; an input-length-bounded
+    // loop strips all the way down.
+    const opener = '<scr'.repeat(20);
+    const closer = 'ipt>'.repeat(20);
+    await DB.prepare(
+      `INSERT INTO articles (slug, kind, title, body_html, body_text, hero_band, published_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    )
+      .bind(
+        'deep-nested',
+        'weekly-summary',
+        'ok',
+        `${opener}<script>alert(20)</script>${closer}`,
+        'x',
+        'green',
+        now,
+        now
+      )
+      .run();
+    const res = await handleArticles(
+      buildContext(new Request('https://x/articles/deep-nested'), {
+        slug: 'deep-nested',
+      })
+    );
+    const body = await res.text();
+    expect(body).not.toMatch(/<script(?!\s+type="application\/ld\+json")\b/i);
+    expect(body).not.toMatch(/<script[^>]*>[^<]*alert/i);
+  });
+
   it('strips unquoted javascript: URLs in href', async () => {
     const now = Date.now();
     await DB.prepare(

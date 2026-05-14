@@ -71,8 +71,12 @@ export async function handleArticles(rc: RouteContext): Promise<Response> {
 // Implementation note: a single-pass regex chain is bypassable by
 // nested/broken tag ordering — e.g. `<scr<script>ipt>` reassembles
 // into `<script>` after one replacement. We loop until the output is
-// stable to close that hole. A cap on iterations prevents a
-// pathological adversarial input from spinning forever.
+// byte-stable. Termination is guaranteed because every iteration
+// that mutates the string strictly shortens it (every regex in the
+// `passes` array replaces with the empty string), so the worst-case
+// iteration count is bounded by `input.length`. We use that as a
+// hard ceiling instead of a fixed `8`; a fixed cap can be defeated
+// by an attacker who nests N+1 deep where N is the cap.
 function sanitizeBodyHtml(input: string): string {
   const passes = [
     /<\/?(?:script|iframe|object|embed|link|meta|style|svg|base|form)\b[^>]*>/gi,
@@ -84,7 +88,8 @@ function sanitizeBodyHtml(input: string): string {
     /(?:href|src)\s*=\s*(?:javascript|data|vbscript)\s*:[^\s>]*/gi,
   ];
   let out = input;
-  for (let i = 0; i < 8; i++) {
+  const maxIters = input.length + 1; // strictly shortens each iter
+  for (let i = 0; i < maxIters; i++) {
     let next = out;
     for (const re of passes) next = next.replace(re, '');
     if (next === out) return out;
