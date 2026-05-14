@@ -22,11 +22,11 @@ CREATE INDEX IF NOT EXISTS idx_subscribers_timezone
   ON subscribers (timezone)
   WHERE unsubscribed_at IS NULL;
 
-CREATE INDEX IF NOT EXISTS idx_subscribers_email
-  ON subscribers (email);
+-- Note: subscribers.email already has a UNIQUE constraint, which creates
+-- an implicit covering index. A second explicit index would be redundant.
 
 CREATE TABLE IF NOT EXISTS metros (
-  slug          TEXT    PRIMARY KEY,
+  slug          TEXT    NOT NULL PRIMARY KEY,
   name          TEXT    NOT NULL,
   state         TEXT    NOT NULL,
   zip           TEXT    NOT NULL,
@@ -41,7 +41,7 @@ CREATE INDEX IF NOT EXISTS idx_metros_state ON metros (state);
 
 CREATE TABLE IF NOT EXISTS events (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
-  kind        TEXT    NOT NULL, -- 'forecast' | 'subscribe' | 'unsubscribe' | 'send' | 'error'
+  kind        TEXT    NOT NULL CHECK (kind IN ('forecast', 'subscribe', 'unsubscribe', 'send', 'error')),
   payload     TEXT,             -- JSON-encoded event body; redacted upstream
   created_at  INTEGER NOT NULL
 );
@@ -51,7 +51,7 @@ CREATE INDEX IF NOT EXISTS idx_events_kind ON events (kind);
 
 CREATE TABLE IF NOT EXISTS mailerlite_retry (
   id              INTEGER PRIMARY KEY AUTOINCREMENT,
-  request_kind    TEXT    NOT NULL, -- 'subscribe' | 'send'
+  request_kind    TEXT    NOT NULL CHECK (request_kind IN ('subscribe', 'unsubscribe', 'send')),
   request_payload TEXT    NOT NULL, -- JSON body to replay on retry
   idempotency_key TEXT    NOT NULL UNIQUE,
   attempts        INTEGER NOT NULL DEFAULT 0,
