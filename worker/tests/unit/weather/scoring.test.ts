@@ -113,6 +113,20 @@ describe('runtime validation', () => {
       })
     ).toThrow(/unknown cooker/);
   });
+
+  it('rejects prototype-chain keys (toString, __proto__) as cooker values', () => {
+    // `cooker in OBJ` would silently accept inherited keys; `Object.hasOwn`
+    // is the right guard. Verify both blocked.
+    for (const evil of ['toString', '__proto__', 'constructor', 'hasOwnProperty']) {
+      expect(() =>
+        scoreDay({
+          cut: 'pork-loin',
+          cooker: evil as Cooker,
+          day: fakeDay(),
+        })
+      ).toThrow(/unknown cooker/);
+    }
+  });
 });
 
 describe('every (cut, cooker) pair scores within bounds', () => {

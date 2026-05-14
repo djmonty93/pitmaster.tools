@@ -51,7 +51,12 @@ export function scoreDay(input: ScoreInput): ScoreResult {
   // TS callers usually arrive through validated boundaries, but the API
   // accepts arbitrary string input (Step 7) so reject unknown cookers
   // explicitly — mirrors the strict guard in the browser JS scorer.
-  if (!(cooker in COOKER_WIND_SENSITIVITY) || !(cooker in COOKER_RH)) {
+  // `Object.hasOwn` rather than `in` so a malicious `toString` / `__proto__`
+  // value from a forged client request can't slip through the prototype chain.
+  if (
+    !Object.hasOwn(COOKER_WIND_SENSITIVITY, cooker) ||
+    !Object.hasOwn(COOKER_RH, cooker)
+  ) {
     throw new Error(`unknown cooker: ${cooker}`);
   }
   const reasons: string[] = [];

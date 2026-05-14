@@ -85,12 +85,13 @@
     }
 
     // No silent default — an unknown cooker is a contract violation that
-    // the API layer is responsible for catching. Throw here so dev sees
-    // it immediately rather than getting weird scores.
-    var windSensitivity = COOKER_WIND_SENSITIVITY[cooker];
-    if (windSensitivity === undefined) {
+    // the API layer is responsible for catching. Use Object.hasOwn so a
+    // malicious "toString" / "__proto__" value can't slip through the
+    // prototype chain (mirrors the guard in scoring.ts).
+    if (!Object.prototype.hasOwnProperty.call(COOKER_WIND_SENSITIVITY, cooker)) {
       throw new Error('unknown cooker: ' + cooker);
     }
+    var windSensitivity = COOKER_WIND_SENSITIVITY[cooker];
     var windRaw = Math.max(0, (day.gustMphMax - 10) / 25);
     var windPenalty = clamp01(windRaw) * 20 * windSensitivity;
     if (day.gustMphMax >= 25) {
@@ -102,10 +103,10 @@
     if (coldPenalty > 0) reasons.push('Cold start (' + Math.round(tempLow) + ' °F low)');
     if (hotPenalty > 0) reasons.push('Hot afternoon (' + Math.round(tempHigh) + ' °F high)');
 
-    var cookerBaseRh = COOKER_RH[cooker];
-    if (cookerBaseRh === undefined) {
+    if (!Object.prototype.hasOwnProperty.call(COOKER_RH, cooker)) {
       throw new Error('unknown cooker: ' + cooker);
     }
+    var cookerBaseRh = COOKER_RH[cooker];
     var cookerCavityRh = clamp(cookerBaseRh + day.rhMean * 0.15, 0, 100);
     var wb = wetBulbF(PIT_TEMP_F, cookerCavityRh);
     var stallRiskPct = clamp(((wb - 110) / 50) * 100, 0, 100);
