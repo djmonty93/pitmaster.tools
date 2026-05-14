@@ -8,17 +8,48 @@ import seed from '../../migrations/0002_metros_seed.sql?raw';
 import articles from '../../migrations/0003_articles.sql?raw';
 
 /**
- * Strip SQL line comments (`-- …` to end of line, anywhere on the line)
- * and split into statements on `;`. Our migration files happen not to
- * embed `--` inside string literals, so we don't need a full tokenizer.
- * If that changes, switch to a real parser.
+ * Strip SQL line comments and split into statements on `;`. Quote-aware
+ * so a `;` inside a single-quoted string literal does NOT end the
+ * statement — important for INSERTs whose payload column carries JSON
+ * (`{"msg":"a;b"}`). SQLite's `''` escape is handled by peeking the
+ * next character when we're inside a string.
+ *
+ * Limitations: doesn't handle nested block comments (`/* … *\/`); our
+ * migrations use `--` only, so that's fine. If we ever add block
+ * comments, extend or move to a real parser.
  */
 export function splitStatements(sql: string): string[] {
+  // Strip `-- …` line comments (anywhere on the line; SQLite ends them
+  // at the next newline).
   const stripped = sql.replace(/--[^\n]*/g, '');
-  return stripped
-    .split(';')
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0);
+
+  const statements: string[] = [];
+  let current = '';
+  let inString = false;
+  for (let i = 0; i < stripped.length; i++) {
+    const c = stripped[i];
+    if (c === "'") {
+      if (inString && stripped[i + 1] === "'") {
+        // `''` is the SQLite escape — emit both chars, stay in-string.
+        current += "''";
+        i++;
+        continue;
+      }
+      inString = !inString;
+      current += c;
+      continue;
+    }
+    if (c === ';' && !inString) {
+      const trimmed = current.trim();
+      if (trimmed) statements.push(trimmed);
+      current = '';
+      continue;
+    }
+    current += c;
+  }
+  const tail = current.trim();
+  if (tail) statements.push(tail);
+  return statements;
 }
 
 export async function applyMigrations(db: D1Database): Promise<void> {

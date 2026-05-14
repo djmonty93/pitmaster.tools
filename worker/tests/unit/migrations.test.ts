@@ -119,4 +119,20 @@ describe('splitStatements helper', () => {
     const sql = `CREATE TABLE t (\n  k TEXT, -- 'a; b' inline note\n  v INT\n);`;
     expect(splitStatements(sql)).toEqual(['CREATE TABLE t (\n  k TEXT, \n  v INT\n)']);
   });
+
+  it('does not split on `;` inside a single-quoted string literal', async () => {
+    const { splitStatements } = await import('../helpers/d1');
+    const sql = `INSERT INTO events (kind, payload) VALUES ('err', '{"msg":"a;b"}');`;
+    expect(splitStatements(sql)).toEqual([
+      `INSERT INTO events (kind, payload) VALUES ('err', '{"msg":"a;b"}')`,
+    ]);
+  });
+
+  it("handles SQLite-escaped quotes ('') inside string literals", async () => {
+    const { splitStatements } = await import('../helpers/d1');
+    // `'don''t; stop'` is the single literal "don't; stop" — the `;`
+    // sits inside the string and must not split.
+    const sql = `INSERT INTO t (v) VALUES ('don''t; stop');`;
+    expect(splitStatements(sql)).toEqual([`INSERT INTO t (v) VALUES ('don''t; stop')`]);
+  });
 });
