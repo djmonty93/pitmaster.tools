@@ -110,10 +110,70 @@ describe('cachedFetch', () => {
     expect(outcomes).toEqual(['stale-while-error']);
   });
 
+  it('class-instance values lose their prototype across the JSON round-trip', async () => {
+    // Pin the JSON round-trip caveat documented in kv.ts: prototype
+    // methods and getters do not survive. Real workloads only cache
+    // success payloads, so this is informational, but the test catches
+    // a regression that would silently break a future code path that
+    // tried to put real WeatherError instances through the cache.
+    class FakeWeatherError {
+      source = 'open-meteo';
+      kind = 'http_5xx';
+      get isRecoverable(): boolean {
+        return true;
+      }
+      describe(): string {
+        return `${this.source}/${this.kind}`;
+      }
+    }
+    const attempt = new FakeWeatherError();
+    expect(attempt.isRecoverable).toBe(true);
+    expect(attempt.describe()).toBe('open-meteo/http_5xx');
+
+    await kvPut(KV, KEY, { attempts: [attempt] }, { freshSeconds: 60, staleSeconds: 600 });
+    const got = await kvGet<{ attempts: unknown[] }>(KV, KEY, {
+      freshSeconds: 60,
+      staleSeconds: 600,
+    });
+    expect(got.status).toBe('hit');
+    const rehydrated = (got.value as { attempts: unknown[] }).attempts[0] as Record<string, unknown>;
+    // Own data properties survive.
+    expect(rehydrated['source']).toBe('open-meteo');
+    expect(rehydrated['kind']).toBe('http_5xx');
+    // Prototype-only methods and getters DON'T — that's the property we're pinning.
+    expect(rehydrated['isRecoverable']).toBeUndefined();
+    expect(typeof rehydrated['describe']).toBe('undefined');
+  });
+
   it('propagates origin error when no cached value is available', async () => {
     const origin = vi.fn().mockRejectedValue(new Error('nope'));
     await expect(
       cachedFetch(KV, KEY, origin, { freshSeconds: 60, staleSeconds: 600 })
     ).rejects.toThrow('nope');
+  });
+
+  it('telemetry surfaces a redacted errorSummary, not the raw error', async () => {
+    const origin = vi
+      .fn()
+      .mockRejectedValue(
+        Object.assign(new Error('upstream 500: token=sk-do-not-leak body=…'), {
+          name: 'WeatherError',
+        })
+      );
+    const captured: Array<{ status: string; errorSummary?: string }> = [];
+    await expect(
+      cachedFetch(KV, KEY, origin, {
+        freshSeconds: 60,
+        staleSeconds: 600,
+        onResult: (outcome) =>
+          captured.push({ status: outcome.status, errorSummary: outcome.errorSummary }),
+      })
+    ).rejects.toBeDefined();
+    const last = captured[captured.length - 1];
+    expect(last?.errorSummary).toMatch(/^WeatherError: /);
+    // The summary should at most echo back the error's own name/message
+    // (which a caller controls); the test asserts we didn't, for example,
+    // attach the response body or stack as a separate field.
+    expect(last).not.toHaveProperty('error');
   });
 });

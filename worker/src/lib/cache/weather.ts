@@ -22,7 +22,16 @@ export interface CachedForecastOptions {
   now?: () => number;
 }
 
+// Tight whitelist on the cache key input. Cloudflare KV caps keys at
+// 512 bytes and rejects some control characters; accept alphanumeric +
+// "-" (US 5-digit zips, Canadian postal codes, etc.) up to 16 chars —
+// generous for foreign postal codes, paranoid against header injection.
+const ZIP_ALLOWED = /^[A-Za-z0-9-]{1,16}$/;
+
 export function cacheKey(zip: string, dayBucket: string): string {
+  if (!ZIP_ALLOWED.test(zip)) {
+    throw new Error(`invalid zip for cache key: ${JSON.stringify(zip)}`);
+  }
   return `${KEY_PREFIX}:${zip}:${dayBucket}`;
 }
 

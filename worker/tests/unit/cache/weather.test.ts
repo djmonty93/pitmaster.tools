@@ -28,6 +28,20 @@ describe('cacheKey', () => {
   it('builds weather:v1:<zip>:<day>', () => {
     expect(cacheKey('20001', '2026-05-14')).toBe('weather:v1:20001:2026-05-14');
   });
+
+  it('accepts non-US postal codes within the whitelist', () => {
+    expect(cacheKey('K1A-0B1', '2026-05-14')).toBe('weather:v1:K1A-0B1:2026-05-14');
+  });
+
+  it('throws on zip with disallowed characters (header / kv-key injection)', () => {
+    for (const bad of ['20001 ', '20001\n', '20001:nope', '../../../', '<>$']) {
+      expect(() => cacheKey(bad, '2026-05-14')).toThrow(/invalid zip/);
+    }
+  });
+
+  it('throws on zip longer than 16 characters', () => {
+    expect(() => cacheKey('12345678901234567', '2026-05-14')).toThrow(/invalid zip/);
+  });
 });
 
 describe('fetchForecastCached', () => {

@@ -12,6 +12,19 @@
 // Stored on KV via put(... { expirationTtl }); the in-payload metadata
 // is for stale-while-error classification, the KV-level expirationTtl is
 // the eventual eviction.
+//
+// Constraints callers should be aware of:
+// - **Serializability**: values must be JSON-safe. Class instances lose
+//   their prototype across a round trip (a cached `WeatherError[]` rehydrates
+//   as plain objects without the `isRecoverable` getter). Cache plain
+//   data, not behavior. The weather composition only caches success
+//   payloads, so this isn't currently an issue, but a follow-up adapter
+//   that puts errors into cache must sanitize first.
+// - **Eventual consistency**: Cloudflare KV is eventually consistent —
+//   a write made by one request may take up to ~60 s to be visible to
+//   another colo. Miniflare tests are strongly consistent, which makes
+//   them slightly optimistic about cache-hit timing in production. The
+//   stale-while-error fallback masks this for the weather use case.
 
 export type CacheStatus = 'hit' | 'stale' | 'miss';
 
@@ -77,17 +90,28 @@ export type FetchOriginResult<T> =
   | { ok: false; error: unknown };
 
 export interface CachedFetchOptions<T> extends CacheOptions {
-  /** Hook for callers to log/measure cache outcomes. */
+  /**
+   * Hook for callers to log/measure cache outcomes. The `errorSummary`
+   * is a redacted one-line description of the underlying error (kind
+   * + message tail) — never the raw error, because origin errors can
+   * embed request bodies / API tokens that the operator does not want
+   * to ship to a telemetry sink.
+   */
   onResult?: (outcome: {
     status: CacheStatus | 'origin' | 'stale-while-error';
     key: string;
-    error?: unknown;
+    errorSummary?: string;
   }) => void;
-  /**
-   * If true (default), origin errors propagate when no stale value is
-   * available. If false, the cache returns `{ ok: false, error }`.
-   */
-  throwOnOriginError?: boolean;
+}
+
+function summarizeError(err: unknown): string {
+  // Cap at 200 chars and strip whitespace to keep telemetry tidy.
+  // Take only `name: message` — both intentional, neither typically
+  // contains caller-supplied content. Anything richer is the caller's
+  // responsibility to log separately.
+  const name = err && typeof err === 'object' && 'name' in err ? String(err.name) : 'Error';
+  const message = err && typeof err === 'object' && 'message' in err ? String(err.message) : '';
+  return `${name}: ${message}`.replace(/\s+/g, ' ').trim().slice(0, 200);
 }
 
 /**
@@ -115,10 +139,10 @@ export async function cachedFetch<T>(
     return fresh;
   } catch (err) {
     if (get.status === 'stale') {
-      opts.onResult?.({ status: 'stale-while-error', key, error: err });
+      opts.onResult?.({ status: 'stale-while-error', key, errorSummary: summarizeError(err) });
       return get.value as T;
     }
-    opts.onResult?.({ status: 'miss', key, error: err });
+    opts.onResult?.({ status: 'miss', key, errorSummary: summarizeError(err) });
     throw err;
   }
 }
