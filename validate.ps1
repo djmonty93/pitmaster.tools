@@ -21,10 +21,34 @@ function Test-XmlFile {
   }
 }
 
+function ConvertFrom-Jsonc {
+  param([string]$Text)
+  # JSONC normalizer: strip /* … */ block comments and // line comments, then
+  # remove trailing commas before } or ]. String literals (which may contain
+  # // or /*) are preserved by handling them as the first alternative in the
+  # regex; the replacement keeps the original match when the captured group is
+  # a string. This is enough for wrangler.jsonc-style configs and is much
+  # smaller than a full JSONC tokenizer.
+  $stringOrComment = '"(?:\\.|[^"\\])*"|/\*[\s\S]*?\*/|//[^\r\n]*'
+  $stripped = [regex]::Replace(
+    $Text,
+    $stringOrComment,
+    { param($m) if ($m.Value.StartsWith('"')) { $m.Value } else { '' } }
+  )
+  # Trailing commas before } or ]
+  $stripped = [regex]::Replace($stripped, ',(\s*[}\]])', '$1')
+  return $stripped
+}
+
 function Test-JsonFile {
   param([string]$Path)
   try {
-    Get-Content $Path -Raw | ConvertFrom-Json | Out-Null
+    $raw = Get-Content $Path -Raw
+    # .jsonc files may contain comments and trailing commas; normalize first.
+    if ($Path -like '*.jsonc') {
+      $raw = ConvertFrom-Jsonc -Text $raw
+    }
+    $raw | ConvertFrom-Json | Out-Null
     Write-Host "OK JSON $Path"
   } catch {
     Add-Error("Invalid JSON: $Path`n$($_.Exception.Message)")

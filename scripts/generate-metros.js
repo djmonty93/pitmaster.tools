@@ -60,13 +60,14 @@ if (METROS.length === 0) {
 let written = 0;
 for (const metro of METROS) {
   const out = path.join(OUT_DIR, metro.slug + '.html');
-  fs.writeFileSync(out, renderMetro(metro));
+  // The marker is prepended here (not inside renderMetro) so the sweep above
+  // is guaranteed to recognize anything this loop wrote, even if a future
+  // template forgets it.
+  fs.writeFileSync(out, GENERATED_MARKER + '\n' + renderMetro(metro));
   written++;
 }
 console.log('generate-metros: wrote ' + written + ' metro pages → ' + OUT_DIR + '/');
 
 function renderMetro(_metro) {
-  // Step 12 returns a string starting with `GENERATED_MARKER + '\n'` so the
-  // sweep above can recognize it on the next run.
   throw new Error('renderMetro: not implemented — wired in Step 12');
 }
