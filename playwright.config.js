@@ -18,7 +18,10 @@ module.exports = defineConfig({
   webServer: {
     command: 'npm run build && npx wrangler dev --port 4173 --ip 127.0.0.1 --log-level error',
     port: 4173,
-    reuseExistingServer: true,
+    // On CI, never reuse an existing process — a leaked server from a prior
+    // failed job would skip the build step and mask stale-asset regressions.
+    // Locally, reusing keeps the dev loop fast.
+    reuseExistingServer: !process.env.CI,
     timeout: 90000,
   },
 });

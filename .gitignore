@@ -10,5 +10,9 @@ node_modules/
 test-results/
 .npm-cache/
 
-# Local Claude Code settings
-.claude/
+# Local Claude Code settings (per-developer machine state).
+# Team-shareable Claude config — .claude/commands/, .claude/agents/,
+# and the project .claude/CLAUDE.md — is intentionally tracked.
+.claude/settings.local.json
+.claude/logs/
+.claude/cache/

@@ -30,7 +30,7 @@ npm run build            # generate-metros → build.js → dist/
 npm run dev:worker       # wrangler dev — Worker + static assets at localhost
 npm test                 # vitest in worker/ via Miniflare
 npm run typecheck        # tsc --noEmit for worker/ and packages/shared/
-npm run test:e2e         # playwright (requires `npm run dev:worker` running)
+npm run test:e2e         # playwright; auto-spawns `wrangler dev` per playwright.config.js
 ```
 
 Configure secrets for `wrangler dev` in `.dev.vars` (copy `.dev.vars.example`).
