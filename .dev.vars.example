@@ -1,0 +1,6 @@
+# Best Smoke Days — local dev secrets for `wrangler dev`.
+# Copy to .dev.vars (gitignored) and fill in values when needed.
+
+# SENTRY_DSN=
+# MAILERLITE_API_KEY=
+# NWS_USER_AGENT=pitmaster.tools (contact@pitmaster.tools)

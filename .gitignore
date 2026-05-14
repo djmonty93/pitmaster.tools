@@ -9,3 +9,6 @@ dist/
 node_modules/
 test-results/
 .npm-cache/
+
+# Local Claude Code settings
+.claude/

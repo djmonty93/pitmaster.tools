@@ -4,6 +4,8 @@
  *
  * Reads source HTML from _src/, replaces <!-- INJECT:name --> placeholders
  * with inlined content from _partials/, writes output to dist/.
+ * Mirrors the _src/ directory tree under dist/ (e.g. _src/smoke-weather/
+ * index.html → dist/smoke-weather/index.html).
  * Copies static assets from root to dist/.
  *
  * Usage: node build.js
@@ -47,18 +49,33 @@ function injectPartials(html, sourceFile) {
   });
 }
 
+// ── Walk _src/ recursively, yield relative .html paths ──────────────────────
+function listHtml(dir) {
+  var out = [];
+  fs.readdirSync(dir, { withFileTypes: true }).forEach(function(entry) {
+    var full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      out = out.concat(listHtml(full));
+    } else if (entry.isFile() && entry.name.endsWith('.html')) {
+      out.push(full);
+    }
+  });
+  return out;
+}
+
 // ── Recreate dist/ from a clean slate ───────────────────────────────────────
 fs.rmSync(DIST, { recursive: true, force: true });
 fs.mkdirSync(DIST, { recursive: true });
 
 // ── Build HTML files ─────────────────────────────────────────────────────────
-var htmlFiles = fs.readdirSync(SRC).filter(function(f) { return f.endsWith('.html'); });
+var htmlFiles = listHtml(SRC);
 var built = 0;
-htmlFiles.forEach(function(file) {
-  var srcPath  = path.join(SRC, file);
-  var distPath = path.join(DIST, file);
+htmlFiles.forEach(function(srcPath) {
+  var rel      = path.relative(SRC, srcPath);
+  var distPath = path.join(DIST, rel);
   var source   = fs.readFileSync(srcPath, 'utf8');
-  var output   = injectPartials(source, file);
+  var output   = injectPartials(source, rel);
+  fs.mkdirSync(path.dirname(distPath), { recursive: true });
   fs.writeFileSync(distPath, output);
   built++;
 });
