@@ -25,5 +25,17 @@
       "id": "00000000000000000000000000000000",
       "preview_id": "00000000000000000000000000000000"
     }
+  ],
+  // SMOKE_DB — D1 database backing subscribers, metros, events,
+  // mailerlite_retry, and articles. Migrations live in worker/migrations/
+  // and are applied with `wrangler d1 migrations apply SMOKE_DB`.
+  // Replace `database_id` after `wrangler d1 create SMOKE_DB`.
+  "d1_databases": [
+    {
+      "binding": "SMOKE_DB",
+      "database_name": "smoke_db",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "worker/migrations"
+    }
   ]
 }

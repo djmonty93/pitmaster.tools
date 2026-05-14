@@ -5,6 +5,7 @@
 export interface Env {
   ASSETS: Fetcher;
   WEATHER_KV: KVNamespace;
+  SMOKE_DB: D1Database;
 }
 
 export default {
