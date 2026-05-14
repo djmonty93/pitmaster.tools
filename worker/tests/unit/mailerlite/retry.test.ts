@@ -379,11 +379,12 @@ describe('mailerlite retry — drain', () => {
     expect(client.unsubscribe).toHaveBeenCalledWith({ email: 'gone@example.com' });
   });
 
-  it("drops 'send' rows since that path is owned by Step 11 (Friday cron)", async () => {
+  it("leaves 'send' rows untouched in the queue for Step 11 to claim", async () => {
     // 'send' is a valid value of mailerlite_retry.request_kind (see
-    // migration 0001) but no client method exists for it yet. Until
-    // Step 11 wires that path, any 'send' row in the queue should be
-    // dropped with an audit, not retried in a loop.
+    // migration 0001) but no client method exists for it yet. Drain
+    // must NOT touch these rows — silently dropping them would be
+    // data loss before Step 11 ships. They sit in the queue and
+    // Step 11's cron will pick them up.
     const t0 = 1_700_000_000_000;
     await DB.prepare(
       `INSERT INTO mailerlite_retry
@@ -394,10 +395,15 @@ describe('mailerlite retry — drain', () => {
       .run();
     const client = fakeClient();
     const outcomes = await drain(DB, client, { now: () => t0 + 1 });
-    expect(outcomes[0]!.status).toBe('dropped');
-    const auditRow = await DB.prepare(
-      `SELECT kind FROM events ORDER BY id DESC LIMIT 1`
-    ).first<{ kind: string }>();
-    expect(auditRow?.kind).toBe('error');
+    expect(outcomes).toEqual([]);
+    expect(client.subscribe).not.toHaveBeenCalled();
+    expect(client.unsubscribe).not.toHaveBeenCalled();
+    // Row is still there — Step 11 will pick it up.
+    const remaining = await DB.prepare(
+      `SELECT COUNT(*) AS c FROM mailerlite_retry WHERE idempotency_key = ?`
+    )
+      .bind('send:cmp_x')
+      .first<{ c: number }>();
+    expect(remaining?.c).toBe(1);
   });
 });

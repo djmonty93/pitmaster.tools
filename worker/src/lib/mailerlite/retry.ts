@@ -29,7 +29,7 @@
 // retry history.
 
 import { MailerLiteError, type MailerLiteRequestKind } from './errors.js';
-import type { MailerLiteClient } from './client.js';
+import type { MailerLiteClient, SubscribeInput, UnsubscribeInput } from './client.js';
 import { summarizeError } from '../redact.js';
 
 export interface EnqueueInput {
@@ -134,6 +134,11 @@ export async function drain(
   const nowFn = opts.now ?? Date.now;
   const now = nowFn();
   const batchSize = opts.batchSize ?? 25;
+  // 'send' is reserved in the schema but Step 11 owns the dispatch
+  // path. Leave any 'send' rows in the queue (do not select them) so
+  // Step 11's cron picks them up exactly once and isn't preceded by a
+  // silent data-loss drop here. The supported kinds will widen when
+  // Step 11 lands; for now this is the gate.
   const rowsRes = await db
     .prepare(
       `SELECT id, request_kind, request_payload, idempotency_key, attempts,
@@ -141,6 +146,7 @@ export async function drain(
          FROM mailerlite_retry
         WHERE next_attempt_at <= ?
           AND attempts < ?
+          AND request_kind IN ('subscribe', 'unsubscribe')
         ORDER BY next_attempt_at ASC
         LIMIT ?`
     )
@@ -174,6 +180,22 @@ async function replayRow(
     await db.prepare(`DELETE FROM mailerlite_retry WHERE id = ?`).bind(row.id).run();
     await recordError(db, row, e, now());
     return { row, status: 'dropped', error: e };
+  }
+
+  // Belt-and-braces narrow: drain's SQL filter already excludes 'send'
+  // rows, but if a future migration widens the kinds enum and forgets
+  // to update drain we'd silently dispatch on an unsupported kind. Skip
+  // here so the row stays in the queue for the future Step 11 path.
+  if (row.request_kind !== 'subscribe' && row.request_kind !== 'unsubscribe') {
+    return {
+      row,
+      status: 'dropped',
+      error: new MailerLiteError(
+        row.request_kind,
+        'malformed',
+        `unsupported kind ${row.request_kind} reached replayRow; drain filter is stale`
+      ),
+    };
   }
 
   try {
@@ -261,68 +283,58 @@ async function recordError(
       .prepare(`INSERT INTO events (kind, payload, created_at) VALUES (?, ?, ?)`)
       .bind('error', payload, now)
       .run();
-  } catch (_err) {
-    /* swallow — see comment above */
+  } catch (auditErr) {
+    // Surface to workerd logs so an operator can correlate a missing
+    // audit row with a real failure. Still swallowed at the function
+    // boundary — the drain outcome takes precedence.
+    console.warn(
+      'mailerlite_retry: events audit insert failed',
+      { retry_id: row.id, kind: row.request_kind, error: summarizeError(auditErr) }
+    );
   }
 }
 
-interface SubscribePayload {
-  email: string;
-  metroSlug?: string | null;
-  cut?: string | null;
-  cooker?: string | null;
-  timezone?: string | null;
+function isSubscribePayload(payload: unknown): payload is SubscribeInput {
+  if (!payload || typeof payload !== 'object') return false;
+  return typeof (payload as { email?: unknown }).email === 'string';
 }
 
-function asSubscribePayload(payload: unknown): SubscribePayload {
-  if (
-    !payload ||
-    typeof payload !== 'object' ||
-    typeof (payload as { email?: unknown }).email !== 'string'
-  ) {
-    throw new MailerLiteError('subscribe', 'malformed', 'missing or invalid email');
-  }
-  return payload as SubscribePayload;
+function isUnsubscribePayload(payload: unknown): payload is UnsubscribeInput {
+  if (!payload || typeof payload !== 'object') return false;
+  return typeof (payload as { email?: unknown }).email === 'string';
 }
 
-function asUnsubscribePayload(payload: unknown): { email: string } {
-  if (
-    !payload ||
-    typeof payload !== 'object' ||
-    typeof (payload as { email?: unknown }).email !== 'string'
-  ) {
-    throw new MailerLiteError('unsubscribe', 'malformed', 'missing or invalid email');
-  }
-  return payload as { email: string };
-}
+/**
+ * `kind` is narrowed to `'subscribe' | 'unsubscribe'` by the drain
+ * SQL filter — 'send' rows are skipped at the query level until Step
+ * 11 owns that dispatch path. The narrow type is enforced at compile
+ * time by the union the caller passes in.
+ */
+type DispatchableKind = 'subscribe' | 'unsubscribe';
 
 async function dispatch(
   client: MailerLiteClient,
-  kind: MailerLiteRequestKind,
+  kind: DispatchableKind,
   payload: unknown
 ): Promise<void> {
   switch (kind) {
-    case 'subscribe':
-      await client.subscribe(asSubscribePayload(payload) as Parameters<MailerLiteClient['subscribe']>[0]);
+    case 'subscribe': {
+      if (!isSubscribePayload(payload)) {
+        throw new MailerLiteError('subscribe', 'malformed', 'missing or invalid email');
+      }
+      await client.subscribe(payload);
       return;
-    case 'unsubscribe':
-      await client.unsubscribe(asUnsubscribePayload(payload));
+    }
+    case 'unsubscribe': {
+      if (!isUnsubscribePayload(payload)) {
+        throw new MailerLiteError('unsubscribe', 'malformed', 'missing or invalid email');
+      }
+      await client.unsubscribe(payload);
       return;
-    case 'send':
-      // Step 11 (Friday cron) is the owner of the campaign send path
-      // — see client.ts header comment. Until then, draining a 'send'
-      // row would be a no-op; we surface it as a malformed dispatch
-      // so the row gets dropped (via the non-retryable branch in
-      // replayRow) and an events audit is written, instead of
-      // looping forever on something we have no code path for.
-      throw new MailerLiteError(
-        'send',
-        'malformed',
-        "'send' dispatch is owned by Step 11 (Friday cron); this row predates that work"
-      );
+    }
     default: {
       const _exhaustive: never = kind;
-      throw new Error(`unknown mailerlite retry kind: ${_exhaustive as string}`);
+      throw new Error(`unknown dispatchable kind: ${_exhaustive as string}`);
     }
   }
 }
