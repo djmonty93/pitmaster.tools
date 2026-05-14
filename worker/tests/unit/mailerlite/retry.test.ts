@@ -427,13 +427,26 @@ describe('mailerlite retry — drain', () => {
       created_at: number;
     }>();
     expect(rows.results).toHaveLength(2);
-    for (const r of rows.results) {
-      expect(r.attempts).toBe(0);
-      expect(r.last_status).toBeNull();
-      expect(r.last_error).toBeNull();
-      expect(r.next_attempt_at).toBe(t0);
-      expect(r.created_at).toBe(t0);
-    }
+    const byKey = Object.fromEntries(rows.results.map((r) => [r.idempotency_key, r]));
+    // Per-row identity assertions — kind, payload, and metadata must
+    // match the seeded values byte-exactly. A silent mutation would
+    // pass a count check; this would not.
+    const valid = byKey['send:cmp_x']!;
+    expect(valid.request_kind).toBe('send');
+    expect(valid.request_payload).toBe(JSON.stringify({ campaignId: 'cmp_x' }));
+    expect(valid.attempts).toBe(0);
+    expect(valid.last_status).toBeNull();
+    expect(valid.last_error).toBeNull();
+    expect(valid.next_attempt_at).toBe(t0);
+    expect(valid.created_at).toBe(t0);
+    const corrupt = byKey['send:corrupt']!;
+    expect(corrupt.request_kind).toBe('send');
+    expect(corrupt.request_payload).toBe('not-json');
+    expect(corrupt.attempts).toBe(0);
+    expect(corrupt.last_status).toBeNull();
+    expect(corrupt.last_error).toBeNull();
+    expect(corrupt.next_attempt_at).toBe(t0);
+    expect(corrupt.created_at).toBe(t0);
     // No audit row should have been written either.
     const audit = await DB.prepare(`SELECT COUNT(*) AS c FROM events`).first<{ c: number }>();
     expect(audit?.c).toBe(0);
