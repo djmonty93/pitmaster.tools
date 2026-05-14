@@ -19,17 +19,13 @@ import articles from '../../migrations/0003_articles.sql?raw';
  * comments, extend or move to a real parser.
  */
 export function splitStatements(sql: string): string[] {
-  // Strip `-- …` line comments (anywhere on the line; SQLite ends them
-  // at the next newline).
-  const stripped = sql.replace(/--[^\n]*/g, '');
-
   const statements: string[] = [];
   let current = '';
   let inString = false;
-  for (let i = 0; i < stripped.length; i++) {
-    const c = stripped[i];
+  for (let i = 0; i < sql.length; i++) {
+    const c = sql[i];
     if (c === "'") {
-      if (inString && stripped[i + 1] === "'") {
+      if (inString && sql[i + 1] === "'") {
         // `''` is the SQLite escape — emit both chars, stay in-string.
         current += "''";
         i++;
@@ -37,6 +33,14 @@ export function splitStatements(sql: string): string[] {
       }
       inString = !inString;
       current += c;
+      continue;
+    }
+    // `--` line comment — only when we're *outside* a string literal,
+    // otherwise `'a--b'` would be truncated mid-value. We stop one
+    // char before the `\n` so the outer loop still emits the newline
+    // (preserves line breaks in the surviving statement text).
+    if (!inString && c === '-' && sql[i + 1] === '-') {
+      while (i + 1 < sql.length && sql[i + 1] !== '\n') i++;
       continue;
     }
     if (c === ';' && !inString) {

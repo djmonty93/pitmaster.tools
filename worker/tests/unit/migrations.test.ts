@@ -199,4 +199,12 @@ describe('splitStatements helper', () => {
     const sql = `INSERT INTO t (v) VALUES ('don''t; stop');`;
     expect(splitStatements(sql)).toEqual([`INSERT INTO t (v) VALUES ('don''t; stop')`]);
   });
+
+  it('does not strip `--` that lives inside a string literal', async () => {
+    const { splitStatements } = await import('../helpers/d1');
+    // `'a--b'` is a literal value containing `--`. A naïve pre-pass
+    // regex strip would corrupt it to `'a` and break the statement.
+    const sql = `INSERT INTO t (v) VALUES ('a--b');`;
+    expect(splitStatements(sql)).toEqual([`INSERT INTO t (v) VALUES ('a--b')`]);
+  });
 });
