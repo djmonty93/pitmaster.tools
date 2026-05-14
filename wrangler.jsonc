@@ -38,4 +38,8 @@
       "migrations_dir": "worker/migrations"
     }
   ]
+  // MAILERLITE_API_KEY — Bearer token for the MailerLite Connect API,
+  // used by worker/src/lib/mailerlite/client.ts. Provisioned with
+  // `wrangler secret put MAILERLITE_API_KEY`; never committed.
+  // Local dev: copy .dev.vars.example to .dev.vars and fill in.
 }

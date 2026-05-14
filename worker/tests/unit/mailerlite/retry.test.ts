@@ -1,0 +1,330 @@
+import { env } from 'cloudflare:test';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { MailerLiteClient } from '../../../src/lib/mailerlite/client';
+import { MailerLiteError } from '../../../src/lib/mailerlite/errors';
+import {
+  MAX_ATTEMPTS,
+  MAX_BACKOFF_MS,
+  PARK_DELAY_MS,
+  backoffMs,
+  drain,
+  enqueue,
+} from '../../../src/lib/mailerlite/retry';
+import { applyMigrations } from '../../helpers/d1';
+
+interface Env {
+  SMOKE_DB: D1Database;
+}
+
+const DB = (env as unknown as Env).SMOKE_DB;
+
+beforeAll(async () => {
+  await applyMigrations(DB);
+});
+
+beforeEach(async () => {
+  await DB.prepare(`DELETE FROM mailerlite_retry`).run();
+});
+
+function fakeClient(overrides: Partial<MailerLiteClient> = {}): MailerLiteClient {
+  return {
+    subscribe: vi.fn().mockResolvedValue({ id: 's_ok', email: 'x@y.com', status: 'active' }),
+    unsubscribe: vi.fn().mockResolvedValue(undefined),
+    sendCampaign: vi.fn().mockResolvedValue({ campaignId: 'c' }),
+    ...overrides,
+  } as MailerLiteClient;
+}
+
+describe('backoffMs', () => {
+  it('starts at one minute on attempt 1 and doubles', () => {
+    expect(backoffMs(1)).toBe(60_000);
+    expect(backoffMs(2)).toBe(120_000);
+    expect(backoffMs(3)).toBe(240_000);
+    expect(backoffMs(4)).toBe(480_000);
+  });
+
+  it('caps at MAX_BACKOFF_MS once the doubling sequence overshoots', () => {
+    // 60_000 * 2^9 = 30_720_000 > MAX_BACKOFF_MS (6 h = 21_600_000),
+    // so attempt 10 is the first one to clamp.
+    expect(backoffMs(9)).toBeLessThan(MAX_BACKOFF_MS);
+    expect(backoffMs(10)).toBe(MAX_BACKOFF_MS);
+    expect(backoffMs(100)).toBe(MAX_BACKOFF_MS);
+  });
+});
+
+describe('mailerlite retry — enqueue', () => {
+  it('inserts a row with attempts=0 and the cause status/error', async () => {
+    const cause = new MailerLiteError('subscribe', 'http_5xx', 'status 503', 503);
+    await enqueue(DB, {
+      kind: 'subscribe',
+      payload: { email: 'a@b.com' },
+      idempotencyKey: 'subscribe:a@b.com',
+      firstAttemptAtMs: 1_700_000_000_000,
+      cause,
+    });
+    const row = await DB.prepare(
+      `SELECT request_kind, request_payload, idempotency_key, attempts, last_status, last_error, next_attempt_at, created_at
+         FROM mailerlite_retry WHERE idempotency_key = ?`
+    )
+      .bind('subscribe:a@b.com')
+      .first<{
+        request_kind: string;
+        request_payload: string;
+        idempotency_key: string;
+        attempts: number;
+        last_status: number | null;
+        last_error: string | null;
+        next_attempt_at: number;
+        created_at: number;
+      }>();
+    expect(row?.request_kind).toBe('subscribe');
+    expect(JSON.parse(row!.request_payload)).toEqual({ email: 'a@b.com' });
+    expect(row?.attempts).toBe(0);
+    expect(row?.last_status).toBe(503);
+    expect(row?.last_error).toMatch(/http_5xx/);
+    expect(row?.created_at).toBe(1_700_000_000_000);
+    expect(row?.next_attempt_at).toBe(1_700_000_000_000 + backoffMs(1));
+  });
+
+  it('is idempotent on duplicate idempotency_key (updates instead of inserting)', async () => {
+    const t0 = 1_700_000_000_000;
+    await enqueue(DB, {
+      kind: 'subscribe',
+      payload: { email: 'a@b.com' },
+      idempotencyKey: 'subscribe:a@b.com',
+      firstAttemptAtMs: t0,
+      cause: new MailerLiteError('subscribe', 'http_5xx', 'first', 503),
+    });
+    await enqueue(DB, {
+      kind: 'subscribe',
+      payload: { email: 'a@b.com' },
+      idempotencyKey: 'subscribe:a@b.com',
+      firstAttemptAtMs: t0 + 1000,
+      cause: new MailerLiteError('subscribe', 'http_5xx', 'second', 503),
+    });
+    const count = await DB.prepare(
+      `SELECT COUNT(*) AS c FROM mailerlite_retry WHERE idempotency_key = ?`
+    )
+      .bind('subscribe:a@b.com')
+      .first<{ c: number }>();
+    expect(count?.c).toBe(1);
+    const row = await DB.prepare(
+      `SELECT last_error, next_attempt_at FROM mailerlite_retry WHERE idempotency_key = ?`
+    )
+      .bind('subscribe:a@b.com')
+      .first<{ last_error: string; next_attempt_at: number }>();
+    expect(row?.last_error).toMatch(/second/);
+    // next_attempt_at should be the MIN of the two scheduled times so a
+    // duplicate enqueue speeds up the next attempt rather than pushing
+    // it out (which would let real retryable conditions languish).
+    expect(row?.next_attempt_at).toBe(t0 + backoffMs(1));
+  });
+});
+
+describe('mailerlite retry — drain', () => {
+  it('skips rows whose next_attempt_at is in the future', async () => {
+    const t0 = 1_700_000_000_000;
+    await enqueue(DB, {
+      kind: 'subscribe',
+      payload: { email: 'a@b.com' },
+      idempotencyKey: 'k1',
+      firstAttemptAtMs: t0,
+      cause: new MailerLiteError('subscribe', 'http_5xx', 'x', 503),
+    });
+    const client = fakeClient();
+    const outcomes = await drain(DB, client, { now: () => t0 + 1000 });
+    expect(outcomes).toEqual([]);
+    expect(client.subscribe).not.toHaveBeenCalled();
+  });
+
+  it('replays a due subscribe row and deletes it on success', async () => {
+    const t0 = 1_700_000_000_000;
+    await enqueue(DB, {
+      kind: 'subscribe',
+      payload: { email: 'a@b.com', metroSlug: 'austin-tx' },
+      idempotencyKey: 'k-ok',
+      firstAttemptAtMs: t0,
+      cause: new MailerLiteError('subscribe', 'http_5xx', 'x', 503),
+    });
+    const client = fakeClient();
+    const outcomes = await drain(DB, client, {
+      now: () => t0 + backoffMs(1) + 1,
+    });
+    expect(outcomes).toHaveLength(1);
+    expect(outcomes[0]!.status).toBe('sent');
+    expect(client.subscribe).toHaveBeenCalledWith({
+      email: 'a@b.com',
+      metroSlug: 'austin-tx',
+    });
+    const remaining = await DB.prepare(
+      `SELECT COUNT(*) AS c FROM mailerlite_retry WHERE idempotency_key = ?`
+    )
+      .bind('k-ok')
+      .first<{ c: number }>();
+    expect(remaining?.c).toBe(0);
+  });
+
+  it('on retryable failure: bumps attempts and reschedules with exponential backoff', async () => {
+    const t0 = 1_700_000_000_000;
+    await enqueue(DB, {
+      kind: 'subscribe',
+      payload: { email: 'a@b.com' },
+      idempotencyKey: 'k-retry',
+      firstAttemptAtMs: t0,
+      cause: new MailerLiteError('subscribe', 'http_5xx', 'first', 503),
+    });
+    const client = fakeClient({
+      subscribe: vi
+        .fn()
+        .mockRejectedValueOnce(new MailerLiteError('subscribe', 'http_5xx', 'still down', 503)),
+    });
+    const drainAt = t0 + backoffMs(1) + 1;
+    const outcomes = await drain(DB, client, { now: () => drainAt });
+    expect(outcomes).toHaveLength(1);
+    expect(outcomes[0]!.status).toBe('retry');
+    const row = await DB.prepare(
+      `SELECT attempts, last_status, last_error, next_attempt_at FROM mailerlite_retry WHERE idempotency_key = ?`
+    )
+      .bind('k-retry')
+      .first<{ attempts: number; last_status: number; last_error: string; next_attempt_at: number }>();
+    expect(row?.attempts).toBe(1);
+    expect(row?.last_status).toBe(503);
+    expect(row?.last_error).toMatch(/still down/);
+    expect(row?.next_attempt_at).toBe(drainAt + backoffMs(1));
+  });
+
+  it('on non-retryable 4xx: drops the row (no infinite replay loop)', async () => {
+    const t0 = 1_700_000_000_000;
+    await enqueue(DB, {
+      kind: 'subscribe',
+      payload: { email: 'a@b.com' },
+      idempotencyKey: 'k-drop',
+      firstAttemptAtMs: t0,
+      cause: new MailerLiteError('subscribe', 'http_5xx', 'x', 503),
+    });
+    const client = fakeClient({
+      subscribe: vi
+        .fn()
+        .mockRejectedValueOnce(new MailerLiteError('subscribe', 'http_4xx', 'invalid', 422)),
+    });
+    const outcomes = await drain(DB, client, { now: () => t0 + backoffMs(1) + 1 });
+    expect(outcomes[0]!.status).toBe('dropped');
+    const remaining = await DB.prepare(
+      `SELECT COUNT(*) AS c FROM mailerlite_retry WHERE idempotency_key = ?`
+    )
+      .bind('k-drop')
+      .first<{ c: number }>();
+    expect(remaining?.c).toBe(0);
+  });
+
+  it('parks a row once attempts reaches MAX_ATTEMPTS', async () => {
+    const t0 = 1_700_000_000_000;
+    await enqueue(DB, {
+      kind: 'subscribe',
+      payload: { email: 'a@b.com' },
+      idempotencyKey: 'k-park',
+      firstAttemptAtMs: t0,
+      cause: new MailerLiteError('subscribe', 'http_5xx', 'x', 503),
+    });
+    // Hand-set attempts to MAX_ATTEMPTS - 1 so the next failure parks.
+    await DB.prepare(`UPDATE mailerlite_retry SET attempts = ? WHERE idempotency_key = ?`)
+      .bind(MAX_ATTEMPTS - 1, 'k-park')
+      .run();
+    const client = fakeClient({
+      subscribe: vi
+        .fn()
+        .mockRejectedValueOnce(new MailerLiteError('subscribe', 'http_5xx', 'down', 503)),
+    });
+    const drainAt = t0 + backoffMs(1) + 1;
+    const outcomes = await drain(DB, client, { now: () => drainAt });
+    expect(outcomes[0]!.status).toBe('parked');
+    const row = await DB.prepare(
+      `SELECT attempts, next_attempt_at FROM mailerlite_retry WHERE idempotency_key = ?`
+    )
+      .bind('k-park')
+      .first<{ attempts: number; next_attempt_at: number }>();
+    expect(row?.attempts).toBe(MAX_ATTEMPTS);
+    expect(row?.next_attempt_at).toBe(drainAt + PARK_DELAY_MS);
+
+    // Subsequent drains skip the parked row even when "now" is well past
+    // the parked time, because attempts >= MAX_ATTEMPTS gates it out.
+    client.subscribe = vi.fn();
+    const second = await drain(DB, client, {
+      now: () => drainAt + PARK_DELAY_MS + 1,
+    });
+    expect(second).toEqual([]);
+    expect(client.subscribe).not.toHaveBeenCalled();
+  });
+
+  it('respects batchSize and processes due rows in next_attempt_at order', async () => {
+    const t0 = 1_700_000_000_000;
+    for (let i = 0; i < 5; i++) {
+      await enqueue(DB, {
+        kind: 'subscribe',
+        payload: { email: `u${i}@example.com` },
+        idempotencyKey: `k-${i}`,
+        firstAttemptAtMs: t0 - i, // earlier first → drained first
+        cause: new MailerLiteError('subscribe', 'http_5xx', 'x', 503),
+      });
+    }
+    const client = fakeClient();
+    const outcomes = await drain(DB, client, {
+      batchSize: 2,
+      now: () => t0 + backoffMs(1) + 100,
+    });
+    expect(outcomes).toHaveLength(2);
+    // The two earliest-scheduled rows (i=4 and i=3, since their
+    // firstAttemptAtMs were smallest) ran first.
+    const subscribe = client.subscribe as ReturnType<typeof vi.fn>;
+    expect(subscribe.mock.calls.map((c) => (c[0] as { email: string }).email)).toEqual([
+      'u4@example.com',
+      'u3@example.com',
+    ]);
+  });
+
+  it('drops a row whose request_payload is corrupted JSON', async () => {
+    const t0 = 1_700_000_000_000;
+    await DB.prepare(
+      `INSERT INTO mailerlite_retry
+         (request_kind, request_payload, idempotency_key, attempts, last_status, last_error, next_attempt_at, created_at)
+         VALUES (?, ?, ?, 0, NULL, NULL, ?, ?)`
+    )
+      .bind('subscribe', 'not-json', 'k-corrupt', t0, t0)
+      .run();
+    const client = fakeClient();
+    const outcomes = await drain(DB, client, { now: () => t0 + 1 });
+    expect(outcomes[0]!.status).toBe('dropped');
+    const remaining = await DB.prepare(
+      `SELECT COUNT(*) AS c FROM mailerlite_retry WHERE idempotency_key = ?`
+    )
+      .bind('k-corrupt')
+      .first<{ c: number }>();
+    expect(remaining?.c).toBe(0);
+    expect(client.subscribe).not.toHaveBeenCalled();
+  });
+
+  it('routes each kind to the matching client method', async () => {
+    const t0 = 1_700_000_000_000;
+    await enqueue(DB, {
+      kind: 'unsubscribe',
+      payload: { email: 'gone@example.com' },
+      idempotencyKey: 'k-uns',
+      firstAttemptAtMs: t0,
+      cause: new MailerLiteError('unsubscribe', 'http_5xx', 'x', 503),
+    });
+    await enqueue(DB, {
+      kind: 'send',
+      payload: { campaignId: 'cmp_x', filter: { metro: 'austin-tx' } },
+      idempotencyKey: 'k-send',
+      firstAttemptAtMs: t0 + 1,
+      cause: new MailerLiteError('send', 'http_5xx', 'x', 503),
+    });
+    const client = fakeClient();
+    await drain(DB, client, { now: () => t0 + backoffMs(1) + 100 });
+    expect(client.unsubscribe).toHaveBeenCalledWith({ email: 'gone@example.com' });
+    expect(client.sendCampaign).toHaveBeenCalledWith({
+      campaignId: 'cmp_x',
+      filter: { metro: 'austin-tx' },
+    });
+  });
+});

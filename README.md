@@ -81,6 +81,22 @@ verified, and rolled back independently.
   an in-memory Miniflare D1 via a quote-aware `splitStatements` helper
   in `worker/tests/helpers/d1.ts` (handles `;` and `--` inside string
   literals, SQLite's `''` escape).
+- **Step 6.** MailerLite client + retry queue under
+  `worker/src/lib/mailerlite/`. `client.ts` calls Connect API
+  (`POST /api/subscribers`, `PUT /api/subscribers/:email`,
+  `POST /api/campaigns/:id/actions/send`) with Bearer auth, an
+  `Idempotency-Key` derived from the email (lowercased) or campaign +
+  filter, and `AbortController` timeouts. Failures are mapped to
+  `MailerLiteError` with a `shouldRetry` rule (5xx + timeout + 429
+  retry; 400/422 + malformed body do not). `retry.ts` enqueues
+  retryable failures onto `mailerlite_retry` (UNIQUE idempotency key,
+  duplicate-safe `ON CONFLICT DO UPDATE` that picks the earlier
+  `next_attempt_at`); `drain()` replays due rows in FIFO order with
+  exponential backoff (1m, 2m, 4m, … capped at 6 h), parks rows after
+  8 attempts, and drops rows whose payload corrupted to non-JSON.
+  `tags.ts` normalises `metro:`/`cut:`/`cooker:` segmentation into
+  MailerLite subscriber custom fields. `MAILERLITE_API_KEY` belongs in
+  `wrangler secret put`; `.dev.vars.example` documents the local form.
 
 ## Tooling rules
 
