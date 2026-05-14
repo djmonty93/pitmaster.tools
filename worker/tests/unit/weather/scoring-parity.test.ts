@@ -70,6 +70,13 @@ const DAY_SCENARIOS: Array<{ name: string; day: WeatherDay }> = [
   { name: 'cold', day: fakeDay({ tempLowF: 22, tempHighF: 48 }) },
   { name: 'hot', day: fakeDay({ tempHighF: 100, rhMean: 60 }) },
   { name: 'humid', day: fakeDay({ rhMean: 90 }) },
+  // NWS-shaped: gustMphMax absent (= 0), only sustained wind reported.
+  // Pins the "fall back to windMean × 1.4" branch in both sources.
+  { name: 'nws-no-gust', day: fakeDay({ gustMphMax: 0, windMphMean: 25 }) },
+  // Reported gust below sustained × 1.4 — pins the "trust reported"
+  // branch. If either source incorrectly used max(), this would emit
+  // a "Gusts to 28 mph" reason and drop the score.
+  { name: 'reported-low-gust', day: fakeDay({ gustMphMax: 8, windMphMean: 20 }) },
 ];
 
 describe('scoring parity: TS source vs _partials/weather-score-shared.js', () => {
