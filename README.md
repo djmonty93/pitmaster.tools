@@ -140,6 +140,31 @@ verified, and rolled back independently.
   entrypoint maps any unhandled error to a 500 JSON envelope;
   Sentry will hook this in Step 17.
 
+  **Auth model.** `/api/unsubscribe` and `/api/preferences`
+  (GET + PATCH) require an HMAC-SHA256 token tied to the email
+  (`worker/src/lib/auth/token.ts`). `/api/subscribe` issues the token
+  in its response (`token: <64 hex chars>`); subsequent calls send it
+  alongside the email. Without this auth check anyone could
+  mass-unsubscribe arbitrary emails or enumerate subscriber prefs.
+  The signing secret is the `SUBSCRIBER_TOKEN_SECRET` env binding —
+  rotate via `wrangler secret put` to invalidate all live tokens.
+
+  **Cache-Control.** `/api/forecast` is `public, max-age=300` ONLY
+  when the zip came from an explicit query param; the geo-IP fallback
+  path (zip from `request.cf.postalCode`) sets `private, max-age=60`
+  so a CDN edge doesn't serve visitor A's metro forecast to visitor B
+  with the same bare URL. `/api/status` is always `no-store`.
+  `/articles/:slug` is `public, max-age=300` on a 200 hit and 60s on
+  the 404 page.
+
+  **body_html sanitization.** Article body HTML is rendered through
+  a defensive `sanitizeBodyHtml` pass that strips `<script>`,
+  `<iframe>`, `<object>`, `<embed>`, `<link>`, `<meta>`, `<style>`,
+  any `on*="..."` event handlers, and `javascript:` / `data:` URLs in
+  `href`/`src`. The article writer (Step 13) is still trusted, but
+  this prevents a single bad row from becoming stored XSS on a
+  marketing page.
+
 ## Tooling rules
 
 - Never commit directly to `main`; everything goes through a feature branch + PR.

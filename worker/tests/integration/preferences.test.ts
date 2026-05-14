@@ -1,8 +1,9 @@
 import { env } from 'cloudflare:test';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { handlePreferences } from '../../src/handlers/preferences';
+import { signToken } from '../../src/lib/auth/token';
 import { applyMigrations } from '../helpers/d1';
-import { buildContext } from '../helpers/routeContext';
+import { buildContext, TEST_SUBSCRIBER_TOKEN_SECRET } from '../helpers/routeContext';
 
 interface E {
   SMOKE_DB: D1Database;
@@ -14,6 +15,8 @@ beforeAll(async () => {
   await applyMigrations(DB);
 });
 
+let validToken = '';
+
 beforeEach(async () => {
   await DB.prepare(`DELETE FROM subscribers`).run();
   await DB.prepare(
@@ -22,12 +25,18 @@ beforeEach(async () => {
   )
     .bind('me@example.com', '30303', 'brisket-flat', 'offset', 'America/New_York', Date.now())
     .run();
+  validToken = await signToken('me@example.com', TEST_SUBSCRIBER_TOKEN_SECRET);
 });
 
 describe('GET /api/preferences', () => {
-  it('returns the subscriber row for the given email', async () => {
+  it('returns the subscriber row when email + token validate', async () => {
     const res = await handlePreferences(
-      buildContext(new Request('https://x/api/preferences?email=me@example.com', { method: 'GET' }))
+      buildContext(
+        new Request(
+          `https://x/api/preferences?email=me@example.com&token=${validToken}`,
+          { method: 'GET' }
+        )
+      )
     );
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({
@@ -39,42 +48,85 @@ describe('GET /api/preferences', () => {
     });
   });
 
-  it("reports unsubscribed:false when unsubscribed_at is set", async () => {
+  it("reports subscribed:false when unsubscribed_at is set", async () => {
     await DB.prepare(`UPDATE subscribers SET unsubscribed_at = ? WHERE email = ?`)
       .bind(Date.now(), 'me@example.com')
       .run();
     const res = await handlePreferences(
-      buildContext(new Request('https://x/api/preferences?email=me@example.com', { method: 'GET' }))
+      buildContext(
+        new Request(
+          `https://x/api/preferences?email=me@example.com&token=${validToken}`,
+          { method: 'GET' }
+        )
+      )
     );
     expect(res.status).toBe(200);
     expect((await res.json()) as { subscribed: boolean }).toMatchObject({ subscribed: false });
   });
 
-  it('400s when ?email is missing or malformed', async () => {
-    const missing = await handlePreferences(
+  it('400s when ?email or ?token is missing', async () => {
+    const missingBoth = await handlePreferences(
       buildContext(new Request('https://x/api/preferences', { method: 'GET' }))
     );
-    expect(missing.status).toBe(400);
-    expect(await missing.json()).toMatchObject({ error: 'missing_email' });
+    expect(missingBoth.status).toBe(400);
 
-    const bad = await handlePreferences(
-      buildContext(new Request('https://x/api/preferences?email=not-an-email', { method: 'GET' }))
+    const missingToken = await handlePreferences(
+      buildContext(
+        new Request('https://x/api/preferences?email=me@example.com', { method: 'GET' })
+      )
     );
-    expect(bad.status).toBe(400);
-    expect(await bad.json()).toMatchObject({ error: 'invalid_email' });
+    expect(missingToken.status).toBe(400);
   });
 
-  it('404s when no row matches', async () => {
-    const res = await handlePreferences(
-      buildContext(new Request('https://x/api/preferences?email=nobody@example.com', { method: 'GET' }))
+  it('401s when the token does not validate (both malformed and wrong-but-valid-format collapse to the same response)', async () => {
+    // Malformed token shape, valid email.
+    const malformed = await handlePreferences(
+      buildContext(
+        new Request('https://x/api/preferences?email=me@example.com&token=garbage', {
+          method: 'GET',
+        })
+      )
     );
-    expect(res.status).toBe(404);
-    expect(await res.json()).toMatchObject({ error: 'not_found' });
+    expect(malformed.status).toBe(401);
+    expect(await malformed.json()).toMatchObject({ error: 'invalid_credentials' });
+
+    // Well-formed but wrong-secret token.
+    const wrongSig = await signToken('me@example.com', 'wrong-secret');
+    const mismatched = await handlePreferences(
+      buildContext(
+        new Request(
+          `https://x/api/preferences?email=me@example.com&token=${wrongSig}`,
+          { method: 'GET' }
+        )
+      )
+    );
+    expect(mismatched.status).toBe(401);
+    expect(await mismatched.json()).toMatchObject({ error: 'invalid_credentials' });
+  });
+
+  it('cannot be used as an enumeration oracle — unknown email still requires a valid token', async () => {
+    // A token signed for a real email won't validate against an
+    // arbitrary other email, so adversaries can't probe existence.
+    const otherToken = await signToken('attacker@example.com', TEST_SUBSCRIBER_TOKEN_SECRET);
+    const res = await handlePreferences(
+      buildContext(
+        new Request(
+          `https://x/api/preferences?email=me@example.com&token=${otherToken}`,
+          { method: 'GET' }
+        )
+      )
+    );
+    expect(res.status).toBe(401);
   });
 
   it('does NOT leak zip in the GET response', async () => {
     const res = await handlePreferences(
-      buildContext(new Request('https://x/api/preferences?email=me@example.com', { method: 'GET' }))
+      buildContext(
+        new Request(
+          `https://x/api/preferences?email=me@example.com&token=${validToken}`,
+          { method: 'GET' }
+        )
+      )
     );
     const body = (await res.json()) as Record<string, unknown>;
     expect(body['zip']).toBeUndefined();
@@ -82,13 +134,13 @@ describe('GET /api/preferences', () => {
 });
 
 describe('PATCH /api/preferences', () => {
-  it('updates cut alone without touching cooker', async () => {
+  it('updates cut alone without touching cooker (token valid)', async () => {
     const res = await handlePreferences(
       buildContext(
         new Request('https://x/api/preferences', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: 'me@example.com', cut: 'pork-butt' }),
+          body: JSON.stringify({ email: 'me@example.com', token: validToken, cut: 'pork-butt' }),
         })
       )
     );
@@ -100,13 +152,35 @@ describe('PATCH /api/preferences', () => {
     expect(row?.cooker).toBe('offset');
   });
 
-  it('400s when PATCH body has no changes', async () => {
+  it('401s on a PATCH whose token does not match the email', async () => {
+    const wrongToken = await signToken('attacker@example.com', TEST_SUBSCRIBER_TOKEN_SECRET);
     const res = await handlePreferences(
       buildContext(
         new Request('https://x/api/preferences', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: 'me@example.com' }),
+          body: JSON.stringify({
+            email: 'me@example.com',
+            token: wrongToken,
+            cut: 'pork-butt',
+          }),
+        })
+      )
+    );
+    expect(res.status).toBe(401);
+    const row = await DB.prepare(`SELECT cut FROM subscribers WHERE email = ?`)
+      .bind('me@example.com')
+      .first<{ cut: string }>();
+    expect(row?.cut).toBe('brisket-flat'); // unchanged
+  });
+
+  it('400s when PATCH body has no field changes', async () => {
+    const res = await handlePreferences(
+      buildContext(
+        new Request('https://x/api/preferences', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: 'me@example.com', token: validToken }),
         })
       )
     );
@@ -114,13 +188,18 @@ describe('PATCH /api/preferences', () => {
     expect(await res.json()).toMatchObject({ error: 'no_changes' });
   });
 
-  it('404s when PATCH targets an email with no row', async () => {
+  it('404s when PATCH targets an email with no row (after token validates)', async () => {
+    const otherToken = await signToken('nobody@example.com', TEST_SUBSCRIBER_TOKEN_SECRET);
     const res = await handlePreferences(
       buildContext(
         new Request('https://x/api/preferences', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: 'nobody@example.com', cut: 'fish' }),
+          body: JSON.stringify({
+            email: 'nobody@example.com',
+            token: otherToken,
+            cut: 'fish',
+          }),
         })
       )
     );
@@ -133,7 +212,11 @@ describe('PATCH /api/preferences', () => {
         new Request('https://x/api/preferences', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: 'me@example.com', cooker: 'microwave' }),
+          body: JSON.stringify({
+            email: 'me@example.com',
+            token: validToken,
+            cooker: 'microwave',
+          }),
         })
       )
     );
@@ -146,7 +229,7 @@ describe('PATCH /api/preferences', () => {
         new Request('https://x/api/preferences', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: 'me@example.com', cut: null }),
+          body: JSON.stringify({ email: 'me@example.com', token: validToken, cut: null }),
         })
       )
     );

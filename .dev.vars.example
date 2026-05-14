@@ -3,4 +3,5 @@
 
 # SENTRY_DSN=
 # MAILERLITE_API_KEY=
+# SUBSCRIBER_TOKEN_SECRET=
 # NWS_USER_AGENT=pitmaster.tools (contact@pitmaster.tools)

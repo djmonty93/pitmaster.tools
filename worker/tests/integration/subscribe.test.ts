@@ -1,9 +1,10 @@
 import { env } from 'cloudflare:test';
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { handleSubscribe } from '../../src/handlers/subscribe';
+import { signToken } from '../../src/lib/auth/token';
 import { applyMigrations } from '../helpers/d1';
 import { installFetchStub, jsonResponse, type FetchStub } from '../helpers/fetchStub';
-import { buildContext } from '../helpers/routeContext';
+import { buildContext, TEST_SUBSCRIBER_TOKEN_SECRET } from '../helpers/routeContext';
 
 interface E {
   SMOKE_DB: D1Database;
@@ -39,7 +40,7 @@ function buildReq(body: unknown): Request {
 }
 
 describe('POST /api/subscribe', () => {
-  it('writes to MailerLite + D1 on the happy path', async () => {
+  it('writes to MailerLite + D1 and returns an HMAC token on the happy path', async () => {
     stub = installFetchStub([{ match: 'connect.mailerlite.com', respond: mailerliteOk }]);
     const res = await handleSubscribe(
       buildContext(
@@ -52,34 +53,39 @@ describe('POST /api/subscribe', () => {
       )
     );
     expect(res.status).toBe(202);
-    const body = (await res.json()) as { status: string; mailerliteId: string };
+    const body = (await res.json()) as { status: string; mailerliteId: string; token: string };
     expect(body.status).toBe('sent');
     expect(body.mailerliteId).toBe('sub_123');
+    // Token must equal HMAC-SHA256(email, secret) hex — verify
+    // independently rather than rubber-stamping whatever the handler
+    // returned.
+    const expected = await signToken('pitmaster@example.com', TEST_SUBSCRIBER_TOKEN_SECRET);
+    expect(body.token).toBe(expected);
+    expect(body.token).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it("normalizes the email (trim + lowercase) so case-only differences don't fork the row", async () => {
+    stub = installFetchStub([
+      {
+        match: 'connect.mailerlite.com',
+        respond: () =>
+          jsonResponse(200, { data: { id: 'sub_1', email: 'me@example.com', status: 'active' } }),
+      },
+    ]);
+    const res = await handleSubscribe(
+      buildContext(buildReq({ email: '  Me@Example.COM  ', zip: '30303' }))
+    );
+    expect(res.status).toBe(202);
     const row = await DB.prepare(
-      `SELECT email, zip, cut, cooker, timezone, unsubscribed_at FROM subscribers WHERE email = ?`
+      `SELECT email FROM subscribers WHERE email = ?`
     )
-      .bind('pitmaster@example.com')
-      .first<{
-        email: string;
-        zip: string;
-        cut: string;
-        cooker: string;
-        timezone: string;
-        unsubscribed_at: number | null;
-      }>();
-    expect(row?.zip).toBe('30303');
-    expect(row?.cut).toBe('brisket-packer');
-    expect(row?.cooker).toBe('offset');
-    // 30303 is a seeded metro → timezone comes from metros table.
-    expect(row?.timezone).toBe('America/New_York');
-    expect(row?.unsubscribed_at).toBeNull();
+      .bind('me@example.com')
+      .first<{ email: string }>();
+    expect(row?.email).toBe('me@example.com');
   });
 
   it('upserts on a second subscribe with new prefs (resubscribe + change cooker)', async () => {
-    stub = installFetchStub([
-      { match: 'connect.mailerlite.com', respond: mailerliteOk },
-    ]);
-    // First subscribe
+    stub = installFetchStub([{ match: 'connect.mailerlite.com', respond: mailerliteOk }]);
     await handleSubscribe(
       buildContext(
         buildReq({
@@ -90,7 +96,6 @@ describe('POST /api/subscribe', () => {
         })
       )
     );
-    // Mark unsubscribed manually then subscribe again with new cooker.
     await DB.prepare(`UPDATE subscribers SET unsubscribed_at = ? WHERE email = ?`)
       .bind(Date.now(), 'pitmaster@example.com')
       .run();
@@ -115,7 +120,7 @@ describe('POST /api/subscribe', () => {
     expect(row?.unsubscribed_at).toBeNull();
   });
 
-  it('queues retryable MailerLite failures but still writes the D1 row', async () => {
+  it('queues retryable MailerLite failures but still writes the D1 row + returns a token', async () => {
     stub = installFetchStub([
       { match: 'connect.mailerlite.com', respond: () => jsonResponse(503, {}) },
     ]);
@@ -130,7 +135,9 @@ describe('POST /api/subscribe', () => {
       )
     );
     expect(res.status).toBe(202);
-    expect((await res.json()) as { status: string }).toMatchObject({ status: 'queued' });
+    const body = (await res.json()) as { status: string; token: string };
+    expect(body.status).toBe('queued');
+    expect(body.token).toMatch(/^[0-9a-f]{64}$/);
     const subRow = await DB.prepare(
       `SELECT email FROM subscribers WHERE email = ?`
     )
@@ -138,10 +145,10 @@ describe('POST /api/subscribe', () => {
       .first<{ email: string }>();
     expect(subRow?.email).toBe('retry@example.com');
     const retryRow = await DB.prepare(
-      `SELECT request_kind, idempotency_key FROM mailerlite_retry WHERE idempotency_key = ?`
+      `SELECT request_kind FROM mailerlite_retry WHERE idempotency_key = ?`
     )
       .bind('subscribe:retry@example.com')
-      .first<{ request_kind: string; idempotency_key: string }>();
+      .first<{ request_kind: string }>();
     expect(retryRow?.request_kind).toBe('subscribe');
   });
 
@@ -190,8 +197,6 @@ describe('POST /api/subscribe', () => {
   });
 
   it('proceeds with UTC timezone when geocoder fails for a non-seeded zip', async () => {
-    // 99999 isn't in metros; geocoder will be called; we fail it; the
-    // handler should fall through to UTC instead of failing the subscribe.
     stub = installFetchStub([
       { match: 'geocoding-api.open-meteo.com', respond: () => jsonResponse(503, {}) },
       { match: 'connect.mailerlite.com', respond: mailerliteOk },

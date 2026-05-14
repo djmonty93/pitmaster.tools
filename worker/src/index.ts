@@ -22,6 +22,14 @@ export interface Env {
    * worker boot, not on the first user subscribe.
    */
   MAILERLITE_API_KEY: string;
+  /**
+   * HMAC-SHA256 secret used to sign subscriber-scoped auth tokens
+   * (see worker/src/lib/auth/token.ts). Returned by /api/subscribe
+   * and required by /api/unsubscribe and /api/preferences. Rotate
+   * via `wrangler secret put SUBSCRIBER_TOKEN_SECRET` to invalidate
+   * all existing tokens.
+   */
+  SUBSCRIBER_TOKEN_SECRET: string;
 }
 
 const routes = compileRoutes([

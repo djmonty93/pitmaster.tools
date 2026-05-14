@@ -44,6 +44,35 @@ export async function handleArticles(rc: RouteContext): Promise<Response> {
   });
 }
 
+// Defense-in-depth sanitization of body_html before render.
+//
+// The articles table is written by Step 13's template cron, which we
+// trust to emit safe HTML. But "trusted" is a fragile invariant:
+// the table has no CHECK constraint on body_html (migration 0003),
+// the cron writer isn't built yet, and a future import script or
+// SQL-injection bug elsewhere could store hostile HTML. This
+// sanitizer is a backstop — it strips a small allowlist of
+// script-style tags and on*= event handlers without trying to be a
+// full DOMPurify. Production callers should still emit clean
+// templated HTML; this just keeps a single bad write from becoming
+// stored XSS on a marketing page.
+//
+// Removed:
+//   - <script>...</script> and self-closing variants
+//   - <iframe>...</iframe>
+//   - <object>, <embed>, <link>, <meta> (anywhere in body)
+//   - `on*="..."`-style event-handler attributes
+//   - `javascript:` and `data:` URLs in href / src
+function sanitizeBodyHtml(input: string): string {
+  return input
+    .replace(/<\/?(?:script|iframe|object|embed|link|meta|style)\b[^>]*>/gi, '')
+    .replace(/\son[a-z]+\s*=\s*"[^"]*"/gi, '')
+    .replace(/\son[a-z]+\s*=\s*'[^']*'/gi, '')
+    .replace(/\son[a-z]+\s*=\s*[^\s>]+/gi, '')
+    .replace(/(?:href|src)\s*=\s*"\s*(?:javascript|data):[^"]*"/gi, '')
+    .replace(/(?:href|src)\s*=\s*'\s*(?:javascript|data):[^']*'/gi, '');
+}
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, '&amp;')
@@ -83,9 +112,11 @@ function renderArticle(row: ArticleRow): string {
   const canonical = `https://pitmaster.tools/articles/${row.slug}`;
   const publishedIso = new Date(row.published_at).toISOString();
   const updatedIso = new Date(row.updated_at).toISOString();
-  // body_html is treated as trusted because it's authored by Step 13's
-  // template renderer (server-controlled). If we ever ingest user-
-  // generated body_html we'll need to sanitize before this point.
+  // body_html is treated as trusted (server-emitted by Step 13's
+  // template cron), but `sanitizeBodyHtml` strips script/iframe/etc.
+  // as a defense-in-depth backstop. If we ever ingest user-generated
+  // body_html, replace this with a proper sanitizer.
+  const safeBodyHtml = sanitizeBodyHtml(row.body_html);
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -124,7 +155,7 @@ function renderArticle(row: ArticleRow): string {
     <h1>${title}</h1>
     <time datetime="${publishedIso}">${publishedIso.slice(0, 10)}</time>
   </header>
-  ${row.body_html}
+  ${safeBodyHtml}
 </article>
 </body>
 </html>`;

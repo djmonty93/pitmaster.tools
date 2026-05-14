@@ -17,7 +17,11 @@ const fakeCtx = {
 
 export interface TestEnvOverrides {
   MAILERLITE_API_KEY?: string;
+  SUBSCRIBER_TOKEN_SECRET?: string;
 }
+
+/** Default value used across handler tests when no override is provided. */
+export const TEST_SUBSCRIBER_TOKEN_SECRET = 'test-token-secret-32-bytes-long-aaaa';
 
 export function buildContext(
   request: Request,
@@ -26,13 +30,15 @@ export function buildContext(
 ): RouteContext {
   // cloudflare:test populates env with declared bindings (KV, D1,
   // ASSETS). Test secrets aren't declared in wrangler.jsonc, so we
-  // synthesize MAILERLITE_API_KEY here.
+  // synthesize them here.
   const e = env as unknown as Partial<Env>;
   const composedEnv: Env = {
     ASSETS: e.ASSETS as Fetcher,
     WEATHER_KV: e.WEATHER_KV as KVNamespace,
     SMOKE_DB: e.SMOKE_DB as D1Database,
     MAILERLITE_API_KEY: overrides.MAILERLITE_API_KEY ?? 'ml_test_secret_key',
+    SUBSCRIBER_TOKEN_SECRET:
+      overrides.SUBSCRIBER_TOKEN_SECRET ?? TEST_SUBSCRIBER_TOKEN_SECRET,
   };
   return {
     request,

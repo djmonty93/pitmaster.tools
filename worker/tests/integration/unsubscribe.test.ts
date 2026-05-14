@@ -1,9 +1,10 @@
 import { env } from 'cloudflare:test';
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { handleUnsubscribe } from '../../src/handlers/unsubscribe';
+import { signToken } from '../../src/lib/auth/token';
 import { applyMigrations } from '../helpers/d1';
 import { installFetchStub, jsonResponse, type FetchStub } from '../helpers/fetchStub';
-import { buildContext } from '../helpers/routeContext';
+import { buildContext, TEST_SUBSCRIBER_TOKEN_SECRET } from '../helpers/routeContext';
 
 interface E {
   SMOKE_DB: D1Database;
@@ -16,6 +17,8 @@ beforeAll(async () => {
 });
 
 let stub: FetchStub | null = null;
+let validToken = '';
+
 beforeEach(async () => {
   await DB.prepare(`DELETE FROM subscribers`).run();
   await DB.prepare(`DELETE FROM mailerlite_retry`).run();
@@ -26,6 +29,7 @@ beforeEach(async () => {
   )
     .bind('gone@example.com', '30303', null, null, 'America/New_York', now)
     .run();
+  validToken = await signToken('gone@example.com', TEST_SUBSCRIBER_TOKEN_SECRET);
 });
 afterEach(() => {
   stub?.restore();
@@ -41,13 +45,13 @@ function buildReq(body: unknown): Request {
 }
 
 describe('POST /api/unsubscribe', () => {
-  it('calls MailerLite + sets unsubscribed_at on D1', async () => {
+  it('calls MailerLite + sets unsubscribed_at on D1 when token is valid', async () => {
     stub = installFetchStub([
       { match: 'connect.mailerlite.com', respond: () => jsonResponse(204, undefined) },
     ]);
     const before = Date.now();
     const res = await handleUnsubscribe(
-      buildContext(buildReq({ email: 'gone@example.com' }))
+      buildContext(buildReq({ email: 'gone@example.com', token: validToken }))
     );
     expect(res.status).toBe(200);
     expect((await res.json()) as { status: string }).toMatchObject({ status: 'sent' });
@@ -59,12 +63,28 @@ describe('POST /api/unsubscribe', () => {
     expect(row?.unsubscribed_at).toBeGreaterThanOrEqual(before);
   });
 
-  it('queues a 5xx and still marks the D1 row unsubscribed', async () => {
+  it('401s on a token that does not match the email — D1 row untouched', async () => {
+    stub = installFetchStub([]); // no fetch should happen
+    const wrongToken = await signToken('someone-else@example.com', TEST_SUBSCRIBER_TOKEN_SECRET);
+    const res = await handleUnsubscribe(
+      buildContext(buildReq({ email: 'gone@example.com', token: wrongToken }))
+    );
+    expect(res.status).toBe(401);
+    expect(await res.json()).toMatchObject({ error: 'invalid_token' });
+    const row = await DB.prepare(
+      `SELECT unsubscribed_at FROM subscribers WHERE email = ?`
+    )
+      .bind('gone@example.com')
+      .first<{ unsubscribed_at: number | null }>();
+    expect(row?.unsubscribed_at).toBeNull();
+  });
+
+  it('queues a 5xx and still marks the D1 row unsubscribed (when token valid)', async () => {
     stub = installFetchStub([
       { match: 'connect.mailerlite.com', respond: () => jsonResponse(502, {}) },
     ]);
     const res = await handleUnsubscribe(
-      buildContext(buildReq({ email: 'gone@example.com' }))
+      buildContext(buildReq({ email: 'gone@example.com', token: validToken }))
     );
     expect(res.status).toBe(200);
     expect((await res.json()) as { status: string }).toMatchObject({ status: 'queued' });
@@ -87,9 +107,8 @@ describe('POST /api/unsubscribe', () => {
       { match: 'connect.mailerlite.com', respond: () => jsonResponse(404, {}) },
     ]);
     const res = await handleUnsubscribe(
-      buildContext(buildReq({ email: 'gone@example.com' }))
+      buildContext(buildReq({ email: 'gone@example.com', token: validToken }))
     );
-    // Non-retryable 4xx falls through to the D1 mark — same 200 shape.
     expect(res.status).toBe(200);
     const row = await DB.prepare(
       `SELECT unsubscribed_at FROM subscribers WHERE email = ?`
@@ -99,11 +118,16 @@ describe('POST /api/unsubscribe', () => {
     expect(row?.unsubscribed_at).not.toBeNull();
   });
 
-  it('400s on schema-invalid body', async () => {
+  it('400s on schema-invalid body (bad email shape, missing token, bad token format)', async () => {
     stub = installFetchStub([]);
-    const res = await handleUnsubscribe(
-      buildContext(buildReq({ email: 'not-an-email' }))
-    );
-    expect(res.status).toBe(400);
+    const cases: Array<unknown> = [
+      { email: 'not-an-email', token: validToken },
+      { email: 'gone@example.com' /* no token */ },
+      { email: 'gone@example.com', token: 'too-short' },
+    ];
+    for (const c of cases) {
+      const res = await handleUnsubscribe(buildContext(buildReq(c)));
+      expect(res.status).toBe(400);
+    }
   });
 });

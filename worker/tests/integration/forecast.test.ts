@@ -58,7 +58,7 @@ const openMeteoOk = () =>
   });
 
 describe('GET /api/forecast', () => {
-  it('returns scored days for a seeded metro zip without geocoder hop', async () => {
+  it('returns scored days for a seeded metro zip without geocoder hop, public CDN-cacheable', async () => {
     stub = installFetchStub([{ match: 'api.open-meteo.com/v1/forecast', respond: openMeteoOk }]);
     const rc = buildContext(
       new Request('https://x/api/forecast?zip=30303&cut=brisket-packer&cooker=offset&days=2')
@@ -75,6 +75,8 @@ describe('GET /api/forecast', () => {
     expect(body.metro).toBe('atlanta-ga');
     expect(body.days).toHaveLength(2);
     expect(body.days[0]!.score.band).toMatch(/red|yellow|green|ideal/);
+    // Explicit zip → URL fully identifies the response → public CDN cache OK.
+    expect(res.headers.get('Cache-Control')).toBe('public, max-age=300');
     // No geocode call — zip resolved from metros table.
     expect(stub.calls.filter((c) => c.url.includes('geocoding'))).toHaveLength(0);
   });
@@ -125,7 +127,7 @@ describe('GET /api/forecast', () => {
     expect(await res.json()).toMatchObject({ error: 'weather_unavailable' });
   });
 
-  it('falls back to request.cf.postalCode when zip query param is omitted', async () => {
+  it('falls back to request.cf.postalCode when zip query param is omitted, with Cache-Control private', async () => {
     stub = installFetchStub([{ match: 'api.open-meteo.com/v1/forecast', respond: openMeteoOk }]);
     // workerd populates `request.cf` at the edge but exposes it as a
     // readonly property — tests can't assign it. We wrap the Request
@@ -145,5 +147,10 @@ describe('GET /api/forecast', () => {
     expect(res.status).toBe(200);
     const body = (await res.json()) as { zip: string };
     expect(body.zip).toBe('30303');
+    // Critical: the URL is the SAME for every visitor in the
+    // geo-IP-fallback path, so a public CDN cache would poison
+    // entries across visitors in different metros. The handler MUST
+    // mark this response private.
+    expect(res.headers.get('Cache-Control')).toBe('private, max-age=60');
   });
 });

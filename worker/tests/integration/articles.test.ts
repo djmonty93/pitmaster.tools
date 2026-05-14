@@ -97,6 +97,38 @@ describe('GET /articles/:slug', () => {
     expect(await res.json()).toMatchObject({ error: 'invalid_slug' });
   });
 
+  it('strips <script>, <iframe>, and on*= handlers from body_html as defense-in-depth', async () => {
+    const now = Date.now();
+    await DB.prepare(
+      `INSERT INTO articles (slug, kind, title, body_html, body_text, hero_band, published_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    )
+      .bind(
+        'sanitize-test',
+        'weekly-summary',
+        'Safe title',
+        // Hostile body — represents the worst case where a row
+        // somehow gets written with attacker-controlled HTML.
+        '<p>Hello</p><script>alert(1)</script><iframe src="https://evil.example"></iframe><a href="javascript:alert(2)">x</a><img src="x" onerror="alert(3)">',
+        'text',
+        'green',
+        now,
+        now
+      )
+      .run();
+    const res = await handleArticles(
+      buildContext(new Request('https://x/articles/sanitize-test'), {
+        slug: 'sanitize-test',
+      })
+    );
+    const body = await res.text();
+    expect(body).toContain('<p>Hello</p>');
+    expect(body).not.toContain('<script>alert(1)</script>');
+    expect(body).not.toContain('<iframe');
+    expect(body).not.toMatch(/onerror\s*=/i);
+    expect(body).not.toMatch(/href\s*=\s*["']?\s*javascript:/i);
+  });
+
   it('404s with an HTML shell when the slug does not exist', async () => {
     const res = await handleArticles(
       buildContext(new Request('https://x/articles/never-published'), {

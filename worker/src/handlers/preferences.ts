@@ -1,18 +1,25 @@
-// GET  /api/preferences?email=<email>   — read a subscriber's prefs
-// PATCH /api/preferences                 — update cut / cooker
+// GET   /api/preferences?email=<email>&token=<token>   — read a subscriber's prefs
+// PATCH /api/preferences                                — update cut / cooker
+//
+// Both methods require an HMAC token issued by /api/subscribe (see
+// lib/auth/token.ts) — without it any caller could enumerate
+// subscriber preferences or vandalize them. GET takes the token in a
+// query param; PATCH takes it in the JSON body.
 //
 // We deliberately do NOT expose zip via GET (a leaked URL would dump
 // the subscriber's home zip). The read-side returns only cut/cooker/
 // timezone and a boolean `subscribed` flag.
 //
-// PATCH body: { email, cut?, cooker? }. Other fields are ignored —
-// changing email or zip requires re-subscribing.
+// PATCH body: { email, token, cut?, cooker? }. Other fields are
+// ignored — changing email or zip requires re-subscribing.
 
 import { z } from 'zod';
+import { verifyToken } from '../lib/auth/token.js';
 import { json, jsonError, type RouteContext } from '../router.js';
 
 const PreferencesPatch = z.object({
   email: z.string().email(),
+  token: z.string().regex(/^[0-9a-f]{64}$/i),
   cut: z
     .enum([
       'brisket-flat',
@@ -41,15 +48,29 @@ export async function handlePreferences(rc: RouteContext): Promise<Response> {
 }
 
 async function handleGet(rc: RouteContext): Promise<Response> {
-  const email = rc.url.searchParams.get('email');
-  if (!email) {
-    return jsonError(400, 'missing_email', 'Provide ?email=<email>');
+  const emailParam = rc.url.searchParams.get('email');
+  const tokenParam = rc.url.searchParams.get('token');
+  if (!emailParam || !tokenParam) {
+    return jsonError(400, 'missing_credentials', 'Provide ?email=<email>&token=<token>');
   }
-  // Email shape validation — avoid leaking row existence with a
-  // structured "we don't know" response when the address is malformed.
-  const parsed = z.string().email().safeParse(email);
+  const parsed = z
+    .object({
+      email: z.string().email(),
+      token: z.string().regex(/^[0-9a-f]{64}$/i),
+    })
+    .safeParse({ email: emailParam, token: tokenParam });
   if (!parsed.success) {
-    return jsonError(400, 'invalid_email', 'Email did not parse');
+    // Same 401 shape as a token mismatch so a malformed email isn't
+    // a different signal from "valid email + wrong token." Otherwise
+    // a caller could enumerate by sending fixed bad tokens and
+    // distinguishing "I sent a syntactically valid email" (401) from
+    // "I sent garbage" (400).
+    return jsonError(401, 'invalid_credentials', 'Email or token did not validate');
+  }
+  const email = parsed.data.email.trim().toLowerCase();
+  const ok = await verifyToken(email, parsed.data.token, rc.env.SUBSCRIBER_TOKEN_SECRET);
+  if (!ok) {
+    return jsonError(401, 'invalid_credentials', 'Email or token did not validate');
   }
   const row = await rc.env.SMOKE_DB.prepare(
     `SELECT cut, cooker, timezone, unsubscribed_at FROM subscribers WHERE email = ?`
@@ -62,8 +83,6 @@ async function handleGet(rc: RouteContext): Promise<Response> {
       unsubscribed_at: number | null;
     }>();
   if (!row) {
-    // Same 404 shape for both "no row" and "row but private" so this
-    // endpoint can't be turned into a subscription enumeration oracle.
     return jsonError(404, 'not_found', 'No preferences for this email');
   }
   return json(200, {
@@ -86,7 +105,12 @@ async function handlePatch(rc: RouteContext): Promise<Response> {
   if (!parsed.success) {
     return jsonError(400, 'invalid_body', 'Request body failed validation', parsed.error.issues);
   }
-  const { email, cut, cooker } = parsed.data;
+  const { cut, cooker } = parsed.data;
+  const email = parsed.data.email.trim().toLowerCase();
+  const ok = await verifyToken(email, parsed.data.token, rc.env.SUBSCRIBER_TOKEN_SECRET);
+  if (!ok) {
+    return jsonError(401, 'invalid_token', 'Token does not match this email');
+  }
   // Build the SET clause dynamically so a PATCH that only includes
   // `cut` doesn't blow away `cooker` (and vice-versa).
   const sets: string[] = [];
@@ -105,7 +129,6 @@ async function handlePatch(rc: RouteContext): Promise<Response> {
   const sql = `UPDATE subscribers SET ${sets.join(', ')} WHERE email = ?`;
   args.push(email);
   const res = await rc.env.SMOKE_DB.prepare(sql).bind(...args).run();
-  // D1's `meta.changes` exposes the affected row count.
   const changes = (res.meta as { changes?: number } | undefined)?.changes ?? 0;
   if (changes === 0) {
     return jsonError(404, 'not_found', 'No subscriber row matched this email');

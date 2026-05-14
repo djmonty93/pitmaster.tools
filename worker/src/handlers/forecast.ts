@@ -54,7 +54,8 @@ export async function handleForecast(rc: RouteContext): Promise<Response> {
   // local dev but always present in production at the edge.
   const cfPostal =
     (rc.request as Request & { cf?: { postalCode?: string; country?: string } }).cf?.postalCode ?? null;
-  const zip = zipParam && zipParam.length > 0 ? zipParam : cfPostal;
+  const zipFromQuery = zipParam && zipParam.length > 0;
+  const zip = zipFromQuery ? zipParam : cfPostal;
   if (!zip) {
     return jsonError(400, 'missing_zip', 'Provide ?zip=<5-digit US zip>');
   }
@@ -117,10 +118,18 @@ export async function handleForecast(rc: RouteContext): Promise<Response> {
     generatedAt: new Date().toISOString(),
     days: scored,
   };
-  return json(200, response, {
-    // Allow CDN edge caching for 5 min — the underlying KV cache is
-    // 30 min fresh, but a CDN hit avoids hitting the worker entirely
-    // for parametrically identical queries.
-    'Cache-Control': 'public, max-age=300',
-  });
+  // Cache-Control split:
+  //   - When the zip came from an explicit query param, the URL fully
+  //     identifies the response so we can let CDN cache it
+  //     publicly for 5 min.
+  //   - When the zip came from request.cf.postalCode, the URL is the
+  //     SAME across visitors in different metros but the response is
+  //     personalized. Public caching would poison the CDN entry —
+  //     visitor #1 in 90210 would seed a row that visitor #2 in 10001
+  //     would then receive. Use `private` (browser cache only) for
+  //     the geo-IP fallback path.
+  const cacheControl = zipFromQuery
+    ? 'public, max-age=300'
+    : 'private, max-age=60';
+  return json(200, response, { 'Cache-Control': cacheControl });
 }

@@ -15,14 +15,24 @@
 // write the D1 row.
 
 import { z } from 'zod';
+import { signToken } from '../lib/auth/token.js';
 import { createMailerLiteClient } from '../lib/mailerlite/client.js';
 import { MailerLiteError } from '../lib/mailerlite/errors.js';
 import { enqueue } from '../lib/mailerlite/retry.js';
 import { GeocoderError, resolveZip } from '../lib/geo/zipGeocoder.js';
 import { json, jsonError, type RouteContext } from '../router.js';
 
+// Trim + lowercase the email BEFORE running the email-shape check so
+// a "  Me@Example.COM  " paste mistake doesn't get rejected as
+// schema-invalid and so the same address always produces the same
+// downstream key (D1, MailerLite idempotency, HMAC token).
+const NormalizedEmail = z.preprocess(
+  (v) => (typeof v === 'string' ? v.trim().toLowerCase() : v),
+  z.string().email()
+);
+
 const SubscribeBody = z.object({
-  email: z.string().email(),
+  email: NormalizedEmail,
   zip: z.string().regex(/^\d{5}$/),
   cut: z
     .enum([
@@ -62,6 +72,7 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
   if (!parsed.success) {
     return jsonError(400, 'invalid_body', 'Request body failed validation', parsed.error.issues);
   }
+  // `parsed.data.email` is already trim+lowercased by NormalizedEmail.
   const body = parsed.data;
 
   // Resolve metro + timezone if either is missing. The geocoder
@@ -142,11 +153,20 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
     )
     .run();
 
+  // Issue an HMAC-signed token tied to this email. Returned in the
+  // subscribe response and required by /api/unsubscribe and
+  // /api/preferences so an attacker can't act on an email they
+  // don't own. The token is stable across re-subscribes (it only
+  // depends on email + secret), which matches the user's mental
+  // model — re-subscribing doesn't invalidate the unsubscribe link.
+  const token = await signToken(body.email, rc.env.SUBSCRIBER_TOKEN_SECRET);
+
   return json(202, {
     status: mailerliteStatus,
     email: body.email,
     metroSlug: resolvedMetroSlug,
     timezone: resolvedTimezone,
     mailerliteId,
+    token,
   });
 }
