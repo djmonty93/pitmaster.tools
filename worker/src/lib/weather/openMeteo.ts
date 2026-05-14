@@ -9,7 +9,13 @@ import { fetchWithTimeout, type Fetcher } from './fetchWithTimeout.js';
 
 const OPEN_METEO_URL = 'https://api.open-meteo.com/v1/forecast';
 const DEFAULT_TIMEOUT_MS = 5000;
-const NUM = z.number().finite();
+
+// Open-Meteo sometimes returns null for individual hourly/daily values when
+// the underlying weather model has no data for that timestamp+variable
+// (e.g. precipitation_probability beyond a regional ensemble's horizon).
+// Accept nullable numbers in the schema and coalesce downstream — refusing
+// the whole payload would force a needless fail-over.
+const NUM = z.number().finite().nullable();
 
 const DailySchema = z.object({
   time: z.array(z.string()),
@@ -123,17 +129,28 @@ function normalize(data: z.infer<typeof OpenMeteoResponse>): WeatherDay[] {
   for (let i = 0; i < daily.time.length; i++) {
     const date = daily.time[i];
     if (date === undefined) continue;
+
+    // A day is only usable if we have both high and low temperatures; the
+    // entire score depends on them. Other daily fields fall back to 0 when
+    // missing — the score will simply not credit those signals.
+    const high = daily.temperature_2m_max[i];
+    const low = daily.temperature_2m_min[i];
+    if (high === null || high === undefined || low === null || low === undefined) {
+      continue;
+    }
+
     const dayHourly = hoursForDay(hourly, date);
     const day: WeatherDay = {
       date,
-      tempHighF: req(daily.temperature_2m_max, i),
-      tempLowF: req(daily.temperature_2m_min, i),
-      rhMean: req(daily.relative_humidity_2m_mean, i),
-      windMphMean: meanOf(dayHourly.map((h) => h.windMph)) ?? req(daily.wind_speed_10m_max, i),
-      gustMphMax: req(daily.wind_gusts_10m_max, i),
-      precipProbPct: req(daily.precipitation_probability_max, i),
-      precipIn: req(daily.precipitation_sum, i),
-      dewPointMeanF: req(daily.dew_point_2m_mean, i),
+      tempHighF: high,
+      tempLowF: low,
+      rhMean: cell(daily.relative_humidity_2m_mean, i),
+      windMphMean:
+        meanOf(dayHourly.map((h) => h.windMph)) ?? cell(daily.wind_speed_10m_max, i),
+      gustMphMax: cell(daily.wind_gusts_10m_max, i),
+      precipProbPct: cell(daily.precipitation_probability_max, i),
+      precipIn: cell(daily.precipitation_sum, i),
+      dewPointMeanF: cell(daily.dew_point_2m_mean, i),
       hourly: dayHourly,
       source: 'open-meteo',
       confidence: confidenceByDayIndex(i),
@@ -148,28 +165,31 @@ function hoursForDay(hourly: z.infer<typeof HourlySchema>, ymd: string): Weather
   for (let i = 0; i < hourly.time.length; i++) {
     const t = hourly.time[i];
     if (t === undefined || !t.startsWith(ymd)) continue;
+    const tempF = hourly.temperature_2m[i];
+    // Skip an hour outright if its temperature is null — the rest of the
+    // score is fundamentally unanchored without it.
+    if (tempF === null || tempF === undefined) continue;
     out.push({
       t,
-      tempF: req(hourly.temperature_2m, i),
-      rh: req(hourly.relative_humidity_2m, i),
-      windMph: req(hourly.wind_speed_10m, i),
-      gustMph: req(hourly.wind_gusts_10m, i),
-      precipProbPct: req(hourly.precipitation_probability, i),
-      precipIn: req(hourly.precipitation, i),
-      dewPointF: req(hourly.dew_point_2m, i),
+      tempF,
+      rh: cell(hourly.relative_humidity_2m, i),
+      windMph: cell(hourly.wind_speed_10m, i),
+      gustMph: cell(hourly.wind_gusts_10m, i),
+      precipProbPct: cell(hourly.precipitation_probability, i),
+      precipIn: cell(hourly.precipitation, i),
+      dewPointF: cell(hourly.dew_point_2m, i),
     });
   }
   return out;
 }
 
-function req(arr: readonly number[], i: number): number {
+// Coalesce a nullable / out-of-bounds cell to 0 so the WeatherDay shape
+// stays `number`-typed downstream. Callers must explicitly handle null
+// for fields where 0 would distort scoring (handled in normalize above
+// for temperature, where the day is skipped).
+function cell(arr: ReadonlyArray<number | null>, i: number): number {
   const v = arr[i];
-  if (v === undefined) {
-    // zod has already asserted the column is fully populated to daily.time.length,
-    // so an undefined here means the response was internally inconsistent.
-    throw new WeatherError('open-meteo', 'malformed', `index ${i} missing`);
-  }
-  return v;
+  return v === null || v === undefined ? 0 : v;
 }
 
 function meanOf(xs: number[]): number | undefined {

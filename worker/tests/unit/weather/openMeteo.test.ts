@@ -63,4 +63,46 @@ describe('fetchOpenMeteo', () => {
       fetchOpenMeteo(0, 0, 1, { fetcher })
     ).rejects.toMatchObject({ source: 'open-meteo', kind: 'malformed' });
   });
+
+  it('tolerates null hourly + daily cells without rejecting the payload', async () => {
+    const payload = {
+      daily: {
+        time: ['2026-05-14', '2026-05-15'],
+        temperature_2m_max: [85.0, null],
+        temperature_2m_min: [65.0, 66.0],
+        relative_humidity_2m_mean: [50.0, 48.0],
+        wind_speed_10m_max: [9.0, null],
+        wind_gusts_10m_max: [null, 14.0],
+        precipitation_probability_max: [10.0, null],
+        precipitation_sum: [0.0, 0.0],
+        dew_point_2m_mean: [null, 58.0],
+      },
+      hourly: {
+        time: ['2026-05-14T00:00', '2026-05-14T12:00'],
+        temperature_2m: [70.0, null], // second hour is dropped
+        relative_humidity_2m: [55.0, 50.0],
+        wind_speed_10m: [5.0, 9.0],
+        wind_gusts_10m: [10.0, null],
+        precipitation_probability: [10.0, 5.0],
+        precipitation: [0.0, 0.0],
+        dew_point_2m: [60.0, null],
+      },
+    };
+    const days = await fetchOpenMeteo(0, 0, 2, {
+      fetcher: async () =>
+        new Response(JSON.stringify(payload), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+    });
+    // Day 0 is kept (high+low both present); Day 1 dropped because its
+    // tempHigh is null.
+    expect(days).toHaveLength(1);
+    expect(days[0]?.date).toBe('2026-05-14');
+    // Hour 1 dropped because tempF is null. Hour 0 keeps its values; the
+    // missing daily dew_point_2m_mean coalesces to 0.
+    expect(days[0]?.hourly).toHaveLength(1);
+    expect(days[0]?.dewPointMeanF).toBe(0);
+    expect(days[0]?.gustMphMax).toBe(0);
+  });
 });
