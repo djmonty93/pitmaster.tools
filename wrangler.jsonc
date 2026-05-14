@@ -13,5 +13,17 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "404-page"
-  }
+  },
+  // WEATHER_KV — cache for Open-Meteo / NWS forecast responses with
+  // stale-while-error semantics. See worker/src/lib/cache/kv.ts.
+  // Replace `id` with the real namespace ID once `wrangler kv:namespace
+  // create WEATHER_KV` is run; tests use Miniflare's in-memory backing
+  // and ignore the value.
+  "kv_namespaces": [
+    {
+      "binding": "WEATHER_KV",
+      "id": "00000000000000000000000000000000",
+      "preview_id": "00000000000000000000000000000000"
+    }
+  ]
 }
