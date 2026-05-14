@@ -118,6 +118,39 @@ describe('scoreDay', () => {
   });
 });
 
+describe('calibration sanity', () => {
+  // Tighter calibration after Step 3 PR review: extreme conditions
+  // must land in red, not green/ideal. These specs pin the bands so
+  // future tuning doesn't accidentally regress them.
+
+  it('90 % rain probability with 0.5" accumulation lands in the red band', () => {
+    const r = scoreDay({
+      cut: 'pork-loin',
+      cooker: 'electric',
+      day: fakeDay({ precipProbPct: 90, precipIn: 0.5 }),
+    });
+    expect(r.score).toBeLessThan(60);
+  });
+
+  it('a 110 °F afternoon high does NOT score "ideal"', () => {
+    const r = scoreDay({
+      cut: 'pork-loin',
+      cooker: 'electric',
+      day: fakeDay({ tempHighF: 110 }),
+    });
+    expect(r.band).not.toBe('ideal');
+  });
+
+  it('35 mph offset gusts drop below "green"', () => {
+    const r = scoreDay({
+      cut: 'pork-loin',
+      cooker: 'offset',
+      day: fakeDay({ gustMphMax: 35 }),
+    });
+    expect(r.score).toBeLessThan(70);
+  });
+});
+
 describe('scoreForecast', () => {
   it('returns one score per day in order', () => {
     const days: WeatherDay[] = [

@@ -93,7 +93,7 @@
 
     var precipPenalty = clamp01(
       (day.precipProbPct / 100) * (1 + day.precipIn * 0.5)
-    ) * 40;
+    ) * 50;
     if (day.precipProbPct >= 60) {
       reasons.push('High chance of rain (' + Math.round(day.precipProbPct) + '%)');
     } else if (day.precipIn >= 0.25) {
@@ -123,8 +123,8 @@
       reasons.push('Gusts to ' + Math.round(effectiveGust) + ' mph (' + cooker + ' sensitivity)');
     }
 
-    var coldPenalty = Math.max(0, (40 - tempLow) / 30) * 15;
-    var hotPenalty = Math.max(0, (tempHigh - 90) / 20) * 15;
+    var coldPenalty = clamp01((40 - tempLow) / 30) * 20;
+    var hotPenalty = clamp01((tempHigh - 85) / 25) * 25;
     if (coldPenalty > 0) reasons.push('Cold start (' + Math.round(tempLow) + ' °F low)');
     if (hotPenalty > 0) reasons.push('Hot afternoon (' + Math.round(tempHigh) + ' °F high)');
 

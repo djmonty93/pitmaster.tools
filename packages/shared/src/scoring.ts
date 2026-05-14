@@ -89,10 +89,12 @@ export function scoreDay(input: ScoreInput): ScoreResult {
 
   // ── Precip ─────────────────────────────────────────────────────────
   // Heavy rain is the strongest single negative signal — pit gets wet,
-  // smoke ring suffers, working outdoors gets miserable.
+  // smoke ring suffers, working outdoors gets miserable. 90%-prob +
+  // 0.5"-accumulation costs the full 50 points so the day lands in the
+  // red band on its own.
   const precipPenalty = clamp01(
     (day.precipProbPct / 100) * (1 + day.precipIn * 0.5)
-  ) * 40;
+  ) * 50;
   if (day.precipProbPct >= 60) reasons.push(`High chance of rain (${Math.round(day.precipProbPct)}%)`);
   else if (day.precipIn >= 0.25) reasons.push(`Heavy rain expected (${day.precipIn.toFixed(2)}")`);
 
@@ -113,12 +115,12 @@ export function scoreDay(input: ScoreInput): ScoreResult {
   }
 
   // ── Temperature extremes ───────────────────────────────────────────
-  // Cold mornings make startup hard (penalty starts below 40 °F low);
-  // afternoons over 90 °F push the cook into uncomfortable working
-  // territory and risk over-temping the cavity (penalty starts above
-  // 90 °F high). Symmetric soft penalty either side.
-  const coldPenalty = Math.max(0, (40 - tempLow) / 30) * 15;
-  const hotPenalty = Math.max(0, (tempHigh - 90) / 20) * 15;
+  // Cold mornings make startup hard (penalty starts below 40 °F low,
+  // full at 10 °F); afternoons over 85 °F push the cook into
+  // uncomfortable working territory and risk over-temping the cavity
+  // (penalty starts above 85 °F, full at 110 °F+ which is danger zone).
+  const coldPenalty = clamp01((40 - tempLow) / 30) * 20;
+  const hotPenalty = clamp01((tempHigh - 85) / 25) * 25;
   if (coldPenalty > 0) reasons.push(`Cold start (${Math.round(tempLow)} °F low)`);
   if (hotPenalty > 0) reasons.push(`Hot afternoon (${Math.round(tempHigh)} °F high)`);
 
