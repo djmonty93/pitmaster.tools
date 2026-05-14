@@ -379,12 +379,14 @@ describe('mailerlite retry — drain', () => {
     expect(client.unsubscribe).toHaveBeenCalledWith({ email: 'gone@example.com' });
   });
 
-  it("leaves 'send' rows untouched in the queue for Step 11 to claim", async () => {
+  it("leaves 'send' rows untouched in the queue (no select, no mutate, even with bad JSON)", async () => {
     // 'send' is a valid value of mailerlite_retry.request_kind (see
     // migration 0001) but no client method exists for it yet. Drain
     // must NOT touch these rows — silently dropping them would be
     // data loss before Step 11 ships. They sit in the queue and
-    // Step 11's cron will pick them up.
+    // Step 11's cron will pick them up. Even a row with malformed
+    // JSON must stay intact, because the parse-error path would
+    // otherwise DELETE it.
     const t0 = 1_700_000_000_000;
     await DB.prepare(
       `INSERT INTO mailerlite_retry
@@ -393,17 +395,47 @@ describe('mailerlite retry — drain', () => {
     )
       .bind('send', JSON.stringify({ campaignId: 'cmp_x' }), 'send:cmp_x', t0, t0)
       .run();
+    // A second 'send' row with corrupt JSON — this would normally
+    // trigger the parse-error DELETE path. The kind guard must run
+    // first.
+    await DB.prepare(
+      `INSERT INTO mailerlite_retry
+         (request_kind, request_payload, idempotency_key, attempts, last_status, last_error, next_attempt_at, created_at)
+         VALUES (?, ?, ?, 0, NULL, NULL, ?, ?)`
+    )
+      .bind('send', 'not-json', 'send:corrupt', t0, t0)
+      .run();
     const client = fakeClient();
     const outcomes = await drain(DB, client, { now: () => t0 + 1 });
     expect(outcomes).toEqual([]);
     expect(client.subscribe).not.toHaveBeenCalled();
     expect(client.unsubscribe).not.toHaveBeenCalled();
-    // Row is still there — Step 11 will pick it up.
-    const remaining = await DB.prepare(
-      `SELECT COUNT(*) AS c FROM mailerlite_retry WHERE idempotency_key = ?`
-    )
-      .bind('send:cmp_x')
-      .first<{ c: number }>();
-    expect(remaining?.c).toBe(1);
+    // Both rows still there, untouched.
+    const rows = await DB.prepare(
+      `SELECT idempotency_key, request_kind, request_payload, attempts, last_status, last_error, next_attempt_at, created_at
+         FROM mailerlite_retry
+        WHERE idempotency_key IN ('send:cmp_x', 'send:corrupt')
+        ORDER BY idempotency_key`
+    ).all<{
+      idempotency_key: string;
+      request_kind: string;
+      request_payload: string;
+      attempts: number;
+      last_status: number | null;
+      last_error: string | null;
+      next_attempt_at: number;
+      created_at: number;
+    }>();
+    expect(rows.results).toHaveLength(2);
+    for (const r of rows.results) {
+      expect(r.attempts).toBe(0);
+      expect(r.last_status).toBeNull();
+      expect(r.last_error).toBeNull();
+      expect(r.next_attempt_at).toBe(t0);
+      expect(r.created_at).toBe(t0);
+    }
+    // No audit row should have been written either.
+    const audit = await DB.prepare(`SELECT COUNT(*) AS c FROM events`).first<{ c: number }>();
+    expect(audit?.c).toBe(0);
   });
 });

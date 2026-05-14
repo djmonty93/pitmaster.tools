@@ -168,6 +168,24 @@ async function replayRow(
   row: RetryRow,
   now: () => number
 ): Promise<DrainOutcome> {
+  // Belt-and-braces narrow MUST run before anything that mutates D1.
+  // Drain's SQL filter already excludes 'send' (and any future kind
+  // we haven't owned yet), but if that filter ever drifts we still
+  // refuse to touch a row whose dispatch path doesn't exist — no
+  // DELETE, no UPDATE, no audit. The unsupported row stays in the
+  // queue for the owner step to claim.
+  if (row.request_kind !== 'subscribe' && row.request_kind !== 'unsubscribe') {
+    return {
+      row,
+      status: 'dropped',
+      error: new MailerLiteError(
+        row.request_kind,
+        'malformed',
+        `unsupported kind ${row.request_kind} reached replayRow; drain filter is stale`
+      ),
+    };
+  }
+
   let payload: unknown;
   try {
     payload = JSON.parse(row.request_payload);
@@ -180,22 +198,6 @@ async function replayRow(
     await db.prepare(`DELETE FROM mailerlite_retry WHERE id = ?`).bind(row.id).run();
     await recordError(db, row, e, now());
     return { row, status: 'dropped', error: e };
-  }
-
-  // Belt-and-braces narrow: drain's SQL filter already excludes 'send'
-  // rows, but if a future migration widens the kinds enum and forgets
-  // to update drain we'd silently dispatch on an unsupported kind. Skip
-  // here so the row stays in the queue for the future Step 11 path.
-  if (row.request_kind !== 'subscribe' && row.request_kind !== 'unsubscribe') {
-    return {
-      row,
-      status: 'dropped',
-      error: new MailerLiteError(
-        row.request_kind,
-        'malformed',
-        `unsupported kind ${row.request_kind} reached replayRow; drain filter is stale`
-      ),
-    };
   }
 
   try {
