@@ -152,13 +152,16 @@ describe('cachedFetch', () => {
     ).rejects.toThrow('nope');
   });
 
-  it('telemetry surfaces a redacted errorSummary, not the raw error', async () => {
+  it('telemetry redacts common secret-shaped substrings from errorSummary', async () => {
     const origin = vi
       .fn()
       .mockRejectedValue(
-        Object.assign(new Error('upstream 500: token=sk-do-not-leak body=…'), {
-          name: 'WeatherError',
-        })
+        Object.assign(
+          new Error(
+            'upstream 500: Authorization: Bearer sk-do-not-leak-1234 token=abc123 sk-private-9999'
+          ),
+          { name: 'WeatherError' }
+        )
       );
     const captured: Array<{ status: string; errorSummary?: string }> = [];
     await expect(
@@ -171,9 +174,12 @@ describe('cachedFetch', () => {
     ).rejects.toBeDefined();
     const last = captured[captured.length - 1];
     expect(last?.errorSummary).toMatch(/^WeatherError: /);
-    // The summary should at most echo back the error's own name/message
-    // (which a caller controls); the test asserts we didn't, for example,
-    // attach the response body or stack as a separate field.
+    // None of the secret payloads should make it through.
+    expect(last?.errorSummary).not.toContain('sk-do-not-leak');
+    expect(last?.errorSummary).not.toContain('sk-private-9999');
+    expect(last?.errorSummary).not.toMatch(/Bearer [a-z]/i);
+    expect(last?.errorSummary).not.toMatch(/token=[a-z0-9]+/i);
+    // The outcome itself carries no raw error blob.
     expect(last).not.toHaveProperty('error');
   });
 });

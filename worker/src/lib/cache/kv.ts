@@ -104,13 +104,32 @@ export interface CachedFetchOptions<T> extends CacheOptions {
   }) => void;
 }
 
+// Defense-in-depth redaction of secret-shaped substrings before
+// telemetry. The list isn't exhaustive; callers should still scrub
+// anything they put into their own `error.message` strings.
+function redactSecrets(message: string): string {
+  return (
+    message
+      // Provider-style key prefixes (Stripe sk_/pk_, OpenAI sk-, etc.).
+      .replace(/\b(?:sk|pk)[_-][A-Za-z0-9_-]{8,}/g, '[redacted-key]')
+      // GitHub PAT / fine-grained tokens.
+      .replace(/\bghp_[A-Za-z0-9]{8,}/g, '[redacted-token]')
+      // `Authorization: Bearer …` and the bare-keyword form.
+      .replace(/\bAuthorization\s*:\s*\S+( \S+)?/gi, 'Authorization: [redacted]')
+      .replace(/\bBearer\s+\S+/gi, 'Bearer [redacted]')
+      // `token=…` / `api-key=…` / `secret=…` / `password=…` query-style.
+      .replace(
+        /\b(token|api[_-]?key|secret|password)\s*[=:]\s*\S+/gi,
+        '$1=[redacted]'
+      )
+  );
+}
+
 function summarizeError(err: unknown): string {
-  // Cap at 200 chars and strip whitespace to keep telemetry tidy.
-  // Take only `name: message` — both intentional, neither typically
-  // contains caller-supplied content. Anything richer is the caller's
-  // responsibility to log separately.
   const name = err && typeof err === 'object' && 'name' in err ? String(err.name) : 'Error';
-  const message = err && typeof err === 'object' && 'message' in err ? String(err.message) : '';
+  const rawMessage = err && typeof err === 'object' && 'message' in err ? String(err.message) : '';
+  const message = redactSecrets(rawMessage);
+  // Cap at 200 chars and collapse whitespace to keep telemetry tidy.
   return `${name}: ${message}`.replace(/\s+/g, ' ').trim().slice(0, 200);
 }
 
