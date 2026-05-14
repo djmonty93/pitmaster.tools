@@ -81,6 +81,29 @@ verified, and rolled back independently.
   an in-memory Miniflare D1 via a quote-aware `splitStatements` helper
   in `worker/tests/helpers/d1.ts` (handles `;` and `--` inside string
   literals, SQLite's `''` escape).
+- **Step 6.** MailerLite client + retry queue under
+  `worker/src/lib/mailerlite/`. `client.ts` calls Connect API
+  (`POST /api/subscribers`, `PUT /api/subscribers/:email`) with Bearer
+  auth, an `Idempotency-Key` whose value is a SHA-256 hash of the
+  lowercased email (PII never leaks into proxy logs or D1), and
+  `AbortController` timeouts. Failures are mapped to `MailerLiteError`
+  with a `shouldRetry` rule (5xx, timeout, network, and 408/425/429
+  retry; 400/422 + malformed body do not). Every error message is run
+  through the shared `lib/redact.ts` so Bearer tokens and emails never
+  reach `mailerlite_retry.last_error`. `retry.ts` enqueues retryable
+  failures onto `mailerlite_retry` (UNIQUE idempotency key,
+  duplicate-safe `ON CONFLICT DO UPDATE` that refreshes payload +
+  clamps `next_attempt_at` down + preserves `attempts`); `drain()`
+  replays due rows in FIFO order with doubling backoff
+  (1m, 2m, 4m, … capped at 6 h), parks rows after 10 attempts, and
+  writes an `events` audit row on every drop or park. `tags.ts`
+  validates metro slugs and emits `metro:`/`cut:`/`cooker:`
+  segmentation as MailerLite subscriber custom fields. The campaign
+  send path is owned by Step 11 (Friday cron); Step 6 reserves the
+  `send` kind in the schema and `drain()`'s SQL filter excludes
+  `send` rows entirely, so any pre-existing rows wait untouched in
+  the queue for Step 11 to claim. `MAILERLITE_API_KEY` belongs in
+  `wrangler secret put`; `.dev.vars.example` documents the local form.
 
 ## Tooling rules
 

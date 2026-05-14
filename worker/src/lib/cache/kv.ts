@@ -26,6 +26,8 @@
 //   them slightly optimistic about cache-hit timing in production. The
 //   stale-while-error fallback masks this for the weather use case.
 
+import { summarizeError } from '../redact.js';
+
 export type CacheStatus = 'hit' | 'stale' | 'miss';
 
 export interface CacheGetResult<T> {
@@ -95,42 +97,14 @@ export interface CachedFetchOptions<T> extends CacheOptions {
    * is a redacted one-line description of the underlying error (kind
    * + message tail) — never the raw error, because origin errors can
    * embed request bodies / API tokens that the operator does not want
-   * to ship to a telemetry sink.
+   * to ship to a telemetry sink. Redaction lives in lib/redact.ts so
+   * the same rule applies to MailerLite errors written into D1.
    */
   onResult?: (outcome: {
     status: CacheStatus | 'origin' | 'stale-while-error';
     key: string;
     errorSummary?: string;
   }) => void;
-}
-
-// Defense-in-depth redaction of secret-shaped substrings before
-// telemetry. The list isn't exhaustive; callers should still scrub
-// anything they put into their own `error.message` strings.
-function redactSecrets(message: string): string {
-  return (
-    message
-      // Provider-style key prefixes (Stripe sk_/pk_, OpenAI sk-, etc.).
-      .replace(/\b(?:sk|pk)[_-][A-Za-z0-9_-]{8,}/g, '[redacted-key]')
-      // GitHub PAT / fine-grained tokens.
-      .replace(/\bghp_[A-Za-z0-9]{8,}/g, '[redacted-token]')
-      // `Authorization: Bearer …` and the bare-keyword form.
-      .replace(/\bAuthorization\s*:\s*\S+( \S+)?/gi, 'Authorization: [redacted]')
-      .replace(/\bBearer\s+\S+/gi, 'Bearer [redacted]')
-      // `token=…` / `api-key=…` / `secret=…` / `password=…` query-style.
-      .replace(
-        /\b(token|api[_-]?key|secret|password)\s*[=:]\s*\S+/gi,
-        '$1=[redacted]'
-      )
-  );
-}
-
-function summarizeError(err: unknown): string {
-  const name = err && typeof err === 'object' && 'name' in err ? String(err.name) : 'Error';
-  const rawMessage = err && typeof err === 'object' && 'message' in err ? String(err.message) : '';
-  const message = redactSecrets(rawMessage);
-  // Cap at 200 chars and collapse whitespace to keep telemetry tidy.
-  return `${name}: ${message}`.replace(/\s+/g, ' ').trim().slice(0, 200);
 }
 
 /**
