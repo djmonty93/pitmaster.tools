@@ -18,13 +18,23 @@ export type WeatherSource = 'open-meteo' | 'nws';
  */
 const RECOVERABLE_4XX = new Set([408, 425, 429]);
 
+export type WeatherErrorKind =
+  | 'http_5xx'
+  | 'http_4xx'
+  | 'timeout'
+  | 'malformed'
+  | 'network'
+  | 'all_failed'; // every source returned a recoverable error in turn
+
 export class WeatherError extends Error {
   constructor(
     public readonly source: WeatherSource,
-    public readonly kind: 'http_5xx' | 'http_4xx' | 'timeout' | 'malformed' | 'network',
+    public readonly kind: WeatherErrorKind,
     message: string,
     /** Underlying HTTP status, when kind is http_4xx or http_5xx. */
-    public readonly status?: number
+    public readonly status?: number,
+    /** Per-source errors collected before this one, in order. */
+    public readonly attempts: WeatherError[] = []
   ) {
     super(`${source}: ${kind}${status !== undefined ? ` (${status})` : ''}: ${message}`);
     this.name = 'WeatherError';
@@ -32,6 +42,7 @@ export class WeatherError extends Error {
 
   /** True if the adapter should try the next source on this error. */
   get isRecoverable(): boolean {
+    if (this.kind === 'all_failed') return false; // already tried everything
     if (this.kind !== 'http_4xx') return true;
     return this.status !== undefined && RECOVERABLE_4XX.has(this.status);
   }

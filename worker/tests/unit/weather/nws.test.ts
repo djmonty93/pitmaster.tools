@@ -75,6 +75,62 @@ describe('fetchNws', () => {
     ).rejects.toMatchObject({ source: 'nws', kind: 'malformed' });
   });
 
+  it('converts temperatureUnit "C" to Fahrenheit (non-CONUS office)', async () => {
+    // Hypothetical Alaska/Pacific office returning Celsius.
+    const celsiusPayload = {
+      properties: {
+        periods: [
+          {
+            startTime: '2026-05-14T10:00:00-09:00',
+            temperature: 20,            // 20 °C → 68 °F
+            temperatureUnit: 'C' as const,
+            windSpeed: '5 mph',
+            windGust: null,
+            probabilityOfPrecipitation: { value: 10 },
+            relativeHumidity: { value: 55 },
+            dewpoint: { value: 10, unitCode: 'wmoUnit:degC' },
+          },
+        ],
+      },
+    };
+    const days = await fetchNws(58.3, -134.4, 1, {
+      fetcher: chainedFetcher(
+        { status: 200, body: nwsPoints },
+        { status: 200, body: celsiusPayload }
+      ),
+    });
+    expect(days[0]?.tempHighF).toBe(68);
+    expect(days[0]?.tempLowF).toBe(68);
+  });
+
+  it('defaults missing RH to 50 percent (conservative neutral) when NWS omits it', async () => {
+    // No relativeHumidity and no dewpoint — both absent.
+    const noHumidityPayload = {
+      properties: {
+        periods: [
+          {
+            startTime: '2026-05-14T10:00:00-05:00',
+            temperature: 80,
+            temperatureUnit: 'F' as const,
+            windSpeed: '5 mph',
+            windGust: null,
+            probabilityOfPrecipitation: { value: 10 },
+          },
+        ],
+      },
+    };
+    const days = await fetchNws(39.1, -94.6, 1, {
+      fetcher: chainedFetcher(
+        { status: 200, body: nwsPoints },
+        { status: 200, body: noHumidityPayload }
+      ),
+    });
+    expect(days[0]?.rhMean).toBe(50);
+    // Magnus(80°F, 50%RH) ≈ 59.7°F — well between freezing and saturated.
+    expect(days[0]?.dewPointMeanF).toBeGreaterThan(58);
+    expect(days[0]?.dewPointMeanF).toBeLessThan(62);
+  });
+
   it('converts NWS dewpoint from Celsius to Fahrenheit', async () => {
     const days = await fetchNws(39.1, -94.6, 1, {
       fetcher: chainedFetcher(

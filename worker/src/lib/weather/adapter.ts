@@ -45,10 +45,16 @@ export async function fetchForecast(
   } catch (err) {
     if (!(err instanceof WeatherError)) throw err;
     attempts.push(err);
+    // Promote to a structured 'all_failed' kind that carries every prior
+    // attempt — /api/status (Step 17) renders the chain, not just the last
+    // failure, so consumers can distinguish "Open-Meteo 5xx + NWS 5xx"
+    // from "Open-Meteo malformed + NWS timeout".
     throw new WeatherError(
       'nws',
-      err.kind,
-      `all sources failed: ${attempts.map((a) => a.message).join(' | ')}`
+      'all_failed',
+      attempts.map((a) => a.message).join(' | '),
+      undefined,
+      attempts
     );
   }
 }

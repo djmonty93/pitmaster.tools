@@ -8,7 +8,12 @@ import { WeatherError } from './errors.js';
 import { fetchWithTimeout, type Fetcher } from './fetchWithTimeout.js';
 
 const OPEN_METEO_URL = 'https://api.open-meteo.com/v1/forecast';
-const DEFAULT_TIMEOUT_MS = 5000;
+// 3 s instead of 5 s — keeps total degraded-path wallclock (Open-Meteo
+// timeout + NWS hop1 + NWS hop2 + buffer) under 12 s so a single fail-over
+// stays comfortably inside Cloudflare paid-plan wallclock budgets and
+// doesn't turn into noticeably bad UX. Open-Meteo's p99 is well under
+// 3 s in practice.
+const DEFAULT_TIMEOUT_MS = 3000;
 
 // Open-Meteo sometimes returns null for individual hourly/daily values when
 // the underlying weather model has no data for that timestamp+variable

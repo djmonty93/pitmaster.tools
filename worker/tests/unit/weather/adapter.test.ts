@@ -137,9 +137,9 @@ describe('weather adapter failover', () => {
     expect(result.source).toBe('nws');
   });
 
-  it('throws when both sources fail and surfaces both attempts', async () => {
+  it('throws WeatherError("all_failed") when both sources fail, surfacing structured attempts', async () => {
     const openMeteoFetcher = scriptedFetcher([() => jsonResponse(503, {})]);
-    const nwsFetcher = scriptedFetcher([() => jsonResponse(503, {})]);
+    const nwsFetcher = scriptedFetcher([() => jsonResponse(504, {})]);
     try {
       await fetchForecast(39.1, -94.6, 2, {
         openMeteo: { fetcher: openMeteoFetcher },
@@ -148,9 +148,12 @@ describe('weather adapter failover', () => {
       expect.fail('expected to throw');
     } catch (err) {
       expect(err).toBeInstanceOf(WeatherError);
-      expect((err as WeatherError).message).toContain('all sources failed');
-      expect((err as WeatherError).message).toContain('open-meteo');
-      expect((err as WeatherError).message).toContain('nws');
+      const e = err as WeatherError;
+      expect(e.kind).toBe('all_failed');
+      expect(e.isRecoverable).toBe(false);
+      expect(e.attempts).toHaveLength(2);
+      expect(e.attempts[0]).toMatchObject({ source: 'open-meteo', kind: 'http_5xx', status: 503 });
+      expect(e.attempts[1]).toMatchObject({ source: 'nws', kind: 'http_5xx', status: 504 });
     }
   });
 });

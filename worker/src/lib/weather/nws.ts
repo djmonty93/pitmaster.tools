@@ -14,7 +14,10 @@ import { WeatherError } from './errors.js';
 import { fetchWithTimeout, type Fetcher } from './fetchWithTimeout.js';
 
 const NWS_BASE_URL = 'https://api.weather.gov';
-const DEFAULT_TIMEOUT_MS = 5000;
+// 4 s per hop; NWS does two hops so the worst-case NWS wallclock is ~8 s.
+// Combined with Open-Meteo's 3 s primary, total fail-over wallclock caps
+// at ~11 s — within Cloudflare paid-plan wallclock budgets.
+const DEFAULT_TIMEOUT_MS = 4000;
 const DEFAULT_USER_AGENT = 'pitmaster.tools (contact@pitmaster.tools)';
 
 const PointsResponse = z.object({
@@ -35,7 +38,11 @@ const NumberValue = z.object({ value: z.number().nullable() });
 const HourlyPeriod = z.object({
   startTime: z.string(),
   temperature: z.number(),
-  temperatureUnit: z.literal('F'),
+  // NWS emits 'F' for the CONUS but occasionally 'C' for non-CONUS
+  // offices (Alaska Region, Pacific Region). Accept both and convert
+  // inside normalize so a single mis-configured office doesn't break
+  // fail-over for every CONUS request that happens to reach NWS first.
+  temperatureUnit: z.enum(['F', 'C']),
   windSpeed: z.string(),
   windGust: z.string().nullable().optional(),
   probabilityOfPrecipitation: NumberValue.nullable().optional(),
@@ -158,8 +165,12 @@ function normalize(periods: z.infer<typeof HourlyPeriod>[], days: number): Weath
   for (const p of periods) {
     const date = p.startTime.slice(0, 10); // YYYY-MM-DD from ISO timestamp
     const bucket = byDate.get(date) ?? [];
-    const tempF = p.temperature;
-    const rh = numberOr(p.relativeHumidity, 0);
+    const tempF = p.temperatureUnit === 'C' ? (p.temperature * 9) / 5 + 32 : p.temperature;
+    // 50 % RH is the conservative default when NWS omits the field:
+    // 0 % implies impossibly dry air and biases the score; 100 % implies
+    // saturated air and over-states stall risk. 50 % keeps the Magnus
+    // dewpoint reasonable without anchoring scoring in either direction.
+    const rh = p.relativeHumidity?.value ?? 50;
     bucket.push({
       t: p.startTime,
       tempF,
