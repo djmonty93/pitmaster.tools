@@ -102,11 +102,10 @@ export function scoreDay(input: ScoreInput): ScoreResult {
   //
   // NWS hourly forecasts commonly omit `windGust` entirely — the adapter
   // turns that into `gustMphMax: 0` while preserving the sustained wind
-  // in `windMphMean`. So a windy NWS day would score zero wind penalty
-  // if we read gust alone. Use whichever is higher of the reported gust
-  // and a sustained-wind upper-bound estimate (windMphMean × 1.4 —
-  // standard gust factor for inland CONUS).
-  const effectiveGust = Math.max(day.gustMphMax, day.windMphMean * 1.4);
+  // in `windMphMean`. Detect that absent-not-zero case and fall back to
+  // a sustained-wind upper bound (windMphMean × 1.4, the CONUS inland
+  // gust factor); otherwise trust the reported gust value verbatim.
+  const effectiveGust = day.gustMphMax > 0 ? day.gustMphMax : day.windMphMean * 1.4;
   const windRaw = Math.max(0, (effectiveGust - 10) / 25);
   const windPenalty = clamp01(windRaw) * 20 * COOKER_WIND_SENSITIVITY[cooker];
   if (effectiveGust >= 25) {

@@ -37,14 +37,29 @@ describe('scoreDay', () => {
 
   it('penalizes sustained wind even when gustMphMax is missing (NWS shape)', () => {
     // NWS often omits windGust; the adapter then sets gustMphMax=0 but
-    // keeps windMphMean. Without the gust factor, this day would skate
-    // free. Effective gust = max(0, 25 * 1.4) = 35 → ~30-point penalty
-    // for an offset.
+    // keeps windMphMean. Effective gust = 0 → fall back to 25 × 1.4 = 35
+    // → ~30-point penalty for an offset.
     const sustainedNoGust = fakeDay({ gustMphMax: 0, windMphMean: 25 });
     const calm = fakeDay({ gustMphMax: 0, windMphMean: 5 });
     const sustainedScore = scoreDay({ cut: 'pork-loin', cooker: 'offset', day: sustainedNoGust }).score;
     const calmScore = scoreDay({ cut: 'pork-loin', cooker: 'offset', day: calm }).score;
     expect(calmScore - sustainedScore).toBeGreaterThan(20);
+  });
+
+  it('trusts a reported low gust even when sustained × 1.4 would be higher', () => {
+    // Open-Meteo can return a true low gust below the 1.4× sustained
+    // estimate (sheltered terrain, smooth airflow). Don't override the
+    // reported value — it's the truer signal when present.
+    const reportedLowGust = fakeDay({ gustMphMax: 8, windMphMean: 15 });
+    const res = scoreDay({ cut: 'pork-loin', cooker: 'offset', day: reportedLowGust });
+    // 8 mph gust is below the 10 mph threshold → zero wind penalty,
+    // and the reason should NOT mention "Gusts to …" because the
+    // effective gust is 8, below the 25 mph reason threshold.
+    expect(res.reasons.some((r) => r.includes('Gusts to'))).toBe(false);
+    // 15 × 1.4 = 21 would have been below 25 too, so we can also assert
+    // the score isn't dragged down by a phantom gust above the
+    // threshold — at 8 mph effective, score loses 0 wind points.
+    expect(res.score).toBeGreaterThanOrEqual(85);
   });
 
   it('applies cooker-specific wind sensitivity (offset > electric)', () => {

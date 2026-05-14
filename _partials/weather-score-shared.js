@@ -113,10 +113,10 @@
     var windSensitivity = COOKER_WIND_SENSITIVITY[cooker];
     // NWS hourly forecasts commonly omit windGust; the adapter turns
     // that into gustMphMax = 0 while preserving the sustained wind in
-    // windMphMean. Use whichever is higher (gust or 1.4× sustained —
-    // standard CONUS inland gust factor) so an NWS-only day with no
-    // gust field still gets a wind penalty.
-    var effectiveGust = Math.max(day.gustMphMax, day.windMphMean * 1.4);
+    // windMphMean. Detect the absent-not-zero case and fall back to
+    // windMphMean × 1.4 (CONUS inland gust factor); otherwise trust
+    // the reported gust verbatim.
+    var effectiveGust = day.gustMphMax > 0 ? day.gustMphMax : day.windMphMean * 1.4;
     var windRaw = Math.max(0, (effectiveGust - 10) / 25);
     var windPenalty = clamp01(windRaw) * 20 * windSensitivity;
     if (effectiveGust >= 25) {
