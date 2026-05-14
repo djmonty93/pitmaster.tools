@@ -2,8 +2,9 @@
 // Only wetBulb_F and SP_COOKER_RH are reused — the rest of smoke-physics.js
 // is cook-time machinery, irrelevant to weather scoring.
 //
-// Parity with the JS implementation is enforced by
-// worker/tests/unit/physics-parity.test.ts.
+// Step 3 of the Best Smoke Days plan adds the parity Vitest spec that
+// asserts this TS port matches the JS source within 0.01 °F across 20
+// fixed inputs.
 
 import type { Cooker } from './types.js';
 

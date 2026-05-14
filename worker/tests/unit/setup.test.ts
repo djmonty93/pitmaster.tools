@@ -12,14 +12,20 @@ describe('Step 1 scaffolding', () => {
   it('shared physics constants are exposed for every cooker', () => {
     const cookers: Cooker[] = ['offset', 'pellet', 'kamado', 'kettle', 'electric'];
     for (const c of cookers) {
-      expect(COOKER_RH[c]).toBeGreaterThan(0);
+      const rh = COOKER_RH[c];
+      expect(rh).toBeGreaterThan(0);
+      expect(rh).toBeLessThan(100);
     }
   });
 
-  it('wetBulbF returns a finite number for plausible weather', () => {
-    const tw = wetBulbF(225, 12);
+  it('wetBulbF returns a plausible outdoor wet-bulb', () => {
+    // 85 °F / 50 % RH is a hot-and-humid summer day; wet-bulb should land
+    // in the mid-70s. Stull (2011) gives ~73.6 °F for this input — assert
+    // a tight window so a regression in the port is caught.
+    const tw = wetBulbF(85, 50);
     expect(Number.isFinite(tw)).toBe(true);
-    expect(tw).toBeLessThan(225);
+    expect(tw).toBeGreaterThan(70);
+    expect(tw).toBeLessThan(76);
   });
 
   it('ScoreInput type wires up through tsconfig paths', () => {

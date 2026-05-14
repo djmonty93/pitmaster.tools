@@ -1,23 +1,23 @@
 import { cloudflareTest } from '@cloudflare/vitest-pool-workers';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// Resolve @shared/* against packages/shared/src/ via a URL pointer rather
+// than `node:path`, which lets the worker tsconfig drop the "node" types
+// reference for src/ and tests/.
+const sharedDir = new URL('../packages/shared/src/', import.meta.url).pathname;
 
 export default defineConfig({
   plugins: [
     cloudflareTest({
+      // compatibility_date and compatibility_flags are sourced from
+      // wrangler.jsonc — one source of truth across `wrangler dev`,
+      // `wrangler deploy`, and the Miniflare-backed test pool.
       wrangler: { configPath: '../wrangler.jsonc' },
-      miniflare: {
-        compatibilityDate: '2026-04-12',
-        compatibilityFlags: ['nodejs_compat'],
-      },
     }),
   ],
   resolve: {
     alias: {
-      '@shared': path.resolve(__dirname, '../packages/shared/src'),
+      '@shared': sharedDir,
     },
   },
 });
