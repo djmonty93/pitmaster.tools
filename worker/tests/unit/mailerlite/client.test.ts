@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createMailerLiteClient } from '../../../src/lib/mailerlite/client';
+import { createMailerLiteClient, hashKey } from '../../../src/lib/mailerlite/client';
 import { MailerLiteError } from '../../../src/lib/mailerlite/errors';
 
 interface CapturedCall {
@@ -51,7 +51,7 @@ function makeFetcher(
 }
 
 describe('mailerlite client — subscribe', () => {
-  it('POSTs /api/subscribers with Bearer token, idempotency key, and tag fields', async () => {
+  it('POSTs /api/subscribers with Bearer token, hashed idempotency key, and tag fields', async () => {
     const captured: CapturedCall[] = [];
     const fetcher = makeFetcher(
       [
@@ -77,7 +77,11 @@ describe('mailerlite client — subscribe', () => {
     expect(call.method).toBe('POST');
     expect(call.headers['Authorization']).toBe('Bearer ml_test_key');
     expect(call.headers['Content-Type']).toBe('application/json');
-    expect(call.headers['Idempotency-Key']).toBe('subscribe:pitmaster@example.com');
+    const expectedKey = await hashKey('subscribe', 'pitmaster@example.com');
+    expect(call.headers['Idempotency-Key']).toBe(expectedKey);
+    // The key MUST NOT contain the plaintext email — it's the whole
+    // point of hashing rather than concatenating.
+    expect(call.headers['Idempotency-Key']).not.toContain('pitmaster@example.com');
     expect(call.body).toEqual({
       email: 'pitmaster@example.com',
       status: 'active',
@@ -90,15 +94,19 @@ describe('mailerlite client — subscribe', () => {
     });
   });
 
-  it('lowercases email in the idempotency key so case-only differences collapse', async () => {
+  it('collapses case-only-different emails to the same idempotency key', async () => {
     const captured: CapturedCall[] = [];
     const fetcher = makeFetcher(
-      [{ status: 200, body: { data: { id: 'sub_1', email: 'Mixed@Example.COM', status: 'active' } } }],
+      [
+        { status: 200, body: { data: { id: 's1', email: 'Mixed@Example.COM', status: 'active' } } },
+        { status: 200, body: { data: { id: 's2', email: 'mixed@example.com', status: 'active' } } },
+      ],
       captured
     );
     const client = createMailerLiteClient({ apiKey: 'k', fetcher });
     await client.subscribe({ email: 'Mixed@Example.COM' });
-    expect(captured[0]!.headers['Idempotency-Key']).toBe('subscribe:mixed@example.com');
+    await client.subscribe({ email: 'mixed@example.com' });
+    expect(captured[0]!.headers['Idempotency-Key']).toBe(captured[1]!.headers['Idempotency-Key']);
   });
 
   it('tolerates a flat (un-wrapped) response shape for sandbox parity', async () => {
@@ -131,16 +139,22 @@ describe('mailerlite client — subscribe', () => {
 
   it('throws http_4xx on 422 and shouldRetry is false', async () => {
     const captured: CapturedCall[] = [];
-    const fetcher = makeFetcher([{ status: 422, body: { errors: { email: ['bad'] } } }], captured);
+    const fetcher = makeFetcher(
+      [{ status: 422, body: { errors: { email: ['already exists for pitmaster@example.com'] } } }],
+      captured
+    );
     const client = createMailerLiteClient({ apiKey: 'k', fetcher });
     try {
-      await client.subscribe({ email: 'a@b.com' });
+      await client.subscribe({ email: 'pitmaster@example.com' });
       expect.fail('expected throw');
     } catch (err) {
       const e = err as MailerLiteError;
       expect(e.kind).toBe('http_4xx');
       expect(e.status).toBe(422);
       expect(e.shouldRetry).toBe(false);
+      // The 4xx body could echo the email — the error MUST NOT carry it.
+      expect(e.message).not.toContain('pitmaster@example.com');
+      expect(e.message).not.toContain('already exists');
     }
   });
 
@@ -194,18 +208,36 @@ describe('mailerlite client — subscribe', () => {
     }
   });
 
-  it('rejects obviously bad emails before issuing a request', async () => {
+  it('redacts Bearer tokens that show up inside a network error message', async () => {
     const captured: CapturedCall[] = [];
+    const fetcher: typeof fetch = async () => {
+      throw new Error(
+        'workerd fetch failed: Authorization: Bearer ml_super_secret_token while POST /api/subscribers'
+      );
+    };
+    const client = createMailerLiteClient({ apiKey: 'ml_super_secret_token', fetcher });
+    try {
+      await client.subscribe({ email: 'a@b.com' });
+      expect.fail('expected throw');
+    } catch (err) {
+      const e = err as MailerLiteError;
+      expect(e.kind).toBe('network');
+      expect(e.message).not.toContain('ml_super_secret_token');
+      expect(e.message).toMatch(/Bearer \[redacted\]|Authorization: \[redacted\]/);
+    }
+    expect(captured).toHaveLength(0);
+  });
+
+  it('rejects obviously bad emails before issuing a request', async () => {
     const fetcher = vi.fn();
     const client = createMailerLiteClient({ apiKey: 'k', fetcher: fetcher as unknown as typeof fetch });
     await expect(client.subscribe({ email: 'no-at-symbol' })).rejects.toThrow(/Invalid email/);
     expect(fetcher).not.toHaveBeenCalled();
-    expect(captured).toHaveLength(0);
   });
 });
 
 describe('mailerlite client — unsubscribe', () => {
-  it('PUTs status=unsubscribed against the email-keyed path', async () => {
+  it('PUTs status=unsubscribed against the email-keyed path with a hashed idempotency key', async () => {
     const captured: CapturedCall[] = [];
     const fetcher = makeFetcher([{ status: 200, body: { data: {} } }], captured);
     const client = createMailerLiteClient({ apiKey: 'k', fetcher });
@@ -215,7 +247,9 @@ describe('mailerlite client — unsubscribe', () => {
     expect(call.method).toBe('PUT');
     expect(call.url).toBe('https://connect.mailerlite.com/api/subscribers/gone%40example.com');
     expect(call.body).toEqual({ status: 'unsubscribed' });
-    expect(call.headers['Idempotency-Key']).toBe('unsubscribe:gone@example.com');
+    const expectedKey = await hashKey('unsubscribe', 'gone@example.com');
+    expect(call.headers['Idempotency-Key']).toBe(expectedKey);
+    expect(call.headers['Idempotency-Key']).not.toContain('gone@example.com');
   });
 
   it('accepts 204 No Content without trying to parse a body', async () => {
@@ -241,52 +275,14 @@ describe('mailerlite client — unsubscribe', () => {
   });
 });
 
-describe('mailerlite client — sendCampaign', () => {
-  it('POSTs to /api/campaigns/:id/actions/send and produces a stable idempotency key', async () => {
-    const captured: CapturedCall[] = [];
-    const fetcher = makeFetcher([{ status: 200, body: { data: { ok: true } } }], captured);
-    const client = createMailerLiteClient({ apiKey: 'k', fetcher });
-    const res = await client.sendCampaign({
-      campaignId: 'cmp_fri',
-      filter: { metro: 'kansas-city-mo' },
-    });
-    expect(res).toEqual({ campaignId: 'cmp_fri' });
-    expect(captured[0]!.method).toBe('POST');
-    expect(captured[0]!.url).toBe(
-      'https://connect.mailerlite.com/api/campaigns/cmp_fri/actions/send'
-    );
-    expect(captured[0]!.headers['Idempotency-Key']).toBe(
-      'send:cmp_fri:metro=kansas-city-mo'
-    );
-  });
-
-  it('uses an "all" suffix when no filter is provided so the key stays stable', async () => {
-    const captured: CapturedCall[] = [];
-    const fetcher = makeFetcher([{ status: 200, body: { data: {} } }], captured);
-    const client = createMailerLiteClient({ apiKey: 'k', fetcher });
-    await client.sendCampaign({ campaignId: 'cmp_x' });
-    expect(captured[0]!.headers['Idempotency-Key']).toBe('send:cmp_x:all');
-  });
-
-  it('orders filter keys deterministically so equivalent filters collapse', async () => {
-    const captured: CapturedCall[] = [];
-    const fetcher = makeFetcher(
-      [
-        { status: 200, body: { data: {} } },
-        { status: 200, body: { data: {} } },
-      ],
-      captured
-    );
-    const client = createMailerLiteClient({ apiKey: 'k', fetcher });
-    await client.sendCampaign({ campaignId: 'cmp_x', filter: { cut: 'brisket-flat', metro: 'austin-tx' } });
-    await client.sendCampaign({ campaignId: 'cmp_x', filter: { metro: 'austin-tx', cut: 'brisket-flat' } });
-    expect(captured[0]!.headers['Idempotency-Key']).toBe(captured[1]!.headers['Idempotency-Key']);
-  });
-});
-
 describe('mailerlite client — construction', () => {
   it('throws if apiKey is missing or empty', () => {
     expect(() => createMailerLiteClient({ apiKey: '' })).toThrow(/apiKey/);
+  });
+
+  it('throws if apiKey contains whitespace (paste-error guard)', () => {
+    expect(() => createMailerLiteClient({ apiKey: 'has space' })).toThrow(/whitespace/);
+    expect(() => createMailerLiteClient({ apiKey: 'has\nnewline' })).toThrow(/whitespace/);
   });
 
   it('respects an override baseUrl (sandbox / staging)', async () => {
