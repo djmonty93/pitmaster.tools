@@ -1,0 +1,137 @@
+/* weather-score-shared.js — browser-side mirror of
+   packages/shared/src/scoring.ts. Injected via
+   <!-- INJECT:weather-score-shared.js:script --> into every smoke-weather
+   page so the client can re-score on cut/cooker toggle without a worker
+   round-trip.
+
+   Behavior is pinned to the TS source by
+   worker/tests/unit/weather/scoring-parity.test.ts which runs both
+   implementations on the same fixtures and asserts identical scores.
+
+   IIFE pattern matches site-utils.js / smoke-physics.js: exposes a
+   global namespace, no module loader required. */
+(function (root) {
+  'use strict';
+
+  // ── Physics: wet-bulb (Stull 2011). Identical to smoke-physics.js. ─
+  function wetBulbF(Tdb_F, rh) {
+    var T = (Tdb_F - 32) * 5 / 9;
+    var tw = T * Math.atan(0.151977 * Math.pow(rh + 8.313659, 0.5))
+      + Math.atan(T + rh)
+      - Math.atan(rh - 1.676331)
+      + 0.00391838 * Math.pow(rh, 1.5) * Math.atan(0.023101 * rh)
+      - 4.686035;
+    return tw * 9 / 5 + 32;
+  }
+
+  var COOKER_RH = {
+    offset:   4,
+    pellet:   12,
+    kamado:   25,
+    kettle:   18,
+    electric: 45
+  };
+
+  var COOKER_WIND_SENSITIVITY = {
+    offset:   1.5,
+    pellet:   1.0,
+    kettle:   1.2,
+    kamado:   0.5,
+    electric: 0.1
+  };
+
+  var STALL_SENSITIVE = {
+    'brisket-flat':    true,
+    'brisket-packer':  true,
+    'pork-butt':       true,
+    'spare-ribs':      true,
+    'baby-back-ribs':  true,
+    'lamb-shoulder':   true
+  };
+
+  var PIT_TEMP_F = 225;
+
+  function clamp(x, lo, hi) {
+    if (x < lo) return lo;
+    if (x > hi) return hi;
+    return x;
+  }
+  function clamp01(x) { return clamp(x, 0, 1); }
+
+  function bandFor(score) {
+    if (score >= 85) return 'ideal';
+    if (score >= 70) return 'green';
+    if (score >= 50) return 'yellow';
+    return 'red';
+  }
+
+  function scoreDay(input) {
+    var cut = input.cut;
+    var cooker = input.cooker;
+    var day = input.day;
+    var reasons = [];
+
+    var precipPenalty = clamp01(
+      (day.precipProbPct / 100) * (1 + day.precipIn * 0.5)
+    ) * 40;
+    if (day.precipProbPct >= 60) {
+      reasons.push('High chance of rain (' + Math.round(day.precipProbPct) + '%)');
+    } else if (day.precipIn >= 0.25) {
+      reasons.push('Heavy rain expected (' + day.precipIn.toFixed(2) + '"' + ')');
+    }
+
+    var windRaw = Math.max(0, (day.gustMphMax - 10) / 25);
+    var windSensitivity = COOKER_WIND_SENSITIVITY[cooker];
+    if (windSensitivity === undefined) windSensitivity = 1.0;
+    var windPenalty = clamp01(windRaw) * 25 * windSensitivity;
+    if (day.gustMphMax >= 25) {
+      reasons.push('Gusts to ' + Math.round(day.gustMphMax) + ' mph (' + cooker + ' sensitivity)');
+    }
+
+    var coldPenalty = Math.max(0, (40 - day.tempLowF) / 30) * 15;
+    var hotPenalty = Math.max(0, (day.tempHighF - 90) / 20) * 15;
+    if (coldPenalty > 0) reasons.push('Cold start (' + Math.round(day.tempLowF) + ' °F low)');
+    if (hotPenalty > 0) reasons.push('Hot afternoon (' + Math.round(day.tempHighF) + ' °F high)');
+
+    var cookerBaseRh = COOKER_RH[cooker];
+    if (cookerBaseRh === undefined) cookerBaseRh = 12;
+    var cookerCavityRh = clamp(cookerBaseRh + day.rhMean * 0.15, 0, 100);
+    var wb = wetBulbF(PIT_TEMP_F, cookerCavityRh);
+    var stallRiskPct = clamp(((wb - 110) / 50) * 100, 0, 100);
+    var stallPenalty = STALL_SENSITIVE[cut] ? (stallRiskPct / 100) * 20 : 0;
+    if (STALL_SENSITIVE[cut] && stallRiskPct >= 60) {
+      reasons.push('High stall risk for ' + cut + ' (cavity wet-bulb ' + wb.toFixed(0) + ' °F)');
+    }
+
+    var score = clamp(
+      100 - precipPenalty - windPenalty - coldPenalty - hotPenalty - stallPenalty,
+      0,
+      100
+    );
+
+    if (reasons.length === 0) reasons.push('Conditions look good');
+
+    return {
+      score: Math.round(score),
+      band: bandFor(score),
+      stallRiskPct: Math.round(stallRiskPct),
+      reasons: reasons,
+      confidence: day.confidence
+    };
+  }
+
+  function scoreForecast(cut, cooker, days) {
+    return days.map(function (d) { return scoreDay({ cut: cut, cooker: cooker, day: d }); });
+  }
+
+  root.WeatherScore = {
+    scoreDay: scoreDay,
+    scoreForecast: scoreForecast,
+    bandFor: bandFor,
+    wetBulbF: wetBulbF,
+    COOKER_RH: COOKER_RH,
+    COOKER_WIND_SENSITIVITY: COOKER_WIND_SENSITIVITY,
+    STALL_SENSITIVE: STALL_SENSITIVE,
+    PIT_TEMP_F: PIT_TEMP_F
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : window);
