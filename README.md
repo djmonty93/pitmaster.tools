@@ -72,6 +72,15 @@ verified, and rolled back independently.
   Parity guards: physics-parity test pins `wetBulbF` to the JS source at
   0.01 °F across 20 inputs; scoring-parity test pins TS ↔ JS scorers
   identical across 13 cuts × 5 cookers × 8 scenarios.
+- **Step 5.** D1 migrations in `worker/migrations/` — `subscribers`,
+  `metros` (seeded with 50 US metros, validated for IANA timezone +
+  5-digit ZIP + url-safe slugs), `events`, `mailerlite_retry`, and
+  `articles`. Enum-shaped columns use `CHECK` constraints; `articles.metro_slug`
+  references `metros.slug`. Apply with
+  `wrangler d1 migrations apply SMOKE_DB`. Unit tests run them against
+  an in-memory Miniflare D1 via a quote-aware `splitStatements` helper
+  in `worker/tests/helpers/d1.ts` (handles `;` and `--` inside string
+  literals, SQLite's `''` escape).
 
 ## Tooling rules
 
