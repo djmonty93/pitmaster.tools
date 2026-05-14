@@ -35,6 +35,18 @@ describe('scoreDay', () => {
     expect(dryScore - wetScore).toBeGreaterThan(30);
   });
 
+  it('penalizes sustained wind even when gustMphMax is missing (NWS shape)', () => {
+    // NWS often omits windGust; the adapter then sets gustMphMax=0 but
+    // keeps windMphMean. Without the gust factor, this day would skate
+    // free. Effective gust = max(0, 25 * 1.4) = 35 → ~30-point penalty
+    // for an offset.
+    const sustainedNoGust = fakeDay({ gustMphMax: 0, windMphMean: 25 });
+    const calm = fakeDay({ gustMphMax: 0, windMphMean: 5 });
+    const sustainedScore = scoreDay({ cut: 'pork-loin', cooker: 'offset', day: sustainedNoGust }).score;
+    const calmScore = scoreDay({ cut: 'pork-loin', cooker: 'offset', day: calm }).score;
+    expect(calmScore - sustainedScore).toBeGreaterThan(20);
+  });
+
   it('applies cooker-specific wind sensitivity (offset > electric)', () => {
     const gusty = fakeDay({ gustMphMax: 30, windMphMean: 18 });
     const offsetScore = scoreDay({ cut: 'pork-loin', cooker: 'offset', day: gusty }).score;

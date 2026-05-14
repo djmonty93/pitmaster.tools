@@ -98,14 +98,19 @@ export function scoreDay(input: ScoreInput): ScoreResult {
 
   // ── Wind / gusts ───────────────────────────────────────────────────
   // 10 mph is comfortable; full penalty at ~35 mph. Cooker sensitivity
-  // amplifies (offset 1.5×) or damps (electric 0.1×) the effect. Base
-  // penalty 20 (was 25) — at 35 mph the offset takes ~30 points, the
-  // electric ~2 — meaningful gap without nuking the score in moderate
-  // gusts.
-  const windRaw = Math.max(0, (day.gustMphMax - 10) / 25);
+  // amplifies (offset 1.5×) or damps (electric 0.1×) the effect.
+  //
+  // NWS hourly forecasts commonly omit `windGust` entirely — the adapter
+  // turns that into `gustMphMax: 0` while preserving the sustained wind
+  // in `windMphMean`. So a windy NWS day would score zero wind penalty
+  // if we read gust alone. Use whichever is higher of the reported gust
+  // and a sustained-wind upper-bound estimate (windMphMean × 1.4 —
+  // standard gust factor for inland CONUS).
+  const effectiveGust = Math.max(day.gustMphMax, day.windMphMean * 1.4);
+  const windRaw = Math.max(0, (effectiveGust - 10) / 25);
   const windPenalty = clamp01(windRaw) * 20 * COOKER_WIND_SENSITIVITY[cooker];
-  if (day.gustMphMax >= 25) {
-    reasons.push(`Gusts to ${Math.round(day.gustMphMax)} mph (${cooker} sensitivity)`);
+  if (effectiveGust >= 25) {
+    reasons.push(`Gusts to ${Math.round(effectiveGust)} mph (${cooker} sensitivity)`);
   }
 
   // ── Temperature extremes ───────────────────────────────────────────

@@ -111,10 +111,16 @@
       throw new Error('unknown cut: ' + cut);
     }
     var windSensitivity = COOKER_WIND_SENSITIVITY[cooker];
-    var windRaw = Math.max(0, (day.gustMphMax - 10) / 25);
+    // NWS hourly forecasts commonly omit windGust; the adapter turns
+    // that into gustMphMax = 0 while preserving the sustained wind in
+    // windMphMean. Use whichever is higher (gust or 1.4× sustained —
+    // standard CONUS inland gust factor) so an NWS-only day with no
+    // gust field still gets a wind penalty.
+    var effectiveGust = Math.max(day.gustMphMax, day.windMphMean * 1.4);
+    var windRaw = Math.max(0, (effectiveGust - 10) / 25);
     var windPenalty = clamp01(windRaw) * 20 * windSensitivity;
-    if (day.gustMphMax >= 25) {
-      reasons.push('Gusts to ' + Math.round(day.gustMphMax) + ' mph (' + cooker + ' sensitivity)');
+    if (effectiveGust >= 25) {
+      reasons.push('Gusts to ' + Math.round(effectiveGust) + ' mph (' + cooker + ' sensitivity)');
     }
 
     var coldPenalty = Math.max(0, (40 - tempLow) / 30) * 15;
