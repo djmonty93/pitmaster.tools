@@ -14,6 +14,7 @@ pitmaster.tools/
     generate-metros.js   emits Best Smoke Days metro pages before build.js
   worker/                Cloudflare Worker — TypeScript, tested with Vitest + Miniflare
     src/index.ts         entry; serves /api/* and falls through to ASSETS
+    src/lib/weather/     Open-Meteo + NWS adapter with failover
     tests/               unit + integration
     vitest.config.mts
     tsconfig.json
@@ -53,10 +54,14 @@ A phone-first, weather-aware companion to the calculators. Live URL:
 `docs/best-smoke-days-plan.md`; features are tracked F1–F22 inside.
 
 Implementation is shipping in 19 step-sized PRs so each piece can be reviewed,
-verified, and rolled back independently. The first PR (this one) lays the
-scaffolding — Worker entry, shared TS package, Vitest + Miniflare wiring,
-recursing `build.js`, and the `npm run build:metros` placeholder — without
-changing any user-visible page.
+verified, and rolled back independently.
+
+- **Step 1 (#33).** Scaffolding — Worker entry, shared TS package, Vitest +
+  Miniflare wiring, recursing `build.js`, `npm run build:metros` placeholder.
+- **Step 2.** Weather adapter under `worker/src/lib/weather/` — Open-Meteo
+  primary client + NWS failover, AbortController timeouts, zod-validated
+  responses tolerant to Open-Meteo null cells and NWS missing dewpoints
+  (Magnus formula fallback), origin-pinned second hop. 38 specs.
 
 ## Tooling rules
 
