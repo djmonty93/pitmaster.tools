@@ -100,9 +100,10 @@ verified, and rolled back independently.
   validates metro slugs and emits `metro:`/`cut:`/`cooker:`
   segmentation as MailerLite subscriber custom fields. The campaign
   send path is owned by Step 11 (Friday cron); Step 6 reserves the
-  `send` kind in the schema and drops any pre-existing `send` row with
-  an audit so the queue never spins on it. `MAILERLITE_API_KEY` belongs
-  in `wrangler secret put`; `.dev.vars.example` documents the local form.
+  `send` kind in the schema and `drain()`'s SQL filter excludes
+  `send` rows entirely, so any pre-existing rows wait untouched in
+  the queue for Step 11 to claim. `MAILERLITE_API_KEY` belongs in
+  `wrangler secret put`; `.dev.vars.example` documents the local form.
 
 ## Tooling rules
 
