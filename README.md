@@ -104,6 +104,66 @@ verified, and rolled back independently.
   `send` rows entirely, so any pre-existing rows wait untouched in
   the queue for Step 11 to claim. `MAILERLITE_API_KEY` belongs in
   `wrangler secret put`; `.dev.vars.example` documents the local form.
+- **Step 7.** Worker router (`worker/src/router.ts`) + handlers
+  (`worker/src/handlers/`) for the public API:
+  - `GET /api/health` — health probe.
+  - `GET /api/forecast?zip=&cut=&cooker=&days=` — F1/F8 scored
+    forecast. Resolves zip via `lib/geo/zipGeocoder.ts` (fast path: D1
+    metros exact zip match; slow path: Open-Meteo geocoding cached in
+    KV for 30 days); fetches forecast via the Step 4 cache wrapper;
+    runs the Step 3 scorer per day. Falls back to
+    `request.cf.postalCode` when `zip` is omitted (F10 geo-IP).
+  - `POST /api/subscribe` — subscribes to MailerLite, writes a row to
+    `subscribers`, queues onto `mailerlite_retry` on transient
+    failures (D1 row still created so the cron can resume), surfaces
+    4xx for caller-side rejections.
+  - `POST /api/unsubscribe` — flips MailerLite status, sets
+    `subscribers.unsubscribed_at`. 5xx queues; 4xx treated as soft
+    success.
+  - `GET /api/preferences?email=` and `PATCH /api/preferences` —
+    read/update cut and cooker. GET deliberately omits `zip` so a
+    leaked URL doesn't dump the subscriber's home zip; PATCH builds
+    the SET clause dynamically so a single-field update can't blow
+    away the other field.
+  - `GET /api/status` — operational JSON for the status page (Step
+    17): mailerlite retry queue depth (queued / parked / next),
+    subscriber counts, and the last 10 redacted error events from the
+    `events` table. `Cache-Control: no-store`.
+  - `GET /articles/:slug` — renders an article row from D1 as a full
+    HTML page (with the canonical/og/twitter/JSON-LD shape required
+    by `CLAUDE.md`). HTML-escapes the title and uses a custom
+    JSON-LD escaper that replaces `<`, `>`, `&`, U+2028, U+2029 with
+    their `\uXXXX` form so a hostile title can't break out of the
+    `<script>` block.
+  All non-matching paths fall through to `env.ASSETS.fetch` so the
+  static-site bundle still serves. A blanket try/catch at the worker
+  entrypoint maps any unhandled error to a 500 JSON envelope;
+  Sentry will hook this in Step 17.
+
+  **Auth model.** `/api/unsubscribe` and `/api/preferences`
+  (GET + PATCH) require an HMAC-SHA256 token tied to the email
+  (`worker/src/lib/auth/token.ts`). `/api/subscribe` issues the token
+  in its response (`token: <64 hex chars>`); subsequent calls send it
+  alongside the email. Without this auth check anyone could
+  mass-unsubscribe arbitrary emails or enumerate subscriber prefs.
+  The signing secret is the `SUBSCRIBER_TOKEN_SECRET` env binding —
+  rotate via `wrangler secret put` to invalidate all live tokens.
+
+  **Cache-Control.** `/api/forecast` is `public, max-age=300` ONLY
+  when the zip came from an explicit query param; the geo-IP fallback
+  path (zip from `request.cf.postalCode`) sets `private, max-age=60`
+  so a CDN edge doesn't serve visitor A's metro forecast to visitor B
+  with the same bare URL. `/api/status` is always `no-store`.
+  `/articles/:slug` is `public, max-age=300` on a 200 hit and 60s on
+  the 404 page.
+
+  **body_html sanitization.** Article body HTML is rendered through
+  a defensive `sanitizeBodyHtml` pass that strips `<script>`,
+  `<iframe>`, `<object>`, `<embed>`, `<link>`, `<meta>`, `<style>`,
+  any `on*="..."` event handlers, and `javascript:` / `data:` URLs in
+  `href`/`src`. The article writer (Step 13) is still trusted, but
+  this prevents a single bad row from becoming stored XSS on a
+  marketing page.
 
 ## Tooling rules
 

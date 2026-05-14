@@ -41,5 +41,11 @@
   // MAILERLITE_API_KEY — Bearer token for the MailerLite Connect API,
   // used by worker/src/lib/mailerlite/client.ts. Provisioned with
   // `wrangler secret put MAILERLITE_API_KEY`; never committed.
+  //
+  // SUBSCRIBER_TOKEN_SECRET — HMAC-SHA256 secret used to sign tokens
+  // that prove email ownership on /api/unsubscribe and
+  // /api/preferences. Provisioned with `wrangler secret put
+  // SUBSCRIBER_TOKEN_SECRET`. Rotate to invalidate all live tokens.
+  //
   // Local dev: copy .dev.vars.example to .dev.vars and fill in.
 }
