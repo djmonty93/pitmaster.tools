@@ -8,7 +8,7 @@
 // raw `body_html` inside a known shell; Step 13 can iterate on the
 // shell when the actual templates land.
 
-import { html, jsonError, type RouteContext } from '../router.js';
+import { html, type RouteContext } from '../router.js';
 
 interface ArticleRow {
   slug: string;
@@ -27,7 +27,11 @@ const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 export async function handleArticles(rc: RouteContext): Promise<Response> {
   const slug = rc.params['slug'];
   if (!slug || !SLUG_RE.test(slug)) {
-    return jsonError(400, 'invalid_slug', 'Article slug must be lowercase letters, digits, and dashes');
+    // HTML response for a 4xx on an HTML route — same shape as the
+    // 404 page so the user's browser shows our shell instead of a
+    // raw JSON envelope. Status 400 + noindex keeps it out of search
+    // results.
+    return html(400, render404(slug ?? ''), { 'Cache-Control': 'no-store' });
   }
   const row = await rc.env.SMOKE_DB.prepare(
     `SELECT slug, kind, metro_slug, title, body_html, body_text, hero_band, published_at, updated_at
@@ -58,19 +62,35 @@ export async function handleArticles(rc: RouteContext): Promise<Response> {
 // stored XSS on a marketing page.
 //
 // Removed:
-//   - <script>...</script> and self-closing variants
-//   - <iframe>...</iframe>
-//   - <object>, <embed>, <link>, <meta> (anywhere in body)
-//   - `on*="..."`-style event-handler attributes
-//   - `javascript:` and `data:` URLs in href / src
+//   - <script>, <iframe>, <object>, <embed>, <link>, <meta>, <style>,
+//     <svg>, <base>, <form> (anywhere in body)
+//   - `on*="..."`-style event-handler attributes (quoted + unquoted)
+//   - `javascript:`, `data:`, `vbscript:` URLs in href / src
+//     (quoted + unquoted variants)
+//
+// Implementation note: a single-pass regex chain is bypassable by
+// nested/broken tag ordering — e.g. `<scr<script>ipt>` reassembles
+// into `<script>` after one replacement. We loop until the output is
+// stable to close that hole. A cap on iterations prevents a
+// pathological adversarial input from spinning forever.
 function sanitizeBodyHtml(input: string): string {
-  return input
-    .replace(/<\/?(?:script|iframe|object|embed|link|meta|style)\b[^>]*>/gi, '')
-    .replace(/\son[a-z]+\s*=\s*"[^"]*"/gi, '')
-    .replace(/\son[a-z]+\s*=\s*'[^']*'/gi, '')
-    .replace(/\son[a-z]+\s*=\s*[^\s>]+/gi, '')
-    .replace(/(?:href|src)\s*=\s*"\s*(?:javascript|data):[^"]*"/gi, '')
-    .replace(/(?:href|src)\s*=\s*'\s*(?:javascript|data):[^']*'/gi, '');
+  const passes = [
+    /<\/?(?:script|iframe|object|embed|link|meta|style|svg|base|form)\b[^>]*>/gi,
+    /\son[a-z]+\s*=\s*"[^"]*"/gi,
+    /\son[a-z]+\s*=\s*'[^']*'/gi,
+    /\son[a-z]+\s*=\s*[^\s>]+/gi,
+    /(?:href|src)\s*=\s*"\s*(?:javascript|data|vbscript)\s*:[^"]*"/gi,
+    /(?:href|src)\s*=\s*'\s*(?:javascript|data|vbscript)\s*:[^']*'/gi,
+    /(?:href|src)\s*=\s*(?:javascript|data|vbscript)\s*:[^\s>]*/gi,
+  ];
+  let out = input;
+  for (let i = 0; i < 8; i++) {
+    let next = out;
+    for (const re of passes) next = next.replace(re, '');
+    if (next === out) return out;
+    out = next;
+  }
+  return out;
 }
 
 function escapeHtml(s: string): string {

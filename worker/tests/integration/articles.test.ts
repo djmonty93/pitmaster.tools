@@ -89,12 +89,77 @@ describe('GET /articles/:slug', () => {
     expect(body).toContain('\\u003c/title\\u003e\\u003cscript\\u003e');
   });
 
-  it('400s on an invalid slug shape', async () => {
+  it('400s as HTML (not JSON) on an invalid slug shape', async () => {
     const res = await handleArticles(
       buildContext(new Request('https://x/articles/Has%20Space'), { slug: 'Has Space' })
     );
     expect(res.status).toBe(400);
-    expect(await res.json()).toMatchObject({ error: 'invalid_slug' });
+    expect(res.headers.get('Content-Type')).toMatch(/^text\/html/);
+    const body = await res.text();
+    expect(body).toContain('Article not found');
+    expect(body).toContain('<meta name="robots" content="noindex, follow">');
+  });
+
+  it('defeats the nested-tag sanitizer bypass — `<scr<script>ipt>` does not reassemble', async () => {
+    const now = Date.now();
+    await DB.prepare(
+      `INSERT INTO articles (slug, kind, title, body_html, body_text, hero_band, published_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    )
+      .bind(
+        'nested-attack',
+        'weekly-summary',
+        'ok',
+        // After a single regex pass, the inner `<script>` is
+        // removed, but the outer `<scr...ipt>` rejoins into a fresh
+        // `<script>` — the sanitizer must iterate until stable.
+        '<scr<script>ipt>alert(99)</scr</script>ipt>',
+        'x',
+        'green',
+        now,
+        now
+      )
+      .run();
+    const res = await handleArticles(
+      buildContext(new Request('https://x/articles/nested-attack'), {
+        slug: 'nested-attack',
+      })
+    );
+    const body = await res.text();
+    // The sanitizer strips the `<script>` AND `</script>` tags — the
+    // inner text "alert(99)" can survive as plaintext because it's
+    // no longer wrapped in a script element. The real invariant is:
+    // no inline `<script>` tag (i.e. a script element WITHOUT the
+    // application/ld+json type that we emit ourselves) survives in
+    // the rendered article body.
+    expect(body).not.toMatch(/<script(?!\s+type="application\/ld\+json")\b/i);
+    // Belt: no script element of any kind wraps the payload.
+    expect(body).not.toMatch(/<script[^>]*>[^<]*alert/i);
+  });
+
+  it('strips unquoted javascript: URLs in href', async () => {
+    const now = Date.now();
+    await DB.prepare(
+      `INSERT INTO articles (slug, kind, title, body_html, body_text, hero_band, published_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    )
+      .bind(
+        'unquoted-js',
+        'weekly-summary',
+        'ok',
+        '<a href=javascript:alert(7)>click</a>',
+        'x',
+        'green',
+        now,
+        now
+      )
+      .run();
+    const res = await handleArticles(
+      buildContext(new Request('https://x/articles/unquoted-js'), { slug: 'unquoted-js' })
+    );
+    const body = await res.text();
+    expect(body).not.toMatch(/javascript:/i);
+    expect(body).not.toContain('alert(7)');
   });
 
   it('strips <script>, <iframe>, and on*= handlers from body_html as defense-in-depth', async () => {

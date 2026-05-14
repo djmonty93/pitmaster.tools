@@ -73,7 +73,14 @@ export async function dispatch(
     }
     const params: Record<string, string> = {};
     for (let i = 0; i < route.paramNames.length; i++) {
-      params[route.paramNames[i]!] = decodeURIComponent(m[i + 1]!);
+      try {
+        params[route.paramNames[i]!] = decodeURIComponent(m[i + 1]!);
+      } catch (_err) {
+        // Malformed percent-encoding in a path param (e.g. `%E0%A4`).
+        // Map to 400 instead of letting URIError bubble to the worker's
+        // catch-all 500 — the caller passed garbage, not us.
+        return jsonError(400, 'invalid_path_param', `Path param ${route.paramNames[i]} is not valid percent-encoded`);
+      }
     }
     return await route.handler({ request, env, ctx, url, params });
   }
