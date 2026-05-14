@@ -86,6 +86,17 @@ describe('fetchNws', () => {
     expect(days[0]?.dewPointMeanF).toBeCloseTo(60.35, 1);
   });
 
+  it('throws WeatherError("malformed") on empty periods', async () => {
+    await expect(
+      fetchNws(39.1, -94.6, 7, {
+        fetcher: chainedFetcher(
+          { status: 200, body: nwsPoints },
+          { status: 200, body: { properties: { periods: [] } } }
+        ),
+      })
+    ).rejects.toMatchObject({ source: 'nws', kind: 'malformed' });
+  });
+
   it('derives dewpoint from temp + RH via Magnus when NWS omits it', async () => {
     // Two periods with dewpoint = null. Magnus(80°F, 55% RH) ≈ 62.4°F.
     const noDewpointPayload = {

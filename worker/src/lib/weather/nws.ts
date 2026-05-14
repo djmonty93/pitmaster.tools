@@ -106,7 +106,14 @@ export async function fetchNws(
     throw new WeatherError('nws', 'malformed', `forecastHourly: ${hourly.error.message}`);
   }
 
-  return normalize(hourly.data.properties.periods, days);
+  const usable = normalize(hourly.data.properties.periods, days);
+  if (usable.length === 0) {
+    // Empty periods → NWS has no forecast for this grid right now. Surface
+    // it as malformed so the adapter's two-source loop reports a proper
+    // "all sources failed" rather than returning success with zero days.
+    throw new WeatherError('nws', 'malformed', 'forecastHourly returned no periods');
+  }
+  return usable;
 }
 
 async function readJson(res: Response): Promise<unknown> {
