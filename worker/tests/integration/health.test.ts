@@ -11,7 +11,7 @@ describe('worker entrypoint', () => {
     expect(res.status).toBe(200);
     const body = await res.json<{ status: string; version: string }>();
     expect(body.status).toBe('ok');
-    expect(body.version).toBe('setup');
+    expect(body.version).toBe('step-7');
   });
 
   it('non-API path is not served by the /api/health handler', async () => {

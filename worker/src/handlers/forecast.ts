@@ -1,0 +1,126 @@
+// GET /api/forecast
+//
+// Query params (all optional except the bare-minimum behavior):
+//   zip       5-digit US zip; defaults to request.cf.postalCode when present
+//   cut       Cut enum; defaults to 'brisket-packer' if absent
+//   cooker    Cooker enum; defaults to 'offset'
+//   days      number of forecast days (1-7); defaults to 7
+//
+// Pipeline:
+//   zip → resolveZip (KV + D1 metros fast path)
+//       → fetchForecastCached (Step 4 KV-wrapped Step 2 adapter)
+//       → scoreDay per WeatherDay (Step 3 scoring engine)
+//   → ForecastResponse JSON
+//
+// All recoverable failures are mapped to JSON errors. The cron context
+// is not in play here (this is a user-facing request), so failures
+// bubble back as 5xx for the client to retry — no D1 retry-queue
+// hop.
+
+import { scoreDay } from '@shared/scoring';
+import type { Cooker, Cut, ForecastResponse } from '@shared/types';
+import { fetchForecastCached } from '../lib/cache/weather.js';
+import { GeocoderError, resolveZip } from '../lib/geo/zipGeocoder.js';
+import { WeatherError } from '../lib/weather/errors.js';
+import { json, jsonError, type RouteContext } from '../router.js';
+
+const ALL_CUTS: ReadonlyArray<Cut> = [
+  'brisket-flat',
+  'brisket-packer',
+  'pork-butt',
+  'spare-ribs',
+  'baby-back-ribs',
+  'pork-loin',
+  'whole-chicken',
+  'spatchcock-chicken',
+  'chicken-thighs',
+  'whole-turkey',
+  'turkey-breast',
+  'fish',
+  'lamb-shoulder',
+];
+
+const ALL_COOKERS: ReadonlyArray<Cooker> = ['offset', 'pellet', 'kamado', 'kettle', 'electric'];
+
+const DEFAULT_CUT: Cut = 'brisket-packer';
+const DEFAULT_COOKER: Cooker = 'offset';
+const DEFAULT_DAYS = 7;
+
+export async function handleForecast(rc: RouteContext): Promise<Response> {
+  const params = rc.url.searchParams;
+  const zipParam = params.get('zip')?.trim();
+  // Geo-IP default (F10): use Cloudflare's request.cf.postalCode when
+  // the caller didn't specify a zip. The cf object is undefined in
+  // local dev but always present in production at the edge.
+  const cfPostal =
+    (rc.request as Request & { cf?: { postalCode?: string; country?: string } }).cf?.postalCode ?? null;
+  const zip = zipParam && zipParam.length > 0 ? zipParam : cfPostal;
+  if (!zip) {
+    return jsonError(400, 'missing_zip', 'Provide ?zip=<5-digit US zip>');
+  }
+
+  const cutParam = (params.get('cut') ?? DEFAULT_CUT) as Cut;
+  if (!ALL_CUTS.includes(cutParam)) {
+    return jsonError(400, 'invalid_cut', `cut must be one of: ${ALL_CUTS.join(', ')}`);
+  }
+
+  const cookerParam = (params.get('cooker') ?? DEFAULT_COOKER) as Cooker;
+  if (!ALL_COOKERS.includes(cookerParam)) {
+    return jsonError(400, 'invalid_cooker', `cooker must be one of: ${ALL_COOKERS.join(', ')}`);
+  }
+
+  const daysRaw = params.get('days');
+  const days = daysRaw ? Number.parseInt(daysRaw, 10) : DEFAULT_DAYS;
+  if (!Number.isInteger(days) || days < 1 || days > 7) {
+    return jsonError(400, 'invalid_days', 'days must be an integer 1-7');
+  }
+
+  let location;
+  try {
+    location = await resolveZip(rc.env.WEATHER_KV, rc.env.SMOKE_DB, zip);
+  } catch (err) {
+    if (err instanceof GeocoderError) {
+      if (err.kind === 'invalid_zip' || err.kind === 'not_found') {
+        return jsonError(404, 'unknown_zip', `Could not resolve zip ${zip}`);
+      }
+      return jsonError(503, 'geocoder_unavailable', 'Upstream geocoder failed; try again shortly');
+    }
+    throw err;
+  }
+
+  let forecast;
+  try {
+    forecast = await fetchForecastCached(
+      rc.env.WEATHER_KV,
+      zip,
+      location.latitude,
+      location.longitude,
+      days
+    );
+  } catch (err) {
+    if (err instanceof WeatherError) {
+      return jsonError(503, 'weather_unavailable', 'Upstream weather sources failed; try again shortly');
+    }
+    throw err;
+  }
+
+  const scored = forecast.days.map((day) => ({
+    date: day.date,
+    day,
+    score: scoreDay({ cut: cutParam, cooker: cookerParam, day }),
+  }));
+
+  const response: ForecastResponse = {
+    zip,
+    metro: location.metroSlug ?? undefined,
+    source: forecast.source,
+    generatedAt: new Date().toISOString(),
+    days: scored,
+  };
+  return json(200, response, {
+    // Allow CDN edge caching for 5 min — the underlying KV cache is
+    // 30 min fresh, but a CDN hit avoids hitting the worker entirely
+    // for parametrically identical queries.
+    'Cache-Control': 'public, max-age=300',
+  });
+}
