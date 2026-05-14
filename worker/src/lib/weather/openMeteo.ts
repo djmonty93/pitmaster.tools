@@ -119,7 +119,17 @@ export async function fetchOpenMeteo(
     throw new WeatherError('open-meteo', 'malformed', parsed.error.message);
   }
 
-  return normalize(parsed.data);
+  const usable = normalize(parsed.data);
+  if (usable.length === 0) {
+    // Every requested day was null-anchored; treat as a fail-over signal
+    // so the adapter tries NWS instead of returning an empty forecast.
+    throw new WeatherError(
+      'open-meteo',
+      'malformed',
+      'no usable days (all temperature_2m_max/min are null)'
+    );
+  }
+  return usable;
 }
 
 function normalize(data: z.infer<typeof OpenMeteoResponse>): WeatherDay[] {
@@ -183,13 +193,22 @@ function hoursForDay(hourly: z.infer<typeof HourlySchema>, ymd: string): Weather
   return out;
 }
 
-// Coalesce a nullable / out-of-bounds cell to 0 so the WeatherDay shape
-// stays `number`-typed downstream. Callers must explicitly handle null
-// for fields where 0 would distort scoring (handled in normalize above
-// for temperature, where the day is skipped).
+// Read cell i from a nullable column. `null` is a legitimate "model has
+// no value for this slot" — coalesce to 0 and let the score not credit
+// the signal. `undefined` means the array was shorter than expected,
+// which can only happen on a malformed payload (zod asserts the *type*
+// of each array but not the lengths against `daily.time`); promote that
+// to a WeatherError so the adapter can fail over.
 function cell(arr: ReadonlyArray<number | null>, i: number): number {
+  if (i >= arr.length) {
+    throw new WeatherError(
+      'open-meteo',
+      'malformed',
+      `column shorter than time series at index ${i}`
+    );
+  }
   const v = arr[i];
-  return v === null || v === undefined ? 0 : v;
+  return v === null ? 0 : (v as number);
 }
 
 function meanOf(xs: number[]): number | undefined {
