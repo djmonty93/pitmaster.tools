@@ -50,15 +50,17 @@ describe('scoreDay', () => {
     // Open-Meteo can return a true low gust below the 1.4× sustained
     // estimate (sheltered terrain, smooth airflow). Don't override the
     // reported value — it's the truer signal when present.
-    const reportedLowGust = fakeDay({ gustMphMax: 8, windMphMean: 15 });
+    //
+    // Calibrate the fixture so the bug (fallback override) and the fix
+    // (trust the reported value) produce DIFFERENT scores:
+    //   reportedGust = 8 mph → below 10 mph threshold → zero wind penalty
+    //   windMean × 1.4 = 20 × 1.4 = 28 mph → above 25, would emit a reason
+    // So if the bug were present, the reasons list would contain "Gusts to
+    // 28 mph" and the score would drop by the 1.5-coefficient offset gust
+    // penalty.
+    const reportedLowGust = fakeDay({ gustMphMax: 8, windMphMean: 20 });
     const res = scoreDay({ cut: 'pork-loin', cooker: 'offset', day: reportedLowGust });
-    // 8 mph gust is below the 10 mph threshold → zero wind penalty,
-    // and the reason should NOT mention "Gusts to …" because the
-    // effective gust is 8, below the 25 mph reason threshold.
     expect(res.reasons.some((r) => r.includes('Gusts to'))).toBe(false);
-    // 15 × 1.4 = 21 would have been below 25 too, so we can also assert
-    // the score isn't dragged down by a phantom gust above the
-    // threshold — at 8 mph effective, score loses 0 wind points.
     expect(res.score).toBeGreaterThanOrEqual(85);
   });
 
