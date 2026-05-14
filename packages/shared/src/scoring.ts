@@ -48,6 +48,12 @@ const PIT_TEMP_F = 225;
 
 export function scoreDay(input: ScoreInput): ScoreResult {
   const { cut, cooker, day } = input;
+  // TS callers usually arrive through validated boundaries, but the API
+  // accepts arbitrary string input (Step 7) so reject unknown cookers
+  // explicitly — mirrors the strict guard in the browser JS scorer.
+  if (!(cooker in COOKER_WIND_SENSITIVITY) || !(cooker in COOKER_RH)) {
+    throw new Error(`unknown cooker: ${cooker}`);
+  }
   const reasons: string[] = [];
 
   // Defensive: a malformed adapter could hand us a day with tempLow > tempHigh.

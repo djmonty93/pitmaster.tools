@@ -101,6 +101,20 @@ describe('scoreForecast', () => {
   });
 });
 
+describe('runtime validation', () => {
+  it('throws on an unknown cooker (matches the JS mirror)', () => {
+    expect(() =>
+      scoreDay({
+        cut: 'pork-loin',
+        // Force a runtime-only invalid value past the type system —
+        // simulating an API caller bypassing schema validation.
+        cooker: 'pizza-oven' as Cooker,
+        day: fakeDay(),
+      })
+    ).toThrow(/unknown cooker/);
+  });
+});
+
 describe('every (cut, cooker) pair scores within bounds', () => {
   const CUTS: Cut[] = [
     'brisket-flat',
