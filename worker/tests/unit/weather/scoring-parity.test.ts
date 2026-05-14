@@ -73,16 +73,18 @@ describe('scoring parity: TS source vs _partials/weather-score-shared.js', () =>
   for (const cut of CUTS) {
     for (const cooker of COOKERS) {
       for (const { name, day } of DAY_SCENARIOS) {
-        it(`${cut} × ${cooker} × ${name} — identical score`, () => {
+        it(`${cut} × ${cooker} × ${name} — identical score, band, reasons`, () => {
           const ts = scoreDayTs({ cut, cooker, day });
           const js = jsMirror.scoreDay({ cut, cooker, day }) as {
             score: number;
             band: string;
             stallRiskPct: number;
+            reasons: string[];
           };
           expect(js.score).toBe(ts.score);
           expect(js.band).toBe(ts.band);
           expect(js.stallRiskPct).toBe(ts.stallRiskPct);
+          expect(js.reasons).toEqual(ts.reasons);
         });
       }
     }

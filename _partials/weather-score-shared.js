@@ -71,30 +71,41 @@
     var day = input.day;
     var reasons = [];
 
+    // Defensive swap if a malformed adapter inverts the day's envelope.
+    var tempHigh = Math.max(day.tempHighF, day.tempLowF);
+    var tempLow  = Math.min(day.tempHighF, day.tempLowF);
+
     var precipPenalty = clamp01(
       (day.precipProbPct / 100) * (1 + day.precipIn * 0.5)
     ) * 40;
     if (day.precipProbPct >= 60) {
       reasons.push('High chance of rain (' + Math.round(day.precipProbPct) + '%)');
     } else if (day.precipIn >= 0.25) {
-      reasons.push('Heavy rain expected (' + day.precipIn.toFixed(2) + '"' + ')');
+      reasons.push('Heavy rain expected (' + day.precipIn.toFixed(2) + '")');
     }
 
-    var windRaw = Math.max(0, (day.gustMphMax - 10) / 25);
+    // No silent default — an unknown cooker is a contract violation that
+    // the API layer is responsible for catching. Throw here so dev sees
+    // it immediately rather than getting weird scores.
     var windSensitivity = COOKER_WIND_SENSITIVITY[cooker];
-    if (windSensitivity === undefined) windSensitivity = 1.0;
-    var windPenalty = clamp01(windRaw) * 25 * windSensitivity;
+    if (windSensitivity === undefined) {
+      throw new Error('unknown cooker: ' + cooker);
+    }
+    var windRaw = Math.max(0, (day.gustMphMax - 10) / 25);
+    var windPenalty = clamp01(windRaw) * 20 * windSensitivity;
     if (day.gustMphMax >= 25) {
       reasons.push('Gusts to ' + Math.round(day.gustMphMax) + ' mph (' + cooker + ' sensitivity)');
     }
 
-    var coldPenalty = Math.max(0, (40 - day.tempLowF) / 30) * 15;
-    var hotPenalty = Math.max(0, (day.tempHighF - 90) / 20) * 15;
-    if (coldPenalty > 0) reasons.push('Cold start (' + Math.round(day.tempLowF) + ' °F low)');
-    if (hotPenalty > 0) reasons.push('Hot afternoon (' + Math.round(day.tempHighF) + ' °F high)');
+    var coldPenalty = Math.max(0, (40 - tempLow) / 30) * 15;
+    var hotPenalty = Math.max(0, (tempHigh - 90) / 20) * 15;
+    if (coldPenalty > 0) reasons.push('Cold start (' + Math.round(tempLow) + ' °F low)');
+    if (hotPenalty > 0) reasons.push('Hot afternoon (' + Math.round(tempHigh) + ' °F high)');
 
     var cookerBaseRh = COOKER_RH[cooker];
-    if (cookerBaseRh === undefined) cookerBaseRh = 12;
+    if (cookerBaseRh === undefined) {
+      throw new Error('unknown cooker: ' + cooker);
+    }
     var cookerCavityRh = clamp(cookerBaseRh + day.rhMean * 0.15, 0, 100);
     var wb = wetBulbF(PIT_TEMP_F, cookerCavityRh);
     var stallRiskPct = clamp(((wb - 110) / 50) * 100, 0, 100);

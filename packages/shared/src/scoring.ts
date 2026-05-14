@@ -50,6 +50,11 @@ export function scoreDay(input: ScoreInput): ScoreResult {
   const { cut, cooker, day } = input;
   const reasons: string[] = [];
 
+  // Defensive: a malformed adapter could hand us a day with tempLow > tempHigh.
+  // Swap rather than fail so the score still grades the day's envelope.
+  const tempHigh = Math.max(day.tempHighF, day.tempLowF);
+  const tempLow = Math.min(day.tempHighF, day.tempLowF);
+
   // ── Precip ─────────────────────────────────────────────────────────
   // Heavy rain is the strongest single negative signal — pit gets wet,
   // smoke ring suffers, working outdoors gets miserable.
@@ -57,13 +62,16 @@ export function scoreDay(input: ScoreInput): ScoreResult {
     (day.precipProbPct / 100) * (1 + day.precipIn * 0.5)
   ) * 40;
   if (day.precipProbPct >= 60) reasons.push(`High chance of rain (${Math.round(day.precipProbPct)}%)`);
-  else if (day.precipIn >= 0.25) reasons.push(`Heavy rain expected (${day.precipIn.toFixed(2)}″)`);
+  else if (day.precipIn >= 0.25) reasons.push(`Heavy rain expected (${day.precipIn.toFixed(2)}")`);
 
   // ── Wind / gusts ───────────────────────────────────────────────────
   // 10 mph is comfortable; full penalty at ~35 mph. Cooker sensitivity
-  // amplifies (offset 1.5×) or damps (electric 0.1×) the effect.
+  // amplifies (offset 1.5×) or damps (electric 0.1×) the effect. Base
+  // penalty 20 (was 25) — at 35 mph the offset takes ~30 points, the
+  // electric ~2 — meaningful gap without nuking the score in moderate
+  // gusts.
   const windRaw = Math.max(0, (day.gustMphMax - 10) / 25);
-  const windPenalty = clamp01(windRaw) * 25 * COOKER_WIND_SENSITIVITY[cooker];
+  const windPenalty = clamp01(windRaw) * 20 * COOKER_WIND_SENSITIVITY[cooker];
   if (day.gustMphMax >= 25) {
     reasons.push(`Gusts to ${Math.round(day.gustMphMax)} mph (${cooker} sensitivity)`);
   }
@@ -72,10 +80,10 @@ export function scoreDay(input: ScoreInput): ScoreResult {
   // Cold mornings make startup hard; afternoons over 95 °F push the
   // cook into uncomfortable working territory and risk over-temping
   // the cavity. Symmetric soft penalty either side.
-  const coldPenalty = Math.max(0, (40 - day.tempLowF) / 30) * 15;
-  const hotPenalty = Math.max(0, (day.tempHighF - 90) / 20) * 15;
-  if (coldPenalty > 0) reasons.push(`Cold start (${Math.round(day.tempLowF)} °F low)`);
-  if (hotPenalty > 0) reasons.push(`Hot afternoon (${Math.round(day.tempHighF)} °F high)`);
+  const coldPenalty = Math.max(0, (40 - tempLow) / 30) * 15;
+  const hotPenalty = Math.max(0, (tempHigh - 90) / 20) * 15;
+  if (coldPenalty > 0) reasons.push(`Cold start (${Math.round(tempLow)} °F low)`);
+  if (hotPenalty > 0) reasons.push(`Hot afternoon (${Math.round(tempHigh)} °F high)`);
 
   // ── Stall risk (F2) ────────────────────────────────────────────────
   // For stall-sensitive cuts only: compute the cooker-cavity wet-bulb
