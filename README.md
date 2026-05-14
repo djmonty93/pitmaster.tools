@@ -62,6 +62,9 @@ verified, and rolled back independently.
   primary client + NWS failover, AbortController timeouts, zod-validated
   responses tolerant to Open-Meteo null cells and NWS missing dewpoints
   (Magnus formula fallback), origin-pinned second hop. 38 specs.
+- **Step 4.** KV cache with stale-while-error (`worker/src/lib/cache/`) — wraps
+  the Step 2 adapter, key shape `weather:v1:<zip>:<utc-day>`, fresh 30 min /
+  stale 6 h, secret-redacted telemetry, JSON round-trip caveats pinned by tests.
 - **Step 3.** Scoring engine in `packages/shared/src/scoring.ts` (F1/F2/F6/F7).
   Pure function: cut × cooker × WeatherDay → 0-100 score, banded
   red/yellow/green/ideal. Mirrored to `_partials/weather-score-shared.js`
