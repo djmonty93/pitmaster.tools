@@ -62,6 +62,13 @@ verified, and rolled back independently.
   primary client + NWS failover, AbortController timeouts, zod-validated
   responses tolerant to Open-Meteo null cells and NWS missing dewpoints
   (Magnus formula fallback), origin-pinned second hop. 38 specs.
+- **Step 3.** Scoring engine in `packages/shared/src/scoring.ts` (F1/F2/F6/F7).
+  Pure function: cut × cooker × WeatherDay → 0-100 score, banded
+  red/yellow/green/ideal. Mirrored to `_partials/weather-score-shared.js`
+  for client-side re-score on cut/cooker toggle without a worker hop.
+  Parity guards: physics-parity test pins `wetBulbF` to the JS source at
+  0.01 °F across 20 inputs; scoring-parity test pins TS ↔ JS scorers
+  identical across 13 cuts × 5 cookers × 8 scenarios.
 
 ## Tooling rules
 
