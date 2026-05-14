@@ -110,22 +110,26 @@
     var cookerCavityRh = clamp(cookerBaseRh + day.rhMean * 0.15, 0, 100);
     var wb = wetBulbF(PIT_TEMP_F, cookerCavityRh);
     var stallRiskPct = clamp(((wb - 110) / 50) * 100, 0, 100);
-    var stallPenalty = STALL_SENSITIVE[cut] ? (stallRiskPct / 100) * 20 : 0;
-    if (STALL_SENSITIVE[cut] && stallRiskPct >= 60) {
+    var isStallSensitive = Object.prototype.hasOwnProperty.call(STALL_SENSITIVE, cut);
+    var stallPenalty = isStallSensitive ? (stallRiskPct / 100) * 20 : 0;
+    if (isStallSensitive && stallRiskPct >= 60) {
       reasons.push('High stall risk for ' + cut + ' (cavity wet-bulb ' + wb.toFixed(0) + ' °F)');
     }
 
-    var score = clamp(
+    var rawScore = clamp(
       100 - precipPenalty - windPenalty - coldPenalty - hotPenalty - stallPenalty,
       0,
       100
     );
+    // Band from the rounded score so {score: 85, band: "ideal"} stays
+    // consistent — mirrors the TS source.
+    var finalScore = Math.round(rawScore);
 
     if (reasons.length === 0) reasons.push('Conditions look good');
 
     return {
-      score: Math.round(score),
-      band: bandFor(score),
+      score: finalScore,
+      band: bandFor(finalScore),
       stallRiskPct: Math.round(stallRiskPct),
       reasons: reasons,
       confidence: day.confidence

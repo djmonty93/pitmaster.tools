@@ -111,17 +111,20 @@ export function scoreDay(input: ScoreInput): ScoreResult {
     reasons.push(`High stall risk for ${cut} (cavity wet-bulb ${wb.toFixed(0)} °F)`);
   }
 
-  const score = clamp(
+  const rawScore = clamp(
     100 - precipPenalty - windPenalty - coldPenalty - hotPenalty - stallPenalty,
     0,
     100
   );
+  // Band from the rounded score so {score: 85, band: "ideal"} stays
+  // internally consistent — a returned 85 should never carry "green".
+  const finalScore = Math.round(rawScore);
 
   if (reasons.length === 0) reasons.push('Conditions look good');
 
   return {
-    score: Math.round(score),
-    band: bandFor(score),
+    score: finalScore,
+    band: bandFor(finalScore),
     stallRiskPct: Math.round(stallRiskPct),
     reasons,
     confidence: day.confidence,
