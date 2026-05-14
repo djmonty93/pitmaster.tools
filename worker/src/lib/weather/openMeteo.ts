@@ -95,10 +95,10 @@ export async function fetchOpenMeteo(
     opts.fetcher
   );
   if (res.status >= 500) {
-    throw new WeatherError('open-meteo', 'http_5xx', `status ${res.status}`);
+    throw new WeatherError('open-meteo', 'http_5xx', `status ${res.status}`, res.status);
   }
   if (!res.ok) {
-    throw new WeatherError('open-meteo', 'http_4xx', `status ${res.status}`);
+    throw new WeatherError('open-meteo', 'http_4xx', `status ${res.status}`, res.status);
   }
 
   let body: unknown;

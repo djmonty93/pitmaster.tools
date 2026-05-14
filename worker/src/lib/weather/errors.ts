@@ -5,20 +5,34 @@
 
 export type WeatherSource = 'open-meteo' | 'nws';
 
+/**
+ * 4xx status codes that should still trigger fail-over to the next provider.
+ *
+ * Most 4xx (400 bad request, 404 unknown grid, 422 unprocessable, …) signal
+ * caller-side problems that won't be helped by retrying; we propagate them.
+ * The exceptions are status codes that describe a *provider-side* condition
+ * the next source might not share:
+ *   - 408 Request Timeout: provider-internal slowness
+ *   - 425 Too Early: provider replay protection
+ *   - 429 Too Many Requests: rate limit, almost always provider-specific
+ */
+const RECOVERABLE_4XX = new Set([408, 425, 429]);
+
 export class WeatherError extends Error {
   constructor(
     public readonly source: WeatherSource,
     public readonly kind: 'http_5xx' | 'http_4xx' | 'timeout' | 'malformed' | 'network',
-    message: string
+    message: string,
+    /** Underlying HTTP status, when kind is http_4xx or http_5xx. */
+    public readonly status?: number
   ) {
-    super(`${source}: ${kind}: ${message}`);
+    super(`${source}: ${kind}${status !== undefined ? ` (${status})` : ''}: ${message}`);
     this.name = 'WeatherError';
   }
 
   /** True if the adapter should try the next source on this error. */
   get isRecoverable(): boolean {
-    // 4xx errors propagate (caller passed a bad lat/lon, more requests
-    // won't help); everything else means we should try the next source.
-    return this.kind !== 'http_4xx';
+    if (this.kind !== 'http_4xx') return true;
+    return this.status !== undefined && RECOVERABLE_4XX.has(this.status);
   }
 }

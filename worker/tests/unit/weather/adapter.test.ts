@@ -94,7 +94,7 @@ describe('weather adapter failover', () => {
     expect(result.attempts[0]?.kind).toBe('timeout');
   });
 
-  it('does NOT fail over on a 4xx — propagates as caller error', async () => {
+  it('does NOT fail over on a 400 — propagates as caller error', async () => {
     const openMeteoFetcher = scriptedFetcher([() => jsonResponse(400, {})]);
     let nwsCalls = 0;
     const nwsFetcher: typeof fetch = async () => {
@@ -106,8 +106,35 @@ describe('weather adapter failover', () => {
         openMeteo: { fetcher: openMeteoFetcher },
         nws: { fetcher: nwsFetcher },
       })
-    ).rejects.toMatchObject({ source: 'open-meteo', kind: 'http_4xx' });
+    ).rejects.toMatchObject({ source: 'open-meteo', kind: 'http_4xx', status: 400 });
     expect(nwsCalls).toBe(0);
+  });
+
+  it('DOES fail over on 429 (rate limit) — provider-side transient', async () => {
+    const openMeteoFetcher = scriptedFetcher([() => jsonResponse(429, {})]);
+    const nwsFetcher = scriptedFetcher([
+      () => jsonResponse(200, nwsPoints),
+      () => jsonResponse(200, nwsHourlyTwoDays),
+    ]);
+    const result = await fetchForecast(39.1, -94.6, 2, {
+      openMeteo: { fetcher: openMeteoFetcher },
+      nws: { fetcher: nwsFetcher },
+    });
+    expect(result.source).toBe('nws');
+    expect(result.attempts[0]).toMatchObject({ kind: 'http_4xx', status: 429 });
+  });
+
+  it('DOES fail over on 408 (request timeout)', async () => {
+    const openMeteoFetcher = scriptedFetcher([() => jsonResponse(408, {})]);
+    const nwsFetcher = scriptedFetcher([
+      () => jsonResponse(200, nwsPoints),
+      () => jsonResponse(200, nwsHourlyTwoDays),
+    ]);
+    const result = await fetchForecast(39.1, -94.6, 2, {
+      openMeteo: { fetcher: openMeteoFetcher },
+      nws: { fetcher: nwsFetcher },
+    });
+    expect(result.source).toBe('nws');
   });
 
   it('throws when both sources fail and surfaces both attempts', async () => {

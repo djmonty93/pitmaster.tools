@@ -34,7 +34,17 @@ describe('fetchOpenMeteo', () => {
   it('throws WeatherError("http_4xx") on 400', async () => {
     await expect(
       fetchOpenMeteo(0, 0, 1, { fetcher: jsonFetcher(400, {}) })
-    ).rejects.toMatchObject({ source: 'open-meteo', kind: 'http_4xx' });
+    ).rejects.toMatchObject({ source: 'open-meteo', kind: 'http_4xx', status: 400 });
+  });
+
+  it('carries the HTTP status on 4xx so the adapter can distinguish rate-limits', async () => {
+    try {
+      await fetchOpenMeteo(0, 0, 1, { fetcher: jsonFetcher(429, {}) });
+    } catch (err) {
+      expect(err).toMatchObject({ source: 'open-meteo', kind: 'http_4xx', status: 429 });
+      // 429 is in the recoverable set; bad-request 400 is not.
+      expect((err as { isRecoverable: boolean }).isRecoverable).toBe(true);
+    }
   });
 
   it('throws WeatherError("malformed") on schema mismatch', async () => {

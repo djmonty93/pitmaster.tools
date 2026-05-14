@@ -75,10 +75,10 @@ export async function fetchNws(
     opts.fetcher
   );
   if (pointsRes.status >= 500) {
-    throw new WeatherError('nws', 'http_5xx', `points ${pointsRes.status}`);
+    throw new WeatherError('nws', 'http_5xx', `points ${pointsRes.status}`, pointsRes.status);
   }
   if (!pointsRes.ok) {
-    throw new WeatherError('nws', 'http_4xx', `points ${pointsRes.status}`);
+    throw new WeatherError('nws', 'http_4xx', `points ${pointsRes.status}`, pointsRes.status);
   }
   const pointsJson = await readJson(pointsRes);
   const points = PointsResponse.safeParse(pointsJson);
@@ -95,10 +95,10 @@ export async function fetchNws(
     opts.fetcher
   );
   if (hourlyRes.status >= 500) {
-    throw new WeatherError('nws', 'http_5xx', `forecastHourly ${hourlyRes.status}`);
+    throw new WeatherError('nws', 'http_5xx', `forecastHourly ${hourlyRes.status}`, hourlyRes.status);
   }
   if (!hourlyRes.ok) {
-    throw new WeatherError('nws', 'http_4xx', `forecastHourly ${hourlyRes.status}`);
+    throw new WeatherError('nws', 'http_4xx', `forecastHourly ${hourlyRes.status}`, hourlyRes.status);
   }
   const hourlyJson = await readJson(hourlyRes);
   const hourly = HourlyForecastResponse.safeParse(hourlyJson);
@@ -123,15 +123,17 @@ function normalize(periods: z.infer<typeof HourlyPeriod>[], days: number): Weath
   for (const p of periods) {
     const date = p.startTime.slice(0, 10); // YYYY-MM-DD from ISO timestamp
     const bucket = byDate.get(date) ?? [];
+    const tempF = p.temperature;
+    const rh = numberOr(p.relativeHumidity, 0);
     bucket.push({
       t: p.startTime,
-      tempF: p.temperature,
-      rh: numberOr(p.relativeHumidity, 0),
+      tempF,
+      rh,
       windMph: parseSpeedMph(p.windSpeed),
       gustMph: parseSpeedMph(p.windGust ?? null),
       precipProbPct: numberOr(p.probabilityOfPrecipitation, 0),
       precipIn: 0, // NWS hourly forecast doesn't carry quantitative precip.
-      dewPointF: dewPointF(p.dewpoint ?? null),
+      dewPointF: dewPointF(p.dewpoint ?? null, tempF, rh),
     });
     byDate.set(date, bucket);
   }
@@ -175,11 +177,27 @@ function numberOr(v: { value: number | null } | null | undefined, fallback: numb
 }
 
 function dewPointF(
-  v: { value: number | null; unitCode?: string | undefined } | null | undefined
+  v: { value: number | null; unitCode?: string | undefined } | null | undefined,
+  fallbackTempF: number,
+  fallbackRhPct: number
 ): number {
-  if (v === null || v === undefined || v.value === null) return 0;
-  // NWS reports dewpoint in Celsius even when temperature is Fahrenheit.
-  return (v.value * 9) / 5 + 32;
+  if (v !== null && v !== undefined && v.value !== null) {
+    // NWS reports dewpoint in Celsius even when temperature is Fahrenheit.
+    return (v.value * 9) / 5 + 32;
+  }
+  // NWS occasionally omits dewpoint on a period. Returning 0 here would
+  // imply a freezing dewpoint and silently distort stall-risk scoring,
+  // so derive it from temperature + RH instead via the Magnus formula
+  // (Alduchov & Eskridge, 1996 — a=17.625, b=243.04):
+  //   α  = ln(rh/100) + a*T_C / (b + T_C)
+  //   Td = b*α / (a - α)            [°C]
+  if (fallbackRhPct <= 0) return fallbackTempF;
+  const a = 17.625;
+  const b = 243.04;
+  const tC = ((fallbackTempF - 32) * 5) / 9;
+  const alpha = Math.log(fallbackRhPct / 100) + (a * tC) / (b + tC);
+  const tdC = (b * alpha) / (a - alpha);
+  return (tdC * 9) / 5 + 32;
 }
 
 function mean(xs: number[]): number {

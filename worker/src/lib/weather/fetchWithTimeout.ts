@@ -21,10 +21,15 @@ export async function fetchWithTimeout(
   try {
     return await fetcher(url, { ...init, signal: ctrl.signal });
   } catch (err) {
-    if (err instanceof Error && err.name === 'AbortError') {
+    // workerd does not always preserve class identity for errors thrown
+    // across the fetch boundary, so check the name + AbortSignal state
+    // separately instead of `err instanceof DOMException`.
+    const name = err && typeof err === 'object' && 'name' in err ? String(err.name) : '';
+    if (name === 'AbortError' || ctrl.signal.aborted) {
       throw new WeatherError(source, 'timeout', `> ${timeoutMs}ms`);
     }
-    throw new WeatherError(source, 'network', err instanceof Error ? err.message : 'fetch failed');
+    const message = err && typeof err === 'object' && 'message' in err ? String(err.message) : 'fetch failed';
+    throw new WeatherError(source, 'network', message);
   } finally {
     clearTimeout(timer);
   }

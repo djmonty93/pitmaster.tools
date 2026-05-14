@@ -85,4 +85,42 @@ describe('fetchNws', () => {
     // Fixture has dewpoint 15.5°C and 16.0°C → mean 15.75°C → 60.35°F
     expect(days[0]?.dewPointMeanF).toBeCloseTo(60.35, 1);
   });
+
+  it('derives dewpoint from temp + RH via Magnus when NWS omits it', async () => {
+    // Two periods with dewpoint = null. Magnus(80°F, 55% RH) ≈ 62.4°F.
+    const noDewpointPayload = {
+      properties: {
+        periods: [
+          {
+            startTime: '2026-05-14T10:00:00-05:00',
+            temperature: 80,
+            temperatureUnit: 'F' as const,
+            windSpeed: '5 mph',
+            windGust: null,
+            probabilityOfPrecipitation: { value: 10 },
+            relativeHumidity: { value: 55 },
+            dewpoint: { value: null },
+          },
+          {
+            startTime: '2026-05-14T11:00:00-05:00',
+            temperature: 80,
+            temperatureUnit: 'F' as const,
+            windSpeed: '5 mph',
+            windGust: null,
+            probabilityOfPrecipitation: { value: 10 },
+            relativeHumidity: { value: 55 },
+            dewpoint: null,
+          },
+        ],
+      },
+    };
+    const days = await fetchNws(39.1, -94.6, 1, {
+      fetcher: chainedFetcher(
+        { status: 200, body: nwsPoints },
+        { status: 200, body: noDewpointPayload }
+      ),
+    });
+    expect(days[0]?.dewPointMeanF).toBeGreaterThan(61);
+    expect(days[0]?.dewPointMeanF).toBeLessThan(64);
+  });
 });

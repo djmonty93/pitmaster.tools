@@ -36,4 +36,20 @@ describe('fetchWithTimeout', () => {
       fetchWithTimeout('nws', 'https://x.test/', {}, 1000, fetcher)
     ).rejects.toBeInstanceOf(WeatherError);
   });
+
+  it('classifies as timeout even when err.name is the only abort signal', async () => {
+    // Some workerd versions surface aborted fetches as a plain object that
+    // has `name: "AbortError"` but no `instanceof Error` lineage. Ensure
+    // the classifier handles that without falling through to "network".
+    const fetcher: typeof fetch = (_url, init) =>
+      new Promise<Response>((_, reject) => {
+        init?.signal?.addEventListener('abort', () => {
+          // Throw a bare object that won't pass `instanceof Error`.
+          reject({ name: 'AbortError', message: 'aborted' });
+        });
+      });
+    await expect(
+      fetchWithTimeout('open-meteo', 'https://x.test/', {}, 20, fetcher)
+    ).rejects.toMatchObject({ kind: 'timeout' });
+  });
 });
