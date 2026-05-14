@@ -86,6 +86,48 @@ describe('fetchNws', () => {
     expect(days[0]?.dewPointMeanF).toBeCloseTo(60.35, 1);
   });
 
+  it('throws non-recoverable WeatherError("http_4xx", 404) when points returns 404', async () => {
+    // NWS returns 404 from /points/{lat,lon} for lat/lon outside its US-only
+    // service area. 404 is NOT in the recoverable 4xx set, so the adapter
+    // will not retry — the call propagates to the user with a clean error.
+    try {
+      await fetchNws(0, 0, 7, {
+        fetcher: chainedFetcher({ status: 404, body: { detail: 'Data Unavailable For Requested Point' } }),
+      });
+      throw new Error('expected to throw');
+    } catch (err) {
+      expect(err).toMatchObject({ source: 'nws', kind: 'http_4xx', status: 404 });
+      expect((err as { isRecoverable: boolean }).isRecoverable).toBe(false);
+    }
+  });
+
+  it('refuses a forecastHourly URL on a different origin than the points base', async () => {
+    const attackerPoints = {
+      properties: {
+        // points response from api.weather.gov hands us an attacker URL
+        forecastHourly: 'https://evil.example.test/forecast/hourly',
+      },
+    };
+    await expect(
+      fetchNws(39.1, -94.6, 7, {
+        fetcher: chainedFetcher({ status: 200, body: attackerPoints }),
+      })
+    ).rejects.toMatchObject({ source: 'nws', kind: 'malformed' });
+  });
+
+  it('refuses an http (not https) forecastHourly URL when base is https', async () => {
+    const downgradePoints = {
+      properties: {
+        forecastHourly: 'http://api.weather.gov/forecast/hourly',
+      },
+    };
+    await expect(
+      fetchNws(39.1, -94.6, 7, {
+        fetcher: chainedFetcher({ status: 200, body: downgradePoints }),
+      })
+    ).rejects.toMatchObject({ source: 'nws', kind: 'malformed' });
+  });
+
   it('throws WeatherError("malformed") on empty periods', async () => {
     await expect(
       fetchNws(39.1, -94.6, 7, {

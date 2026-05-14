@@ -26,6 +26,12 @@ const PointsResponse = z.object({
 
 const NumberValue = z.object({ value: z.number().nullable() });
 
+// NWS forecastHourly periods. In practice the only field guaranteed on
+// every period is `startTime`, `temperature`, `temperatureUnit`, and
+// `windSpeed`. `windGust` is almost always *absent* (not null) on hourly
+// forecasts — schema accepts both. `dewpoint.value` is Celsius even when
+// `temperatureUnit` is Fahrenheit; nws.ts:dewPointF handles the conversion
+// and falls back to a Magnus calculation when value is null.
 const HourlyPeriod = z.object({
   startTime: z.string(),
   temperature: z.number(),
@@ -86,10 +92,32 @@ export async function fetchNws(
     throw new WeatherError('nws', 'malformed', `points: ${points.error.message}`);
   }
 
-  // Hop 2: hourly forecast. NWS hands us the absolute URL.
+  // Pin the forecastHourly URL to the same origin as the points request.
+  // NWS always returns a same-origin URL (api.weather.gov); refuse anything
+  // else so a compromised/forked response can't redirect the second hop to
+  // an attacker-controlled host or downgrade the scheme to http.
+  const baseOrigin = new URL(base).origin;
+  let forecastHourly: URL;
+  try {
+    forecastHourly = new URL(points.data.properties.forecastHourly);
+  } catch (err) {
+    throw new WeatherError(
+      'nws',
+      'malformed',
+      `forecastHourly not a URL: ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
+  if (forecastHourly.origin !== baseOrigin) {
+    throw new WeatherError(
+      'nws',
+      'malformed',
+      `forecastHourly origin ${forecastHourly.origin} != points origin ${baseOrigin}`
+    );
+  }
+
   const hourlyRes = await fetchWithTimeout(
     'nws',
-    points.data.properties.forecastHourly,
+    forecastHourly.toString(),
     { method: 'GET', headers },
     timeout,
     opts.fetcher
