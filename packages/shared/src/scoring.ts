@@ -30,6 +30,24 @@ const COOKER_WIND_SENSITIVITY: Record<Cooker, number> = {
   electric: 0.1,
 };
 
+// Every supported cut; an explicit allow-list lets the scorer reject
+// unknown cuts symmetrically with the unknown-cooker guard.
+const ALL_CUTS: ReadonlySet<Cut> = new Set<Cut>([
+  'brisket-flat',
+  'brisket-packer',
+  'pork-butt',
+  'spare-ribs',
+  'baby-back-ribs',
+  'pork-loin',
+  'whole-chicken',
+  'spatchcock-chicken',
+  'chicken-thighs',
+  'whole-turkey',
+  'turkey-breast',
+  'fish',
+  'lamb-shoulder',
+]);
+
 // Cuts that spend hours in the stall band (150-165 °F) — these are the
 // only ones for which the stall-risk signal contributes to the score.
 const STALL_SENSITIVE: ReadonlySet<Cut> = new Set<Cut>([
@@ -58,6 +76,9 @@ export function scoreDay(input: ScoreInput): ScoreResult {
     !Object.hasOwn(COOKER_RH, cooker)
   ) {
     throw new Error(`unknown cooker: ${cooker}`);
+  }
+  if (!ALL_CUTS.has(cut)) {
+    throw new Error(`unknown cut: ${cut}`);
   }
   const reasons: string[] = [];
 
@@ -88,9 +109,10 @@ export function scoreDay(input: ScoreInput): ScoreResult {
   }
 
   // ── Temperature extremes ───────────────────────────────────────────
-  // Cold mornings make startup hard; afternoons over 95 °F push the
-  // cook into uncomfortable working territory and risk over-temping
-  // the cavity. Symmetric soft penalty either side.
+  // Cold mornings make startup hard (penalty starts below 40 °F low);
+  // afternoons over 90 °F push the cook into uncomfortable working
+  // territory and risk over-temping the cavity (penalty starts above
+  // 90 °F high). Symmetric soft penalty either side.
   const coldPenalty = Math.max(0, (40 - tempLow) / 30) * 15;
   const hotPenalty = Math.max(0, (tempHigh - 90) / 20) * 15;
   if (coldPenalty > 0) reasons.push(`Cold start (${Math.round(tempLow)} °F low)`);

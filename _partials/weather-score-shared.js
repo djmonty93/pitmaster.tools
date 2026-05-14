@@ -40,6 +40,22 @@
     electric: 0.1
   };
 
+  var ALL_CUTS = {
+    'brisket-flat':       true,
+    'brisket-packer':     true,
+    'pork-butt':          true,
+    'spare-ribs':         true,
+    'baby-back-ribs':     true,
+    'pork-loin':          true,
+    'whole-chicken':      true,
+    'spatchcock-chicken': true,
+    'chicken-thighs':     true,
+    'whole-turkey':       true,
+    'turkey-breast':      true,
+    'fish':               true,
+    'lamb-shoulder':      true
+  };
+
   var STALL_SENSITIVE = {
     'brisket-flat':    true,
     'brisket-packer':  true,
@@ -84,12 +100,15 @@
       reasons.push('Heavy rain expected (' + day.precipIn.toFixed(2) + '")');
     }
 
-    // No silent default — an unknown cooker is a contract violation that
-    // the API layer is responsible for catching. Use Object.hasOwn so a
-    // malicious "toString" / "__proto__" value can't slip through the
-    // prototype chain (mirrors the guard in scoring.ts).
+    // No silent default — an unknown cooker / cut is a contract violation
+    // that the API layer is responsible for catching. Use hasOwnProperty
+    // so a malicious "toString" / "__proto__" value can't slip through
+    // the prototype chain (mirrors the guard in scoring.ts).
     if (!Object.prototype.hasOwnProperty.call(COOKER_WIND_SENSITIVITY, cooker)) {
       throw new Error('unknown cooker: ' + cooker);
+    }
+    if (!Object.prototype.hasOwnProperty.call(ALL_CUTS, cut)) {
+      throw new Error('unknown cut: ' + cut);
     }
     var windSensitivity = COOKER_WIND_SENSITIVITY[cooker];
     var windRaw = Math.max(0, (day.gustMphMax - 10) / 25);
@@ -148,6 +167,7 @@
     COOKER_RH: COOKER_RH,
     COOKER_WIND_SENSITIVITY: COOKER_WIND_SENSITIVITY,
     STALL_SENSITIVE: STALL_SENSITIVE,
+    ALL_CUTS: ALL_CUTS,
     PIT_TEMP_F: PIT_TEMP_F
   };
 })(typeof globalThis !== 'undefined' ? globalThis : window);

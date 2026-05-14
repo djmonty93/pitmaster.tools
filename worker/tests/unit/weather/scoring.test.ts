@@ -114,6 +114,28 @@ describe('runtime validation', () => {
     ).toThrow(/unknown cooker/);
   });
 
+  it('throws on an unknown cut', () => {
+    expect(() =>
+      scoreDay({
+        cut: 'tofu' as Cut,
+        cooker: 'pellet',
+        day: fakeDay(),
+      })
+    ).toThrow(/unknown cut/);
+  });
+
+  it('rejects prototype-chain keys on cut too', () => {
+    for (const evil of ['toString', '__proto__', 'constructor']) {
+      expect(() =>
+        scoreDay({
+          cut: evil as Cut,
+          cooker: 'pellet',
+          day: fakeDay(),
+        })
+      ).toThrow(/unknown cut/);
+    }
+  });
+
   it('rejects prototype-chain keys (toString, __proto__) as cooker values', () => {
     // `cooker in OBJ` would silently accept inherited keys; `Object.hasOwn`
     // is the right guard. Verify both blocked.

@@ -51,8 +51,13 @@ const CUTS: Cut[] = [
   'brisket-packer',
   'pork-butt',
   'spare-ribs',
+  'baby-back-ribs',
   'pork-loin',
   'whole-chicken',
+  'spatchcock-chicken',
+  'chicken-thighs',
+  'whole-turkey',
+  'turkey-breast',
   'fish',
   'lamb-shoulder',
 ];
