@@ -8,7 +8,10 @@
 CREATE TABLE IF NOT EXISTS articles (
   slug         TEXT    NOT NULL PRIMARY KEY,
   kind         TEXT    NOT NULL CHECK (kind IN ('weekly-summary', 'metro-roundup', 'seasonal')),
-  metro_slug   TEXT REFERENCES metros(slug),   -- nullable; FK to metros.slug when set
+  -- Nullable FK to metros.slug. ON DELETE SET NULL matches the nullable
+  -- column intent: dropping a metro should null the archive entry, not
+  -- error or cascade-delete published articles.
+  metro_slug   TEXT REFERENCES metros(slug) ON DELETE SET NULL,
   title        TEXT    NOT NULL,
   body_html    TEXT    NOT NULL,
   body_text    TEXT    NOT NULL,               -- plaintext for length validation / Friday email

@@ -11,8 +11,17 @@ CREATE TABLE IF NOT EXISTS subscribers (
   id              INTEGER PRIMARY KEY AUTOINCREMENT,
   email           TEXT    NOT NULL UNIQUE,
   zip             TEXT    NOT NULL,
-  cut             TEXT,
-  cooker          TEXT,
+  -- cut / cooker mirror the Cut / Cooker enums in packages/shared/src/types.ts.
+  -- Keep these in lockstep when adding new cuts or cookers.
+  cut             TEXT    CHECK (cut IS NULL OR cut IN (
+                            'brisket-flat', 'brisket-packer', 'pork-butt',
+                            'spare-ribs', 'baby-back-ribs', 'pork-loin',
+                            'whole-chicken', 'spatchcock-chicken', 'chicken-thighs',
+                            'whole-turkey', 'turkey-breast', 'fish', 'lamb-shoulder'
+                          )),
+  cooker          TEXT    CHECK (cooker IS NULL OR cooker IN (
+                            'offset', 'pellet', 'kamado', 'kettle', 'electric'
+                          )),
   timezone        TEXT    NOT NULL,
   created_at      INTEGER NOT NULL,
   unsubscribed_at INTEGER

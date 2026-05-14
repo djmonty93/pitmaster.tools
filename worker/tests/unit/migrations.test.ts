@@ -148,6 +148,64 @@ describe('D1 migrations — schema', () => {
     ).rejects.toThrow();
   });
 
+  it('subscribers rejects unknown cut or cooker values', async () => {
+    const now = Date.now();
+    await expect(
+      DB.prepare(
+        `INSERT INTO subscribers (email, zip, cut, timezone, created_at) VALUES (?, ?, ?, ?, ?)`
+      )
+        .bind('bad-cut@example.com', '20001', 'rocket', 'America/New_York', now)
+        .run()
+    ).rejects.toThrow();
+    await expect(
+      DB.prepare(
+        `INSERT INTO subscribers (email, zip, cooker, timezone, created_at) VALUES (?, ?, ?, ?, ?)`
+      )
+        .bind('bad-cooker@example.com', '20001', 'microwave', 'America/New_York', now)
+        .run()
+    ).rejects.toThrow();
+  });
+
+  it('subscribers allows NULL cut and cooker (no preference yet)', async () => {
+    const now = Date.now();
+    await DB.prepare(
+      `INSERT INTO subscribers (email, zip, timezone, created_at) VALUES (?, ?, ?, ?)`
+    )
+      .bind('no-prefs@example.com', '20001', 'America/New_York', now)
+      .run();
+    const row = await DB.prepare(
+      `SELECT cut, cooker FROM subscribers WHERE email = ?`
+    )
+      .bind('no-prefs@example.com')
+      .first<{ cut: string | null; cooker: string | null }>();
+    expect(row?.cut).toBeNull();
+    expect(row?.cooker).toBeNull();
+  });
+
+  it('articles.metro_slug rejects values that do not exist in metros', async () => {
+    // D1 enables foreign_keys by default. Inserting an unknown metro_slug
+    // should fail with a FOREIGN KEY constraint error.
+    const now = Date.now();
+    await expect(
+      DB.prepare(
+        `INSERT INTO articles (slug, kind, metro_slug, title, body_html, body_text, hero_band, published_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      )
+        .bind(
+          'bad-metro-ref',
+          'metro-roundup',
+          'not-a-real-metro',
+          't',
+          '<p>x</p>',
+          'x',
+          'green',
+          now,
+          now
+        )
+        .run()
+    ).rejects.toThrow();
+  });
+
   it('articles rejects unknown kind or hero_band values', async () => {
     const now = Date.now();
     await expect(
