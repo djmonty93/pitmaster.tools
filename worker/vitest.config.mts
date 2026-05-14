@@ -1,10 +1,20 @@
+/// <reference types="node" />
 import { cloudflareTest } from '@cloudflare/vitest-pool-workers';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
-// Resolve @shared/* against packages/shared/src/ via a URL pointer rather
-// than `node:path`, which lets the worker tsconfig drop the "node" types
-// reference for src/ and tests/.
-const sharedDir = new URL('../packages/shared/src/', import.meta.url).pathname;
+// Node `path` + `fileURLToPath` produce a true Windows absolute path
+// (H:\Code\…) rather than the `/H:/Code/…` that `new URL().pathname`
+// returns. Vite's alias resolver needs the former on Windows.
+//
+// The node types are pulled in by the triple-slash reference at the top
+// of this file so worker/tsconfig.json can leave node out of its `types`
+// list — src/ and tests/ still compile against workerd globals only.
+const sharedDir = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '../packages/shared/src'
+);
 
 export default defineConfig({
   plugins: [
