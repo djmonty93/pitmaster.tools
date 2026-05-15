@@ -318,11 +318,16 @@
   font-weight: 700;
   color: var(--charcoal);
   text-decoration: none;
-  border-bottom: 2px solid var(--amber);
   padding-bottom: 1px;
 }
-.affiliate-card__product:hover,
-.affiliate-card__product:focus-visible {
+/* Only the linked variant gets the affordance underline — when no
+   merchant URL is configured the product renders as a <span>, and
+   underlining it would mislead the user into trying to tap it. */
+a.affiliate-card__product {
+  border-bottom: 2px solid var(--amber);
+}
+a.affiliate-card__product:hover,
+a.affiliate-card__product:focus-visible {
   color: var(--amber);
 }
 .affiliate-card__reason {

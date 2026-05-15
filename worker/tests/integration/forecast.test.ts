@@ -158,9 +158,18 @@ describe('GET /api/forecast', () => {
   });
 
   it('varies the affiliate recommendation by cooker (rule keying is wired correctly)', async () => {
-    // Same zip, same fixture, two cookers → two product picks. Proves
-    // the handler is actually feeding `cooker` into the rule engine
-    // rather than hard-coding a single product.
+    // Same zip, same fixture, two cookers → two distinct products.
+    // Proves the handler is actually feeding `cooker` into the rule
+    // engine rather than hard-coding a single product.
+    //
+    // Band assumption: the openMeteoOk fixture above is benign weather
+    // (10-15 mph gusts, 5-10% precip, 80 °F highs) — scoring lands the
+    // best day in green/ideal. The identity assertions below depend on
+    // that. If a future scoring tweak sinks the best day into the
+    // yellow band, both cookers would match the windscreen rule (yellow
+    // band + offset/kettle) — the offset assertion would flip and this
+    // test would fail. Bump the fixture rather than weaken the
+    // assertion: the value of this spec is the cooker-keying contract.
     stub = installFetchStub([{ match: 'api.open-meteo.com/v1/forecast', respond: openMeteoOk }]);
     const offsetRc = buildContext(
       new Request('https://x/api/forecast?zip=30303&cut=pork-butt&cooker=offset&days=2')
@@ -172,8 +181,13 @@ describe('GET /api/forecast', () => {
     const pelletRes = await handleForecast(pelletRc);
     expect(offsetRes.status).toBe(200);
     expect(pelletRes.status).toBe(200);
-    const offsetBody = (await offsetRes.json()) as { recommendation?: { productId: string } };
-    const pelletBody = (await pelletRes.json()) as { recommendation?: { productId: string } };
+    const offsetBody = (await offsetRes.json()) as { recommendation?: { productId: string }; days: Array<{ score: { band: string } }> };
+    const pelletBody = (await pelletRes.json()) as { recommendation?: { productId: string }; days: Array<{ score: { band: string } }> };
+    // Pin the fixture's band so a scoring change fails this assertion
+    // first, before the identity check has a chance to mislead.
+    const bestOffsetBand = offsetBody.days.reduce((a, d) =>
+      ['ideal','green','yellow','red'].indexOf(d.score.band) < ['ideal','green','yellow','red'].indexOf(a) ? d.score.band : a, 'red');
+    expect(['ideal', 'green']).toContain(bestOffsetBand);
     expect(offsetBody.recommendation?.productId).toBe('bbq-guru-partypal');
     expect(pelletBody.recommendation?.productId).toBe('competition-pellet-blend');
   });
