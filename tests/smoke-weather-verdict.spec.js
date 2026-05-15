@@ -138,6 +138,12 @@ test.describe('Best Smoke Days verdict landing', () => {
       await page.evaluate(() => localStorage.getItem('pitmaster_zip'))
     ).toBe('90210');
 
+    // Wait for the in-flight refetch triggered by submit to complete
+    // before reloading; otherwise the navigation aborts the request
+    // mid-flight (logs noise, can race the localStorage write on slow
+    // CI runners).
+    await expect(page.locator('#dayCards .day-card')).toHaveCount(4);
+
     await page.reload();
     await expect(page.locator('#zipInput')).toHaveValue('90210');
   });

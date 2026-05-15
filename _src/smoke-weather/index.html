@@ -151,7 +151,6 @@
           id="zipInput"
           name="zip"
           inputmode="numeric"
-          pattern="[0-9]{5}"
           maxlength="5"
           placeholder="e.g. 64108"
           aria-describedby="zipHelp"
@@ -192,7 +191,7 @@
 
   <p id="swStatus" class="sw-status" hidden role="status" aria-live="polite"></p>
 
-  <section class="verdict-hero" id="verdictHero" hidden aria-live="polite"></section>
+  <section class="verdict-hero" id="verdictHero" hidden aria-live="polite" aria-atomic="true"></section>
 
   <section aria-label="Daily smoke scores">
     <p class="section-title">7-day forecast</p>

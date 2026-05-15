@@ -9,8 +9,13 @@
    ============================================================ */
 
 :root {
+  /* Foreground colors are tuned for WCAG AA (4.5:1) against the
+     paired band background. --score-yellow at #E2A019 fails AA on
+     yellow-bg (~2.6:1); #8A6308 clears it for the .82rem confidence
+     pill and the .85rem band label. The 2.4rem score number passes
+     either way thanks to the large-text relaxation. */
   --score-red:    #C0392B;
-  --score-yellow: #E2A019;
+  --score-yellow: #8A6308;
   --score-green:  #2D7A3A;
   --score-ideal:  #1F5DAA;
   --score-red-bg:    #FBEDEA;

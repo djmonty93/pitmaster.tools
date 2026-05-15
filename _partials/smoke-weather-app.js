@@ -46,6 +46,18 @@
     return typeof zip === 'string' && /^\d{5}$/.test(zip);
   }
 
+  function isValidIsoDate(s) {
+    return typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s);
+  }
+
+  // Format a number for display, returning an em dash when the
+  // upstream day omitted the field. NWS partial responses can leave
+  // tempLowF / gustMphMax undefined, and Math.round(undefined) is NaN —
+  // we don't want "NaN°F" leaking onto the page.
+  function fmtNum(v) {
+    return Number.isFinite(v) ? String(Math.round(v)) : '—';
+  }
+
   // YYYY-MM-DD → "Sat, May 16". Built without the Date constructor on
   // the date-only string because Safari/Chrome disagree on whether
   // YYYY-MM-DD is parsed as UTC midnight or local midnight, and that
@@ -81,6 +93,10 @@
     if (grid) grid.innerHTML = '';
   }
 
+  // Tie-break: strict `>` keeps the EARLIEST day on a tie, since the
+  // user wants the soonest opportunity to cook when conditions are
+  // equally good. Don't change to `>=` without updating the e2e fixture
+  // and the verdict-hero copy.
   function pickBestDay(days) {
     var best = null;
     for (var i = 0; i < days.length; i++) {
@@ -108,14 +124,18 @@
     else if (best.score.band === 'yellow') verdict = 'Workable, plan ahead';
     else verdict = 'Tough conditions';
 
+    // `forecast.metro` and `forecast.zip` are server-derived but still
+    // funnel into innerHTML; escape both as defense-in-depth so a
+    // malformed upstream response can't inject markup. `forecast.days
+    // .length` and `best.score.score` are numeric (Number()), safe.
     var locLabel = forecast.metro ? forecast.metro : 'ZIP ' + forecast.zip;
     var sourceLabel = forecast.source === 'nws' ? 'National Weather Service' : 'Open-Meteo';
     hero.innerHTML =
-      '<div class="verdict-hero__label">Best day in the next ' + forecast.days.length + ' days</div>' +
+      '<div class="verdict-hero__label">Best day in the next ' + Number(forecast.days.length) + ' days</div>' +
       '<h2 class="verdict-hero__verdict">' + escapeHtml(verdict) + ' &mdash; ' + escapeHtml(formatDateLabel(best.date)) + '</h2>' +
       '<div class="verdict-hero__meta">' +
-        '<span>Score <strong>' + best.score.score + '</strong>/100</span>' +
-        '<span>High ' + Math.round(best.day.tempHighF) + '&deg;F / Low ' + Math.round(best.day.tempLowF) + '&deg;F</span>' +
+        '<span>Score <strong>' + Number(best.score.score) + '</strong>/100</span>' +
+        '<span>High ' + fmtNum(best.day.tempHighF) + '&deg;F / Low ' + fmtNum(best.day.tempLowF) + '&deg;F</span>' +
         '<span>' + escapeHtml(locLabel) + '</span>' +
       '</div>' +
       '<div class="verdict-hero__source">Source: ' + escapeHtml(sourceLabel) + '</div>';
@@ -125,6 +145,9 @@
     var bandClass = 'band-' + entry.score.band;
     var article = document.createElement('article');
     article.className = 'day-card ' + bandClass + (isBest ? ' is-best' : '');
+    // Date is validated by the caller, but assigning via setAttribute
+    // is safe even if it weren't — no HTML parsing happens for an
+    // attribute value.
     article.setAttribute('data-date', entry.date);
 
     var reasonsHtml = '';
@@ -136,10 +159,10 @@
     article.innerHTML =
       '<div class="day-card__date">' + escapeHtml(formatDateLabel(entry.date)) + '</div>' +
       '<div class="day-card__score">' +
-        '<span class="day-card__score-num">' + entry.score.score + '</span>' +
+        '<span class="day-card__score-num">' + Number(entry.score.score) + '</span>' +
         '<span class="day-card__score-band">' + escapeHtml(entry.score.band) + '</span>' +
       '</div>' +
-      '<div class="day-card__temps">' + Math.round(entry.day.tempHighF) + '&deg;F / ' + Math.round(entry.day.tempLowF) + '&deg;F &middot; gust ' + Math.round(entry.day.gustMphMax) + ' mph</div>' +
+      '<div class="day-card__temps">' + fmtNum(entry.day.tempHighF) + '&deg;F / ' + fmtNum(entry.day.tempLowF) + '&deg;F &middot; gust ' + fmtNum(entry.day.gustMphMax) + ' mph</div>' +
       '<ul class="day-card__reasons">' + reasonsHtml + '</ul>' +
       '<div class="day-card__confidence is-' + escapeHtml(entry.score.confidence) + '">Confidence: ' + escapeHtml(entry.score.confidence) + '</div>';
     return article;
@@ -149,10 +172,17 @@
     var grid = $('dayCards');
     if (!grid) return;
     grid.innerHTML = '';
-    var bestDate = pickBestDay(forecast.days);
-    var bestKey = bestDate ? bestDate.date : null;
+    // Filter out malformed days (missing or bad ISO date) before
+    // rendering — a day without a date can't get a stable
+    // `data-date` selector and is useless to the user anyway.
+    var clean = [];
     for (var i = 0; i < forecast.days.length; i++) {
-      var entry = forecast.days[i];
+      if (isValidIsoDate(forecast.days[i].date)) clean.push(forecast.days[i]);
+    }
+    var bestDate = pickBestDay(clean);
+    var bestKey = bestDate ? bestDate.date : null;
+    for (var j = 0; j < clean.length; j++) {
+      var entry = clean[j];
       grid.appendChild(renderDayCard(entry, entry.date === bestKey));
     }
   }
@@ -184,6 +214,12 @@
     return 'Something went wrong fetching the forecast.';
   }
 
+  // Module-scoped controller so a rapid cut/cooker toggle aborts the
+  // previous in-flight request before starting a new one. Without
+  // this, a slow first response can land AFTER the second and
+  // overwrite the DOM with stale day cards.
+  var inflightCtrl = null;
+
   function loadForecast(opts) {
     var zip = opts.zip || '';
     var cut = opts.cut;
@@ -191,7 +227,11 @@
     setStatus('Loading forecast…', false);
     clearResults();
 
+    if (inflightCtrl) {
+      try { inflightCtrl.abort(); } catch (e) { /* already settled */ }
+    }
     var ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+    inflightCtrl = ctrl;
     var timeoutId = null;
     if (ctrl) {
       timeoutId = setTimeout(function () { ctrl.abort(); }, 12000);
@@ -224,9 +264,16 @@
         var input = $('zipInput');
         if (input && !input.value) input.value = forecast.zip;
       }
-      renderForecast(forecast);
+      // Only commit a render if this fetch is still the active one.
+      // A newer request may have already aborted us during a rapid
+      // cut/cooker change; in that case the newer call owns the DOM.
+      if (inflightCtrl === ctrl) renderForecast(forecast);
     }).catch(function (err) {
+      // A user-initiated abort (newer request supersedes this one)
+      // shows up as AbortError but `inflightCtrl` will already point
+      // at a different controller — drop silently in that case.
       if (err && err.name === 'AbortError') {
+        if (inflightCtrl !== ctrl) return;
         setStatus('The forecast request timed out. Check your connection and try again.', true);
         return;
       }
