@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Best Smoke Days — Weather-Aware Smoking Forecast | Pitmaster Tools</title>
+<meta name="description" content="See which days this week are best for smoking brisket, ribs, pork, and chicken. Free weather-aware smoke forecast scored for your cooker — offset, pellet, kamado, kettle, or electric.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://pitmaster.tools/smoke-weather/">
+<meta property="og:title" content="Best Smoke Days — Weather-Aware Smoking Forecast">
+<meta property="og:description" content="See which days this week are best for smoking brisket, ribs, pork, and chicken. Free weather-aware smoke forecast scored for your cooker.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://pitmaster.tools/smoke-weather/">
+<meta property="og:image" content="https://pitmaster.tools/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pitmaster Tools - Free BBQ Calculators">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Best Smoke Days — Weather-Aware Smoking Forecast">
+<meta name="twitter:description" content="See which days this week are best for smoking brisket, ribs, pork, and chicken. Free weather-aware smoke forecast scored for your cooker.">
+<meta name="twitter:image" content="https://pitmaster.tools/og-image.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23EF9F27' d='M36 4c2 10-3 15-8 21-5 6-9 11-9 19 0 10 7 16 15 16 11 0 19-8 19-19 0-12-7-19-17-37z'/%3E%3Cpath fill='%23D78108' d='M33 27c1 6-2 9-5 12-3 3-5 6-5 10 0 6 4 10 9 10 7 0 12-5 12-12 0-7-4-11-11-20z'/%3E%3C/svg%3E">
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'analytics_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'wait_for_update': 500
+  });
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Pitmaster Tools — Best Smoke Days",
+  "url": "https://pitmaster.tools/smoke-weather/",
+  "description": "Free weather-aware smoking forecast. Enter your ZIP and pick a cut and cooker to see which days this week are best for smoking, scored 0-100 with stall risk and wind sensitivity baked in.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "isAccessibleForFree": true,
+  "browserRequirements": "Requires JavaScript enabled in a modern browser.",
+  "dateModified": "2026-05-14",
+  "featureList": [
+    "7-day smoking weather forecast scored 0-100",
+    "Cut-aware stall-risk modeling using wet-bulb temperature",
+    "Cooker-specific wind sensitivity (offset, pellet, kamado, kettle, electric)",
+    "ZIP-level lookup with geo-IP fallback",
+    "Open-Meteo primary with NWS failover",
+    "Confidence label per forecast day"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What makes a day a good smoke day?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A day scores well when rain probability is low, sustained wind and gusts are mild for your cooker type, the temperature stays inside roughly 40-85 °F, and the wet-bulb temperature is low enough that long-stall cuts (brisket, pork butt, ribs) won't get stuck for hours. Each factor reduces the score with its own weight, capped at 0."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does cooker type change the score?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "An offset stick burner is roughly 15× more wind-sensitive than an electric smoker and pulls humidity from outside air, which feeds straight into stall risk. A kamado is heavily insulated with a small intake, so wind barely moves the needle. The score weights wind and humidity per cooker so an offset day and an electric day are evaluated on the right standard."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How accurate is the forecast?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "We pull from Open-Meteo as the primary source with the US National Weather Service as failover. Each day carries a confidence label — high for the next 24-48 hours, dropping to medium and then low further out. Treat the 5-7 day end of the window as a rough planning signal, not a commitment."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does the score include cooker output, fuel, or my altitude?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. The score evaluates outdoor conditions only — what the weather is doing to your cook. Fuel quantity, cooker output, altitude, and pit-management style are out of scope here. Use the Charcoal Calculator and Cook Time Coordinator for those."
+      }
+    }
+  ]
+}
+</script>
+<!-- INJECT:site-header.css -->
+<!-- INJECT:site-base.css -->
+<!-- INJECT:smoke-weather.css -->
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<header>
+  <a href="/" class="logo">Pitmaster<span> Tools</span></a>
+  <div class="header-right">
+  <nav class="header-nav" aria-label="Site navigation">
+    <div class="nav-dropdown">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="/tools">All Tools</a></li>
+        <li><a href="/">Meat Smoking Calculator</a></li>
+        <li><a href="/smoke-weather/" aria-current="page">Best Smoke Days</a></li>
+        <li><a href="/brisket-calculator">Brisket Calculator</a></li>
+        <li><a href="/pork-shoulder-calculator">Pork Shoulder Calculator</a></li>
+        <li><a href="/rib-calculator">Rib Calculator</a></li>
+        <li><a href="/turkey-smoking-calculator">Turkey Calculator</a></li>
+        <li><a href="/meat-per-person">Meat Per Person</a></li>
+        <li><a href="/cook-time-coordinator">Cook Time Coordinator</a></li>
+        <li><a href="/charcoal-calculator">Charcoal Calculator</a></li>
+        <li><a href="/brine-calculator">Brine Calculator</a></li>
+        <li><a href="/dry-rub-calculator">Dry Rub Calculator</a></li>
+        <li><a href="/bbq-cost-calculator">BBQ Cost Calculator</a></li>
+        <li><a href="/catering-calculator">Catering Calculator</a></li>
+        <li><a href="/brisket-yield-calculator">Brisket Yield Calculator</a></li>
+      </ul>
+    </div>
+    <a href="/about">About</a>
+  </nav>
+  </div>
+</header>
+
+<main id="main-content">
+  <section class="page-hero" aria-label="Page introduction">
+    <h1>Best Smoke Days</h1>
+    <p>A weather-aware forecast scored for your cut and cooker. Pick a day with a high score, light the fire, and stop guessing which Saturday gets blown out by 35-mph gusts.</p>
+  </section>
+
+  <form id="swForm" class="form-card" autocomplete="off" novalidate aria-label="Smoke forecast inputs">
+    <div class="smoke-controls">
+      <div class="form-group">
+        <label for="zipInput">ZIP code</label>
+        <input
+          type="text"
+          id="zipInput"
+          name="zip"
+          inputmode="numeric"
+          autocomplete="postal-code"
+          maxlength="5"
+          placeholder="e.g. 64108"
+          aria-describedby="zipHelp"
+        >
+      </div>
+      <div class="form-group">
+        <label for="cutSelect">Cut</label>
+        <select id="cutSelect" name="cut">
+          <option value="brisket-packer">Brisket (packer)</option>
+          <option value="brisket-flat">Brisket (flat)</option>
+          <option value="pork-butt">Pork butt</option>
+          <option value="spare-ribs">Spare ribs</option>
+          <option value="baby-back-ribs">Baby-back ribs</option>
+          <option value="pork-loin">Pork loin</option>
+          <option value="whole-chicken">Whole chicken</option>
+          <option value="spatchcock-chicken">Spatchcock chicken</option>
+          <option value="chicken-thighs">Chicken thighs</option>
+          <option value="whole-turkey">Whole turkey</option>
+          <option value="turkey-breast">Turkey breast</option>
+          <option value="lamb-shoulder">Lamb shoulder</option>
+          <option value="fish">Fish</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="cookerSelect">Cooker</label>
+        <select id="cookerSelect" name="cooker">
+          <option value="offset">Offset</option>
+          <option value="pellet">Pellet</option>
+          <option value="kamado">Kamado</option>
+          <option value="kettle">Kettle</option>
+          <option value="electric">Electric</option>
+        </select>
+      </div>
+      <button type="submit" class="calc-btn">Get forecast</button>
+      <p id="zipHelp" class="vmsg" hidden></p>
+    </div>
+  </form>
+
+  <p id="swStatus" class="sw-status" hidden role="status" aria-live="polite"></p>
+
+  <section class="verdict-hero" id="verdictHero" hidden aria-live="polite" aria-atomic="true"></section>
+
+  <section aria-label="Daily smoke scores">
+    <p class="section-title">7-day forecast</p>
+    <div id="dayCards" class="day-cards"></div>
+  </section>
+
+  <p class="sw-disclaimer">
+    Forecasts model regional weather, not your microclimate. Trees, structures, and elevation can shift wind and temperature noticeably from the airport-grade source we pull. Always step outside before lighting the fire.
+  </p>
+
+  <section class="related-tools" aria-labelledby="related-title">
+    <h2 id="related-title">More Pitmaster Tools</h2>
+    <div class="tool-links">
+      <a class="tool-link" href="/">
+        <div>
+          <div class="tool-link-name">Meat Smoking Calculator</div>
+          <div class="tool-link-desc">Cook times for 28 cuts with full timeline, wood pairings, and serving size math.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="/cook-time-coordinator">
+        <div>
+          <div class="tool-link-name">Cook Time Coordinator</div>
+          <div class="tool-link-desc">Smoke multiple meats and sync all finish times to the same table.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="/charcoal-calculator">
+        <div>
+          <div class="tool-link-name">Charcoal Calculator</div>
+          <div class="tool-link-desc">Exact charcoal amounts for Minion, Snake, or direct-heat cooks.</div>
+        </div>
+      </a>
+      <a class="tool-link" href="/brine-calculator">
+        <div>
+          <div class="tool-link-name">Brine Calculator</div>
+          <div class="tool-link-desc">Salt and water by weight for wet brines and pickle-style cures.</div>
+        </div>
+      </a>
+    </div>
+  </section>
+</main>
+
+<!-- Cookie consent banner -->
+<div class="cookie-banner" id="cookieBanner" role="dialog" aria-live="polite" aria-label="Cookie consent">
+  <div class="cookie-banner__inner">
+    <p class="cookie-banner__text">We use cookies for analytics and advertising. See our <a href="/privacy-policy">Privacy Policy</a> for details.</p>
+    <div class="cookie-banner__actions">
+      <button class="cookie-accept" id="cookieAccept" type="button">Accept</button>
+      <button class="cookie-reject" id="cookieReject" type="button">Reject</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>&#169; 2026 Pitmaster Tools. All rights reserved.</div>
+  <nav aria-label="Footer">
+    <a href="/">Calculator</a>
+    <span>|</span>
+    <a href="/tools">All Tools</a>
+    <span>|</span>
+    <a href="/privacy-policy">Privacy Policy</a>
+    <span>|</span>
+    <a href="/terms-of-service">Terms of Service</a>
+    <span>|</span>
+    <a href="mailto:contact@pitmaster.tools">contact@pitmaster.tools</a>
+  </nav>
+  <p class="footer-small">Forecasts use Open-Meteo and the US National Weather Service. Conditions can change quickly — verify before you cook.</p>
+  <p class="footer-small">Last updated: May 14, 2026</p>
+</footer>
+
+<!-- INJECT:site-utils.js:script -->
+<!-- INJECT:weather-score-shared.js:script -->
+<!-- INJECT:smoke-weather-app.js:script -->
+<!-- INJECT:site-header.js:script -->
+<script>
+  // Initialize the standard consent banner used across the site so the
+  // first-visit experience matches every other tool page.
+  if (typeof initConsentBanner === 'function') initConsentBanner();
+</script>
+</body>
+</html>

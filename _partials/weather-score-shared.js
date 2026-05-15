@@ -1,6 +1,6 @@
 /* weather-score-shared.js — browser-side mirror of
-   packages/shared/src/scoring.ts. Injected via
-   <!-- INJECT:weather-score-shared.js:script --> into every smoke-weather
+   packages/shared/src/scoring.ts. Injected via the
+   weather-score-shared.js script partial on every smoke-weather
    page so the client can re-score on cut/cooker toggle without a worker
    round-trip.
 

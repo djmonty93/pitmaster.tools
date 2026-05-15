@@ -1,0 +1,212 @@
+/* ============================================================
+   smoke-weather.css — F8/F11/F12 verdict landing styles.
+   Inlined at build time by build.js. Do not load as an external file.
+   Load order: site-header.css → site-base.css → smoke-weather.css → page <style>
+   Depends on --amber and --card-* from site-base.css.
+   Score band colors (F11) are exposed as CSS vars so JS can attach
+   bands by class name only (.band-red / .band-yellow / .band-green
+   / .band-ideal) without inline style.
+   ============================================================ */
+
+:root {
+  /* Foreground colors are tuned for WCAG AA (4.5:1) against the
+     paired band background. --score-yellow at #E2A019 fails AA on
+     yellow-bg (~2.6:1); #8A6308 clears it for the .82rem confidence
+     pill and the .85rem band label. The 2.4rem score number passes
+     either way thanks to the large-text relaxation. */
+  --score-red:    #C0392B;
+  --score-yellow: #8A6308;
+  --score-green:  #2D7A3A;
+  --score-ideal:  #1F5DAA;
+  --score-red-bg:    #FBEDEA;
+  --score-yellow-bg: #FBF3DE;
+  --score-green-bg:  #E7F2E8;
+  --score-ideal-bg:  #E5EEF8;
+}
+
+/* ----- Zip + cooker controls ----- */
+.smoke-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 200px) 1fr 1fr auto;
+  gap: .75rem;
+  align-items: end;
+}
+.smoke-controls .form-group { margin: 0; }
+.smoke-controls .calc-btn { margin-top: 0; padding: .8rem 1.25rem; width: auto; }
+.smoke-controls .vmsg { grid-column: 1 / -1; }
+@media (max-width: 700px) {
+  .smoke-controls { grid-template-columns: 1fr 1fr; }
+  .smoke-controls .form-group:first-child { grid-column: 1 / -1; }
+  .smoke-controls .calc-btn { grid-column: 1 / -1; }
+}
+
+/* ----- Loading + error placeholders ----- */
+.sw-status {
+  margin: 1.25rem 0;
+  padding: 1rem 1.15rem;
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow);
+  font-size: .95rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+.sw-status.error { color: #922B21; background: #FDECEA; border-color: #F5C6C1; }
+.sw-status[hidden] { display: none; }
+
+/* ----- Verdict hero ----- */
+.verdict-hero {
+  background: var(--surface-strong);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.verdict-hero[hidden] { display: none; }
+.verdict-hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--band-color, var(--amber));
+}
+.verdict-hero__label {
+  font-size: .75rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: .35rem;
+}
+.verdict-hero__verdict {
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  line-height: 1.15;
+  color: var(--charcoal);
+  margin-bottom: .55rem;
+}
+.verdict-hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .55rem .85rem;
+  font-size: .9rem;
+  color: var(--text-muted);
+}
+.verdict-hero__source { font-size: .8rem; }
+
+/* ----- Day cards grid ----- */
+.day-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.day-card {
+  background: var(--surface-strong);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.1rem 1.15rem;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+}
+.day-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--band-color, var(--card-border));
+}
+.day-card.is-best { outline: 2px solid var(--band-color, var(--amber)); outline-offset: -2px; }
+
+.day-card__date {
+  font-size: .8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--text-muted);
+}
+.day-card__score {
+  display: flex;
+  align-items: baseline;
+  gap: .35rem;
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+}
+.day-card__score-num {
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--band-color, var(--charcoal));
+  font-variant-numeric: tabular-nums;
+}
+.day-card__score-band {
+  font-size: .85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--band-color, var(--charcoal));
+}
+.day-card__temps {
+  font-size: .9rem;
+  color: var(--charcoal);
+  font-variant-numeric: tabular-nums;
+}
+.day-card__reasons {
+  list-style: none;
+  margin: .25rem 0 0;
+  padding: 0;
+  font-size: .82rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.day-card__reasons li { padding: .15rem 0; }
+.day-card__confidence {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-muted);
+  margin-top: auto;
+}
+.day-card__confidence::before {
+  content: '';
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+.day-card__confidence.is-high::before    { background: var(--score-green); }
+.day-card__confidence.is-medium::before  { background: var(--score-yellow); }
+.day-card__confidence.is-low::before     { background: var(--score-red); }
+
+/* ----- Band classes (set by JS via class string) ----- */
+.band-red    { --band-color: var(--score-red);    background: var(--score-red-bg); }
+.band-yellow { --band-color: var(--score-yellow); background: var(--score-yellow-bg); }
+.band-green  { --band-color: var(--score-green);  background: var(--score-green-bg); }
+.band-ideal  { --band-color: var(--score-ideal);  background: var(--score-ideal-bg); }
+.verdict-hero.band-red,
+.verdict-hero.band-yellow,
+.verdict-hero.band-green,
+.verdict-hero.band-ideal { background: var(--surface-strong); }
+
+/* ----- Disclaimer ----- */
+.sw-disclaimer {
+  font-size: .8rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  padding: .9rem 1rem;
+  background: rgba(255,255,255,.55);
+  border: 1px dashed var(--card-border);
+  border-radius: 8px;
+  margin-top: 1rem;
+}
