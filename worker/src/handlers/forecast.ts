@@ -19,6 +19,7 @@
 
 import { scoreDay } from '@shared/scoring';
 import type { Cooker, Cut, ForecastResponse } from '@shared/types';
+import { recommend } from '../lib/affiliate/rules.js';
 import { fetchForecastCached } from '../lib/cache/weather.js';
 import { GeocoderError, resolveZip } from '../lib/geo/zipGeocoder.js';
 import { WeatherError } from '../lib/weather/errors.js';
@@ -111,12 +112,30 @@ export async function handleForecast(rc: RouteContext): Promise<Response> {
     score: scoreDay({ cut: cutParam, cooker: cookerParam, day }),
   }));
 
+  // F15: pick a single product placement keyed on the best-day band so
+  // the recommendation tracks the verdict the user is actually shown
+  // in the hero. Falls back to the highest-score day when scored is
+  // non-empty (the empty branch is unreachable in practice: a
+  // successful upstream response always returns at least one day, and
+  // the early-return paths above already cover the failure modes).
+  // The recommend() rule table includes a catch-all so a `null` result
+  // means there were literally no scored days — in that case omit the
+  // field entirely rather than surface a placeholder card.
+  const bestDay = scored.reduce<typeof scored[number] | null>(
+    (acc, d) => (acc === null || d.score.score > acc.score.score ? d : acc),
+    null
+  );
+  const recommendation = bestDay
+    ? recommend({ cut: cutParam, cooker: cookerParam, band: bestDay.score.band })
+    : null;
+
   const response: ForecastResponse = {
     zip,
     metro: location.metroSlug ?? undefined,
     source: forecast.source,
     generatedAt: new Date().toISOString(),
     days: scored,
+    ...(recommendation ? { recommendation } : {}),
   };
   // Cache-Control split:
   //   - When the zip came from an explicit query param, the URL fully

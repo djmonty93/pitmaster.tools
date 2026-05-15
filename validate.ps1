@@ -143,7 +143,8 @@ $htmlFiles = @(
   'tools.html',
   'turkey-smoking-calculator.html',
   'terms-of-service.html',
-  'smoke-weather/index.html'
+  'smoke-weather/index.html',
+  'smoke-weather/disclosures.html'
 )
 
 Write-Host 'Building dist/ before validation...'
