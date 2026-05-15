@@ -17,7 +17,10 @@
 //   - Most-specific-first: rules are scanned in declaration order and
 //     the first match wins. A rule with both a cut and a cooker
 //     constraint must appear before a rule with only one or the
-//     other; the loadRules() check guards this in tests.
+//     other; the per-rule identity assertions in
+//     tests/unit/affiliate/rules.test.ts (rain canopy on red,
+//     windscreen on yellow offset/kettle, etc.) pin the ordering so a
+//     reorder that breaks the policy fails fast in CI.
 
 import type { AffiliateRecommendation, Cooker, Cut, ScoreResult } from '@shared/types';
 
