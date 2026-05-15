@@ -296,6 +296,23 @@ verified, and rolled back independently.
   zero-padded slug shape, ≥300-word content floor, anchor-city
   presence in `body_text`, idempotency invariants, and seasonal
   hero-band selection.
+- **Step 14.** Schema markup (F18). Two pieces:
+  (1) Metro pages now emit a third JSON-LD block — a 3-level
+  `BreadcrumbList` (Home → Best Smoke Days → Metro) on top of the
+  existing `WebApplication` + `FAQPage` graph from `CLAUDE.md`. Helps
+  Google show the page hierarchy in SERPs and sitelinks. Generated
+  centrally in `scripts/generate-metros.js` so all 50 metros (and
+  future metros) inherit automatically.
+  (2) New `scripts/validate-schema.test.js` (chained via
+  `npm run test:scripts`) walks `_src/**.html` and asserts every
+  non-exempt page carries the CLAUDE.md `WebApplication` +
+  `FAQPage` pair. Exempt set is pinned at six entries
+  (`404`, `privacy-policy`, `terms-of-service`,
+  `smoke-weather/disclosures`, `about`, `tools`) — each with an
+  inline justification, and a second test asserts the set hasn't
+  silently drifted. New informational pages added later
+  (methodology, faq, status) must either ship with the required
+  schema or claim an exemption in the same PR.
 
 ## DNS setup — MailerLite sending domain
 
