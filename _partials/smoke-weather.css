@@ -293,6 +293,60 @@
 .verdict-hero.band-green,
 .verdict-hero.band-ideal { background: var(--surface-strong); }
 
+/* ----- Affiliate placement (F15) ----- */
+.affiliate-card {
+  margin-top: 1.25rem;
+  padding: 1rem 1.15rem;
+  background: var(--surface-strong);
+  border: 1px solid var(--card-border);
+  border-left: 4px solid var(--amber);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.affiliate-card[hidden] { display: none; }
+.affiliate-card__label {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-muted);
+  margin-bottom: .35rem;
+}
+.affiliate-card__product {
+  display: inline-block;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--charcoal);
+  text-decoration: none;
+  padding-bottom: 1px;
+}
+/* Only the linked variant gets the affordance underline — when no
+   merchant URL is configured the product renders as a <span>, and
+   underlining it would mislead the user into trying to tap it. */
+a.affiliate-card__product {
+  border-bottom: 2px solid var(--amber);
+}
+a.affiliate-card__product:hover,
+a.affiliate-card__product:focus-visible {
+  color: var(--amber);
+}
+.affiliate-card__reason {
+  margin: .35rem 0 .65rem;
+  font-size: .92rem;
+  line-height: 1.5;
+  color: var(--charcoal);
+}
+.affiliate-disclosure {
+  font-size: .72rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin: 0;
+}
+.affiliate-disclosure a {
+  color: inherit;
+  text-decoration: underline;
+}
+
 /* ----- Disclaimer ----- */
 .sw-disclaimer {
   font-size: .8rem;

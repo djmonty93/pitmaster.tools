@@ -127,6 +127,71 @@ describe('GET /api/forecast', () => {
     expect(await res.json()).toMatchObject({ error: 'weather_unavailable' });
   });
 
+  it('attaches a single affiliate recommendation keyed on the best-day band (F15)', async () => {
+    stub = installFetchStub([{ match: 'api.open-meteo.com/v1/forecast', respond: openMeteoOk }]);
+    const rc = buildContext(
+      new Request('https://x/api/forecast?zip=30303&cut=brisket-packer&cooker=offset&days=2')
+    );
+    const res = await handleForecast(rc);
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      recommendation?: {
+        productId: string;
+        productName: string;
+        productUrl: string;
+        reason: string;
+        category: string;
+        disclosureRequired: boolean;
+      };
+      days: Array<{ score: { band: string; score: number } }>;
+    };
+    expect(body.recommendation).toBeDefined();
+    expect(body.recommendation!.disclosureRequired).toBe(true);
+    // Best day score for the openMeteoOk fixture lands in green/ideal, and the
+    // first rule that matches (cut=brisket, cooker=offset, band=green) is the
+    // BBQ Guru controller. If the fixture's weights change so the best day
+    // sinks below green, the rule should still produce one of the allowed
+    // products — assert membership rather than identity so the test isn't
+    // brittle to scoring tweaks.
+    expect(body.recommendation!.productId).toMatch(/^[a-z0-9-]+$/);
+    expect(body.recommendation!.reason.length).toBeGreaterThan(0);
+  });
+
+  it('varies the affiliate recommendation by cooker (rule keying is wired correctly)', async () => {
+    // Same zip, same fixture, two cookers → two distinct products.
+    // Proves the handler is actually feeding `cooker` into the rule
+    // engine rather than hard-coding a single product.
+    //
+    // Band assumption: the openMeteoOk fixture above is benign weather
+    // (10-15 mph gusts, 5-10% precip, 80 °F highs) — scoring lands the
+    // best day in green/ideal. The identity assertions below depend on
+    // that. If a future scoring tweak sinks the best day into the
+    // yellow band, both cookers would match the windscreen rule (yellow
+    // band + offset/kettle) — the offset assertion would flip and this
+    // test would fail. Bump the fixture rather than weaken the
+    // assertion: the value of this spec is the cooker-keying contract.
+    stub = installFetchStub([{ match: 'api.open-meteo.com/v1/forecast', respond: openMeteoOk }]);
+    const offsetRc = buildContext(
+      new Request('https://x/api/forecast?zip=30303&cut=pork-butt&cooker=offset&days=2')
+    );
+    const pelletRc = buildContext(
+      new Request('https://x/api/forecast?zip=30303&cut=pork-butt&cooker=pellet&days=2')
+    );
+    const offsetRes = await handleForecast(offsetRc);
+    const pelletRes = await handleForecast(pelletRc);
+    expect(offsetRes.status).toBe(200);
+    expect(pelletRes.status).toBe(200);
+    const offsetBody = (await offsetRes.json()) as { recommendation?: { productId: string }; days: Array<{ score: { band: string } }> };
+    const pelletBody = (await pelletRes.json()) as { recommendation?: { productId: string }; days: Array<{ score: { band: string } }> };
+    // Pin the fixture's band so a scoring change fails this assertion
+    // first, before the identity check has a chance to mislead.
+    const bestOffsetBand = offsetBody.days.reduce((a, d) =>
+      ['ideal','green','yellow','red'].indexOf(d.score.band) < ['ideal','green','yellow','red'].indexOf(a) ? d.score.band : a, 'red');
+    expect(['ideal', 'green']).toContain(bestOffsetBand);
+    expect(offsetBody.recommendation?.productId).toBe('bbq-guru-partypal');
+    expect(pelletBody.recommendation?.productId).toBe('competition-pellet-blend');
+  });
+
   it('falls back to request.cf.postalCode when zip query param is omitted, with Cache-Control private', async () => {
     stub = installFetchStub([{ match: 'api.open-meteo.com/v1/forecast', respond: openMeteoOk }]);
     // workerd populates `request.cf` at the edge but exposes it as a

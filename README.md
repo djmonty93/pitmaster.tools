@@ -206,6 +206,36 @@ verified, and rolled back independently.
   tap-to-expand lazy render, NWS-offset timestamp formatting,
   empty-hourly fallback copy, and the dual tooltip + SR-only
   wirings on both confidence pill and dew-point row.
+- **Step 10.** Affiliate rules (F15). `/api/forecast` now attaches a
+  single deterministic product recommendation keyed on
+  (cut, cooker, best-day band). The rule table lives in
+  `worker/src/lib/affiliate/rules.ts` — ordered most-specific-first,
+  with a catch-all so every combination produces a placement. The
+  rule engine is pure: no D1, no KV, no network at runtime; adding or
+  removing a product is one line plus a test. The shared
+  `AffiliateRecommendation` type carries `disclosureRequired: true` as
+  a literal so the policy can't be flipped on the wire. The client
+  renderer (`_partials/smoke-weather-app.js` → `renderAffiliateCard`)
+  paints a card beneath the 7-day grid with the FTC disclosure
+  inline; outbound merchant links carry
+  `rel="sponsored nofollow noopener" target="_blank"` per Google's
+  link-attribute guidance, and a `^https?://` guard prevents a
+  misconfigured rule from producing a `javascript:`/`data:`
+  clickthrough. The disclosure text links to a new
+  `/smoke-weather/disclosures` legal page (`noindex, follow`,
+  excluded from sitemap per site convention) that explains scoring
+  independence from affiliate revenue, the product selection rule,
+  and the `rel="sponsored nofollow noopener"` policy. Public CDN
+  caching is still safe — cut/cooker are URL params so the same URL
+  always yields the same product. Coverage:
+  `worker/tests/unit/affiliate/rules.test.ts` (12 unit specs
+  exhaustive across cuts × cookers × bands plus rule-table
+  well-formedness),
+  `worker/tests/integration/forecast.test.ts` (2 specs — recommendation
+  present + disclosureRequired true; recommendation varies by cooker),
+  `tests/smoke-weather-verdict.spec.js` (3 e2e specs — card render with
+  disclosure, hidden-slot when no recommendation, `javascript:` URI
+  neutralized). `validate.ps1` now checks `smoke-weather/disclosures.html`.
 
 ## Tooling rules
 
