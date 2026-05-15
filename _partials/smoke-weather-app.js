@@ -141,6 +141,68 @@
       '<div class="verdict-hero__source">Source: ' + escapeHtml(sourceLabel) + '</div>';
   }
 
+  // Confidence-pill tooltip text (F3). Same wording shown across all
+  // day cards — kept short so the native `title` tooltip pops cleanly
+  // on desktop and on mobile long-press.
+  var CONFIDENCE_TOOLTIP =
+    'Forecast certainty: high (next 1-2 days), medium (3-4 days), low (5+ days).';
+
+  // Dew-point tooltip (F4). Pinned to 60 °F because that's the stall
+  // threshold the scoring engine uses for long-cook cuts (brisket,
+  // pork butt, ribs). Don't change without updating scoring.ts in
+  // lockstep — the number on screen has to match the engine's logic.
+  var DEWPOINT_TOOLTIP =
+    'Dew point above ~60 °F slows evaporative cooling and lengthens the stall on long cuts.';
+
+  function fmtHour(t) {
+    // Both feeds put HH at offset 11-13 of the ISO string:
+    //   Open-Meteo (timezone=auto) → '2026-05-15T08:00'
+    //   NWS                         → '2026-05-15T08:00:00-05:00'
+    // Slicing avoids constructing a Date in the user's tz, which
+    // would shift the hour off by their UTC offset for the NWS path.
+    if (typeof t !== 'string' || t.length < 13 || t.charAt(10) !== 'T') return '';
+    var hh = parseInt(t.slice(11, 13), 10);
+    if (!Number.isFinite(hh) || hh < 0 || hh > 23) return '';
+    var period = hh < 12 ? 'AM' : 'PM';
+    var h12 = hh % 12;
+    if (h12 === 0) h12 = 12;
+    return h12 + ' ' + period;
+  }
+
+  function renderHourlyTable(hours) {
+    if (!Array.isArray(hours) || hours.length === 0) {
+      return '<p class="day-card__hourly-empty">No hourly data for this day.</p>';
+    }
+    // Numeric fields go through fmtNum so a null/undefined value (NWS
+    // partial responses) renders as an em dash, never "NaN".
+    var rows = '';
+    for (var i = 0; i < hours.length; i++) {
+      var h = hours[i];
+      rows +=
+        '<tr>' +
+          '<th scope="row">' + escapeHtml(fmtHour(h.t)) + '</th>' +
+          '<td>' + fmtNum(h.tempF) + '&deg;F</td>' +
+          '<td>' + fmtNum(h.windMph) + '/' + fmtNum(h.gustMph) + '</td>' +
+          '<td>' + fmtNum(h.precipProbPct) + '%</td>' +
+          '<td>' + fmtNum(h.dewPointF) + '&deg;F</td>' +
+        '</tr>';
+    }
+    return (
+      '<table class="hourly-table">' +
+        '<thead>' +
+          '<tr>' +
+            '<th scope="col">Hour</th>' +
+            '<th scope="col">Temp</th>' +
+            '<th scope="col">Wind/Gust</th>' +
+            '<th scope="col">Rain</th>' +
+            '<th scope="col">Dew</th>' +
+          '</tr>' +
+        '</thead>' +
+        '<tbody>' + rows + '</tbody>' +
+      '</table>'
+    );
+  }
+
   function renderDayCard(entry, isBest) {
     var bandClass = 'band-' + entry.score.band;
     var article = document.createElement('article');
@@ -164,7 +226,28 @@
       '</div>' +
       '<div class="day-card__temps">' + fmtNum(entry.day.tempHighF) + '&deg;F / ' + fmtNum(entry.day.tempLowF) + '&deg;F &middot; gust ' + fmtNum(entry.day.gustMphMax) + ' mph</div>' +
       '<ul class="day-card__reasons">' + reasonsHtml + '</ul>' +
-      '<div class="day-card__confidence is-' + escapeHtml(entry.score.confidence) + '">Confidence: ' + escapeHtml(entry.score.confidence) + '</div>';
+      '<div class="day-card__dewpoint" title="' + escapeHtml(DEWPOINT_TOOLTIP) + '">Dew point ' + fmtNum(entry.day.dewPointMeanF) + '&deg;F</div>' +
+      '<details class="day-card__hourly">' +
+        '<summary>Hour-by-hour</summary>' +
+        '<div class="day-card__hourly-body" data-hourly-pending="1"></div>' +
+      '</details>' +
+      '<div class="day-card__confidence is-' + escapeHtml(entry.score.confidence) + '" title="' + escapeHtml(CONFIDENCE_TOOLTIP) + '">Confidence: ' + escapeHtml(entry.score.confidence) + '</div>';
+
+    // Lazy-populate the hourly table on the first open (F5
+    // progressive disclosure). Keeps initial DOM small — a 7-day
+    // forecast with 24h each would otherwise add ~170 rows up front.
+    // The data-hourly-pending guard makes the fill idempotent so
+    // toggling open/closed/open does no extra work.
+    var details = article.querySelector('.day-card__hourly');
+    var body = article.querySelector('.day-card__hourly-body');
+    if (details && body) {
+      details.addEventListener('toggle', function () {
+        if (!details.open) return;
+        if (body.getAttribute('data-hourly-pending') !== '1') return;
+        body.removeAttribute('data-hourly-pending');
+        body.innerHTML = renderHourlyTable(entry.day.hourly);
+      });
+    }
     return article;
   }
 

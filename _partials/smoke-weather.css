@@ -189,6 +189,79 @@
 .day-card__confidence.is-medium::before  { background: var(--score-yellow); }
 .day-card__confidence.is-low::before     { background: var(--score-red); }
 
+/* ----- Dew point + progressive-disclosure hourly table (F4/F5) ----- */
+.day-card__dewpoint {
+  font-size: .82rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  /* Native title tooltip — cursor cue on desktop, long-press on mobile. */
+  cursor: help;
+  border-bottom: 1px dotted var(--card-border);
+  align-self: flex-start;
+  padding-bottom: .15rem;
+}
+.day-card__hourly { margin-top: .25rem; }
+.day-card__hourly > summary {
+  cursor: pointer;
+  font-size: .8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--band-color, var(--charcoal));
+  padding: .35rem 0;
+  list-style: none;
+  outline-offset: 2px;
+}
+.day-card__hourly > summary::-webkit-details-marker { display: none; }
+.day-card__hourly > summary::before {
+  content: '+ ';
+  font-weight: 700;
+}
+.day-card__hourly[open] > summary::before { content: '\2212  '; }
+.day-card__hourly-empty {
+  font-size: .82rem;
+  color: var(--text-muted);
+  margin: .35rem 0 0;
+}
+.hourly-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .78rem;
+  font-variant-numeric: tabular-nums;
+  margin-top: .35rem;
+  /* Long-form hourly tables can overflow narrow phones; keep them
+     scrollable horizontally as a fallback rather than breaking the
+     card grid. */
+  display: block;
+  overflow-x: auto;
+}
+.hourly-table thead th {
+  text-align: left;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-size: .68rem;
+  color: var(--text-muted);
+  padding: .25rem .4rem .35rem 0;
+  border-bottom: 1px solid var(--card-border);
+}
+.hourly-table tbody th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--charcoal);
+  padding: .3rem .4rem .3rem 0;
+  white-space: nowrap;
+}
+.hourly-table tbody td {
+  padding: .3rem .4rem .3rem 0;
+  color: var(--charcoal);
+  white-space: nowrap;
+}
+.hourly-table tbody tr + tr th,
+.hourly-table tbody tr + tr td {
+  border-top: 1px solid var(--card-border);
+}
+
 /* ----- Band classes (set by JS via class string) ----- */
 .band-red    { --band-color: var(--score-red);    background: var(--score-red-bg); }
 .band-yellow { --band-color: var(--score-yellow); background: var(--score-yellow-bg); }
