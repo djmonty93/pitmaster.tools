@@ -232,12 +232,17 @@
       '</div>' +
       '<div class="day-card__temps">' + fmtNum(entry.day.tempHighF) + '&deg;F / ' + fmtNum(entry.day.tempLowF) + '&deg;F &middot; gust ' + fmtNum(entry.day.gustMphMax) + ' mph</div>' +
       '<ul class="day-card__reasons">' + reasonsHtml + '</ul>' +
-      '<div class="day-card__dewpoint" title="' + escapeHtml(DEWPOINT_TOOLTIP) + '">Dew point ' + fmtNum(entry.day.dewPointMeanF) + '&deg;F</div>' +
+      // Dew-point + confidence both rely on a native title for mouse
+      // hover, AND embed the same wording in a visually-hidden span
+      // so assistive tech reliably announces the explanation. title
+      // alone is unreliable for screen readers and unreachable for
+      // keyboard-only users without pointer hover.
+      '<div class="day-card__dewpoint" title="' + escapeHtml(DEWPOINT_TOOLTIP) + '">Dew point ' + fmtNum(entry.day.dewPointMeanF) + '&deg;F<span class="sw-sr-only"> — ' + escapeHtml(DEWPOINT_TOOLTIP) + '</span></div>' +
       '<details class="day-card__hourly">' +
         '<summary>Hour-by-hour</summary>' +
         '<div class="day-card__hourly-body" data-hourly-pending="1"></div>' +
       '</details>' +
-      '<div class="day-card__confidence is-' + escapeHtml(entry.score.confidence) + '" title="' + escapeHtml(CONFIDENCE_TOOLTIP) + '">Confidence: ' + escapeHtml(entry.score.confidence) + '</div>';
+      '<div class="day-card__confidence is-' + escapeHtml(entry.score.confidence) + '" title="' + escapeHtml(CONFIDENCE_TOOLTIP) + '">Confidence: ' + escapeHtml(entry.score.confidence) + '<span class="sw-sr-only"> — ' + escapeHtml(CONFIDENCE_TOOLTIP) + '</span></div>';
 
     // Lazy-populate the hourly table on the first open (F5
     // progressive disclosure). Keeps initial DOM small — a 7-day

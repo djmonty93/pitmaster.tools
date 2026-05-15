@@ -189,6 +189,21 @@
 .day-card__confidence.is-medium::before  { background: var(--score-yellow); }
 .day-card__confidence.is-low::before     { background: var(--score-red); }
 
+/* Visually-hidden helper — accessible to screen readers, removed
+   visually. Used to expose explanations that we also surface via
+   native title tooltips for mouse/touch. */
+.sw-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ----- Dew point + progressive-disclosure hourly table (F4/F5) ----- */
 .day-card__dewpoint {
   font-size: .82rem;

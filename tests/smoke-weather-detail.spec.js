@@ -129,7 +129,7 @@ test.describe('Best Smoke Days — F3/F4/F5 detail view', () => {
     await expect(emptyCard.locator('.day-card__hourly-empty')).toBeVisible();
   });
 
-  test('confidence pill carries the explanatory tooltip (F3)', async ({ page }) => {
+  test('confidence pill carries the explanatory tooltip AND a screen-reader description (F3)', async ({ page }) => {
     await mockForecast(page);
     await page.goto('/smoke-weather/');
 
@@ -139,9 +139,15 @@ test.describe('Best Smoke Days — F3/F4/F5 detail view', () => {
       'title',
       /high \(next 1-2 days\), medium \(3-4 days\), low \(5\+ days\)/
     );
+    // Also exposed inline via a visually-hidden span so screen readers
+    // and keyboard-only users get the same explanation as mouse
+    // hoverers — title alone is not reliably announced.
+    const sr = pill.locator('.sw-sr-only');
+    await expect(sr).toHaveCount(1);
+    await expect(sr).toHaveText(/high \(next 1-2 days\), medium \(3-4 days\), low \(5\+ days\)/);
   });
 
-  test('dew-point row carries the stall-risk tooltip (F4)', async ({ page }) => {
+  test('dew-point row carries the stall-risk tooltip AND a screen-reader description (F4)', async ({ page }) => {
     await mockForecast(page);
     await page.goto('/smoke-weather/');
 
@@ -149,5 +155,8 @@ test.describe('Best Smoke Days — F3/F4/F5 detail view', () => {
     await expect(dp).toBeVisible();
     await expect(dp).toContainText('Dew point 46');
     await expect(dp).toHaveAttribute('title', /slows evaporative cooling/);
+    const sr = dp.locator('.sw-sr-only');
+    await expect(sr).toHaveCount(1);
+    await expect(sr).toHaveText(/slows evaporative cooling/);
   });
 });
