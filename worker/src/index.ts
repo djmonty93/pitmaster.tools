@@ -2,34 +2,46 @@
 // handlers. Anything that doesn't match a route (including HTML pages
 // served from dist/) falls through to env.ASSETS.fetch.
 
+import { runFridayCron } from './crons/fridayEmail.js';
 import { handleArticles } from './handlers/articles.js';
 import { handleForecast } from './handlers/forecast.js';
 import { handlePreferences } from './handlers/preferences.js';
 import { handleStatus } from './handlers/status.js';
 import { handleSubscribe } from './handlers/subscribe.js';
 import { handleUnsubscribe } from './handlers/unsubscribe.js';
+import { createMailerLiteClient } from './lib/mailerlite/client.js';
+import { drain } from './lib/mailerlite/retry.js';
 import { compileRoutes, dispatch, jsonError } from './router.js';
 
 export interface Env {
   ASSETS: Fetcher;
   WEATHER_KV: KVNamespace;
   SMOKE_DB: D1Database;
-  /**
-   * MailerLite Connect API token. Sourced from a Wrangler secret
-   * (`wrangler secret put MAILERLITE_API_KEY`) in production. Local
-   * development reads it from .dev.vars. Step 6's client constructor
-   * fails fast if this is missing, so the absence shows up at the
-   * worker boot, not on the first user subscribe.
-   */
   MAILERLITE_API_KEY: string;
-  /**
-   * HMAC-SHA256 secret used to sign subscriber-scoped auth tokens
-   * (see worker/src/lib/auth/token.ts). Returned by /api/subscribe
-   * and required by /api/unsubscribe and /api/preferences. Rotate
-   * via `wrangler secret put SUBSCRIBER_TOKEN_SECRET` to invalidate
-   * all existing tokens.
-   */
   SUBSCRIBER_TOKEN_SECRET: string;
+  /**
+   * From-address / from-name configured on the MailerLite sending
+   * domain (mail.pitmaster.tools). See README "DNS setup" for the
+   * CNAME + SPF/DKIM/DMARC records the operator must add on Cloudflare.
+   * Surfaced into Env so a per-environment override (staging vs prod)
+   * is a wrangler-vars change rather than a code change.
+   */
+  MAILERLITE_FROM_EMAIL?: string;
+  MAILERLITE_FROM_NAME?: string;
+  MAILERLITE_REPLY_TO?: string;
+  /**
+   * Per-region MailerLite automation ids. Each automation has its
+   * audience filtered to `pitmaster_<region>` in the dashboard; the
+   * Friday cron triggers them at 6am local in each region's anchor tz.
+   * Optional — a missing id means that region is dark for this
+   * environment (useful while staging onboarding for one region first).
+   */
+  MAILERLITE_AUTOMATION_NORTHEAST_ID?: string;
+  MAILERLITE_AUTOMATION_SOUTHEAST_ID?: string;
+  MAILERLITE_AUTOMATION_MIDWEST_ID?: string;
+  MAILERLITE_AUTOMATION_SOUTH_CENTRAL_ID?: string;
+  MAILERLITE_AUTOMATION_MOUNTAIN_ID?: string;
+  MAILERLITE_AUTOMATION_PACIFIC_ID?: string;
 }
 
 const routes = compileRoutes([
@@ -64,5 +76,31 @@ export default {
       console.error('worker unhandled error', err);
       return jsonError(500, 'internal_error', 'An unexpected error occurred');
     }
+  },
+  async scheduled(controller: ScheduledController, env: Env, _ctx: ExecutionContext): Promise<void> {
+    // Two cron triggers feed into this handler (see wrangler.jsonc):
+    //
+    //   `0 10-14 * * 5` — Friday digest. Awaited so a retryable
+    //   failure throw propagates to Cloudflare's scheduled-handler
+    //   contract and triggers auto-retry. Without the await,
+    //   Cloudflare sees the handler resolve normally and never
+    //   re-attempts the only matching 6am-local tick for a failed
+    //   region.
+    //
+    //   `*/5 * * * *` — mailerlite_retry drain. Without this nothing
+    //   ever calls drain() in production, so subscribe/unsubscribe/
+    //   preferences/group-assign retryable failures would queue
+    //   forever. The 5-minute cadence aligns with the retry queue's
+    //   1-minute initial backoff.
+    if (controller.cron === '0 10-14 * * 5') {
+      await runFridayCron(env, new Date(controller.scheduledTime));
+      return;
+    }
+    if (controller.cron === '*/5 * * * *') {
+      const client = createMailerLiteClient({ apiKey: env.MAILERLITE_API_KEY });
+      await drain(env.SMOKE_DB, client, env.WEATHER_KV);
+      return;
+    }
+    console.warn('scheduled: unrecognized cron expression', { cron: controller.cron });
   },
 } satisfies ExportedHandler<Env>;

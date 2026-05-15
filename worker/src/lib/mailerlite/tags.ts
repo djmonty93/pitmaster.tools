@@ -1,69 +1,85 @@
-// Subscriber tagging helpers. The Best Smoke Days plan committed to
-// tag-based segmentation rather than 50 MailerLite groups (one per
-// metro), because MailerLite Connect's subscriber custom-fields model
-// can carry the same routing data without the group-management
-// overhead. Friday-cron segments filter on these fields directly.
+// Portfolio-aware MailerLite custom-field schema for BBQ subscribers.
 //
-// The shape is intentionally narrow:
-//   metro:<slug>      → routes Friday email to the right metro card
-//   cut:<slug>        → drives copy variant (brisket vs ribs vs chicken)
-//   cooker:<slug>     → drives equipment-specific tips
+// Field keys are prefixed `bbq_*` so a future portfolio site
+// (powersizing.com, overlanding.tools, ...) can share a MailerLite
+// account without colliding on field names. The prefix lives only on
+// the MailerLite side — D1 columns stay unprefixed (region, cut, etc.)
+// and this module maps between the two shapes.
 //
-// We expose two helpers:
-//   - formatTags(): canonical string[] form ("metro:kansas-city-mo"),
-//     used for logging / event-payload breadcrumbs.
-//   - toSubscriberFields(): the object shape POSTed to MailerLite's
-//     /api/subscribers endpoint. Field keys match what the dashboard
-//     expects so Segments can be authored without code changes.
+// What we DON'T emit:
+//   - bbq_metro: regional campaigns key on bbq_region; metro-slug
+//     routing was a v1 detail that the portfolio refactor removed.
+//   - tag-style 'metro:<slug>' strings: replaced by group membership
+//     (pitmaster_all + pitmaster_<region>), see groups.ts.
 
 import type { Cooker, Cut } from '@shared/types';
+import type { Region } from '../regions/index.js';
 
-export interface TagInput {
-  metroSlug?: string | null;
+/** Inputs the subscribe handler / Friday cron pass in. */
+export interface BbqTagInput {
+  zip: string;
+  /** Display name from the geocoder ("Atlanta, Georgia"). Null on miss. */
+  city?: string | null;
+  /** Two-letter state code; required because region derives from it. */
+  state: string;
+  region: Region;
   cut?: Cut | null;
   cooker?: Cooker | null;
+  /** IANA timezone for per-region cron scheduling. */
+  timezone: string;
+  /**
+   * Subscription timestamp. Serialized as YYYY-MM-DD because MailerLite
+   * date fields drop time-of-day. Defaults to "today" when omitted.
+   */
+  signupDate?: Date | null;
 }
 
-export interface SubscriberFields {
-  metro?: string;
-  cut?: Cut;
-  cooker?: Cooker;
+/** Exact key shape POSTed to MailerLite's /api/subscribers `fields` map. */
+export interface BbqSubscriberFields {
+  bbq_zip: string;
+  bbq_city?: string;
+  bbq_state: string;
+  bbq_region: Region;
+  bbq_cut_pref?: Cut;
+  bbq_cooker_pref?: Cooker;
+  bbq_timezone: string;
+  bbq_signup_date?: string;
 }
 
-const METRO_SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const ZIP_RE = /^\d{5}$/;
+const STATE_RE = /^[A-Z]{2}$/;
 
 /**
- * Validates that the metro slug matches the same URL-safe shape the
- * migrations 0002_metros_seed.sql enforces. Throws on bad input so
- * upstream typos surface at the API boundary instead of being silently
- * shipped to MailerLite as `metro:` (truncated).
+ * Map domain inputs to the MailerLite-shaped `fields` object. Omits
+ * keys with null/undefined values so MailerLite doesn't store empty
+ * strings (a stray "" on bbq_cut_pref would still match the conditional
+ * merge tag `{$if:bbq_cut_pref=""}` in the email template).
  */
-function assertMetroSlug(slug: string): void {
-  if (!METRO_SLUG_RE.test(slug)) {
-    throw new TypeError(
-      `Invalid metro slug ${JSON.stringify(slug)}: expected lowercase letters, digits, dashes`
-    );
+export function toBbqSubscriberFields(input: BbqTagInput): BbqSubscriberFields {
+  if (!ZIP_RE.test(input.zip)) {
+    throw new TypeError(`Invalid zip: expected 5 digits, got ${JSON.stringify(input.zip)}`);
   }
-}
-
-export function formatTags(input: TagInput): string[] {
-  const out: string[] = [];
-  if (input.metroSlug) {
-    assertMetroSlug(input.metroSlug);
-    out.push(`metro:${input.metroSlug}`);
+  if (!STATE_RE.test(input.state)) {
+    throw new TypeError(`Invalid state: expected two-letter code, got ${JSON.stringify(input.state)}`);
   }
-  if (input.cut) out.push(`cut:${input.cut}`);
-  if (input.cooker) out.push(`cooker:${input.cooker}`);
-  return out;
-}
-
-export function toSubscriberFields(input: TagInput): SubscriberFields {
-  const fields: SubscriberFields = {};
-  if (input.metroSlug) {
-    assertMetroSlug(input.metroSlug);
-    fields.metro = input.metroSlug;
-  }
-  if (input.cut) fields.cut = input.cut;
-  if (input.cooker) fields.cooker = input.cooker;
+  const fields: BbqSubscriberFields = {
+    bbq_zip: input.zip,
+    bbq_state: input.state,
+    bbq_region: input.region,
+    bbq_timezone: input.timezone,
+  };
+  if (input.city) fields.bbq_city = input.city;
+  if (input.cut) fields.bbq_cut_pref = input.cut;
+  if (input.cooker) fields.bbq_cooker_pref = input.cooker;
+  if (input.signupDate) fields.bbq_signup_date = formatDate(input.signupDate);
   return fields;
+}
+
+function formatDate(d: Date): string {
+  // YYYY-MM-DD in UTC. Avoids the local-tz gotcha where a US-east
+  // signup at 11pm local rolls into the next day when serialized.
+  const yyyy = d.getUTCFullYear();
+  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(d.getUTCDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
 }

@@ -237,6 +237,38 @@ verified, and rolled back independently.
   disclosure, hidden-slot when no recommendation, `javascript:` URI
   neutralized). `validate.ps1` now checks `smoke-weather/disclosures.html`.
 
+## DNS setup — MailerLite sending domain
+
+Best Smoke Days emails ship from `pete@mail.pitmaster.tools`. Configure
+the sending domain in MailerLite first (Dashboard → Account →
+Settings → Domains → Add new domain), then add the records MailerLite
+gives you to Cloudflare DNS for `pitmaster.tools`:
+
+| Record                                | Type   | Target / Value                                 |
+| ------------------------------------- | ------ | ---------------------------------------------- |
+| `mail.pitmaster.tools`                | CNAME  | (from MailerLite UI, e.g. `mlsend.com`)        |
+| `pitmaster._domainkey.pitmaster.tools`| TXT    | (DKIM public key from MailerLite UI)           |
+| `pitmaster.tools` SPF                 | TXT    | `v=spf1 include:_spf.mlsend.com -all`          |
+| `_dmarc.pitmaster.tools`              | TXT    | `v=DMARC1; p=quarantine; rua=mailto:dmarc@pitmaster.tools` |
+
+After Cloudflare propagation (usually < 5 min), click "Verify" in the
+MailerLite domain UI. Once verified, every regional automation can
+send from this domain.
+
+Code-side, set the from-address envs:
+
+```bash
+wrangler secret put MAILERLITE_FROM_EMAIL    # pete@mail.pitmaster.tools
+wrangler secret put MAILERLITE_FROM_NAME     # Pitmaster Tools
+wrangler secret put MAILERLITE_REPLY_TO      # pete@mail.pitmaster.tools
+```
+
+The envs are surfaced into `Env` for future use — the regional
+automation templates are still the canonical place to set the from
+address per send. See `docs/mailerlite-setup.md` for the operator
+checklist and `docs/portfolio-email-architecture.md` for why this
+matters at portfolio scale.
+
 ## Tooling rules
 
 - Never commit directly to `main`; everything goes through a feature branch + PR.

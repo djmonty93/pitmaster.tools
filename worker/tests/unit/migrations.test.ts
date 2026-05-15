@@ -19,7 +19,14 @@ describe('D1 migrations — schema', () => {
     ).all<{ name: string }>();
     const tables = res.results.map((r) => r.name);
     expect(tables).toEqual(
-      expect.arrayContaining(['articles', 'events', 'mailerlite_retry', 'metros', 'subscribers'])
+      expect.arrayContaining([
+        'articles',
+        'events',
+        'friday_campaign_log',
+        'mailerlite_retry',
+        'metros',
+        'subscribers',
+      ])
     );
   });
 
@@ -33,12 +40,14 @@ describe('D1 migrations — schema', () => {
     expect(idx).toEqual(
       expect.arrayContaining([
         'idx_subscribers_timezone',
+        'idx_subscribers_region',
         'idx_metros_state',
         'idx_events_created_at',
         'idx_events_kind',
         'idx_mailerlite_retry_next',
         'idx_articles_published_at',
         'idx_articles_metro_slug',
+        'idx_friday_campaign_log_send_date',
       ])
     );
     // PRIMARY KEY / UNIQUE columns get implicit indexes — asserting an
@@ -204,6 +213,95 @@ describe('D1 migrations — schema', () => {
         )
         .run()
     ).rejects.toThrow();
+  });
+
+  it('subscribers.region accepts the six regional values and NULL', async () => {
+    const now = Date.now();
+    const cases: Array<[string, string | null]> = [
+      ['ne@x.com', 'northeast'],
+      ['se@x.com', 'southeast'],
+      ['mw@x.com', 'midwest'],
+      ['sc@x.com', 'south_central'],
+      ['mt@x.com', 'mountain'],
+      ['pa@x.com', 'pacific'],
+      ['nullreg@x.com', null],
+    ];
+    for (const [email, region] of cases) {
+      await DB.prepare(
+        `INSERT INTO subscribers (email, zip, timezone, region, created_at) VALUES (?, ?, ?, ?, ?)`
+      )
+        .bind(email, '20001', 'America/New_York', region, now)
+        .run();
+    }
+  });
+
+  it('subscribers.region rejects unknown region values', async () => {
+    const now = Date.now();
+    await expect(
+      DB.prepare(
+        `INSERT INTO subscribers (email, zip, timezone, region, created_at) VALUES (?, ?, ?, ?, ?)`
+      )
+        .bind('bad-region@x.com', '20001', 'America/New_York', 'antarctica', now)
+        .run()
+    ).rejects.toThrow();
+  });
+
+  it('friday_campaign_log enforces UNIQUE (region, send_date)', async () => {
+    const now = Date.now();
+    await DB.prepare(
+      `INSERT INTO friday_campaign_log (region, send_date, status, attempted_at) VALUES (?, ?, ?, ?)`
+    )
+      .bind('southeast', '2026-05-15', 'queued', now)
+      .run();
+    // Same region + same date — must collide.
+    await expect(
+      DB.prepare(
+        `INSERT INTO friday_campaign_log (region, send_date, status, attempted_at) VALUES (?, ?, ?, ?)`
+      )
+        .bind('southeast', '2026-05-15', 'sent', now)
+        .run()
+    ).rejects.toThrow();
+    // Different region same date — allowed.
+    await DB.prepare(
+      `INSERT INTO friday_campaign_log (region, send_date, status, attempted_at) VALUES (?, ?, ?, ?)`
+    )
+      .bind('midwest', '2026-05-15', 'queued', now)
+      .run();
+  });
+
+  it('friday_campaign_log rejects unknown status or region values', async () => {
+    const now = Date.now();
+    await expect(
+      DB.prepare(
+        `INSERT INTO friday_campaign_log (region, send_date, status, attempted_at) VALUES (?, ?, ?, ?)`
+      )
+        .bind('northeast', '2026-05-22', 'pending', now)
+        .run()
+    ).rejects.toThrow();
+    await expect(
+      DB.prepare(
+        `INSERT INTO friday_campaign_log (region, send_date, status, attempted_at) VALUES (?, ?, ?, ?)`
+      )
+        .bind('antarctica', '2026-05-22', 'queued', now)
+        .run()
+    ).rejects.toThrow();
+  });
+
+  it("friday_campaign_log accepts 'sending' as a status (claim-lock state)", async () => {
+    // The cron INSERTs at 'sending' atomically so the row itself is
+    // the claim lock; the CHECK must allow it.
+    const now = Date.now();
+    await DB.prepare(
+      `INSERT INTO friday_campaign_log (region, send_date, status, attempted_at) VALUES (?, ?, ?, ?)`
+    )
+      .bind('mountain', '2026-06-12', 'sending', now)
+      .run();
+    const row = await DB.prepare(
+      `SELECT status FROM friday_campaign_log WHERE region = ? AND send_date = ?`
+    )
+      .bind('mountain', '2026-06-12')
+      .first<{ status: string }>();
+    expect(row?.status).toBe('sending');
   });
 
   it('articles rejects unknown kind or hero_band values', async () => {

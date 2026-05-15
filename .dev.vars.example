@@ -5,3 +5,19 @@
 # MAILERLITE_API_KEY=
 # SUBSCRIBER_TOKEN_SECRET=
 # NWS_USER_AGENT=pitmaster.tools (contact@pitmaster.tools)
+
+# Sending domain — set after MailerLite verifies DNS for mail.pitmaster.tools.
+# MAILERLITE_FROM_EMAIL=pete@mail.pitmaster.tools
+# MAILERLITE_FROM_NAME=Pitmaster Tools
+# MAILERLITE_REPLY_TO=pete@mail.pitmaster.tools
+
+# Per-region weekly-digest automations. Each id is the MailerLite
+# automation that fires on Fri 06:00 local in that region's anchor tz.
+# A missing id makes that region dark — useful for staging one region
+# at a time.
+# MAILERLITE_AUTOMATION_NORTHEAST_ID=
+# MAILERLITE_AUTOMATION_SOUTHEAST_ID=
+# MAILERLITE_AUTOMATION_MIDWEST_ID=
+# MAILERLITE_AUTOMATION_SOUTH_CENTRAL_ID=
+# MAILERLITE_AUTOMATION_MOUNTAIN_ID=
+# MAILERLITE_AUTOMATION_PACIFIC_ID=

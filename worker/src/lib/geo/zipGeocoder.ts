@@ -26,7 +26,12 @@ const GEOCODE_URL = 'https://geocoding-api.open-meteo.com/v1/search';
 const DEFAULT_TIMEOUT_MS = 3000;
 const FRESH_SECONDS = 30 * 24 * 60 * 60; // 30 days — zip→location is geographically stable
 const STALE_SECONDS = 90 * 24 * 60 * 60; // 90 days fallback if API is down
-const KEY_PREFIX = 'geo:v1';
+// Bumped from v1 → v2 when ZipLocation gained the `state` field
+// (portfolio-aware region routing). v1 entries are missing `state`,
+// which would silently drop subscribers into the no-region path on
+// the slow-path resubscribe. Old keys age out naturally via TTL —
+// no purge required.
+const KEY_PREFIX = 'geo:v2';
 
 // US 5-digit zip; we don't yet support other countries.
 const US_ZIP_RE = /^\d{5}$/;
@@ -41,6 +46,13 @@ export interface ZipLocation {
   metroSlug: string | null;
   /** Display name for the resolved place (e.g. "Atlanta, Georgia"). */
   name: string;
+  /**
+   * Two-letter US state code (e.g. "GA"). Comes from the metros table
+   * on the fast path or from admin1→code conversion on the slow path.
+   * Null when the geocoder can't resolve it — caller decides whether
+   * to reject or proceed with region=null.
+   */
+  state: string | null;
 }
 
 const GeocodeResponse = z.object({
@@ -114,6 +126,7 @@ export async function resolveZip(
       timezone: metro.timezone,
       metroSlug: metro.slug,
       name: `${metro.name}, ${metro.state}`,
+      state: metro.state,
     };
   }
 
@@ -186,5 +199,30 @@ async function fetchGeocode(zip: string, opts: ResolveOptions): Promise<ZipLocat
     timezone: first.timezone,
     metroSlug: null,
     name: first.admin1 ? `${first.name}, ${first.admin1}` : first.name,
+    state: first.admin1 ? stateNameToCode(first.admin1) : null,
   };
+}
+
+// Open-Meteo returns admin1 as the full state name ("Georgia"); we
+// need the two-letter code for region bucketing. This table covers
+// the 50 states + DC. Anything not in here returns null and the
+// caller skips region assignment for that subscriber.
+const STATE_NAME_TO_CODE: Readonly<Record<string, string>> = {
+  Alabama: 'AL', Alaska: 'AK', Arizona: 'AZ', Arkansas: 'AR',
+  California: 'CA', Colorado: 'CO', Connecticut: 'CT', Delaware: 'DE',
+  'District of Columbia': 'DC', Florida: 'FL', Georgia: 'GA', Hawaii: 'HI',
+  Idaho: 'ID', Illinois: 'IL', Indiana: 'IN', Iowa: 'IA',
+  Kansas: 'KS', Kentucky: 'KY', Louisiana: 'LA', Maine: 'ME',
+  Maryland: 'MD', Massachusetts: 'MA', Michigan: 'MI', Minnesota: 'MN',
+  Mississippi: 'MS', Missouri: 'MO', Montana: 'MT', Nebraska: 'NE',
+  Nevada: 'NV', 'New Hampshire': 'NH', 'New Jersey': 'NJ', 'New Mexico': 'NM',
+  'New York': 'NY', 'North Carolina': 'NC', 'North Dakota': 'ND', Ohio: 'OH',
+  Oklahoma: 'OK', Oregon: 'OR', Pennsylvania: 'PA', 'Rhode Island': 'RI',
+  'South Carolina': 'SC', 'South Dakota': 'SD', Tennessee: 'TN', Texas: 'TX',
+  Utah: 'UT', Vermont: 'VT', Virginia: 'VA', Washington: 'WA',
+  'West Virginia': 'WV', Wisconsin: 'WI', Wyoming: 'WY',
+};
+
+function stateNameToCode(name: string): string | null {
+  return STATE_NAME_TO_CODE[name.trim()] ?? null;
 }

@@ -18,8 +18,8 @@ beforeAll(async () => {
 
 let stub: FetchStub | null = null;
 beforeEach(async () => {
-  await KV.delete('geo:v1:30303');
-  await KV.delete('geo:v1:99999');
+  await KV.delete('geo:v2:30303');
+  await KV.delete('geo:v2:99999');
 });
 afterEach(() => {
   stub?.restore();
@@ -42,6 +42,7 @@ describe('resolveZip', () => {
     const loc = await resolveZip(KV, DB, '30303');
     expect(loc.metroSlug).toBe('atlanta-ga');
     expect(loc.timezone).toBe('America/New_York');
+    expect(loc.state).toBe('GA');
     // No fetch call — fast path.
     expect(stub.calls).toHaveLength(0);
   });
@@ -69,7 +70,31 @@ describe('resolveZip', () => {
     expect(loc.latitude).toBe(35.5);
     expect(loc.timezone).toBe('America/Los_Angeles');
     expect(loc.metroSlug).toBeNull();
+    // admin1 "California" → "CA" via the state-name→code map.
+    expect(loc.state).toBe('CA');
     expect(stub.calls).toHaveLength(1);
+  });
+
+  it('returns state=null when admin1 is missing or unrecognized', async () => {
+    stub = installFetchStub([
+      {
+        match: 'geocoding-api.open-meteo.com',
+        respond: () =>
+          jsonResponse(200, {
+            results: [
+              {
+                latitude: 0,
+                longitude: 0,
+                timezone: 'UTC',
+                name: 'Unknown',
+                // No admin1
+              },
+            ],
+          }),
+      },
+    ]);
+    const loc = await resolveZip(KV, DB, '99999');
+    expect(loc.state).toBeNull();
   });
 
   it('caches the geocode result so a second call skips the network', async () => {

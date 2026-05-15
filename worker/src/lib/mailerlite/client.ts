@@ -32,10 +32,9 @@
 //   retry.ts so a queued replay collides with the original at our
 //   own D1 layer regardless of server behavior.
 
-import type { Cooker, Cut } from '@shared/types';
 import { redactSecrets } from '../redact.js';
 import { MailerLiteError, type MailerLiteRequestKind } from './errors.js';
-import { toSubscriberFields } from './tags.js';
+import type { BbqSubscriberFields } from './tags.js';
 
 export type Fetcher = typeof fetch;
 
@@ -50,11 +49,13 @@ export interface MailerLiteClientOptions {
 
 export interface SubscribeInput {
   email: string;
-  metroSlug?: string | null;
-  cut?: Cut | null;
-  cooker?: Cooker | null;
-  /** ISO timezone, stored as a custom field for the Friday-cron tz gate. */
-  timezone?: string | null;
+  /**
+   * Pre-shaped bbq_* fields — build via tags.toBbqSubscriberFields().
+   * Keeping the client agnostic of the tag layer lets a portfolio site
+   * (powersizing.com, etc.) reuse the same client with its own fields
+   * shape.
+   */
+  fields: BbqSubscriberFields;
 }
 
 export interface SubscribeResult {
@@ -68,9 +69,65 @@ export interface UnsubscribeInput {
   email: string;
 }
 
+export interface MailerLiteGroup {
+  id: string;
+  name: string;
+}
+
+export interface TriggerCampaignInput {
+  /** MailerLite automation id (one per region in the portfolio model). */
+  automationId: string;
+  /**
+   * Stable per-week tag (e.g. `southeast:2026-05-15`). Hashed into the
+   * Idempotency-Key so a same-week retry collapses to the original
+   * trigger.
+   */
+  idempotencyTag: string;
+}
+
 export interface MailerLiteClient {
   subscribe(input: SubscribeInput): Promise<SubscribeResult>;
+  /**
+   * Update only the bbq_* fields on an existing subscriber WITHOUT
+   * sending `status: 'active'`. Used by the preferences PATCH handler
+   * so an unsubscribed user who edits cut/cooker (e.g. via a stale
+   * link) is not silently reactivated in MailerLite. The subscribe
+   * endpoint accepts both shapes — the field-only POST is treated as
+   * an upsert that preserves the current status column. Returns null
+   * on 404 so the caller can choose to drop a stale request silently
+   * (preferences PATCH already guarded by token, so 404 means the
+   * subscriber was purged out-of-band).
+   */
+  updateSubscriberFields(
+    email: string,
+    fields: Record<string, unknown>
+  ): Promise<{ id: string } | null>;
+  /**
+   * Look up a subscriber by email. Returns null on 404 so callers can
+   * branch on "not in MailerLite" without try/catch. Used by the
+   * unsubscribe handler to find the MailerLite subscriber id without
+   * persisting it in D1.
+   */
+  getSubscriberByEmail(email: string): Promise<{ id: string } | null>;
   unsubscribe(input: UnsubscribeInput): Promise<void>;
+  /**
+   * List all groups configured in the MailerLite account. Used by
+   * groups.ts to hydrate the name→id KV cache on miss. Paginates
+   * server-side via `?limit=100`; the portfolio currently has ≤7 groups
+   * so a single page suffices, but the loop keeps us honest as new
+   * sites onboard.
+   */
+  listGroups(): Promise<MailerLiteGroup[]>;
+  /** POST /api/subscribers/:id/groups/:groupId — idempotent server-side. */
+  assignGroup(subscriberId: string, groupId: string): Promise<void>;
+  /** DELETE /api/subscribers/:id/groups/:groupId — 404 means "already not a member". */
+  removeGroup(subscriberId: string, groupId: string): Promise<void>;
+  /**
+   * POST /api/automations/:id/run — fires the region's weekly digest
+   * automation. The automation's audience filter (pitmaster_<region>)
+   * is configured in the MailerLite dashboard, not by this call.
+   */
+  triggerCampaign(input: TriggerCampaignInput): Promise<void>;
 }
 
 const DEFAULT_BASE_URL = 'https://connect.mailerlite.com';
@@ -162,18 +219,10 @@ export function createMailerLiteClient(opts: MailerLiteClientOptions): MailerLit
   return {
     async subscribe(input) {
       assertEmail(input.email);
-      const fields = toSubscriberFields({
-        metroSlug: input.metroSlug,
-        cut: input.cut,
-        cooker: input.cooker,
-      });
       const body: Record<string, unknown> = {
         email: input.email,
         status: 'active',
-        fields: {
-          ...fields,
-          ...(input.timezone ? { timezone: input.timezone } : {}),
-        },
+        fields: { ...input.fields },
       };
       const idempotencyKey = await hashKey('subscribe', input.email.toLowerCase());
       const json = await request<{ data: SubscribeResult }>('subscribe', {
@@ -191,6 +240,101 @@ export function createMailerLiteClient(opts: MailerLiteClientOptions): MailerLit
       return data;
     },
 
+    async updateSubscriberFields(email, fields) {
+      assertEmail(email);
+      // POST without `status` so MailerLite preserves whatever status
+      // the subscriber currently has (active OR unsubscribed). Posting
+      // `status: 'active'` here would silently re-opt-in an unsubscribed
+      // user when they edit their cut/cooker preference. Even with the
+      // handler's pre-check for unsubscribed_at there is a race window
+      // between the snapshot read and this network call; omitting the
+      // status field closes it.
+      const body: Record<string, unknown> = {
+        email,
+        fields: { ...fields },
+      };
+      // Idempotency-Key MUST include a hash of the fields, not just
+      // the email. The subscribe path can reuse `subscribe:<email>`
+      // because every subscribe is logically "make this user a member
+      // with these tags" and a duplicate is safe to collapse. But two
+      // sequential preference PATCHes (cut→pork-butt, then cut→brisket)
+      // are DIFFERENT logical updates: if MailerLite honors a stable
+      // key inside its retention window, the second PATCH gets treated
+      // as a duplicate of the first and the new value is dropped while
+      // the handler still reports 'sent'. Hashing the canonical JSON of
+      // the fields keeps retry-collapse for the same logical update
+      // while letting subsequent edits land.
+      const idempotencyKey = await hashKey(
+        'subscribe',
+        `fields:${email.toLowerCase()}:${canonicalJson(fields)}`
+      );
+      try {
+        const json = await request<unknown>('subscribe', {
+          method: 'POST',
+          path: '/api/subscribers',
+          body,
+          idempotencyKey,
+        });
+        // Tolerate both `{data: {id}}` and a flat `{id}` shape — same
+        // pattern as getSubscriberByEmail. A 2xx without a recognizable
+        // id is malformed, not "not found".
+        const wrappedId = (json as { data?: { id?: unknown } } | null)?.data?.id;
+        const flatId = (json as { id?: unknown } | null)?.id;
+        const id =
+          typeof wrappedId === 'string'
+            ? wrappedId
+            : typeof flatId === 'string'
+              ? flatId
+              : null;
+        if (!id) {
+          throw makeError('subscribe', 'malformed', 'missing data.id and id in updateSubscriberFields response');
+        }
+        return { id };
+      } catch (err) {
+        if (err instanceof MailerLiteError && err.kind === 'http_4xx' && err.status === 404) {
+          return null;
+        }
+        throw err;
+      }
+    },
+
+    async getSubscriberByEmail(email) {
+      assertEmail(email);
+      try {
+        const json = await request<unknown>('subscribe', {
+          method: 'GET',
+          path: `/api/subscribers/${encodeURIComponent(email)}`,
+        });
+        // Tolerate both response shapes. MailerLite Connect wraps the
+        // resource in `{data: ...}`, but sandbox / older API builds
+        // return a flat object. The subscribe path applies the same
+        // fallback (see line for `data ?? json as ...`) — mirror it
+        // here so unsubscribe's group-removal step isn't skipped just
+        // because the GET hit a sandbox endpoint that returned flat.
+        const wrappedId = (json as { data?: { id?: unknown } } | null)?.data?.id;
+        const flatId = (json as { id?: unknown } | null)?.id;
+        const id =
+          typeof wrappedId === 'string'
+            ? wrappedId
+            : typeof flatId === 'string'
+              ? flatId
+              : null;
+        if (!id) {
+          // 2xx with no recognizable id is malformed, not "not found".
+          // Throwing here lets the unsubscribe handler enqueue a retry
+          // (per its non-retryable-MLError-on-lookup catch) instead of
+          // proceeding to skip group removal and report success.
+          throw makeError('subscribe', 'malformed', 'missing data.id and id in subscriber lookup response');
+        }
+        return { id };
+      } catch (err) {
+        if (err instanceof MailerLiteError && err.kind === 'http_4xx' && err.status === 404) {
+          return null;
+        }
+        throw err;
+      }
+    },
+
     async unsubscribe(input) {
       assertEmail(input.email);
       // PUT /api/subscribers/:email with status=unsubscribed is the
@@ -201,6 +345,77 @@ export function createMailerLiteClient(opts: MailerLiteClientOptions): MailerLit
         method: 'PUT',
         path: `/api/subscribers/${encodeURIComponent(input.email)}`,
         body: { status: 'unsubscribed' },
+        idempotencyKey,
+      });
+    },
+
+    async listGroups() {
+      // Paginate defensively. MailerLite's group API returns
+      // `{ data: [...], meta: { last_page, current_page } }`. We page
+      // through until current_page === last_page so a portfolio that
+      // grows past the page size doesn't silently truncate.
+      const groups: MailerLiteGroup[] = [];
+      let page = 1;
+      for (;;) {
+        const json = await request<{
+          data: Array<{ id: string; name: string }>;
+          meta?: { last_page?: number; current_page?: number };
+        }>('group_list', {
+          method: 'GET',
+          path: `/api/groups?limit=100&page=${page}`,
+        });
+        for (const g of json.data ?? []) {
+          if (typeof g.id === 'string' && typeof g.name === 'string') {
+            groups.push({ id: g.id, name: g.name });
+          }
+        }
+        const last = json.meta?.last_page;
+        const current = json.meta?.current_page ?? page;
+        if (!last || current >= last) break;
+        page = current + 1;
+      }
+      return groups;
+    },
+
+    async assignGroup(subscriberId, groupId) {
+      // Idempotency key collapses concurrent retries of the same
+      // (subscriber, group) pair. MailerLite treats a repeat assign as
+      // a no-op server-side, but the key still helps the retry queue
+      // detect duplicates on its own side.
+      const idempotencyKey = await hashKey('group_assign', `${subscriberId}:${groupId}`);
+      await request<unknown>('group_assign', {
+        method: 'POST',
+        path: `/api/subscribers/${encodeURIComponent(subscriberId)}/groups/${encodeURIComponent(groupId)}`,
+        idempotencyKey,
+      });
+    },
+
+    async removeGroup(subscriberId, groupId) {
+      const idempotencyKey = await hashKey('group_remove', `${subscriberId}:${groupId}`);
+      try {
+        await request<unknown>('group_remove', {
+          method: 'DELETE',
+          path: `/api/subscribers/${encodeURIComponent(subscriberId)}/groups/${encodeURIComponent(groupId)}`,
+          idempotencyKey,
+        });
+      } catch (err) {
+        // 404 means "not a member" — treat as success so unsubscribe
+        // is idempotent even when the subscriber was never in the
+        // group to begin with. Any other failure propagates.
+        if (err instanceof MailerLiteError && err.kind === 'http_4xx' && err.status === 404) return;
+        throw err;
+      }
+    },
+
+    async triggerCampaign(input) {
+      if (!input.automationId) {
+        throw new TypeError('triggerCampaign: automationId is required');
+      }
+      const idempotencyKey = await hashKey('campaign', input.idempotencyTag);
+      await request<unknown>('campaign', {
+        method: 'POST',
+        path: `/api/automations/${encodeURIComponent(input.automationId)}/run`,
+        body: {},
         idempotencyKey,
       });
     },
@@ -224,6 +439,20 @@ export async function hashKey(kind: MailerLiteRequestKind, value: string): Promi
     hex += bytes[i]!.toString(16).padStart(2, '0');
   }
   return `${kind}:${hex}`;
+}
+
+/**
+ * Stable JSON encoding for a fields object: keys sorted lexicographically
+ * so `{a:1,b:2}` and `{b:2,a:1}` produce byte-identical output. Used by
+ * updateSubscriberFields to derive an idempotency key that collapses
+ * exact-duplicate retries but distinguishes substantive edits. Values
+ * are passed through JSON.stringify directly — primitives are fine and
+ * nested objects (unlikely for our flat fields shape) recurse via the
+ * standard JSON encoding.
+ */
+function canonicalJson(obj: Record<string, unknown>): string {
+  const keys = Object.keys(obj).sort();
+  return JSON.stringify(keys.map((k) => [k, obj[k]]));
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

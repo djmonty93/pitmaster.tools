@@ -6,6 +6,8 @@
 import init from '../../migrations/0001_init.sql?raw';
 import seed from '../../migrations/0002_metros_seed.sql?raw';
 import articles from '../../migrations/0003_articles.sql?raw';
+import addRegion from '../../migrations/0004_add_region.sql?raw';
+import fridayCampaignLog from '../../migrations/0005_friday_campaign_log.sql?raw';
 
 /**
  * Strip SQL line comments and split into statements on `;`. Quote-aware
@@ -58,7 +60,7 @@ export function splitStatements(sql: string): string[] {
 
 export async function applyMigrations(db: D1Database): Promise<void> {
   // Order matters: schema → seed → schema additions.
-  const files = [init, seed, articles];
+  const files = [init, seed, articles, addRegion, fridayCampaignLog];
   for (const file of files) {
     for (const stmt of splitStatements(file)) {
       await db.prepare(stmt).run();
