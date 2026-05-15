@@ -37,7 +37,29 @@
       "database_id": "00000000-0000-0000-0000-000000000000",
       "migrations_dir": "worker/migrations"
     }
-  ]
+  ],
+  // Cron triggers:
+  //
+  // 1. `0 10-14 * * 5` — Friday digest. Fires hourly Fri UTC across
+  //    the five anchor-tz 6am windows that DST + standard time can
+  //    produce: DST {ET 10:00, CT 11:00, MT 12:00, PT 13:00};
+  //    Standard {ET 11:00, CT 12:00, MT 13:00, PT 14:00}. Each tick
+  //    is a no-op for regions whose anchor tz is not currently
+  //    Fri 06:00 local — see worker/src/crons/fridayEmail.ts.
+  //
+  // 2. `*/5 * * * *` — mailerlite_retry drain. Subscribe/unsubscribe/
+  //    preferences/group-assign retries enqueue on the retry table
+  //    and need a steady ticker to replay them. Every 5 minutes
+  //    matches the backoffMs(1) minimum so a freshly queued row gets
+  //    a replay within ~1 attempt window. Higher frequency would
+  //    burn Worker invocations for no benefit; lower would compound
+  //    the user-visible latency between a 5xx and the recovered send.
+  "triggers": {
+    "crons": [
+      "0 10-14 * * 5",
+      "*/5 * * * *"
+    ]
+  }
   // MAILERLITE_API_KEY — Bearer token for the MailerLite Connect API,
   // used by worker/src/lib/mailerlite/client.ts. Provisioned with
   // `wrangler secret put MAILERLITE_API_KEY`; never committed.

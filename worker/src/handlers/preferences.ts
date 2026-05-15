@@ -15,6 +15,10 @@
 
 import { z } from 'zod';
 import { verifyToken } from '../lib/auth/token.js';
+import { createMailerLiteClient } from '../lib/mailerlite/client.js';
+import { MailerLiteError } from '../lib/mailerlite/errors.js';
+import { enqueue } from '../lib/mailerlite/retry.js';
+import { summarizeError } from '../lib/redact.js';
 import { json, jsonError, type RouteContext } from '../router.js';
 
 const PreferencesPatch = z.object({
@@ -133,5 +137,105 @@ async function handlePatch(rc: RouteContext): Promise<Response> {
   if (changes === 0) {
     return jsonError(404, 'not_found', 'No subscriber row matched this email');
   }
-  return json(200, { email, cut: cut ?? undefined, cooker: cooker ?? undefined });
+
+  // Read the current preference snapshot AFTER our UPDATE so the
+  // MailerLite-side fields reflect the merged outcome of any
+  // concurrent PATCHes, and so we can check unsubscribed_at before
+  // touching MailerLite.
+  //
+  // Concurrent PATCH safety: two simultaneous PATCHes (one setting
+  // cut, one setting cooker) would both queue under the same
+  // idempotency key `preferences:<email>` and the second's payload
+  // would overwrite the first's via the enqueue ON CONFLICT path —
+  // losing one field. Each PATCH's snapshot read sees the committed
+  // state of all prior UPDATEs, so the queued payloads converge.
+  //
+  // Null fields are sent as empty string (not omitted) so the
+  // regional automation's `{$if:bbq_cut_pref="brisket"}` conditional
+  // stops matching after the user clears their preference.
+  const snapshot = await rc.env.SMOKE_DB.prepare(
+    `SELECT cut, cooker, unsubscribed_at FROM subscribers WHERE email = ?`
+  )
+    .bind(email)
+    .first<{ cut: string | null; cooker: string | null; unsubscribed_at: number | null }>();
+
+  // Skip MailerLite sync entirely for an unsubscribed account.
+  // updateSubscriberFields omits the status field (so it won't
+  // reactivate), but skipping the network call also avoids leaking
+  // a tombstoned email to the upstream and saves a wasted POST.
+  // The user's D1 prefs are still updated; whenever they resubscribe,
+  // the subscribe handler pushes the latest fields fresh.
+  if (snapshot?.unsubscribed_at !== null && snapshot?.unsubscribed_at !== undefined) {
+    return json(200, {
+      email,
+      cut: cut ?? undefined,
+      cooker: cooker ?? undefined,
+      status: 'skipped',
+    });
+  }
+
+  const mailerliteFields: Record<string, string> = {
+    bbq_cut_pref: snapshot?.cut ?? '',
+    bbq_cooker_pref: snapshot?.cooker ?? '',
+  };
+  let mailerliteStatus: 'sent' | 'queued' = 'sent';
+  {
+    const client = createMailerLiteClient({ apiKey: rc.env.MAILERLITE_API_KEY });
+    try {
+      // updateSubscriberFields POSTs without `status: 'active'`, so an
+      // unsubscribed user who edits prefs via a stale link is NOT
+      // silently reactivated. The handler's earlier unsubscribed_at
+      // check already short-circuits the common case; this is the
+      // race-safe backstop for an unsubscribe that lands between the
+      // snapshot read and this call.
+      await client.updateSubscriberFields(email, mailerliteFields);
+    } catch (err) {
+      if (err instanceof MailerLiteError) {
+        // Both retryable and non-retryable MailerLite failures enqueue
+        // a retry. Retryable will replay until success/park; non-
+        // retryable (missing field, revoked key) will replay once,
+        // fail, and the drain drops the row with an events audit
+        // entry for /api/status visibility. Either way the caller
+        // sees status='queued' so the response reflects partial state.
+        await enqueue(rc.env.SMOKE_DB, {
+          kind: 'subscribe',
+          payload: {
+            stage: 'preferences',
+            email,
+            fields: mailerliteFields,
+          },
+          idempotencyKey: `preferences:${email}`,
+          cause: err.shouldRetry ? err : undefined,
+        });
+        mailerliteStatus = 'queued';
+        if (!err.shouldRetry) {
+          console.warn(
+            'preferences: MailerLite field update non-retryable failure (queued for one replay+audit)',
+            summarizeError(err)
+          );
+        }
+      } else {
+        // Non-MailerLite error: queue defensively so the drain can
+        // re-attempt rather than losing the sync entirely.
+        await enqueue(rc.env.SMOKE_DB, {
+          kind: 'subscribe',
+          payload: {
+            stage: 'preferences',
+            email,
+            fields: mailerliteFields,
+          },
+          idempotencyKey: `preferences:${email}`,
+        });
+        mailerliteStatus = 'queued';
+        console.warn('preferences: unexpected error syncing to MailerLite', summarizeError(err));
+      }
+    }
+  }
+
+  return json(200, {
+    email,
+    cut: cut ?? undefined,
+    cooker: cooker ?? undefined,
+    status: mailerliteStatus,
+  });
 }

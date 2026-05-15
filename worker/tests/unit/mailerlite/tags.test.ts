@@ -1,36 +1,94 @@
 import { describe, expect, it } from 'vitest';
-import { formatTags, toSubscriberFields } from '../../../src/lib/mailerlite/tags';
+import { toBbqSubscriberFields } from '../../../src/lib/mailerlite/tags';
 
-describe('mailerlite tags', () => {
-  it('formatTags emits metro/cut/cooker in canonical order', () => {
+describe('toBbqSubscriberFields', () => {
+  it('emits the required bbq_* fields with all inputs present', () => {
     expect(
-      formatTags({ metroSlug: 'kansas-city-mo', cut: 'brisket-packer', cooker: 'offset' })
-    ).toEqual(['metro:kansas-city-mo', 'cut:brisket-packer', 'cooker:offset']);
+      toBbqSubscriberFields({
+        zip: '78701',
+        city: 'Austin, Texas',
+        state: 'TX',
+        region: 'south_central',
+        cut: 'brisket-packer',
+        cooker: 'offset',
+        timezone: 'America/Chicago',
+        signupDate: new Date('2026-05-15T18:00:00Z'),
+      })
+    ).toEqual({
+      bbq_zip: '78701',
+      bbq_city: 'Austin, Texas',
+      bbq_state: 'TX',
+      bbq_region: 'south_central',
+      bbq_cut_pref: 'brisket-packer',
+      bbq_cooker_pref: 'offset',
+      bbq_timezone: 'America/Chicago',
+      bbq_signup_date: '2026-05-15',
+    });
   });
 
-  it('formatTags omits absent values', () => {
-    expect(formatTags({ cut: 'pork-butt' })).toEqual(['cut:pork-butt']);
-    expect(formatTags({})).toEqual([]);
-    expect(formatTags({ metroSlug: null, cut: null, cooker: null })).toEqual([]);
-  });
-
-  it('formatTags rejects malformed metro slugs', () => {
-    expect(() => formatTags({ metroSlug: 'Kansas City' })).toThrow(/Invalid metro slug/);
-    expect(() => formatTags({ metroSlug: '' })).not.toThrow(); // empty falsy → omitted
-    expect(() => formatTags({ metroSlug: '-leading-dash' })).toThrow(/Invalid metro slug/);
-    expect(() => formatTags({ metroSlug: 'trailing-' })).toThrow(/Invalid metro slug/);
-  });
-
-  it('toSubscriberFields returns MailerLite-shaped object, no empty keys', () => {
+  it('omits optional fields when null/undefined rather than emitting empty strings', () => {
     expect(
-      toSubscriberFields({ metroSlug: 'austin-tx', cut: 'spare-ribs', cooker: 'pellet' })
-    ).toEqual({ metro: 'austin-tx', cut: 'spare-ribs', cooker: 'pellet' });
-
-    expect(toSubscriberFields({})).toEqual({});
-    expect(toSubscriberFields({ cooker: 'kamado' })).toEqual({ cooker: 'kamado' });
+      toBbqSubscriberFields({
+        zip: '94102',
+        state: 'CA',
+        region: 'pacific',
+        timezone: 'America/Los_Angeles',
+        cut: null,
+        cooker: null,
+        city: null,
+      })
+    ).toEqual({
+      bbq_zip: '94102',
+      bbq_state: 'CA',
+      bbq_region: 'pacific',
+      bbq_timezone: 'America/Los_Angeles',
+    });
   });
 
-  it('toSubscriberFields validates the metro slug', () => {
-    expect(() => toSubscriberFields({ metroSlug: 'BAD slug!' })).toThrow(/Invalid metro slug/);
+  it('serializes signupDate as UTC YYYY-MM-DD (no local-tz drift)', () => {
+    // 23:00 in US/Eastern on 2026-05-14 → 03:00 UTC on 2026-05-15.
+    // Stamp should reflect UTC date, not the local one.
+    const d = new Date('2026-05-15T03:00:00Z');
+    const fields = toBbqSubscriberFields({
+      zip: '10001',
+      state: 'NY',
+      region: 'northeast',
+      timezone: 'America/New_York',
+      signupDate: d,
+    });
+    expect(fields.bbq_signup_date).toBe('2026-05-15');
+  });
+
+  it('rejects malformed zip', () => {
+    expect(() =>
+      toBbqSubscriberFields({
+        zip: '7870',
+        state: 'TX',
+        region: 'south_central',
+        timezone: 'America/Chicago',
+      })
+    ).toThrow(/Invalid zip/);
+  });
+
+  it('rejects malformed state code', () => {
+    expect(() =>
+      toBbqSubscriberFields({
+        zip: '78701',
+        state: 'texas',
+        region: 'south_central',
+        timezone: 'America/Chicago',
+      })
+    ).toThrow(/Invalid state/);
+  });
+
+  it('never emits a bare metro field (no v1 leftover)', () => {
+    const fields = toBbqSubscriberFields({
+      zip: '64108',
+      state: 'MO',
+      region: 'south_central',
+      timezone: 'America/Chicago',
+    });
+    expect(fields).not.toHaveProperty('metro');
+    expect(fields).not.toHaveProperty('bbq_metro');
   });
 });

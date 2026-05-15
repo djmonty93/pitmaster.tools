@@ -30,7 +30,9 @@
 
 import { MailerLiteError, type MailerLiteRequestKind } from './errors.js';
 import type { MailerLiteClient, SubscribeInput, UnsubscribeInput } from './client.js';
+import { ALL_GROUP_NAME, assignBbqGroups, regionToGroupName, removeBbqGroups, resolveGroupId } from './groups.js';
 import { summarizeError } from '../redact.js';
+import type { Region } from '../regions/index.js';
 
 export interface EnqueueInput {
   kind: MailerLiteRequestKind;
@@ -129,6 +131,7 @@ export async function enqueue(db: D1Database, input: EnqueueInput): Promise<void
 export async function drain(
   db: D1Database,
   client: MailerLiteClient,
+  kv: KVNamespace,
   opts: DrainOptions = {}
 ): Promise<DrainOutcome[]> {
   const nowFn = opts.now ?? Date.now;
@@ -155,7 +158,7 @@ export async function drain(
 
   const outcomes: DrainOutcome[] = [];
   for (const row of rowsRes.results) {
-    const outcome = await replayRow(db, client, row, nowFn);
+    const outcome = await replayRow(db, client, kv, row, nowFn);
     opts.onResult?.(outcome);
     outcomes.push(outcome);
   }
@@ -165,6 +168,7 @@ export async function drain(
 async function replayRow(
   db: D1Database,
   client: MailerLiteClient,
+  kv: KVNamespace,
   row: RetryRow,
   now: () => number
 ): Promise<DrainOutcome> {
@@ -201,7 +205,7 @@ async function replayRow(
   }
 
   try {
-    await dispatch(client, row.request_kind, payload);
+    await dispatch(client, kv, row.request_kind, payload);
     await db.prepare(`DELETE FROM mailerlite_retry WHERE id = ?`).bind(row.id).run();
     return { row, status: 'sent' };
   } catch (err) {
@@ -296,47 +300,233 @@ async function recordError(
   }
 }
 
-function isSubscribePayload(payload: unknown): payload is SubscribeInput {
-  if (!payload || typeof payload !== 'object') return false;
-  return typeof (payload as { email?: unknown }).email === 'string';
+interface SubscribeRetryPayload extends SubscribeInput {
+  region?: Region | null;
+  /**
+   * Region the subscriber WAS in before this resubscribe. When set and
+   * different from `region`, the drain detaches pitmaster_<oldRegion>
+   * after assigning the new groups so a region-change resubscribe that
+   * happened during a MailerLite outage doesn't leave the subscriber
+   * in both regional audiences after recovery.
+   *
+   * Optional because most queued subscribes are first-time signups
+   * (no prior region) — only resubscribes carry this hint.
+   */
+  oldRegion?: Region | null;
 }
 
-function isUnsubscribePayload(payload: unknown): payload is UnsubscribeInput {
+interface GroupAssignStagePayload {
+  stage: 'group_assign';
+  subscriberId: string;
+  region: Region | null;
+  /**
+   * Region the subscriber WAS in before this resubscribe. Symmetric
+   * with SubscribeRetryPayload.oldRegion — when set and different from
+   * `region`, the drain detaches pitmaster_<oldRegion> after assigning
+   * the new groups. Without this hint, a transient assignBbqGroups
+   * failure during a region-change resubscribe leaves the user in
+   * BOTH regional audiences after drain recovery.
+   */
+  oldRegion?: Region | null;
+}
+
+interface GroupRemoveStagePayload {
+  stage: 'group_remove';
+  subscriberId: string;
+  /** Group name like `pitmaster_southeast`; resolved at replay time. */
+  groupName: string;
+}
+
+interface PreferencesStagePayload {
+  stage: 'preferences';
+  email: string;
+  fields: Record<string, unknown>;
+}
+
+interface UnsubscribeRetryPayload extends UnsubscribeInput {
+  /** Pre-resolved MailerLite subscriber id (skip the GET). */
+  subscriberId?: string;
+}
+
+function isSubscribePayload(payload: unknown): payload is SubscribeRetryPayload {
+  if (!payload || typeof payload !== 'object') return false;
+  const p = payload as { email?: unknown; fields?: unknown };
+  return typeof p.email === 'string' && !!p.fields && typeof p.fields === 'object';
+}
+
+function isGroupAssignStage(payload: unknown): payload is GroupAssignStagePayload {
+  if (!payload || typeof payload !== 'object') return false;
+  const p = payload as { stage?: unknown; subscriberId?: unknown };
+  return p.stage === 'group_assign' && typeof p.subscriberId === 'string';
+}
+
+function isGroupRemoveStage(payload: unknown): payload is GroupRemoveStagePayload {
+  if (!payload || typeof payload !== 'object') return false;
+  const p = payload as { stage?: unknown; subscriberId?: unknown; groupName?: unknown };
+  return (
+    p.stage === 'group_remove' &&
+    typeof p.subscriberId === 'string' &&
+    typeof p.groupName === 'string'
+  );
+}
+
+function isPreferencesStage(payload: unknown): payload is PreferencesStagePayload {
+  if (!payload || typeof payload !== 'object') return false;
+  const p = payload as { stage?: unknown; email?: unknown; fields?: unknown };
+  return (
+    p.stage === 'preferences' &&
+    typeof p.email === 'string' &&
+    !!p.fields &&
+    typeof p.fields === 'object'
+  );
+}
+
+function isUnsubscribePayload(payload: unknown): payload is UnsubscribeRetryPayload {
   if (!payload || typeof payload !== 'object') return false;
   return typeof (payload as { email?: unknown }).email === 'string';
 }
 
 /**
  * `kind` is narrowed to `'subscribe' | 'unsubscribe'` by the drain
- * SQL filter — 'send' rows are skipped at the query level until Step
- * 11 owns that dispatch path. The narrow type is enforced at compile
- * time by the union the caller passes in.
+ * SQL filter — 'send' rows are skipped at the query level. The narrow
+ * type is enforced at compile time by the union the caller passes in.
  */
 type DispatchableKind = 'subscribe' | 'unsubscribe';
 
 async function dispatch(
   client: MailerLiteClient,
+  kv: KVNamespace,
   kind: DispatchableKind,
   payload: unknown
 ): Promise<void> {
   switch (kind) {
-    case 'subscribe': {
-      if (!isSubscribePayload(payload)) {
-        throw new MailerLiteError('subscribe', 'malformed', 'missing or invalid email');
-      }
-      await client.subscribe(payload);
+    case 'subscribe':
+      await dispatchSubscribe(client, kv, payload);
       return;
-    }
-    case 'unsubscribe': {
-      if (!isUnsubscribePayload(payload)) {
-        throw new MailerLiteError('unsubscribe', 'malformed', 'missing or invalid email');
-      }
-      await client.unsubscribe(payload);
+    case 'unsubscribe':
+      await dispatchUnsubscribe(client, kv, payload);
       return;
-    }
     default: {
       const _exhaustive: never = kind;
       throw new Error(`unknown dispatchable kind: ${_exhaustive as string}`);
     }
   }
+}
+
+/**
+ * Replay a subscribe row. Two shapes are accepted:
+ *   1. Full subscribe — payload carries {email, fields, region?}. We
+ *      POST /api/subscribers and then assign the BBQ groups so the
+ *      recovered subscriber actually ends up in pitmaster_all (and the
+ *      regional group when we know it). Skipping the group assign here
+ *      was the original [P1] bug: a transient MailerLite 5xx during
+ *      subscribe used to leave the user ungrouped after recovery.
+ *   2. Staged group_assign — payload carries {stage:'group_assign',
+ *      subscriberId, region}. The subscribe call already succeeded on
+ *      a prior pass; only the group assignment is owed.
+ */
+async function dispatchSubscribe(
+  client: MailerLiteClient,
+  kv: KVNamespace,
+  payload: unknown
+): Promise<void> {
+  if (isPreferencesStage(payload)) {
+    // PATCH /api/preferences sync: push the bbq_* field deltas to
+    // MailerLite WITHOUT a status field so an unsubscribed user who
+    // queued a preference change is not silently reactivated when the
+    // drain replays. The handler already short-circuits the unsub case
+    // before enqueue, but a user could unsubscribe between enqueue and
+    // drain — updateSubscriberFields closes that race window.
+    //
+    // NO group operations — the subscriber's group memberships are
+    // unaffected by a preference change, only the conditional merge
+    // tags in the email body are.
+    await client.updateSubscriberFields(payload.email, payload.fields);
+    return;
+  }
+  if (isGroupAssignStage(payload)) {
+    if (payload.region) {
+      await assignBbqGroups(client, kv, payload.subscriberId, payload.region);
+    } else {
+      const allGroupId = await resolveGroupId(client, kv, ALL_GROUP_NAME);
+      await client.assignGroup(payload.subscriberId, allGroupId);
+    }
+    // Stale-region cleanup mirroring the full-replay path. The
+    // subscribe handler's own inline detach was skipped because the
+    // assign threw and gated the cleanup on success — finish it here.
+    if (payload.oldRegion && payload.oldRegion !== payload.region) {
+      const staleGroupId = await resolveGroupId(
+        client,
+        kv,
+        regionToGroupName(payload.oldRegion)
+      );
+      await client.removeGroup(payload.subscriberId, staleGroupId);
+    }
+    return;
+  }
+  if (isGroupRemoveStage(payload)) {
+    // Targeted single-group removal — used by subscribe's stale-region
+    // cleanup when the user moves zips across regions. Distinct from
+    // unsubscribe's removeBbqGroups which removes from ALL pitmaster_*
+    // groups; here we only detach the one stale regional group.
+    const groupId = await resolveGroupId(client, kv, payload.groupName);
+    await client.removeGroup(payload.subscriberId, groupId);
+    return;
+  }
+  if (!isSubscribePayload(payload)) {
+    throw new MailerLiteError('subscribe', 'malformed', 'missing or invalid email/fields');
+  }
+  const { region: _region, oldRegion: _oldRegion, ...subscribeInput } = payload;
+  const result = await client.subscribe(subscribeInput);
+  if (payload.region) {
+    await assignBbqGroups(client, kv, result.id, payload.region);
+  } else {
+    const allGroupId = await resolveGroupId(client, kv, ALL_GROUP_NAME);
+    await client.assignGroup(result.id, allGroupId);
+  }
+  // Stale-region cleanup: if this was a region-change resubscribe
+  // captured at enqueue time, detach the prior regional group AFTER
+  // the new assign succeeds. Without this, a transient MailerLite
+  // outage during a region-change subscribe leaves the user in BOTH
+  // pitmaster_<old> and pitmaster_<new> after drain recovery — the
+  // subscribe handler's stale-detach logic was bypassed because
+  // mailerliteId was null at the time. Mirrors the handler's
+  // gated-on-success guard so a partial replay doesn't strand the
+  // user in neither regional audience.
+  if (payload.oldRegion && payload.oldRegion !== payload.region) {
+    const staleGroupId = await resolveGroupId(client, kv, regionToGroupName(payload.oldRegion));
+    await client.removeGroup(result.id, staleGroupId);
+  }
+}
+
+/**
+ * Replay an unsubscribe row. The portfolio-aware behavior is
+ * group-scoped removal — DO NOT call client.unsubscribe (which would
+ * set status=unsubscribed account-wide and detach the subscriber from
+ * sibling-site groups too). Original [P1] bug: a transient 5xx during
+ * the group-removal phase used to enqueue kind='unsubscribe' which the
+ * drain dispatched to client.unsubscribe, breaking the
+ * portfolio-aware promise specifically during transient failures.
+ *
+ * Payload may include a pre-resolved subscriberId to skip the GET
+ * (set by the handler when group removal failed after the lookup
+ * already succeeded). When the GET path runs and MailerLite returns
+ * null (subscriber not in MailerLite), nothing further is owed —
+ * D1 was already marked unsubscribed by the original handler.
+ */
+async function dispatchUnsubscribe(
+  client: MailerLiteClient,
+  kv: KVNamespace,
+  payload: unknown
+): Promise<void> {
+  if (!isUnsubscribePayload(payload)) {
+    throw new MailerLiteError('unsubscribe', 'malformed', 'missing or invalid email');
+  }
+  let subscriberId: string | null = payload.subscriberId ?? null;
+  if (!subscriberId) {
+    const found = await client.getSubscriberByEmail(payload.email);
+    subscriberId = found?.id ?? null;
+  }
+  if (!subscriberId) return;
+  await removeBbqGroups(client, kv, subscriberId);
 }

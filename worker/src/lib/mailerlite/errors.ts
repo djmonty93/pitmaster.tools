@@ -10,7 +10,14 @@
 // forever. 429 (rate limit) IS retryable since MailerLite's free tier
 // caps at ~120 req/min and bursts on Friday-cron will hit it.
 
-export type MailerLiteRequestKind = 'subscribe' | 'unsubscribe' | 'send';
+export type MailerLiteRequestKind =
+  | 'subscribe'
+  | 'unsubscribe'
+  | 'send'
+  | 'group_assign'
+  | 'group_remove'
+  | 'group_list'
+  | 'campaign';
 
 export type MailerLiteErrorKind =
   | 'http_5xx'
