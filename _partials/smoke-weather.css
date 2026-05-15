@@ -223,17 +223,19 @@
   color: var(--text-muted);
   margin: .35rem 0 0;
 }
+.hourly-table-scroll {
+  /* Long-form hourly tables can overflow narrow phones; the wrapper
+     handles horizontal overflow so the <table> itself can keep
+     native table semantics for screen readers. */
+  margin-top: .35rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
 .hourly-table {
   width: 100%;
   border-collapse: collapse;
   font-size: .78rem;
   font-variant-numeric: tabular-nums;
-  margin-top: .35rem;
-  /* Long-form hourly tables can overflow narrow phones; keep them
-     scrollable horizontally as a fallback rather than breaking the
-     card grid. */
-  display: block;
-  overflow-x: auto;
 }
 .hourly-table thead th {
   text-align: left;

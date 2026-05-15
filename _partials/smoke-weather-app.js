@@ -187,19 +187,25 @@
           '<td>' + fmtNum(h.dewPointF) + '&deg;F</td>' +
         '</tr>';
     }
+    // Scroll container wraps the table instead of `display: block` on
+    // the table itself — keeps native <table> semantics intact for
+    // screen readers while still giving narrow phones a horizontal
+    // overflow escape hatch.
     return (
-      '<table class="hourly-table">' +
-        '<thead>' +
-          '<tr>' +
-            '<th scope="col">Hour</th>' +
-            '<th scope="col">Temp</th>' +
-            '<th scope="col">Wind/Gust</th>' +
-            '<th scope="col">Rain</th>' +
-            '<th scope="col">Dew</th>' +
-          '</tr>' +
-        '</thead>' +
-        '<tbody>' + rows + '</tbody>' +
-      '</table>'
+      '<div class="hourly-table-scroll">' +
+        '<table class="hourly-table">' +
+          '<thead>' +
+            '<tr>' +
+              '<th scope="col">Hour</th>' +
+              '<th scope="col">Temp</th>' +
+              '<th scope="col">Wind/Gust</th>' +
+              '<th scope="col">Rain</th>' +
+              '<th scope="col">Dew</th>' +
+            '</tr>' +
+          '</thead>' +
+          '<tbody>' + rows + '</tbody>' +
+        '</table>' +
+      '</div>'
     );
   }
 
