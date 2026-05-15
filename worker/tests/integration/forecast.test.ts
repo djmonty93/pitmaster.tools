@@ -157,6 +157,27 @@ describe('GET /api/forecast', () => {
     expect(body.recommendation!.reason.length).toBeGreaterThan(0);
   });
 
+  it('varies the affiliate recommendation by cooker (rule keying is wired correctly)', async () => {
+    // Same zip, same fixture, two cookers → two product picks. Proves
+    // the handler is actually feeding `cooker` into the rule engine
+    // rather than hard-coding a single product.
+    stub = installFetchStub([{ match: 'api.open-meteo.com/v1/forecast', respond: openMeteoOk }]);
+    const offsetRc = buildContext(
+      new Request('https://x/api/forecast?zip=30303&cut=pork-butt&cooker=offset&days=2')
+    );
+    const pelletRc = buildContext(
+      new Request('https://x/api/forecast?zip=30303&cut=pork-butt&cooker=pellet&days=2')
+    );
+    const offsetRes = await handleForecast(offsetRc);
+    const pelletRes = await handleForecast(pelletRc);
+    expect(offsetRes.status).toBe(200);
+    expect(pelletRes.status).toBe(200);
+    const offsetBody = (await offsetRes.json()) as { recommendation?: { productId: string } };
+    const pelletBody = (await pelletRes.json()) as { recommendation?: { productId: string } };
+    expect(offsetBody.recommendation?.productId).toBe('bbq-guru-partypal');
+    expect(pelletBody.recommendation?.productId).toBe('competition-pellet-blend');
+  });
+
   it('falls back to request.cf.postalCode when zip query param is omitted, with Cache-Control private', async () => {
     stub = installFetchStub([{ match: 'api.open-meteo.com/v1/forecast', respond: openMeteoOk }]);
     // workerd populates `request.cf` at the edge but exposes it as a
