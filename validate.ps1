@@ -142,9 +142,7 @@ $htmlFiles = @(
   'rib-calculator.html',
   'tools.html',
   'turkey-smoking-calculator.html',
-  'terms-of-service.html',
-  'smoke-weather/index.html',
-  'smoke-weather/disclosures.html'
+  'terms-of-service.html'
 )
 
 Write-Host 'Building dist/ before validation...'
@@ -167,8 +165,21 @@ if (-not (Test-Path (Join-Path $distRoot 'og-image.png'))) {
 
 Test-XmlFile (Join-Path $distRoot 'sitemap.xml')
 Test-JsonFile 'wrangler.jsonc'
-Test-LocalLinks -BaseDirectory $distRoot -Paths $htmlFiles
-Test-NoInjectPlaceholders -BaseDirectory $distRoot -Paths $htmlFiles
+
+# Auto-discover every page under dist/smoke-weather/ so the 50 generated metro
+# pages (and any hand-authored siblings like index.html / disclosures.html)
+# get the same link + INJECT validation as the hardcoded site pages.
+$smokeWeatherDir = Join-Path $distRoot 'smoke-weather'
+$smokeWeatherFiles = @()
+if (Test-Path $smokeWeatherDir) {
+  $smokeWeatherFiles = Get-ChildItem -Path $smokeWeatherDir -Filter '*.html' |
+    Sort-Object Name |
+    ForEach-Object { "smoke-weather/$($_.Name)" }
+}
+$allHtmlFiles = $htmlFiles + $smokeWeatherFiles
+
+Test-LocalLinks -BaseDirectory $distRoot -Paths $allHtmlFiles
+Test-NoInjectPlaceholders -BaseDirectory $distRoot -Paths $allHtmlFiles
 
 if ($errors.Count -gt 0) {
   Write-Host ''
