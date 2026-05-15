@@ -177,6 +177,10 @@
   letter-spacing: .08em;
   color: var(--text-muted);
   margin-top: auto;
+  /* Visual cue that hovering reveals more — matches the dotted
+     underline on .day-card__dewpoint so both tooltip elements look
+     interactive in the same way. */
+  cursor: help;
 }
 .day-card__confidence::before {
   content: '';

@@ -114,6 +114,14 @@ test.describe('Best Smoke Days — F3/F4/F5 detail view', () => {
     // Spot-check a row to confirm the renderer formatted the
     // upstream UTC hour without timezone-shifting it. 06:00 → "6 AM".
     await expect(card.locator('.hourly-table tbody tr').first().locator('th')).toHaveText('6 AM');
+
+    // Idempotency check: closing and re-opening must not double-render.
+    // The data-hourly-pending guard short-circuits the second fill —
+    // if it ever regressed, this assertion would catch a doubled
+    // tbody row count.
+    await card.locator('.day-card__hourly > summary').click(); // close
+    await card.locator('.day-card__hourly > summary').click(); // re-open
+    await expect(card.locator('.hourly-table tbody tr')).toHaveCount(HOURLY.length);
   });
 
   test('hourly hour labels render correctly for NWS-style timestamps with timezone offset', async ({ page }) => {
