@@ -29,7 +29,8 @@ pitmaster.tools/
 npm install
 npm run build            # generate-metros → build.js → dist/
 npm run dev:worker       # wrangler dev — Worker + static assets at localhost
-npm test                 # vitest in worker/ via Miniflare
+npm test                 # test:scripts (node --test) then vitest in worker/ via Miniflare
+npm run test:scripts     # node --test scripts/generate-metros.test.js
 npm run typecheck        # tsc --noEmit for worker/ and packages/shared/
 npm run test:e2e         # playwright; auto-spawns `wrangler dev` per playwright.config.js
 ```
@@ -236,6 +237,44 @@ verified, and rolled back independently.
   `tests/smoke-weather-verdict.spec.js` (3 e2e specs — card render with
   disclosure, hidden-slot when no recommendation, `javascript:` URI
   neutralized). `validate.ps1` now checks `smoke-weather/disclosures.html`.
+- **Step 11 (#44).** Friday cron (F14) — portfolio-aware regional digest.
+  `worker/src/crons/fridayEmail.ts` triggers per-region MailerLite
+  automations at Fri 06:00 local in each anchor timezone; cron schedule
+  `0 10-13 * * 5` covers ET/CT/MT/PT windows in DST and is idempotent
+  per `(region, send_date)` via the new `friday_campaign_log` table
+  (migration `0005`). MailerLite custom fields gain the `bbq_` prefix
+  so this account can host sibling sites (powersizing.com,
+  overlanding.tools); D1 columns stay unprefixed. `worker/src/lib/regions/`
+  maps state → region (six regions, 50 states + DC; MO sits in
+  south_central on the KC BBQ axis). `worker/src/lib/mailerlite/groups.ts`
+  manages BBQ-scoped group membership (`pitmaster_all` +
+  `pitmaster_<region>`) without disturbing sibling-site groups on the
+  same subscriber. `subscribe`/`unsubscribe` were rewritten to derive
+  region from the zip's state and assign/remove the right groups.
+  See `docs/portfolio-email-architecture.md` for the full multi-tenant
+  rationale and `docs/mailerlite-setup.md` for the operator runbook
+  (including the existing-subscribers backfill warning baked into the
+  migration header).
+- **Step 12 (#45).** Top-metro pages (F16). `scripts/generate-metros.js`
+  emits 50 SEO-optimized landing pages under `_src/smoke-weather/<slug>.html`
+  — one per metro from `worker/migrations/0002_metros_seed.sql`. Each
+  page reuses the canonical `<!-- INJECT -->` partial directives so
+  header/footer/CSS/JS auto-wire at build time, pre-fills the ZIP input
+  with the metro's anchor zip, and carries region-aware editorial body
+  (≥300 plain-text words; BBQ heritage, regional climate, cooker fit,
+  per-metro distinctiveness note). The `METRO_NOTE` map keeps every
+  page uniquely worded — no two same-state metros share intro content.
+  `scripts/generate-metros.test.js` (Node-builtin `node:test`) covers
+  three-way parity (`METROS` ↔ SQL seed ↔ `sitemap.xml`), JSON-LD
+  pair, INJECT presence, ZIP prefill, 300-word floor, same-state
+  intro uniqueness, sweep idempotency. New `npm run test:scripts`
+  script; `npm test` chains it before the worker vitest run.
+  `validate.ps1` auto-discovers every `dist/smoke-weather/*.html`
+  so generated and hand-authored siblings get the same link + INJECT
+  validation. Stale-page guard: `GENERATED_MARKER` is the first line
+  of every emitted file; a sweep removes any marker-bearing file
+  before re-emission, so removing a metro from `METROS` also removes
+  the dist page on the next build.
 
 ## DNS setup — MailerLite sending domain
 
