@@ -201,12 +201,51 @@ test('renderMetro embeds canonical, title, description, and ZIP-prefilled input'
   }
 });
 
-test('renderMetro embeds two JSON-LD blocks (WebApplication + FAQPage)', () => {
+test('renderMetro embeds three JSON-LD blocks (WebApplication + FAQPage + BreadcrumbList)', () => {
   const html = gen.renderMetro(gen.METROS[0]);
   const ldBlocks = html.match(/<script type="application\/ld\+json">/g) || [];
-  assert.equal(ldBlocks.length, 2);
+  assert.equal(ldBlocks.length, 3);
   assert.ok(html.includes('"@type": "WebApplication"'));
   assert.ok(html.includes('"@type": "FAQPage"'));
+  assert.ok(html.includes('"@type": "BreadcrumbList"'));
+});
+
+test('every metro emits a 3-level BreadcrumbList (Home → Best Smoke Days → metro)', () => {
+  for (const metro of gen.METROS) {
+    const html = gen.renderMetro(metro);
+    // Parse every JSON-LD block separately (a `[\s\S]*?` across multiple
+    // <script> tags concatenates blocks and breaks JSON.parse) and find
+    // the BreadcrumbList. The page has three blocks today; this stays
+    // correct if the order ever changes.
+    const blocks = [];
+    const re = /<script type="application\/ld\+json">\s*([\s\S]*?)\s*<\/script>/g;
+    let m;
+    while ((m = re.exec(html)) !== null) blocks.push(m[1]);
+    let parsed = null;
+    for (const raw of blocks) {
+      const candidate = JSON.parse(raw);
+      if (candidate && candidate['@type'] === 'BreadcrumbList') {
+        parsed = candidate;
+        break;
+      }
+    }
+    assert.ok(parsed, metro.slug + ' BreadcrumbList JSON-LD block missing');
+    assert.equal(parsed['@type'], 'BreadcrumbList');
+    assert.equal(parsed.itemListElement.length, 3);
+    assert.equal(parsed.itemListElement[0].name, 'Home');
+    assert.equal(parsed.itemListElement[0].item, 'https://pitmaster.tools/');
+    assert.equal(parsed.itemListElement[1].name, 'Best Smoke Days');
+    assert.equal(parsed.itemListElement[1].item, 'https://pitmaster.tools/smoke-weather/');
+    assert.equal(parsed.itemListElement[2].name, metro.name + ', ' + metro.state);
+    assert.equal(
+      parsed.itemListElement[2].item,
+      'https://pitmaster.tools/smoke-weather/' + metro.slug
+    );
+    // Schema.org positions are 1-based.
+    assert.equal(parsed.itemListElement[0].position, 1);
+    assert.equal(parsed.itemListElement[1].position, 2);
+    assert.equal(parsed.itemListElement[2].position, 3);
+  }
 });
 
 test('renderMetro references all four build-time INJECT directives', () => {

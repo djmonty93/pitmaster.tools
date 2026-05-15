@@ -294,6 +294,19 @@ function renderMetro(metro) {
     ],
   };
 
+  // BreadcrumbList helps Google show the page hierarchy in the SERP and
+  // sitelinks. Three levels: site root → /smoke-weather/ landing → this
+  // metro. position numbering is 1-based per schema.org convention.
+  const breadcrumbJson = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://pitmaster.tools/' },
+      { '@type': 'ListItem', 'position': 2, 'name': 'Best Smoke Days', 'item': 'https://pitmaster.tools/smoke-weather/' },
+      { '@type': 'ListItem', 'position': 3, 'name': name + ', ' + metro.state, 'item': canonical },
+    ],
+  };
+
   const appJson = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
@@ -363,6 +376,9 @@ function renderMetro(metro) {
     '</script>',
     '<script type="application/ld+json">',
     JSON.stringify(faqJson, null, 2),
+    '</script>',
+    '<script type="application/ld+json">',
+    JSON.stringify(breadcrumbJson, null, 2),
     '</script>',
     '<!-- INJECT:site-header.css -->',
     '<!-- INJECT:site-base.css -->',
