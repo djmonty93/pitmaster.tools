@@ -186,6 +186,26 @@ verified, and rolled back independently.
   persistence, 503 error rendering, and the no-network short-zip
   rejection. `validate.ps1` now includes `smoke-weather/index.html` in
   its checked set.
+- **Step 9.** Detail / hourly view (F3/F4/F5) layered onto the verdict
+  landing. Each day card now exposes a confidence-pill tooltip
+  (F3 — `title` + visually-hidden `.sw-sr-only` span so screen
+  readers and mouse hoverers get the same explanation), a dew-point
+  row pinned to the 60 °F stall threshold the scoring engine uses
+  (F4 — same dual title/SR-only wiring), and a `<details>` element
+  that lazy-renders the per-hour table on first open (F5). The lazy
+  fill is guarded by a `data-hourly-pending` flag so toggling
+  open/closed/open is idempotent, and a 7-day forecast pays ~170
+  fewer rows on initial paint. Hour labels are produced by string
+  slicing the ISO timestamp so the same renderer handles Open-Meteo
+  (`2026-05-15T08:00`, no offset) and NWS
+  (`2026-05-15T08:00:00-05:00`, with offset) without timezone-shifting
+  the display. The hourly `<table>` lives inside a
+  `.hourly-table-scroll` wrapper that owns the horizontal overflow,
+  preserving native table semantics for assistive tech on narrow
+  phones. e2e coverage in `tests/smoke-weather-detail.spec.js`:
+  tap-to-expand lazy render, NWS-offset timestamp formatting,
+  empty-hourly fallback copy, and the dual tooltip + SR-only
+  wirings on both confidence pill and dew-point row.
 
 ## Tooling rules
 
