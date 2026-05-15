@@ -237,13 +237,20 @@
       timeoutId = setTimeout(function () { ctrl.abort(); }, 12000);
     }
 
+    function clearPendingTimeout() {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+    }
+
     return fetch(buildUrl(zip, cut, cooker), {
       method: 'GET',
       headers: { 'Accept': 'application/json' },
       credentials: 'omit',
       signal: ctrl ? ctrl.signal : undefined
     }).then(function (res) {
-      if (timeoutId) clearTimeout(timeoutId);
+      clearPendingTimeout();
       return res.json().catch(function () { return null; }).then(function (body) {
         if (!res.ok) {
           throw { status: res.status, body: body };
@@ -269,6 +276,10 @@
       // cut/cooker change; in that case the newer call owns the DOM.
       if (inflightCtrl === ctrl) renderForecast(forecast);
     }).catch(function (err) {
+      // Always clear the pending 12s timer on the failure path so a
+      // superseded fetch doesn't leak a no-op abort up to 12 seconds
+      // later on a controller that's already settled.
+      clearPendingTimeout();
       // A user-initiated abort (newer request supersedes this one)
       // shows up as AbortError but `inflightCtrl` will already point
       // at a different controller — drop silently in that case.
