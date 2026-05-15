@@ -89,8 +89,14 @@
   function clearResults() {
     var hero = $('verdictHero');
     var grid = $('dayCards');
+    var slot = $('affiliateSlot');
     if (hero) { hero.hidden = true; hero.className = 'verdict-hero'; }
     if (grid) grid.innerHTML = '';
+    // Affiliate card belongs to the prior forecast — never let it
+    // outlive the cards/hero. Showing stale gear copy next to a fresh
+    // loading state or validation error would associate the
+    // recommendation with the wrong (zip, cut, cooker) tuple.
+    if (slot) { slot.hidden = true; slot.innerHTML = ''; }
   }
 
   // Tie-break: strict `>` keeps the EARLIEST day on a tie, since the

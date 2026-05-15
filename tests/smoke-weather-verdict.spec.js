@@ -187,6 +187,62 @@ test.describe('Best Smoke Days verdict landing', () => {
     await expect(card.locator('.affiliate-disclosure a')).toHaveAttribute('href', '/smoke-weather/disclosures');
   });
 
+  test('clears a stale affiliate card when an invalid zip submit blanks the forecast (Codex P2)', async ({ page }) => {
+    // First load: a successful forecast renders the card.
+    const withRec = JSON.parse(JSON.stringify(FORECAST_FIXTURE));
+    withRec.recommendation = {
+      productId: 'bbq-guru-partypal',
+      productName: 'BBQ Guru PartyPal temperature controller',
+      productUrl: 'https://example.com/bbq-guru?ref=test',
+      reason: 'Holds your pit steady through a long overnight cook.',
+      category: 'fire-management',
+      disclosureRequired: true,
+    };
+    await mockForecast(page, withRec);
+    await page.goto('/smoke-weather/');
+    await expect(page.locator('#affiliateSlot')).toBeVisible();
+    await expect(page.locator('#dayCards .day-card')).toHaveCount(4);
+
+    // Submitting an invalid zip clears the forecast — the affiliate
+    // card must go with it, not linger next to the validation error.
+    await page.fill('#zipInput', '12');
+    await page.click('button[type="submit"]');
+    await expect(page.locator('#swStatus')).toContainText('valid 5-digit US ZIP');
+    await expect(page.locator('#dayCards .day-card')).toHaveCount(0);
+    await expect(page.locator('#verdictHero')).toBeHidden();
+    await expect(page.locator('#affiliateSlot')).toBeHidden();
+  });
+
+  test('clears a stale affiliate card when a subsequent fetch errors with 503', async ({ page }) => {
+    // First fetch returns a recommendation; the user's next action
+    // (cut change) hits a 503 — the prior card must not linger next
+    // to the error banner.
+    const withRec = JSON.parse(JSON.stringify(FORECAST_FIXTURE));
+    withRec.recommendation = {
+      productId: 'bbq-guru-partypal',
+      productName: 'BBQ Guru PartyPal',
+      productUrl: 'https://example.com/bbq-guru',
+      reason: 'Holds your pit steady.',
+      category: 'fire-management',
+      disclosureRequired: true,
+    };
+    let calls = 0;
+    await page.route('**/api/forecast**', async (route) => {
+      calls += 1;
+      if (calls === 1) {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(withRec) });
+      } else {
+        await route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: 'weather_unavailable' }) });
+      }
+    });
+    await page.goto('/smoke-weather/');
+    await expect(page.locator('#affiliateSlot')).toBeVisible();
+
+    await page.selectOption('#cutSelect', 'pork-butt');
+    await expect(page.locator('#swStatus')).toContainText('temporarily unavailable');
+    await expect(page.locator('#affiliateSlot')).toBeHidden();
+  });
+
   test('renders verdict hero + 4 day cards on initial load', async ({ page }) => {
     await mockForecast(page);
     await page.goto('/smoke-weather/');
