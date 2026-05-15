@@ -275,6 +275,27 @@ verified, and rolled back independently.
   of every emitted file; a sweep removes any marker-bearing file
   before re-emission, so removing a metro from `METROS` also removes
   the dist page on the next build.
+- **Step 13.** Weekly article cron (F17). `worker/src/crons/weeklyArticle.ts`
+  fires on `0 12 * * 1` (Mondays 12:00 UTC) and writes one
+  `weekly-summary` row to the D1 `articles` table; `/articles/:slug`
+  renders it as `<!doctype html>` with the canonical/OG/JSON-LD shape
+  from Step 7. Slug shape is `weekly-summary-<isoYear>-w<NN>` keyed by
+  ISO 8601 week so the Thursday-belongs-to-this-year rule works
+  across the year boundary. Template-only per the plan's "Defaults
+  committed" — body covers all six regions by anchor city
+  (New York, Atlanta, Chicago, Kansas City, Denver, Los Angeles) for
+  national-coverage SEO and includes the FTC affiliate disclosure
+  inline. Hero band is derived from the UTC month so summer reads as
+  `ideal`, shoulder seasons `green`/`yellow`, deep winter `red`.
+  Idempotent: re-runs in the same ISO week UPDATE the existing row,
+  bumping `updated_at` while keeping `published_at` stable, so
+  manual re-invocations and Cloudflare's scheduled-handler retries
+  are both safe. 12 vitest specs in
+  `worker/tests/unit/crons/weeklyArticle.test.ts` cover ISO-week math
+  (including 2027-01-01 → 2026-W53 and 2024-12-30 → 2025-W01),
+  zero-padded slug shape, ≥300-word content floor, anchor-city
+  presence in `body_text`, idempotency invariants, and seasonal
+  hero-band selection.
 
 ## DNS setup — MailerLite sending domain
 
