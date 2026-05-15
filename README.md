@@ -313,6 +313,19 @@ verified, and rolled back independently.
   silently drifted. New informational pages added later
   (methodology, faq, status) must either ship with the required
   schema or claim an exemption in the same PR.
+- **Step 15.** Seasonal pages (F19). Four static HTML files under
+  `_src/seasonal/` — `winter.html`, `spring.html`, `summer.html`,
+  `fall.html` — placeholder editorial pages that Monty will overwrite
+  with final copy later. Each carries the full CLAUDE.md
+  `<head>` shape plus three JSON-LD blocks (WebApplication +
+  FAQPage + 3-level BreadcrumbList: Home → Best Smoke Days →
+  Season). Cross-linked from each other in a "Other seasons" list
+  and from the live `/smoke-weather/` forecast link. `validate.ps1`
+  auto-discovers `dist/seasonal/*.html` (parallel to the existing
+  smoke-weather sweep) so a future seasonal page picks up the same
+  link + INJECT validation; sitemap.xml lists all four with monthly
+  changefreq and 0.6 priority. The schema validator from Step 14
+  catches missing JSON-LD on these pages automatically.
 
 ## DNS setup — MailerLite sending domain
 
