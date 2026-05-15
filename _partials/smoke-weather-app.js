@@ -106,10 +106,10 @@
     return best;
   }
 
-  function renderVerdictHero(forecast) {
+  function renderVerdictHero(forecast, days) {
     var hero = $('verdictHero');
     if (!hero) return;
-    var best = pickBestDay(forecast.days);
+    var best = pickBestDay(days);
     if (!best) {
       hero.hidden = true;
       return;
@@ -131,7 +131,7 @@
     var locLabel = forecast.metro ? forecast.metro : 'ZIP ' + forecast.zip;
     var sourceLabel = forecast.source === 'nws' ? 'National Weather Service' : 'Open-Meteo';
     hero.innerHTML =
-      '<div class="verdict-hero__label">Best day in the next ' + Number(forecast.days.length) + ' days</div>' +
+      '<div class="verdict-hero__label">Best day in the next ' + Number(days.length) + ' days</div>' +
       '<h2 class="verdict-hero__verdict">' + escapeHtml(verdict) + ' &mdash; ' + escapeHtml(formatDateLabel(best.date)) + '</h2>' +
       '<div class="verdict-hero__meta">' +
         '<span>Score <strong>' + Number(best.score.score) + '</strong>/100</span>' +
@@ -168,29 +168,31 @@
     return article;
   }
 
-  function renderDayCards(forecast) {
+  function renderDayCards(days) {
     var grid = $('dayCards');
     if (!grid) return;
     grid.innerHTML = '';
-    // Filter out malformed days (missing or bad ISO date) before
-    // rendering — a day without a date can't get a stable
-    // `data-date` selector and is useless to the user anyway.
-    var clean = [];
-    for (var i = 0; i < forecast.days.length; i++) {
-      if (isValidIsoDate(forecast.days[i].date)) clean.push(forecast.days[i]);
-    }
-    var bestDate = pickBestDay(clean);
+    var bestDate = pickBestDay(days);
     var bestKey = bestDate ? bestDate.date : null;
-    for (var j = 0; j < clean.length; j++) {
-      var entry = clean[j];
+    for (var j = 0; j < days.length; j++) {
+      var entry = days[j];
       grid.appendChild(renderDayCard(entry, entry.date === bestKey));
     }
   }
 
   function renderForecast(forecast) {
+    // Filter out malformed days (missing or bad ISO date) ONCE up
+    // front, then use the filtered list for both the verdict hero
+    // and the day cards. Filtering inside renderDayCards but not
+    // renderVerdictHero would let the hero advertise a "best day"
+    // whose card never renders.
+    var clean = [];
+    for (var i = 0; i < forecast.days.length; i++) {
+      if (isValidIsoDate(forecast.days[i].date)) clean.push(forecast.days[i]);
+    }
     setStatus('', false);
-    renderVerdictHero(forecast);
-    renderDayCards(forecast);
+    renderVerdictHero(forecast, clean);
+    renderDayCards(clean);
   }
 
   function buildUrl(zip, cut, cooker) {

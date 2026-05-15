@@ -219,6 +219,27 @@ test.describe('Best Smoke Days verdict landing', () => {
     await expect(page.locator('#swStatus')).toContainText('valid 5-digit US ZIP');
   });
 
+  test('verdict hero never advertises a day whose card was filtered out as malformed', async ({ page }) => {
+    // Spike the highest-scoring day with a malformed date (no card
+    // can render for it). A correct implementation filters that day
+    // out of BOTH the hero pick and the cards list, so the hero
+    // verdict points to the second-best day with a real date — not
+    // to a phantom day with no card.
+    const spiked = JSON.parse(JSON.stringify(FORECAST_FIXTURE));
+    spiked.days[1].date = 'not-a-date';
+    spiked.days[1].day.date = 'not-a-date';
+    await mockForecast(page, spiked);
+    await page.goto('/smoke-weather/');
+
+    // Only 3 days survive the filter (indexes 0, 2, 3).
+    await expect(page.locator('#dayCards .day-card')).toHaveCount(3);
+    // The remaining best is index 2 (2026-05-17, score 76, band green).
+    await expect(page.locator('#verdictHero')).toHaveClass(/band-green/);
+    await expect(page.locator('#dayCards .day-card[data-date="2026-05-17"]')).toHaveClass(/is-best/);
+    // Verdict label reports filtered count, not raw count.
+    await expect(page.locator('.verdict-hero__label')).toContainText('Best day in the next 3 days');
+  });
+
   test('an older 503 does not overwrite a newer successful render', async ({ page }) => {
     // First call (auto-load) hangs until we release it with a 503.
     // Second call (cooker change) returns 200 immediately.
