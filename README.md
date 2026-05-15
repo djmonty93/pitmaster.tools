@@ -164,6 +164,28 @@ verified, and rolled back independently.
   `href`/`src`. The article writer (Step 13) is still trusted, but
   this prevents a single bad row from becoming stored XSS on a
   marketing page.
+- **Step 8.** Verdict landing page (F8/F9/F10/F11/F12) at
+  `_src/smoke-weather/index.html`. Reuses every site partial
+  (`site-header.css`, `site-base.css`, `site-utils.js`, header nav,
+  footer, cookie banner) so the look-and-feel matches the rest of the
+  calculator suite automatically. New partials:
+  `_partials/smoke-weather.css` (band color stops, day-card grid,
+  verdict hero) and `_partials/smoke-weather-app.js` (vanilla-JS client:
+  reads zip / cut / cooker, persists to `localStorage` keys
+  `pitmaster_zip` / `pitmaster_cut` / `pitmaster_cooker`, fetches
+  `/api/forecast`, renders verdict + 7-day cards with band colors and
+  confidence pills). Geo-IP first-paint is delegated to the worker —
+  the client sends the request without a zip and the worker fills it
+  from `request.cf.postalCode`; the resolved zip is stored only on the
+  geo-IP path so a user-supplied zip is never overwritten by a
+  normalized echo. The form uses `novalidate` so the JS validator runs
+  on short-zip submits instead of being short-circuited by HTML5
+  pattern checks. Page weight is ~71 KB inlined (well under the F12
+  sub-100 KB target). e2e coverage: `tests/smoke-weather-verdict.spec.js`
+  (Playwright on a 390×844 viewport) covers the success path, zip
+  persistence, 503 error rendering, and the no-network short-zip
+  rejection. `validate.ps1` now includes `smoke-weather/index.html` in
+  its checked set.
 
 ## Tooling rules
 
