@@ -70,4 +70,23 @@ export interface ForecastResponse {
     day: WeatherDay;
     score: ScoreResult;
   }>;
+  recommendation?: AffiliateRecommendation;
+}
+
+/**
+ * F15: a single product placement chosen by the rules engine for the
+ * current (cut, cooker, best-day band) tuple. The renderer must show
+ * the FTC disclosure on every placement — `disclosureRequired` is
+ * always `true` and is included on the wire so the client doesn't
+ * need to know the policy. `productUrl` may be empty when the rule
+ * matches but no merchant link is configured yet; the client should
+ * render the recommendation copy without a clickthrough in that case.
+ */
+export interface AffiliateRecommendation {
+  productId: string;
+  productName: string;
+  productUrl: string;
+  reason: string;
+  category: 'thermometer' | 'fire-management' | 'rain-cover' | 'gloves' | 'wood';
+  disclosureRequired: true;
 }
