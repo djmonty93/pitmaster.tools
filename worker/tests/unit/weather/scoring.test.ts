@@ -243,3 +243,38 @@ describe('every (cut, cooker) pair scores within bounds', () => {
     }
   }
 });
+
+// F20 — degenerate-input failure mode. The adapter's zod schema rejects
+// malformed WeatherDays in production, but a defense-in-depth invariant
+// is that the API NEVER returns a NaN score. If a non-finite slips
+// through (zod bypass, future hand-built fixture, manual handler call),
+// the scorer must still produce a finite 0-100 integer rather than
+// propagating NaN into the JSON response.
+describe('scoreDay: NaN/non-finite inputs (F20 sweep)', () => {
+  function expectFiniteBoundedScore(day: WeatherDay): void {
+    const res = scoreDay({ cut: 'brisket-packer', cooker: 'offset', day });
+    expect(Number.isFinite(res.score)).toBe(true);
+    expect(Number.isInteger(res.score)).toBe(true);
+    expect(res.score).toBeGreaterThanOrEqual(0);
+    expect(res.score).toBeLessThanOrEqual(100);
+    expect(['red', 'yellow', 'green', 'ideal']).toContain(res.band);
+  }
+
+  it('returns a finite integer when temperature fields are non-finite', () => {
+    for (const value of [NaN, Infinity, -Infinity]) {
+      expectFiniteBoundedScore(fakeDay({ tempHighF: value, tempLowF: value }));
+    }
+  });
+
+  it('returns a finite integer when humidity-driven stall risk is non-finite', () => {
+    for (const value of [NaN, Infinity, -Infinity]) {
+      expectFiniteBoundedScore(fakeDay({ rhMean: value }));
+    }
+  });
+
+  it('returns a finite integer when wind/gust fields are non-finite', () => {
+    for (const value of [NaN, Infinity, -Infinity]) {
+      expectFiniteBoundedScore(fakeDay({ windMphMean: value, gustMphMax: value }));
+    }
+  });
+});

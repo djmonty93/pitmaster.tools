@@ -326,6 +326,27 @@ verified, and rolled back independently.
   link + INJECT validation; sitemap.xml lists all four with monthly
   changefreq and 0.6 priority. The schema validator from Step 14
   catches missing JSON-LD on these pages automatically.
+- **Step 16.** F20 failure-mode sweep. Audit + close known gaps the plan
+  flagged. Existing tests already covered Open-Meteo down, NWS down,
+  both-down, invalid zip, unknown zip, geo-IP fallback, MailerLite 5xx
+  on subscribe, MailerLite 5xx on Friday send, and KV outage. Two
+  gaps closed in this step:
+  (1) **NaN score guard.** `clamp()` in both `packages/shared/src/scoring.ts`
+  and the JS mirror `_partials/weather-score-shared.js` now returns `lo`
+  for non-finite inputs (NaN, ±Infinity). The adapter's zod schema
+  rejects malformed WeatherDays in production, but if one slips through,
+  the API never returns a NaN score — the affected penalty branch
+  contributes 0 instead, and the final `Math.round` always produces a
+  finite integer. 3 new vitest specs in
+  `worker/tests/unit/weather/scoring.test.ts` pin the invariant against
+  fully-NaN, Infinity, and single-field-NaN WeatherDays. The
+  scoring-parity test re-runs the JS mirror through the same 4500+ cases
+  so the two implementations stay locked.
+  (2) **Microclimate disclaimer guard.** New
+  `scripts/validate-disclaimers.test.js` asserts the verdict landing
+  carries the `sw-disclaimer` wrapper and the required text fragments
+  ("microclimate", "step outside"). Catches accidental removal during
+  refactors. Chained from `test:scripts`.
 
 ## DNS setup — MailerLite sending domain
 
