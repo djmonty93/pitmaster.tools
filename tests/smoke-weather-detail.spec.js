@@ -116,6 +116,34 @@ test.describe('Best Smoke Days — F3/F4/F5 detail view', () => {
     await expect(card.locator('.hourly-table tbody tr').first().locator('th')).toHaveText('6 AM');
   });
 
+  test('hourly hour labels render correctly for NWS-style timestamps with timezone offset', async ({ page }) => {
+    // NWS returns ISO timestamps with an explicit offset
+    // (e.g. 2026-05-16T06:00:00-05:00), unlike Open-Meteo which
+    // uses local-time-without-offset (2026-05-16T06:00). The
+    // fmtHour helper slices the HH digits directly so it must
+    // produce the same "6 AM" / "6 PM" labels for both feeds.
+    // Without this test, a regression that constructed a Date()
+    // from the NWS string would silently shift hours by the user's
+    // UTC offset and pass against the existing Open-Meteo fixture.
+    const nwsBody = JSON.parse(JSON.stringify(FIXTURE));
+    nwsBody.source = 'nws';
+    nwsBody.days[0].day.source = 'nws';
+    nwsBody.days[0].day.hourly = [
+      { t: '2026-05-16T06:00:00-05:00', tempF: 56, rh: 72, windMph: 4, gustMph: 7, precipProbPct: 5, precipIn: 0, dewPointF: 44 },
+      { t: '2026-05-16T18:00:00-05:00', tempF: 70, rh: 42, windMph: 5, gustMph: 8, precipProbPct: 0, precipIn: 0, dewPointF: 47 },
+    ];
+    await mockForecast(page, nwsBody);
+    await page.goto('/smoke-weather/');
+
+    const card = page.locator('#dayCards .day-card[data-date="2026-05-16"]');
+    await card.locator('.day-card__hourly > summary').click();
+
+    const rows = card.locator('.hourly-table tbody tr');
+    await expect(rows).toHaveCount(2);
+    await expect(rows.nth(0).locator('th')).toHaveText('6 AM');
+    await expect(rows.nth(1).locator('th')).toHaveText('6 PM');
+  });
+
   test('hourly body stays empty when the day has no hourly samples (NWS partial / outage)', async ({ page }) => {
     await mockForecast(page);
     await page.goto('/smoke-weather/');
