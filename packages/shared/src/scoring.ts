@@ -176,6 +176,13 @@ function bandFor(score: number): ScoreResult['band'] {
 }
 
 function clamp(x: number, lo: number, hi: number): number {
+  // Non-finite (NaN / ±Infinity) defaults to `lo`. F20 defense-in-depth:
+  // the adapter's zod schema rejects malformed WeatherDays in production,
+  // but if one slips through, every penalty branch must still produce a
+  // finite integer score. Falling back to `lo` neutralizes the affected
+  // penalty (most call sites use clamp01, so the missing signal becomes
+  // a 0-contribution rather than poisoning the whole score with NaN).
+  if (!Number.isFinite(x)) return lo;
   if (x < lo) return lo;
   if (x > hi) return hi;
   return x;

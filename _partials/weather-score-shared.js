@@ -68,6 +68,11 @@
   var PIT_TEMP_F = 225;
 
   function clamp(x, lo, hi) {
+    // Non-finite (NaN / ±Infinity) defaults to `lo`. F20 defense-in-depth:
+    // the adapter validates WeatherDays in production, but if one slips
+    // through, every penalty branch must still produce a finite integer
+    // score. Mirrors the guard in packages/shared/src/scoring.ts.
+    if (!isFinite(x)) return lo;
     if (x < lo) return lo;
     if (x > hi) return hi;
     return x;
