@@ -176,7 +176,17 @@ if (Test-Path $smokeWeatherDir) {
     Sort-Object Name |
     ForEach-Object { "smoke-weather/$($_.Name)" }
 }
-$allHtmlFiles = $htmlFiles + $smokeWeatherFiles
+# Step 15 (F19): same auto-discovery for the seasonal/ subdirectory — the four
+# winter/spring/summer/fall placeholder pages live here and need the same
+# link + INJECT validation as the smoke-weather siblings.
+$seasonalDir = Join-Path $distRoot 'seasonal'
+$seasonalFiles = @()
+if (Test-Path $seasonalDir) {
+  $seasonalFiles = Get-ChildItem -Path $seasonalDir -Filter '*.html' |
+    Sort-Object Name |
+    ForEach-Object { "seasonal/$($_.Name)" }
+}
+$allHtmlFiles = $htmlFiles + $smokeWeatherFiles + $seasonalFiles
 
 Test-LocalLinks -BaseDirectory $distRoot -Paths $allHtmlFiles
 Test-NoInjectPlaceholders -BaseDirectory $distRoot -Paths $allHtmlFiles
