@@ -89,8 +89,14 @@
   function clearResults() {
     var hero = $('verdictHero');
     var grid = $('dayCards');
+    var slot = $('affiliateSlot');
     if (hero) { hero.hidden = true; hero.className = 'verdict-hero'; }
     if (grid) grid.innerHTML = '';
+    // Affiliate card belongs to the prior forecast — never let it
+    // outlive the cards/hero. Showing stale gear copy next to a fresh
+    // loading state or validation error would associate the
+    // recommendation with the wrong (zip, cut, cooker) tuple.
+    if (slot) { slot.hidden = true; slot.innerHTML = ''; }
   }
 
   // Tie-break: strict `>` keeps the EARLIEST day on a tie, since the
@@ -274,6 +280,66 @@
     }
   }
 
+  // F15 — FTC disclosure copy + affiliate-card renderer.
+  //
+  // Policy: the disclosure must be VISIBLE and ADJACENT to every
+  // affiliate placement (FTC Endorsement Guides §255.5). We hard-code
+  // the wording here rather than reading `disclosureRequired` from
+  // the wire — the flag is a server-side belt-and-suspenders; the
+  // client always shows the line regardless. The link target,
+  // /smoke-weather/disclosures, is a static page in _src/smoke-weather/.
+  var AFFILIATE_DISCLOSURE_HTML =
+    '<p class="affiliate-disclosure">' +
+      'We may earn a commission on purchases made through links on this page at no additional cost to you. ' +
+      '<a href="/smoke-weather/disclosures">See our affiliate disclosure</a>.' +
+    '</p>';
+
+  // Only http(s) URLs are allowed for affiliate clickthroughs.
+  // Defense-in-depth: even though `productUrl` originates from a
+  // server-side table the worker controls, treating anything that
+  // doesn't start with http:// or https:// as "no link" prevents
+  // a misconfigured rule from emitting javascript:/data:/file: URIs
+  // that escapeHtml does not neutralize.
+  function isHttpUrl(s) {
+    return typeof s === 'string' && /^https?:\/\//i.test(s);
+  }
+
+  function renderAffiliateCard(rec) {
+    var slot = $('affiliateSlot');
+    if (!slot) return;
+    if (!rec || !rec.productName) {
+      slot.hidden = true;
+      slot.innerHTML = '';
+      return;
+    }
+    var productLine;
+    if (isHttpUrl(rec.productUrl)) {
+      // rel="sponsored" makes the affiliate relationship explicit to
+      // search engines per Google's link-attribute guidance.
+      // nofollow + noopener round out the standard outbound-link
+      // hardening; target="_blank" since the merchant page is off-site.
+      productLine =
+        '<a class="affiliate-card__product" ' +
+          'href="' + escapeHtml(rec.productUrl) + '" ' +
+          'rel="sponsored nofollow noopener" target="_blank">' +
+          escapeHtml(rec.productName) +
+        '</a>';
+    } else {
+      // No merchant URL configured yet (empty string) or a
+      // non-http(s) protocol slipped through: show the product copy
+      // without a clickthrough rather than break the card.
+      productLine =
+        '<span class="affiliate-card__product">' + escapeHtml(rec.productName) + '</span>';
+    }
+    slot.hidden = false;
+    slot.className = 'affiliate-card';
+    slot.innerHTML =
+      '<div class="affiliate-card__label">Gear that helps for this cook</div>' +
+      productLine +
+      '<p class="affiliate-card__reason">' + escapeHtml(rec.reason) + '</p>' +
+      AFFILIATE_DISCLOSURE_HTML;
+  }
+
   function renderForecast(forecast) {
     // Filter out malformed days (missing or bad ISO date) ONCE up
     // front, then use the filtered list for both the verdict hero
@@ -287,6 +353,7 @@
     setStatus('', false);
     renderVerdictHero(forecast, clean);
     renderDayCards(clean);
+    renderAffiliateCard(forecast.recommendation);
   }
 
   function buildUrl(zip, cut, cooker) {

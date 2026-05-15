@@ -104,6 +104,145 @@ async function mockForecast(page, body = FORECAST_FIXTURE, status = 200) {
 test.describe('Best Smoke Days verdict landing', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
+  test('renders an affiliate card with FTC disclosure when the response includes a recommendation (F15)', async ({ page }) => {
+    const withRec = JSON.parse(JSON.stringify(FORECAST_FIXTURE));
+    withRec.recommendation = {
+      productId: 'bbq-guru-partypal',
+      productName: 'BBQ Guru PartyPal temperature controller',
+      productUrl: 'https://example.com/bbq-guru?ref=test',
+      reason: 'Holds your pit steady through a long overnight cook.',
+      category: 'fire-management',
+      disclosureRequired: true,
+    };
+    await mockForecast(page, withRec);
+    await page.goto('/smoke-weather/');
+
+    const card = page.locator('#affiliateSlot');
+    await expect(card).toBeVisible();
+    const link = card.locator('a.affiliate-card__product');
+    await expect(link).toHaveAttribute('href', 'https://example.com/bbq-guru?ref=test');
+    // FTC + Google guidance: every affiliate link MUST carry rel="sponsored".
+    await expect(link).toHaveAttribute('rel', /sponsored/);
+    await expect(link).toHaveAttribute('rel', /nofollow/);
+    await expect(link).toHaveAttribute('rel', /noopener/);
+    await expect(link).toHaveAttribute('target', '_blank');
+    await expect(card).toContainText('BBQ Guru PartyPal');
+    await expect(card).toContainText('long overnight cook');
+
+    // The disclosure must be visible and adjacent to the placement.
+    const disclosure = card.locator('.affiliate-disclosure');
+    await expect(disclosure).toBeVisible();
+    await expect(disclosure).toContainText('may earn a commission');
+    await expect(disclosure.locator('a')).toHaveAttribute('href', '/smoke-weather/disclosures');
+  });
+
+  test('omits the affiliate card when no recommendation is in the response', async ({ page }) => {
+    // FORECAST_FIXTURE does not include a `recommendation` key by default,
+    // so the slot stays hidden — proving the renderer fails closed
+    // rather than showing a stale or empty placement.
+    await mockForecast(page);
+    await page.goto('/smoke-weather/');
+    await expect(page.locator('#dayCards .day-card')).toHaveCount(4);
+    await expect(page.locator('#affiliateSlot')).toBeHidden();
+  });
+
+  test('does not render a clickthrough for a non-http(s) productUrl (defense-in-depth)', async ({ page }) => {
+    // A misconfigured rule should not be able to inject a
+    // javascript:/data: URI into the affiliate card.
+    const withRec = JSON.parse(JSON.stringify(FORECAST_FIXTURE));
+    withRec.recommendation = {
+      productId: 'evil',
+      productName: 'Hostile product',
+      productUrl: 'javascript:alert(1)',
+      reason: 'Should never produce a clickable link.',
+      category: 'thermometer',
+      disclosureRequired: true,
+    };
+    await mockForecast(page, withRec);
+    await page.goto('/smoke-weather/');
+    const card = page.locator('#affiliateSlot');
+    await expect(card).toBeVisible();
+    await expect(card.locator('a.affiliate-card__product')).toHaveCount(0);
+    await expect(card.locator('span.affiliate-card__product')).toContainText('Hostile product');
+  });
+
+  test('renders the affiliate card without a clickthrough when productUrl is empty', async ({ page }) => {
+    const withRec = JSON.parse(JSON.stringify(FORECAST_FIXTURE));
+    withRec.recommendation = {
+      productId: 'thermoworks-thermapen',
+      productName: 'ThermoWorks Thermapen ONE',
+      productUrl: '',
+      reason: 'A fast-read thermometer is the single biggest accuracy win.',
+      category: 'thermometer',
+      disclosureRequired: true,
+    };
+    await mockForecast(page, withRec);
+    await page.goto('/smoke-weather/');
+
+    const card = page.locator('#affiliateSlot');
+    await expect(card).toBeVisible();
+    // No <a> for the product line, but the disclosure link is still present.
+    await expect(card.locator('a.affiliate-card__product')).toHaveCount(0);
+    await expect(card.locator('span.affiliate-card__product')).toContainText('Thermapen ONE');
+    await expect(card.locator('.affiliate-disclosure a')).toHaveAttribute('href', '/smoke-weather/disclosures');
+  });
+
+  test('clears a stale affiliate card when an invalid zip submit blanks the forecast (Codex P2)', async ({ page }) => {
+    // First load: a successful forecast renders the card.
+    const withRec = JSON.parse(JSON.stringify(FORECAST_FIXTURE));
+    withRec.recommendation = {
+      productId: 'bbq-guru-partypal',
+      productName: 'BBQ Guru PartyPal temperature controller',
+      productUrl: 'https://example.com/bbq-guru?ref=test',
+      reason: 'Holds your pit steady through a long overnight cook.',
+      category: 'fire-management',
+      disclosureRequired: true,
+    };
+    await mockForecast(page, withRec);
+    await page.goto('/smoke-weather/');
+    await expect(page.locator('#affiliateSlot')).toBeVisible();
+    await expect(page.locator('#dayCards .day-card')).toHaveCount(4);
+
+    // Submitting an invalid zip clears the forecast — the affiliate
+    // card must go with it, not linger next to the validation error.
+    await page.fill('#zipInput', '12');
+    await page.click('button[type="submit"]');
+    await expect(page.locator('#swStatus')).toContainText('valid 5-digit US ZIP');
+    await expect(page.locator('#dayCards .day-card')).toHaveCount(0);
+    await expect(page.locator('#verdictHero')).toBeHidden();
+    await expect(page.locator('#affiliateSlot')).toBeHidden();
+  });
+
+  test('clears a stale affiliate card when a subsequent fetch errors with 503', async ({ page }) => {
+    // First fetch returns a recommendation; the user's next action
+    // (cut change) hits a 503 — the prior card must not linger next
+    // to the error banner.
+    const withRec = JSON.parse(JSON.stringify(FORECAST_FIXTURE));
+    withRec.recommendation = {
+      productId: 'bbq-guru-partypal',
+      productName: 'BBQ Guru PartyPal',
+      productUrl: 'https://example.com/bbq-guru',
+      reason: 'Holds your pit steady.',
+      category: 'fire-management',
+      disclosureRequired: true,
+    };
+    let calls = 0;
+    await page.route('**/api/forecast**', async (route) => {
+      calls += 1;
+      if (calls === 1) {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(withRec) });
+      } else {
+        await route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: 'weather_unavailable' }) });
+      }
+    });
+    await page.goto('/smoke-weather/');
+    await expect(page.locator('#affiliateSlot')).toBeVisible();
+
+    await page.selectOption('#cutSelect', 'pork-butt');
+    await expect(page.locator('#swStatus')).toContainText('temporarily unavailable');
+    await expect(page.locator('#affiliateSlot')).toBeHidden();
+  });
+
   test('renders verdict hero + 4 day cards on initial load', async ({ page }) => {
     await mockForecast(page);
     await page.goto('/smoke-weather/');
