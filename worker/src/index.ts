@@ -3,6 +3,7 @@
 // served from dist/) falls through to env.ASSETS.fetch.
 
 import { runFridayCron } from './crons/fridayEmail.js';
+import { runWeeklyArticleCron } from './crons/weeklyArticle.js';
 import { handleArticles } from './handlers/articles.js';
 import { handleForecast } from './handlers/forecast.js';
 import { handlePreferences } from './handlers/preferences.js';
@@ -92,6 +93,10 @@ export default {
     //   preferences/group-assign retryable failures would queue
     //   forever. The 5-minute cadence aligns with the retry queue's
     //   1-minute initial backoff.
+    //
+    //   `0 12 * * 1` — F17 weekly article cron. Mondays at 12:00 UTC
+    //   writes the week's `weekly-summary` row to D1; /articles/:slug
+    //   renders it. Idempotent — re-runs in the same ISO week UPDATE.
     if (controller.cron === '0 10-14 * * 5') {
       await runFridayCron(env, new Date(controller.scheduledTime));
       return;
@@ -99,6 +104,10 @@ export default {
     if (controller.cron === '*/5 * * * *') {
       const client = createMailerLiteClient({ apiKey: env.MAILERLITE_API_KEY });
       await drain(env.SMOKE_DB, client, env.WEATHER_KV);
+      return;
+    }
+    if (controller.cron === '0 12 * * 1') {
+      await runWeeklyArticleCron(env, new Date(controller.scheduledTime));
       return;
     }
     console.warn('scheduled: unrecognized cron expression', { cron: controller.cron });

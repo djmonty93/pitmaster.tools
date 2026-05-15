@@ -54,10 +54,19 @@
   //    a replay within ~1 attempt window. Higher frequency would
   //    burn Worker invocations for no benefit; lower would compound
   //    the user-visible latency between a 5xx and the recovered send.
+  //
+  // 3. `0 12 * * 1` — F17 weekly article cron. Monday 12:00 UTC writes
+  //    one `weekly-summary` row to D1; the /articles/:slug worker
+  //    route renders it. Mid-day UTC (07:00 ET / 04:00 PT) avoids
+  //    overlap with the Friday digest cron range and gives the row a
+  //    full day to propagate to caches before any Friday email
+  //    references it. Idempotent within an ISO week — re-runs UPDATE
+  //    the existing row.
   "triggers": {
     "crons": [
       "0 10-14 * * 5",
-      "*/5 * * * *"
+      "*/5 * * * *",
+      "0 12 * * 1"
     ]
   }
   // MAILERLITE_API_KEY — Bearer token for the MailerLite Connect API,
