@@ -164,6 +164,64 @@ const REGION_COOKER_TIP = {
   pacific:       'Pacific cooks have the easiest climate in the country and the widest cooker latitude. Offsets, pellets, kamados, kettles and electrics all work well most of the year. The variable to plan around is coastal wind in the afternoons; an inland yard a few miles back from the water sees less of it.',
 };
 
+// Per-metro 1-2 sentence note woven into the intro paragraph. Keeps every
+// page editorially distinct from its same-state siblings (TX has 4 metros,
+// FL has 4, OH has 3, NC/CA/TN/VA/OK/PA/MO/NY all have 2+) so Google
+// doesn't see near-duplicate landing pages. Required for every slug in
+// METROS; the test enforces parity.
+const METRO_NOTE = {
+  'new-york-ny':          'New York’s restaurant-grade pit scene runs out of Brooklyn and the outer boroughs, where Texas-trained pitmasters built brisket-first menus on industrial wood-burning offsets in the 2010s.',
+  'los-angeles-ca':       'Los Angeles is the West Coast’s largest Texas-style brisket scene, with smokehouses in the Arts District and Inglewood that built their reputations on the same post-oak fires Austin runs.',
+  'chicago-il':           'Chicago barbecue is rib-tip and hot-link country — the city’s South Side pit shops kept their own tradition alive long before brisket showed up, and aquarium smokers behind plexiglass remain a Chicago signature.',
+  'dallas-fort-worth-tx': 'Dallas-Fort Worth runs a competition-heavy pit scene, and the Metroplex’s modern smokehouses adopted Austin’s Central Texas brisket playbook in the 2010s.',
+  'houston-tx':           'Houston blends Central Texas brisket with Gulf Coast seafood smoke and a strong Mexican-influenced barbacoa tradition that runs through the city’s east and south sides.',
+  'washington-dc':        'DC’s barbecue scene runs Carolina pulled pork alongside Texas brisket, with a small but steady set of restaurant pits in the Shaw and H Street corridors.',
+  'miami-fl':             'Miami barbecue draws hard from Caribbean and Cuban influences — citrus marinades, slow-smoked pork, and tropical-fruit woods sit alongside the regional Carolina and Texas styles.',
+  'philadelphia-pa':      'Philadelphia’s pit scene is restaurant-driven and Texas-leaning, with brisket-and-rib-tip menus that built a following in Fishtown and North Philly in the last decade.',
+  'atlanta-ga':           'Atlanta is the South’s pit-restaurant hub, with multiple legacy pulled-pork rooms in the city plus a wave of newer Texas-style brisket houses across the metro area.',
+  'boston-ma':            'Boston’s pit scene runs Carolina-style pulled pork and Memphis-style ribs in equal measure, and the regional climate makes May through October the strongest backyard cook window.',
+  'phoenix-az':           'Phoenix’s pit scene runs Texas brisket and Memphis ribs through the long, dry summers — the regional benefit is short stalls; the trade is heavy moisture loss across the cook.',
+  'san-francisco-ca':     'San Francisco’s barbecue scene is small but precise — Texas-trained pitmasters operate compact restaurants in the East Bay and South Bay using offsets that benefit from the city’s mild marine climate.',
+  'riverside-ca':         'Riverside and the Inland Empire run a backyard-heavy pit scene with hot, dry summers — the desert climate gives short stalls and aggressive bark formation versus the coastal half of California.',
+  'detroit-mi':           'Detroit barbecue is a mix of Memphis-style ribs and Carolina pulled pork, with neighborhood pit spots that survived the city’s downturn and a newer wave of brisket houses adding to the menu.',
+  'seattle-wa':           'Seattle’s pit scene runs alder-smoked salmon alongside a growing brisket-and-rib tradition — Pacific Northwest woods and the marine climate’s mild summers favor longer, cooler cooks.',
+  'minneapolis-mn':       'Minneapolis-St. Paul is a winter-tested pit scene where insulated kamados and pellet rigs dominate from November through March, and offset brisket cooks own the summer Saturdays.',
+  'san-diego-ca':         'San Diego’s coastal climate gives the easiest barbecue weather in the contiguous US — mild marine air, low humidity, and a calendar that genuinely stays open year-round for offset cooks.',
+  'tampa-fl':             'Tampa’s pit scene combines Carolina pulled pork with Latin and Caribbean influence — Cuban-pork roots run deep, and the regional climate’s afternoon storm pattern decides most Saturdays.',
+  'denver-co':            'Denver runs the Mile High City’s barbecue at altitude — a pit at 5,280 feet behaves differently than one at sea level, water boils lower, and wrap-and-rest timing shifts accordingly.',
+  'baltimore-md':         'Baltimore’s pit scene runs pit beef as a regional signature alongside the broader pulled-pork and brisket traditions — the Chesapeake region adds smoked seafood to the standard menu.',
+  'st-louis-mo':          'St. Louis built its own rib style — cut St. Louis-style from the spare rack, finished with a tomato-based sauce that’s sharper than Kansas City’s — and the city’s pit shops keep the tradition alive.',
+  'charlotte-nc':         'Charlotte sits between Eastern Carolina’s whole-hog tradition and Lexington’s shoulder-and-tomato style — both menus appear across the metro, often in the same pit house.',
+  'orlando-fl':           'Orlando’s pit scene draws on both Carolina pulled-pork and Texas-brisket traditions — the Central Florida climate’s summer-storm pattern is the variable that decides most weekends.',
+  'san-antonio-tx':       'San Antonio’s pit scene blends Central Texas brisket with a strong barbacoa tradition — pit-cooked cabeza and beef cheek have a longer history in the city than the brisket that put Texas on the BBQ map.',
+  'portland-or':          'Portland’s barbecue scene is small but inventive — Pacific Northwest pitmasters run Texas brisket and Carolina pork alongside alder-smoked salmon and locally-foraged wood blends.',
+  'sacramento-ca':        'Sacramento’s pit scene runs a Central Valley take on Texas brisket — hot, dry summers give short stalls, and the regional pellet-cooker culture is among the strongest in California.',
+  'pittsburgh-pa':        'Pittsburgh’s pit scene runs neighborhood-driven Carolina pulled pork and Memphis ribs, and the city’s three-river microclimate adds a wind-and-humidity variable that the regional default doesn’t capture.',
+  'las-vegas-nv':         'Las Vegas brings every regional barbecue style under one roof in resort-and-restaurant menus, but the city’s backyard pit scene is real too — desert summers reward insulated cookers and shorter rest windows.',
+  'cincinnati-oh':        'Cincinnati barbecue blends Memphis-style ribs and Carolina pulled pork — the city’s German-immigrant heritage also threads smoked sausage and brats into the regional pit menu.',
+  'kansas-city-mo':       'Kansas City is the home of burnt ends — caramelized cubes off the point of a packer brisket — and the regional sweet tomato-and-molasses sauce that defines KC barbecue worldwide.',
+  'columbus-oh':          'Columbus is a Midwest college-town pit scene with a strong restaurant-pit presence in Short North and German Village — Carolina pork, Memphis ribs, and Texas brisket all share menu space.',
+  'indianapolis-in':      'Indianapolis runs a contest-heavy Midwest pit scene — the city’s Memorial Day weekend doubles as one of the country’s largest barbecue holidays, and pit shops calibrate their menus around it.',
+  'cleveland-oh':         'Cleveland’s pit scene leans Eastern European in its sausage tradition — kielbasa and brats share pit space with the regional Carolina pulled pork and Memphis rib menu.',
+  'austin-tx':            'Austin is the modern center of Central Texas barbecue — Franklin Barbecue, Terry Black’s, La Barbecue and the post-oak smokehouses around the city set the standard for brisket worldwide.',
+  'nashville-tn':         'Nashville’s pit scene runs hot chicken alongside the regional pulled-pork and rib tradition — the city’s growing brisket scene over the last decade adds a Texas layer to the Mid-South playbook.',
+  'virginia-beach-va':    'Virginia Beach sits in the Tidewater region — pit shops here run Carolina-bridged pulled pork alongside smoked seafood, and coastal storms decide more Saturdays than humidity does.',
+  'providence-ri':        'Providence’s pit scene is small and restaurant-driven — Rhode Island’s coastal climate makes May through October the strongest cook window, and offsets rule the regional benchmark.',
+  'milwaukee-wi':         'Milwaukee’s pit scene runs sausage-heavy German and Polish traditions alongside Carolina pulled pork — the regional Friday-fish-fry calendar coexists with summer Saturday smokes.',
+  'jacksonville-fl':      'Jacksonville sits north of Florida’s tropical zone in genuinely humid subtropical climate — Carolina pulled pork and Texas brisket dominate the regional pit menu, and afternoon storms decide most Saturday cooks.',
+  'oklahoma-city-ok':     'Oklahoma City runs the state’s blend of Texas brisket, Memphis ribs, and smoked bologna — wind is the regional variable, and OKC’s central-plains position keeps the gust forecast in play almost year-round.',
+  'raleigh-nc':           'Raleigh-Durham’s pit scene runs both Eastern Carolina whole-hog and Lexington shoulder traditions — the Research Triangle’s wave of newer Texas-style brisket houses adds a third layer to the regional menu.',
+  'memphis-tn':           'Memphis is the world capital of dry-rubbed ribs and pulled pork — the city’s Memphis-in-May contest is one of the country’s three largest BBQ competitions, and local pit shops set the standard for the style.',
+  'richmond-va':          'Richmond’s pit scene runs Virginia chopped pork as its regional backbone, with newer Texas-style brisket houses adding to the menu — the James River corridor sees frequent summer humidity.',
+  'louisville-ky':        'Louisville barbecue runs western Kentucky’s mutton tradition alongside the regional pulled-pork and rib menu — black-dip mutton sauce remains a Louisville signature.',
+  'new-orleans-la':       'New Orleans threads Creole and Cajun smoke into the regional barbecue catalog — andouille and tasso ham share pit space with brisket and ribs, and Gulf humidity decides most summer Saturdays.',
+  'hartford-ct':          'Hartford’s pit scene runs a New England take on Memphis ribs and Carolina pulled pork — the regional climate gives strong May-October cook windows and tough November-March ones.',
+  'salt-lake-city-ut':    'Salt Lake City barbecue runs Texas brisket and Memphis ribs at altitude — the Wasatch Front’s dry summer climate gives short stalls; the trade is aggressive moisture loss across the cook.',
+  'birmingham-al':        'Birmingham runs Alabama white-sauce smoked chicken as the regional signature — Big Bob Gibson’s white sauce defined the style, and pit shops across the metro keep the tradition alive.',
+  'buffalo-ny':           'Buffalo’s pit scene is small but local — beef-on-weck and chicken-wing traditions coexist with Carolina-style pulled pork and brisket, and lake-effect winters close most backyard cooks December-March.',
+  'tulsa-ok':             'Tulsa’s pit scene shares Oklahoma City’s Texas-brisket-and-smoked-bologna playbook — the Arkansas River corridor and northeast Oklahoma woods give the regional cook a distinct hickory-and-pecan flavor.',
+};
+
 // Last-modified date emitted in og/twitter/json-ld. Bump when the template
 // changes materially; metro-list changes alone don't require it.
 const LAST_MODIFIED = '2026-05-15';
@@ -200,7 +258,9 @@ function renderMetro(metro) {
   const desc      = 'Free 7-day weather-aware smoke forecast for ' + name + ', ' + metro.state + '. Day-by-day scores for brisket, ribs, pork, and chicken on offset, pellet, kamado, kettle, or electric cookers.';
   const canonical = 'https://pitmaster.tools/smoke-weather/' + slug;
 
-  const intro     = name + ', ' + stateNm + ' sits in the ' + regLbl + ' barbecue region. This page scores the next seven days for low-and-slow cooks in the ' + name + ' metro, weighing rain probability, sustained wind and gusts, daytime temperature, and the wet-bulb humidity that drives the stall — then weights the result for your cut and cooker so you can pick the day with the highest odds of a clean cook.';
+  const note      = METRO_NOTE[slug];
+  if (!note) throw new Error('generate-metros: missing METRO_NOTE for ' + slug);
+  const intro     = name + ', ' + stateNm + ' sits in the ' + regLbl + ' barbecue region. ' + note + ' This page scores the next seven days for low-and-slow cooks in the ' + name + ' metro, weighing rain probability, sustained wind and gusts, daytime temperature, and the wet-bulb humidity that drives the stall — then weights the result for your cut and cooker so you can pick the day with the highest odds of a clean cook.';
   const closing   = 'Pick a day with a strong score, light the fire, and stop guessing whether Saturday in ' + name + ' will hold. The form lets you swap cut and cooker without leaving the page — your selection persists across visits via local storage. ZIP defaults to ' + zip + ' for the ' + name + ' metro; change it any time to score a different yard.';
 
   const faqJson = {
@@ -551,6 +611,7 @@ module.exports = {
   BBQ_HERITAGE_BY_REGION,
   REGION_CLIMATE,
   REGION_COOKER_TIP,
+  METRO_NOTE,
   GENERATED_MARKER,
   LAST_MODIFIED,
   renderMetro,

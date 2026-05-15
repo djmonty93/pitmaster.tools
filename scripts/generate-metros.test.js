@@ -131,6 +131,43 @@ test('METROS matches worker/migrations/0002_metros_seed.sql exactly', () => {
   }
 });
 
+test('every metro has a unique METRO_NOTE woven into the intro', () => {
+  const notes = new Set();
+  for (const m of gen.METROS) {
+    const note = gen.METRO_NOTE[m.slug];
+    assert.ok(note, m.slug + ' missing METRO_NOTE');
+    assert.ok(note.length >= 80, m.slug + ' note is too short (' + note.length + ' chars)');
+    assert.equal(notes.has(note), false, m.slug + ' duplicate note');
+    notes.add(note);
+    const html = gen.renderMetro(m);
+    assert.ok(html.includes(gen.escapeHtml(note)),
+      m.slug + ' rendered HTML does not contain its METRO_NOTE');
+  }
+});
+
+test('same-state metros have distinct intros (no near-duplicate SEO pages)', () => {
+  // Group metros by state and assert that any state with 2+ metros produces
+  // distinct page-hero intro paragraphs. Catches regressions where someone
+  // adds a new metro but forgets the METRO_NOTE override.
+  const byState = new Map();
+  for (const m of gen.METROS) {
+    if (!byState.has(m.state)) byState.set(m.state, []);
+    byState.get(m.state).push(m);
+  }
+  for (const [state, metros] of byState) {
+    if (metros.length < 2) continue;
+    const introHtmls = metros.map((m) => {
+      const html = gen.renderMetro(m);
+      const match = html.match(/<section class="page-hero"[^>]*>([\s\S]*?)<\/section>/);
+      assert.ok(match, m.slug + ' page-hero missing');
+      return match[1];
+    });
+    const unique = new Set(introHtmls);
+    assert.equal(unique.size, introHtmls.length,
+      state + ' has duplicate page-hero content across same-state metros');
+  }
+});
+
 test('every state in METROS has a region, state-name, and either state or regional heritage', () => {
   for (const m of gen.METROS) {
     assert.ok(gen.REGION_BY_STATE[m.state], m.slug + ' missing region map');
