@@ -280,11 +280,13 @@
       // superseded fetch doesn't leak a no-op abort up to 12 seconds
       // later on a controller that's already settled.
       clearPendingTimeout();
-      // A user-initiated abort (newer request supersedes this one)
-      // shows up as AbortError but `inflightCtrl` will already point
-      // at a different controller — drop silently in that case.
+      // Any error from a superseded request must be dropped silently —
+      // surfacing a stale 503 (or AbortError, or timeout) on top of a
+      // newer successful render would tell the user the page failed
+      // when in fact it just succeeded with newer parameters. The
+      // active request is the only one that owns #swStatus.
+      if (inflightCtrl !== ctrl) return;
       if (err && err.name === 'AbortError') {
-        if (inflightCtrl !== ctrl) return;
         setStatus('The forecast request timed out. Check your connection and try again.', true);
         return;
       }
@@ -304,6 +306,16 @@
     var cooker = cookerEl ? cookerEl.value : '';
 
     if (zip && !isValidUSZip(zip)) {
+      // Cancel any in-flight auto-load and wipe any prior render so the
+      // user doesn't see the validation error stacked on top of a
+      // forecast for a different zip. Drop inflightCtrl to null AFTER
+      // aborting so the in-flight catch path also sees `inflightCtrl
+      // !== ctrl` and stays silent.
+      if (inflightCtrl) {
+        try { inflightCtrl.abort(); } catch (e) { /* already settled */ }
+        inflightCtrl = null;
+      }
+      clearResults();
       setStatus('Enter a valid 5-digit US ZIP code.', true);
       return;
     }

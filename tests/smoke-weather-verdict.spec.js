@@ -160,7 +160,7 @@ test.describe('Best Smoke Days verdict landing', () => {
     await expect(page.locator('#dayCards .day-card')).toHaveCount(0);
   });
 
-  test('rejects an invalid zip without hitting the network', async ({ page }) => {
+  test('rejects an invalid zip without hitting the network and clears prior results', async ({ page }) => {
     let calls = 0;
     await page.route('**/api/forecast**', async (route) => {
       calls += 1;
@@ -172,6 +172,7 @@ test.describe('Best Smoke Days verdict landing', () => {
     });
     await page.goto('/smoke-weather/');
     await expect(page.locator('#dayCards .day-card')).toHaveCount(4);
+    await expect(page.locator('#verdictHero')).toBeVisible();
     const initialCalls = calls;
 
     await page.fill('#zipInput', '12');
@@ -180,5 +181,79 @@ test.describe('Best Smoke Days verdict landing', () => {
     await expect(page.locator('#swStatus')).toHaveClass(/error/);
     await expect(page.locator('#swStatus')).toContainText('valid 5-digit US ZIP');
     expect(calls).toBe(initialCalls);
+    // Codex review iter 1: previous forecast must be cleared so the
+    // user doesn't see a validation error stacked on top of a stale
+    // forecast for a different zip.
+    await expect(page.locator('#dayCards .day-card')).toHaveCount(0);
+    await expect(page.locator('#verdictHero')).toBeHidden();
+  });
+
+  test('drops a stale auto-load if the user submits an invalid zip first', async ({ page }) => {
+    // Slow the auto-load so the invalid-zip submit lands first.
+    let resolveFirst;
+    const firstReady = new Promise((r) => { resolveFirst = r; });
+    let calls = 0;
+    await page.route('**/api/forecast**', async (route) => {
+      calls += 1;
+      if (calls === 1) {
+        await firstReady;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(FORECAST_FIXTURE),
+      });
+    });
+
+    await page.goto('/smoke-weather/');
+    await page.fill('#zipInput', '12');
+    await page.click('button[type="submit"]');
+
+    await expect(page.locator('#swStatus')).toContainText('valid 5-digit US ZIP');
+    // Now release the slow first request — it should be aborted by
+    // the invalid-zip handler, so the day cards must NOT appear.
+    resolveFirst();
+    await page.waitForTimeout(250);
+    await expect(page.locator('#dayCards .day-card')).toHaveCount(0);
+    await expect(page.locator('#swStatus')).toHaveClass(/error/);
+    await expect(page.locator('#swStatus')).toContainText('valid 5-digit US ZIP');
+  });
+
+  test('an older 503 does not overwrite a newer successful render', async ({ page }) => {
+    // First call (auto-load) hangs until we release it with a 503.
+    // Second call (cooker change) returns 200 immediately.
+    let resolveFirst;
+    const firstReady = new Promise((r) => { resolveFirst = r; });
+    let calls = 0;
+    await page.route('**/api/forecast**', async (route) => {
+      calls += 1;
+      if (calls === 1) {
+        await firstReady;
+        await route.fulfill({
+          status: 503,
+          contentType: 'application/json',
+          body: JSON.stringify({ error: 'weather_unavailable' }),
+        });
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(FORECAST_FIXTURE),
+      });
+    });
+
+    await page.goto('/smoke-weather/');
+    // Auto-load is hanging. Trigger a cooker change to start request #2.
+    await page.selectOption('#cookerSelect', 'pellet');
+    await expect(page.locator('#dayCards .day-card')).toHaveCount(4);
+    await expect(page.locator('#swStatus')).toBeHidden();
+
+    // Release the older 503. It must NOT clobber the newer successful
+    // render with an error message.
+    resolveFirst();
+    await page.waitForTimeout(250);
+    await expect(page.locator('#dayCards .day-card')).toHaveCount(4);
+    await expect(page.locator('#swStatus')).toBeHidden();
   });
 });
