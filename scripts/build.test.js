@@ -90,6 +90,50 @@ test('parseFrontmatter — allows multiple leading non-meta comments before the 
   assert.ok(!body.includes('<!-- meta:'));
 });
 
+test('parseFrontmatter — throws on unquoted assignment so malformed permalink cannot silently bypass validation', () => {
+  // Without this gate, `permalink=/bad.html` (no quotes) is dropped by KV_RE,
+  // vars.permalink stays unset, resolvePermalink falls back to the source path,
+  // and the entire `permalink` validation block (leading-slash, traversal,
+  // .html suffix, etc.) is silently skipped. Catching it at parse time fails
+  // loudly instead.
+  const src = `<!-- meta:
+  title="Hello"
+  permalink=/bad.html
+-->
+rest`;
+  assert.throws(
+    () => parseFrontmatter(src),
+    /Malformed frontmatter assignment "permalink=\.\.\." — values must be double-quoted/
+  );
+});
+
+test('parseFrontmatter — throws on any malformed key, not just permalink', () => {
+  // The gate must catch malformed assignments for any frontmatter key — a
+  // permalink-only check would let a future required field silently disappear
+  // the same way. Pin that the validation is general.
+  const src = `<!-- meta: title=raw -->
+rest`;
+  assert.throws(
+    () => parseFrontmatter(src),
+    /Malformed frontmatter assignment "title=\.\.\."/
+  );
+});
+
+test('parseFrontmatter — allows whitespace and newlines in a well-formed meta block', () => {
+  // Sanity check: the residue scan must not false-positive on the whitespace
+  // and newlines that legitimately separate well-formed key="value" pairs.
+  const src = `<!-- meta:
+  title="Hello"
+  description="A page"
+  permalink="ok.html"
+-->
+rest`;
+  const { vars } = parseFrontmatter(src);
+  assert.equal(vars.title, 'Hello');
+  assert.equal(vars.description, 'A page');
+  assert.equal(vars.permalink, 'ok.html');
+});
+
 test('parseFrontmatter — still ignores a meta comment that follows non-comment content', () => {
   // Confirms the loosened parser only walks leading HTML comments — DOCTYPE,
   // plain text, or any non-comment markup still anchors the search, so a
@@ -253,6 +297,52 @@ test('resolvePermalink — rejects ".." segment anywhere in the path', () => {
   assert.throws(
     () => resolvePermalink('x.html', { permalink: 'a/../b.html' }, 'x.html'),
     /must not contain "\.\."/
+  );
+});
+
+test('resolvePermalink — rejects empty segment from double slash (a//b.html)', () => {
+  // path.join collapses // to /, so a//b.html and a/b.html would both write to
+  // dist/a/b.html. Without this gate the collision check is bypassed.
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: 'a//b.html' }, 'x.html'),
+    /must not contain empty or "\." segments/
+  );
+});
+
+test('resolvePermalink — rejects "." segment (a/./b.html)', () => {
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: 'a/./b.html' }, 'x.html'),
+    /must not contain empty or "\." segments/
+  );
+});
+
+test('resolvePermalink — rejects trailing slash (empty final segment)', () => {
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: 'a/b/' }, 'x.html'),
+    /must not contain empty or "\." segments/
+  );
+});
+
+test('resolvePermalink — rejects "?" before .html suffix', () => {
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: 'foo?x.html' }, 'x.html'),
+    /must not contain "\?" or "#"/
+  );
+});
+
+test('resolvePermalink — rejects "?" after .html suffix', () => {
+  // Without the explicit ?/# gate this would slip past the endsWith check on
+  // Linux (literal "foo.html?x" filename) and crash at write time on Windows.
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: 'foo.html?x' }, 'x.html'),
+    /must not contain "\?" or "#"/
+  );
+});
+
+test('resolvePermalink — rejects "#"', () => {
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: 'foo#bar.html' }, 'x.html'),
+    /must not contain "\?" or "#"/
   );
 });
 

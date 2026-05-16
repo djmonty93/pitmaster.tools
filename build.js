@@ -81,6 +81,12 @@ const META_COMMENT_RE = /^\s*<!--\s*meta:\s*([\s\S]*?)\s*-->\s*\r?\n?/;
 const KV_RE = /(\w+)\s*=\s*"((?:\\.|[^"\\])*)"/g;
 const FRONTMATTER_UNESCAPE_RE = /\\(["\\])/g;
 
+// Detects a `key=` assignment whose value is NOT a double-quoted string. This
+// is how `permalink=/bad.html` (no quotes) or `title=raw` slips past KV_RE
+// without populating `vars` — resolvePermalink then never runs and the source-
+// path fallback silently bypasses validation. Catching it here fails loudly.
+const MALFORMED_KV_RE = /\b(\w+)\s*=\s*(?!")\S/;
+
 function parseFrontmatter(html) {
   var prefixLen = 0;
   var rest = html;
@@ -91,11 +97,23 @@ function parseFrontmatter(html) {
   }
   var m = rest.match(META_COMMENT_RE);
   if (!m) return { vars: {}, body: html };
+  var meta = m[1];
   var vars = {};
   var kv;
   KV_RE.lastIndex = 0;
-  while ((kv = KV_RE.exec(m[1])) !== null) {
+  // Strip each recognized `key="value"` from a working copy as we parse it.
+  // Anything that survives must be whitespace or a malformed assignment.
+  var residue = meta;
+  while ((kv = KV_RE.exec(meta)) !== null) {
     vars[kv[1].toLowerCase()] = kv[2].replace(FRONTMATTER_UNESCAPE_RE, '$1');
+    residue = residue.replace(kv[0], '');
+  }
+  var malformed = residue.match(MALFORMED_KV_RE);
+  if (malformed) {
+    throw new Error(
+      'Malformed frontmatter assignment "' + malformed[1] +
+      '=..." — values must be double-quoted'
+    );
   }
   var prefix = html.slice(0, prefixLen);
   var afterMeta = rest.slice(m[0].length);
@@ -163,7 +181,10 @@ function injectPartials(html, vars, partials, sourceFile) {
 
 // ── Permalink resolution ────────────────────────────────────────────────────
 // A `permalink` frontmatter value overrides the default `_src/<rel> → dist/<rel>`
-// mapping. Forward-slashed, must end in .html, no leading slash, no traversal.
+// mapping. Forward-slashed, must end in .html, no leading slash, no traversal,
+// no empty or "." segments (those collapse via path.join and break the
+// emitted-map collision check), and no URL syntax characters that would emit
+// platform-dependent filenames.
 // Returns the dist-relative path (forward-slashed) the file should be written to.
 function resolvePermalink(rel, vars, sourceFile) {
   if (vars.permalink == null) {
@@ -176,9 +197,28 @@ function resolvePermalink(rel, vars, sourceFile) {
   if (p.startsWith('/') || p.startsWith('\\')) {
     throw new Error('permalink in ' + sourceFile + ' must not start with "/" (got "' + p + '")');
   }
+  // Reject URL-syntax characters before the .html suffix check: "foo.html?x"
+  // and "foo?x.html" both pass an endsWith test but emit literal-question-mark
+  // filenames on Linux and crash on write on Windows. Validation must be
+  // platform-agnostic.
+  if (/[?#]/.test(p)) {
+    throw new Error('permalink in ' + sourceFile + ' must not contain "?" or "#" (got "' + p + '")');
+  }
   var segments = p.split(/[\\/]/);
-  if (segments.indexOf('..') !== -1) {
-    throw new Error('permalink in ' + sourceFile + ' must not contain ".." (got "' + p + '")');
+  for (var i = 0; i < segments.length; i++) {
+    var seg = segments[i];
+    if (seg === '..') {
+      throw new Error('permalink in ' + sourceFile + ' must not contain ".." (got "' + p + '")');
+    }
+    if (seg === '' || seg === '.') {
+      // Empty segments (a//b.html) and "." segments (a/./b.html) survive the
+      // string-key collision map but path.join normalizes them out, so two
+      // sources can write to the same dist path without tripping the collision
+      // check. Reject both.
+      throw new Error(
+        'permalink in ' + sourceFile + ' must not contain empty or "." segments (got "' + p + '")'
+      );
+    }
   }
   if (!p.endsWith('.html')) {
     throw new Error('permalink in ' + sourceFile + ' must end with ".html" (got "' + p + '")');
@@ -219,8 +259,13 @@ function runBuild() {
 
   // Build HTML files. Track emitted dist-relative paths so two source files
   // claiming the same permalink fail loudly instead of silently clobbering.
+  // Case-insensitive Windows filesystems would otherwise let "Foo.html" and
+  // "foo.html" pass the exact-match map and clobber on disk while emitting
+  // two distinct files on Linux CI — break dist parity across platforms.
+  // A secondary lowercase key catches that.
   var htmlFiles = listHtml(SRC);
   var emitted = Object.create(null);
+  var emittedCi = Object.create(null);
   var built = 0;
   htmlFiles.forEach(function(srcPath) {
     var rel      = path.relative(SRC, srcPath);
@@ -233,7 +278,15 @@ function runBuild() {
         ' emit to dist/' + distRel
       );
     }
+    var ciKey = distRel.toLowerCase();
+    if (emittedCi[ciKey] != null && emittedCi[ciKey] !== distRel) {
+      throw new Error(
+        'Case-insensitive permalink collision: ' + emittedCi[ciKey] +
+        ' and ' + distRel + ' differ only in case (would clobber on Windows)'
+      );
+    }
     emitted[distRel] = rel;
+    emittedCi[ciKey] = distRel;
     var distPath = path.join(DIST, distRel);
     var output   = injectPartials(fm.body, fm.vars, partials, rel);
     fs.mkdirSync(path.dirname(distPath), { recursive: true });
