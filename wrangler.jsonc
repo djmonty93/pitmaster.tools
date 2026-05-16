@@ -22,7 +22,7 @@
   "kv_namespaces": [
     {
       "binding": "WEATHER_KV",
-      "id": "00000000000000000000000000000000",
+      "id": "b6961432ba1a4645a967e01f3071ff77",
       "preview_id": "00000000000000000000000000000000"
     }
   ],
@@ -34,7 +34,7 @@
     {
       "binding": "SMOKE_DB",
       "database_name": "smoke_db",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "f0e45fbc-332c-4f15-b2b9-67f9338e3824",
       "migrations_dir": "worker/migrations"
     }
   ],
