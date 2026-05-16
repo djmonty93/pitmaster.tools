@@ -124,6 +124,106 @@ function Test-NoInjectPlaceholders {
   }
 }
 
+function Test-UnresolvedTokens {
+  param(
+    [string]$BaseDirectory,
+    [string[]]$Paths
+  )
+
+  foreach ($path in $Paths) {
+    $fullPath = Join-Path $BaseDirectory $path
+    $matches = Select-String -Path $fullPath -Pattern '\{\{[A-Z_]+\}\}'
+    if ($matches) {
+      foreach ($m in $matches) {
+        Add-Error("Unresolved {{token}} in ${path}: $($m.Line.Trim())")
+      }
+    } else {
+      Write-Host "OK TOK  $path"
+    }
+  }
+}
+
+function Test-ConsentBeforeAnalytics {
+  # Asserts the Consent Mode v2 default-deny gtag call appears before any
+  # googletagmanager.com or pagead2/adsbygoogle reference, per CLAUDE.md.
+  param(
+    [string]$BaseDirectory,
+    [string[]]$Paths
+  )
+
+  foreach ($path in $Paths) {
+    $fullPath = Join-Path $BaseDirectory $path
+    $content = Get-Content $fullPath -Raw
+    $consentIdx  = $content.IndexOf("gtag('consent', 'default'")
+    $analyticsIdx = [Math]::Min(
+      ($content.IndexOf('googletagmanager.com') + [int]($content.IndexOf('googletagmanager.com') -lt 0) * [int]::MaxValue),
+      ($content.IndexOf('pagead2.googlesyndication') + [int]($content.IndexOf('pagead2.googlesyndication') -lt 0) * [int]::MaxValue)
+    )
+    if ($consentIdx -ge 0 -and $analyticsIdx -lt [int]::MaxValue -and $analyticsIdx -lt $consentIdx) {
+      Add-Error("Consent default must precede analytics loader in ${path}")
+    } else {
+      Write-Host "OK CON  $path"
+    }
+  }
+}
+
+function Test-HeadOrder {
+  # Enforces the ordered head block required by CLAUDE.md: each present tag
+  # must appear in the expected sequence. Missing tags are skipped (so minimal
+  # pages like 404.html don't trip the check); only mis-ordering fails.
+  param(
+    [string]$BaseDirectory,
+    [string[]]$Paths
+  )
+
+  $expectedTags = @(
+    @{ name = 'charset';       pattern = '<meta\s+charset=' },
+    @{ name = 'viewport';      pattern = '<meta\s+name="viewport"' },
+    @{ name = 'title';         pattern = '<title>' },
+    @{ name = 'description';   pattern = '<meta\s+name="description"' },
+    @{ name = 'robots';        pattern = '<meta\s+name="robots"' },
+    @{ name = 'canonical';     pattern = '<link\s+rel="canonical"' },
+    @{ name = 'og:title';      pattern = '<meta\s+property="og:title"' },
+    @{ name = 'og:description';pattern = '<meta\s+property="og:description"' },
+    @{ name = 'og:type';       pattern = '<meta\s+property="og:type"' },
+    @{ name = 'og:url';        pattern = '<meta\s+property="og:url"' },
+    @{ name = 'og:image';      pattern = '<meta\s+property="og:image"' },
+    @{ name = 'twitter:card';  pattern = '<meta\s+name="twitter:card"' },
+    @{ name = 'twitter:title'; pattern = '<meta\s+name="twitter:title"' },
+    @{ name = 'twitter:description'; pattern = '<meta\s+name="twitter:description"' },
+    @{ name = 'twitter:image'; pattern = '<meta\s+name="twitter:image"' },
+    @{ name = 'favicon';       pattern = '<link\s+rel="icon"\s+href=' },
+    @{ name = 'consent';       pattern = "gtag\('consent', 'default'" }
+  )
+
+  foreach ($path in $Paths) {
+    $fullPath = Join-Path $BaseDirectory $path
+    $content = Get-Content $fullPath -Raw
+    $headMatch = [regex]::Match($content, '(?s)<head>(.*?)</head>')
+    if (-not $headMatch.Success) {
+      Add-Error("No <head> block found in ${path}")
+      continue
+    }
+    $head = $headMatch.Groups[1].Value
+
+    $lastIdx = -1
+    $lastName = '(start)'
+    $pageOk = $true
+    foreach ($tag in $expectedTags) {
+      $m = [regex]::Match($head, $tag.pattern)
+      if (-not $m.Success) { continue }
+      if ($m.Index -lt $lastIdx) {
+        Add-Error("Head tag out of order in ${path}: '$($tag.name)' appears before '$lastName'")
+        $pageOk = $false
+        break
+      }
+      $lastIdx = $m.Index
+      $lastName = $tag.name
+    }
+    if ($pageOk) { Write-Host "OK HEAD $path" }
+  }
+}
+
 $htmlFiles = @(
   '404.html',
   'about.html',
@@ -190,6 +290,9 @@ $allHtmlFiles = $htmlFiles + $smokeWeatherFiles + $seasonalFiles
 
 Test-LocalLinks -BaseDirectory $distRoot -Paths $allHtmlFiles
 Test-NoInjectPlaceholders -BaseDirectory $distRoot -Paths $allHtmlFiles
+Test-UnresolvedTokens -BaseDirectory $distRoot -Paths $allHtmlFiles
+Test-ConsentBeforeAnalytics -BaseDirectory $distRoot -Paths $allHtmlFiles
+Test-HeadOrder -BaseDirectory $distRoot -Paths $allHtmlFiles
 
 if ($errors.Count -gt 0) {
   Write-Host ''

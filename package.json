@@ -4,6 +4,7 @@
   "scripts": {
     "build:metros": "node scripts/generate-metros.js",
     "build": "npm run build:metros && node build.js",
+    "validate": "npm run build && node scripts/validate.mjs",
     "dev:worker": "wrangler dev",
     "deploy": "wrangler deploy",
     "test": "npm run test:scripts && vitest run --root worker",
