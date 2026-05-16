@@ -155,7 +155,10 @@ function Test-ConsentBeforeAnalytics {
   foreach ($path in $Paths) {
     $fullPath = Join-Path $BaseDirectory $path
     $content = Get-Content $fullPath -Raw
-    $consentIdx = $content.IndexOf("gtag('consent', 'default'")
+    # Match either single- or double-quoted JS string literals so a future
+    # double-quoted variant doesn't silently skip the ordering gate.
+    $consentMatch = [regex]::Match($content, "gtag\(\s*['""]consent['""]\s*,\s*['""]default['""]")
+    $consentIdx = if ($consentMatch.Success) { $consentMatch.Index } else { -1 }
     $analyticsIdx = @('googletagmanager.com', 'pagead2.googlesyndication') |
       ForEach-Object { $content.IndexOf($_) } |
       Where-Object { $_ -ge 0 } |
@@ -198,7 +201,9 @@ function Test-HeadOrder {
     'twitter:description' = '<meta\s+name="twitter:description"'
     'twitter:image'       = '<meta\s+name="twitter:image"'
     'favicon'             = '<link\s+rel="icon"\s+href='
-    'consent'             = "gtag\('consent', 'default'"
+    # Quote-agnostic to match the consent-before-analytics gate above; a
+    # double-quoted gtag() call must not silently pass the head-order check.
+    'consent'             = "gtag\(\s*['""]consent['""]\s*,\s*['""]default['""]"
   }
   $universal = @('charset', 'viewport', 'title', 'description', 'canonical')
   $social    = @('og:title', 'og:description', 'og:type', 'og:url', 'og:image',

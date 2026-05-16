@@ -45,10 +45,16 @@ const SRC      = '_src';
 const PARTIALS = '_partials';
 const DIST     = 'dist';
 
-// Static assets to copy from repo root to dist/
+// Static assets to copy from repo root to dist/. _redirects is omitted
+// because the file is unused: Workers Assets handles clean URLs via the
+// default auto-trailing-slash html_handling, and the "block internal
+// files" lines defended against files build.js doesn't copy anyway.
+// Cloudflare Workers also rejected the Pages-style 404 / forced-301
+// syntax the old file used, which was failing Workers Builds on every
+// commit.
 const STATIC_ASSETS = [
   'favicon.ico', 'robots.txt', 'sitemap.xml', 'ads.txt',
-  '_headers', '_redirects', 'og-image.png', 'llms.txt',
+  '_headers', 'og-image.png', 'llms.txt',
 ];
 
 // ── Frontmatter parsing ─────────────────────────────────────────────────────

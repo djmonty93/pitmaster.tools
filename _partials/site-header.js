@@ -86,5 +86,37 @@
     });
   }
 
+  // ── Active-nav marking ────────────────────────────────────────────────────
+  // Mark header/footer nav anchors that point at the current page with
+  // aria-current="page", and tag any containing nav-dropdown trigger with
+  // .is-current. Lets shared partials stay static — pages don't need to
+  // hand-mark their own location in the nav.
+  function normalizePath(p) {
+    if (!p) return '/';
+    // Strip trailing slash so '/about/' and '/about' match, and treat the
+    // clean-URL form ('/about') as equivalent to the .html form ('/about.html').
+    var clean = p.replace(/\/$/, '') || '/';
+    if (clean.endsWith('.html')) clean = clean.slice(0, -5);
+    return clean;
+  }
+
+  function markActiveLinks() {
+    var current = normalizePath(window.location.pathname);
+    document.querySelectorAll('header nav a[href], footer nav a[href]').forEach(function(link) {
+      var url;
+      try { url = new URL(link.getAttribute('href'), window.location.href); }
+      catch (e) { return; }
+      if (url.origin !== window.location.origin) return;
+      if (normalizePath(url.pathname) !== current) return;
+      link.setAttribute('aria-current', 'page');
+      var dropdown = link.closest('.nav-dropdown');
+      if (dropdown) {
+        var trigger = dropdown.querySelector('.nav-dropdown__trigger');
+        if (trigger) trigger.classList.add('is-current');
+      }
+    });
+  }
+
   document.querySelectorAll('header').forEach(setupHeader);
+  markActiveLinks();
 })();

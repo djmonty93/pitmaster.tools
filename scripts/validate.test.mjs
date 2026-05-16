@@ -1,12 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import {
   stripJsonc,
   validateXmlBalance,
   findUnresolvedInjects,
   findUnresolvedTokens,
   consentBeforeAnalytics,
-  checkHeadBlock
+  checkHeadBlock,
+  resolveLocalLink,
+  findBrokenLocalLinks,
+  discoverHtmlFiles
 } from './validate.mjs';
 
 // ── stripJsonc ──────────────────────────────────────────────────────────────
@@ -155,4 +161,146 @@ test('checkHeadBlock — flags out-of-order tags', () => {
 test('checkHeadBlock — flags missing <head> entirely', () => {
   const errs = checkHeadBlock('<html><body>nope</body></html>');
   assert.deepEqual(errs, ['no <head> block found']);
+});
+
+test('checkHeadBlock — double-quoted consent satisfies the head-order check', () => {
+  // Tag patterns must use the same quote-agnostic matcher as the consent
+  // ordering gate. Otherwise a future page using double-quoted gtag() would
+  // bypass the head-order presence check.
+  const headWithDoubleQuoteConsent = fullHead.replace(
+    /<\/head>/,
+    `<script>gtag("consent", "default", {});</script></head>`
+  );
+  // Drop the single-quoted consent so only the double-quoted variant remains.
+  // (fullHead doesn't include consent today; check that adding a double-quoted
+  // one is recognized, i.e. no "out of order" error fires.)
+  assert.deepEqual(checkHeadBlock(headWithDoubleQuoteConsent), []);
+});
+
+// ── consentBeforeAnalytics quote variants ───────────────────────────────────
+test('consentBeforeAnalytics — matches double-quoted gtag call', () => {
+  const html = `gtag("consent", "default", {})`;
+  // No analytics loader → null (consent present, but nothing to order against).
+  assert.equal(consentBeforeAnalytics(html), null);
+});
+
+test('consentBeforeAnalytics — fails when double-quoted analytics precedes consent', () => {
+  const html = `googletagmanager.com/gtag.js ... gtag("consent", "default", {})`;
+  assert.match(consentBeforeAnalytics(html), /consent default must precede/);
+});
+
+// ── resolveLocalLink ────────────────────────────────────────────────────────
+function withTempDist(layout) {
+  const dir = mkdtempSync(join(tmpdir(), 'pmt-validate-'));
+  for (const [rel, body] of Object.entries(layout)) {
+    const full = join(dir, rel);
+    mkdirSync(join(full, '..'), { recursive: true });
+    writeFileSync(full, body);
+  }
+  return { dir, cleanup: () => rmSync(dir, { recursive: true, force: true }) };
+}
+
+test('resolveLocalLink — skips external, mailto, data, and anchor targets', () => {
+  const dummy = '/tmp/anywhere/page.html';
+  for (const t of ['https://x.test/y', 'http://x', 'mailto:a@b', 'data:foo', '#frag']) {
+    assert.deepEqual(resolveLocalLink(t, dummy, '/tmp/anywhere'), { skip: true });
+  }
+});
+
+test('resolveLocalLink — skips empty / whitespace targets', () => {
+  assert.deepEqual(resolveLocalLink('', '/d/p.html', '/d'), { skip: true });
+  assert.deepEqual(resolveLocalLink('?q=1', '/d/p.html', '/d'), { skip: true });
+  assert.deepEqual(resolveLocalLink('#frag-only', '/d/p.html', '/d'), { skip: true });
+});
+
+test('resolveLocalLink — "/" resolves to baseDir/index.html', () => {
+  const t = withTempDist({ 'index.html': '<p>i</p>' });
+  try {
+    const r = resolveLocalLink('/', join(t.dir, 'index.html'), t.dir);
+    assert.equal(r.exists, true);
+    assert.equal(r.resolved, join(t.dir, 'index.html'));
+  } finally { t.cleanup(); }
+});
+
+test('resolveLocalLink — root-relative resolves against baseDir', () => {
+  const t = withTempDist({ 'tools.html': 'x' });
+  try {
+    const r = resolveLocalLink('/tools', join(t.dir, 'about.html'), t.dir);
+    assert.equal(r.exists, true);
+    assert.ok(r.resolved.endsWith('tools.html'));
+  } finally { t.cleanup(); }
+});
+
+test('resolveLocalLink — document-relative resolves against fullPath dirname', () => {
+  const t = withTempDist({
+    'a/page.html': 'x',
+    'a/sibling.html': 'y'
+  });
+  try {
+    const r = resolveLocalLink('sibling', join(t.dir, 'a', 'page.html'), t.dir);
+    assert.equal(r.exists, true);
+  } finally { t.cleanup(); }
+});
+
+test('resolveLocalLink — extensionless target falls back to .html', () => {
+  const t = withTempDist({ 'meat-per-person.html': 'x' });
+  try {
+    const r = resolveLocalLink('/meat-per-person', join(t.dir, 'i.html'), t.dir);
+    assert.equal(r.exists, true);
+  } finally { t.cleanup(); }
+});
+
+test('resolveLocalLink — anchor and query strings are stripped before resolution', () => {
+  const t = withTempDist({ 'tools.html': 'x' });
+  try {
+    assert.equal(resolveLocalLink('/tools?utm=1', join(t.dir, 'i.html'), t.dir).exists, true);
+    assert.equal(resolveLocalLink('/tools#a', join(t.dir, 'i.html'), t.dir).exists, true);
+  } finally { t.cleanup(); }
+});
+
+test('resolveLocalLink — missing target returns exists=false', () => {
+  const t = withTempDist({ 'real.html': 'x' });
+  try {
+    assert.equal(resolveLocalLink('/missing', join(t.dir, 'i.html'), t.dir).exists, false);
+  } finally { t.cleanup(); }
+});
+
+// ── findBrokenLocalLinks ────────────────────────────────────────────────────
+test('findBrokenLocalLinks — flags only the broken href; skips external + valid', () => {
+  const t = withTempDist({ 'tools.html': 'x', 'i.html': 'x' });
+  try {
+    const content =
+      '<a href="https://x.test">ext</a>' +
+      '<a href="/tools">ok</a>' +
+      '<a href="/missing">bad</a>' +
+      '<a href="mailto:a@b">mail</a>';
+    const broken = findBrokenLocalLinks(content, join(t.dir, 'i.html'), t.dir);
+    assert.deepEqual(broken, ['/missing']);
+  } finally { t.cleanup(); }
+});
+
+// ── discoverHtmlFiles ───────────────────────────────────────────────────────
+test('discoverHtmlFiles — recurses subdirs, sorts, forward-slashes paths', () => {
+  const t = withTempDist({
+    'about.html': 'x',
+    'tools.html': 'x',
+    'smoke-weather/disclosures.html': 'x',
+    'smoke-weather/index.html': 'x',
+    'seasonal/winter.html': 'x',
+    'not-html.txt': 'x'
+  });
+  try {
+    const files = discoverHtmlFiles(t.dir);
+    assert.deepEqual(files, [
+      'about.html',
+      'seasonal/winter.html',
+      'smoke-weather/disclosures.html',
+      'smoke-weather/index.html',
+      'tools.html'
+    ]);
+  } finally { t.cleanup(); }
+});
+
+test('discoverHtmlFiles — returns empty array when baseDir missing', () => {
+  assert.deepEqual(discoverHtmlFiles('/nonexistent-path-xyzzy-123'), []);
 });
