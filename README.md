@@ -385,6 +385,32 @@ verified, and rolled back independently.
   on next regeneration. `/smoke-weather/index.html` footer updated by
   hand. Both new pages cross-link to each other, to disclosures, and
   to the verdict landing. Sitemap entries at 0.6 priority.
+- **Step 19.** Final pass. End-to-end verification sweep before v1
+  ship:
+  - `npm test` — 922 worker tests across 29 files pass (Vitest +
+    Miniflare; covers Open-Meteo/NWS failover, KV stale-while-error,
+    D1 migrations, MailerLite client + retry queue, all worker
+    handlers, both crons, scoring engine + JS-mirror parity, region
+    routing, Sentry options, F20 NaN guards, weekly article cron).
+  - `npm run test:scripts` — 22 Node-builtin tests pass
+    (generate-metros parity, schema validator, microclimate
+    disclaimer guard).
+  - `npm run test:e2e` — 36 Playwright specs pass against
+    `wrangler dev` (verdict landing, detail view, browser smoke,
+    affiliate cards, consent banner behavior).
+  - `npm run typecheck` — clean.
+  - `validate.ps1` — clean (HTML head shape, INJECT resolution,
+    link resolution, sitemap XML validity across 77 dist pages).
+  - **Manual pre-deploy** (not automated):
+    - Lighthouse mobile ≥95 against the deployed preview URL
+      (target ≥95 across PWA/Perf/A11y/Best-Practices/SEO).
+    - Google Rich Results test on `/smoke-weather/`,
+      `/smoke-weather/methodology`, one metro page, and one
+      `/articles/:slug` article.
+    - Sentry DSN provisioned via `wrangler secret put SENTRY_DSN`
+      before deploy.
+    - MailerLite secrets (API key + token-secret + region automation
+      ids) provisioned via `wrangler secret put`.
 
 ## DNS setup — MailerLite sending domain
 

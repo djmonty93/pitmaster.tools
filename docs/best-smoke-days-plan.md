@@ -1,5 +1,9 @@
 # Best Smoke Days — Implementation Plan
 
+## Status
+
+**Shipped 2026-05-15.** Steps 1–18 merged to `main` across PRs #33–#51; Step 19 is the current open PR (#52) completing the v1 documentation pass. 22 features F1–F22 delivered; F17 weekly article cron, F18 BreadcrumbList schema, F19 seasonal pages, F20 NaN-score guard + microclimate disclaimer test, F21 Sentry + status page, F22 methodology + FAQ pages. Real editorial copy for `_src/seasonal/*.html` is the only follow-up Monty has on his plate; the placeholder content shipped is SEO-valid in the meantime.
+
 ## Context
 
 Monty wants to add a phone-first, weather-aware "Best Smoke Days" feature to **pitmaster.tools**. Source of truth for scope is `F:\Downloads\BEST_SMOKE_DAYS_BUILD_PLAN.md` (22 features F1–F22, strict TDD, Cloudflare stack). The build plan was written greenfield and mandates Astro + Tailwind + pnpm — but the existing site is already a Cloudflare Worker with a custom Node.js templating engine (`build.js` injects `<!-- INJECT:name -->` partials from `_partials/` into pages in `_src/`). User directive: **"Keep the existing site and make the new functionality fit the look and feel."**
