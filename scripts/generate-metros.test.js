@@ -271,6 +271,78 @@ test('renderMetro references all build-time INJECT directives', () => {
   assert.ok(html.includes('<!-- INJECT:weather-score-shared.js:script -->'));
 });
 
+test('renderMetro feeds parseFrontmatter + injectPartials into a valid final <head>', () => {
+  // Integration check: the old per-page tests asserted that the FINAL HTML
+  // (after head expansion) carried <link rel="canonical">, <title>, OG meta,
+  // etc. Now that those tags live in shared partials, generator-only tests
+  // would miss a regression in head-meta.html, head-og.html, or
+  // parseFrontmatter itself. This wires the whole pipeline against one metro
+  // and asserts the post-build head is correct.
+  const build = require('../build.js');
+  const partials = {};
+  for (const file of fs.readdirSync('_partials')) {
+    partials[file] = fs.readFileSync(path.join('_partials', file), 'utf8').trimEnd();
+  }
+  const metro = gen.METROS[0];
+  const src = gen.renderMetro(metro);
+  const fm = build.parseFrontmatter(src);
+  const out = build.injectPartials(fm.body, fm.vars, partials, metro.slug);
+
+  const canonical = 'https://pitmaster.tools/smoke-weather/' + metro.slug;
+  assert.ok(out.includes('<link rel="canonical" href="' + canonical + '">'),
+    'final canonical link missing from expanded head');
+  assert.ok(out.includes('<title>' + metro.name + ', ' + metro.state),
+    'final <title> missing from expanded head');
+  assert.ok(out.includes('<meta property="og:url" content="' + canonical + '">'),
+    'final og:url missing from expanded head');
+  assert.ok(out.includes('<meta property="og:title" content="' + metro.name + ', ' + metro.state),
+    'final og:title missing from expanded head');
+  // Header and footer partials expanded into real markup.
+  assert.ok(out.includes('aria-label="Site navigation"'),
+    'expanded site-header markup missing');
+  assert.ok(out.includes('id="cookieBanner"'),
+    'expanded cookie banner / footer markup missing');
+  // No unresolved {{TOKENS}} survived substitution.
+  assert.ok(!/\{\{[A-Z_]+\}\}/.test(out),
+    'unresolved {{TOKEN}} survived into expanded HTML');
+});
+
+test('renderMetro emits scripts in the expected load order', () => {
+  // site-footer-smoke.html injects site-utils.js + the initEmbedMode/
+  // initConsentBanner bootstrap + site-header.js, in that order. The per-page
+  // smoke-weather scripts (weather-score-shared.js → smoke-weather-app.js)
+  // are inlined after the footer. weather-score-shared.js exposes
+  // WeatherScore before smoke-weather-app.js's DOMContentLoaded init runs, so
+  // their order matters; lock that down with a positional assertion.
+  const html = gen.renderMetro(gen.METROS[0]);
+  const footerIdx  = html.indexOf('<!-- INJECT:site-footer-smoke.html -->');
+  const sharedIdx  = html.indexOf('<!-- INJECT:weather-score-shared.js:script -->');
+  const appIdx     = html.indexOf('<!-- INJECT:smoke-weather-app.js:script -->');
+  assert.ok(footerIdx > 0, 'site-footer-smoke.html INJECT missing');
+  assert.ok(footerIdx < sharedIdx,
+    'weather-score-shared.js must follow site-footer-smoke.html (which loads site-utils.js)');
+  assert.ok(sharedIdx < appIdx,
+    'smoke-weather-app.js must follow weather-score-shared.js');
+});
+
+test('LAST_MODIFIED ISO date in the generator matches site-footer-smoke.html display string', () => {
+  // The metro JSON-LD dateModified uses LAST_MODIFIED in ISO form (e.g.
+  // "2026-05-15"). site-footer-smoke.html hardcodes the same date as a
+  // display string (e.g. "May 15, 2026"). Bumping one without the other lets
+  // the date displayed on the page drift away from the date reported to
+  // search engines. This test catches that drift before merge.
+  const footer = fs.readFileSync(path.join('_partials', 'site-footer-smoke.html'), 'utf8');
+  const [y, m, d] = gen.LAST_MODIFIED.split('-').map(Number);
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  const expected = months[m - 1] + ' ' + d + ', ' + y;
+  assert.ok(footer.includes('Last updated: ' + expected),
+    'site-footer-smoke.html should display "Last updated: ' + expected
+      + '" to match generator LAST_MODIFIED=' + gen.LAST_MODIFIED);
+});
+
 test('every metro renders a body with at least 300 plain-text words (F16)', () => {
   for (const metro of gen.METROS) {
     const html = gen.renderMetro(metro);
