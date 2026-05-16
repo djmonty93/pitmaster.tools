@@ -18,8 +18,8 @@
  */
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { join, dirname, extname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join, dirname, extname, relative } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 // ── JSONC normalizer ────────────────────────────────────────────────────────
 export function stripJsonc(text) {
@@ -30,8 +30,15 @@ export function stripJsonc(text) {
 
 // ── XML balance parser ──────────────────────────────────────────────────────
 // Stream-tokenizes XML and verifies that every open tag has a matching close.
-// Handles <?prolog?>, <!--comments-->, <self-closing/>, and standard elements.
-// Returns null on success, or a string describing the first structural error.
+// Handles <?prolog?>, <!--comments-->, <![CDATA[...]]>, <self-closing/>, and
+// standard elements. Returns null on success or a string describing the first
+// structural error.
+//
+// Scope: well-quoted XML with no literal '>' inside attribute values. The
+// parser finds the tag end via indexOf('>'), so an attribute like
+// title="A > B" would be truncated mid-tag and produce a spurious mismatch.
+// Sitemap.xml has no such attributes; widen the parser only if this validator
+// is repointed at arbitrary XML.
 export function validateXmlBalance(text) {
   let i = 0;
   const stack = [];
@@ -88,8 +95,14 @@ export function findUnresolvedTokens(content) {
   return content.match(/\{\{[A-Z_]+\}\}/g) || [];
 }
 
+// Matches gtag('consent', 'default'...) and the double-quoted variant. The
+// project standard is single quotes today, but the gate must not silently
+// pass if a future page or partial uses double-quoted JS strings.
+const CONSENT_RE = /gtag\(\s*['"]consent['"]\s*,\s*['"]default['"]/;
+
 export function consentBeforeAnalytics(content) {
-  const consentIdx = content.indexOf("gtag('consent', 'default'");
+  const consentMatch = CONSENT_RE.exec(content);
+  const consentIdx = consentMatch ? consentMatch.index : -1;
   const analyticsIdx = ['googletagmanager.com', 'pagead2.googlesyndication']
     .map((needle) => content.indexOf(needle))
     .filter((idx) => idx >= 0)
@@ -229,7 +242,7 @@ export function discoverHtmlFiles(baseDir) {
       const full = join(dir, entry.name);
       if (entry.isDirectory()) walk(full);
       else if (entry.isFile() && entry.name.endsWith('.html')) {
-        out.push(full.slice(baseDir.length + 1).replace(/\\/g, '/'));
+        out.push(relative(baseDir, full).replace(/\\/g, '/'));
       }
     }
   }
@@ -328,6 +341,8 @@ function runScript() {
   console.log('\nAll validation checks passed.');
 }
 
-if (import.meta.url === `file://${process.argv[1]}` || import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'))) {
+// Run the script body only when invoked directly (not when imported as a
+// module). pathToFileURL handles Windows drive letters and spaces correctly.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   runScript();
 }

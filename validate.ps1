@@ -155,7 +155,10 @@ function Test-ConsentBeforeAnalytics {
   foreach ($path in $Paths) {
     $fullPath = Join-Path $BaseDirectory $path
     $content = Get-Content $fullPath -Raw
-    $consentIdx = $content.IndexOf("gtag('consent', 'default'")
+    # Match either single- or double-quoted JS string literals so a future
+    # double-quoted variant doesn't silently skip the ordering gate.
+    $consentMatch = [regex]::Match($content, "gtag\(\s*['""]consent['""]\s*,\s*['""]default['""]")
+    $consentIdx = if ($consentMatch.Success) { $consentMatch.Index } else { -1 }
     $analyticsIdx = @('googletagmanager.com', 'pagead2.googlesyndication') |
       ForEach-Object { $content.IndexOf($_) } |
       Where-Object { $_ -ge 0 } |
