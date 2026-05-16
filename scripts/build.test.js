@@ -54,6 +54,23 @@ test('parseFrontmatter — ignores frontmatter that is not at the very start', (
   assert.deepEqual(vars, {});
 });
 
+test('parseFrontmatter — allows a leading non-meta HTML comment before the meta block', () => {
+  // The metro generator emits a "<!-- generated:... -->" marker on line 1 and
+  // the meta block on line 2. parseFrontmatter must skip past the marker,
+  // parse the meta, strip only the meta comment, and pass the marker through
+  // to the body so it survives into dist for traceability and the sweep step.
+  const src = `<!-- generated:metro-page -->
+<!-- meta: title="Hello" -->
+<html>body</html>`;
+  const { vars, body } = parseFrontmatter(src);
+  assert.equal(vars.title, 'Hello');
+  assert.ok(body.startsWith('<!-- generated:metro-page -->'),
+    'generator marker must survive into body');
+  assert.ok(body.includes('<html>body</html>'));
+  assert.ok(!body.includes('<!-- meta:'),
+    'meta comment must be stripped from body');
+});
+
 test('substituteVars — replaces known tokens, leaves unknown ones', () => {
   const out = substituteVars('Hi {{TITLE}} / {{MYSTERY}}', { title: 'World' });
   assert.equal(out, 'Hi World / {{MYSTERY}}');

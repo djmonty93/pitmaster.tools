@@ -59,20 +59,30 @@ const STATIC_ASSETS = [
 
 // ── Frontmatter parsing ─────────────────────────────────────────────────────
 // Matches a leading "<!-- meta: ... -->" comment (whitespace-tolerant) at the
-// very top of the file. Returns the parsed key/value map plus the body with
-// the comment removed.
+// top of the file, optionally preceded by other HTML comments — e.g. the
+// "<!-- generated:... -->" marker the metro generator emits. Returns the
+// parsed key/value map plus the body with the meta comment removed (any
+// preceding comments pass through to the body so they survive into dist).
 //
 // Value escapes: KV_RE skips past any backslash-pair inside a value so the
 // captured group is the raw content. We then drop the backslash from \" and
 // \\ — those are the only two escapes a frontmatter author needs (literal
 // quote, literal backslash). Other escapes (\n, \t) survive as literal
 // two-character sequences since meta values don't carry control characters.
-const FRONTMATTER_RE = /^\s*<!--\s*meta:\s*([\s\S]*?)\s*-->\s*\r?\n?/;
+const NONMETA_COMMENT_RE = /^\s*<!--(?!\s*meta:)[\s\S]*?-->\s*/;
+const META_COMMENT_RE = /^\s*<!--\s*meta:\s*([\s\S]*?)\s*-->\s*\r?\n?/;
 const KV_RE = /(\w+)\s*=\s*"((?:\\.|[^"\\])*)"/g;
 const FRONTMATTER_UNESCAPE_RE = /\\(["\\])/g;
 
 function parseFrontmatter(html) {
-  var m = html.match(FRONTMATTER_RE);
+  var prefixLen = 0;
+  var rest = html;
+  var pre;
+  while ((pre = rest.match(NONMETA_COMMENT_RE)) !== null) {
+    prefixLen += pre[0].length;
+    rest = rest.slice(pre[0].length);
+  }
+  var m = rest.match(META_COMMENT_RE);
   if (!m) return { vars: {}, body: html };
   var vars = {};
   var kv;
@@ -80,7 +90,9 @@ function parseFrontmatter(html) {
   while ((kv = KV_RE.exec(m[1])) !== null) {
     vars[kv[1].toLowerCase()] = kv[2].replace(FRONTMATTER_UNESCAPE_RE, '$1');
   }
-  return { vars: vars, body: html.slice(m[0].length) };
+  var prefix = html.slice(0, prefixLen);
+  var afterMeta = rest.slice(m[0].length);
+  return { vars: vars, body: prefix + afterMeta };
 }
 
 // ── Variable substitution (scoped to partial bodies) ────────────────────────

@@ -190,10 +190,13 @@ test('renderMetro embeds canonical, title, description, and ZIP-prefilled input'
   for (const metro of gen.METROS) {
     const html = gen.renderMetro(metro);
     const canonical = 'https://pitmaster.tools/smoke-weather/' + metro.slug;
-    assert.ok(html.includes('<link rel="canonical" href="' + canonical + '">'),
-      metro.slug + ' canonical missing');
-    assert.ok(html.includes('<title>' + metro.name + ', ' + metro.state),
-      metro.slug + ' title missing metro name');
+    // canonical, title, description, og_title now live in the frontmatter
+    // <!-- meta: ... --> block; head-meta.html / head-og.html partials emit
+    // the final <title>/<link>/<meta> at build time via {{TOKEN}} substitution.
+    assert.ok(html.includes('canonical="' + canonical + '"'),
+      metro.slug + ' canonical missing from frontmatter');
+    assert.ok(html.includes('title="' + metro.name + ', ' + metro.state),
+      metro.slug + ' title missing metro name from frontmatter');
     assert.ok(html.includes('Best Smoke Days in ' + metro.name + ', ' + metro.state),
       metro.slug + ' h1 missing');
     assert.ok(html.includes('value="' + metro.zip + '"'),
@@ -248,15 +251,24 @@ test('every metro emits a 3-level BreadcrumbList (Home → Best Smoke Days → m
   }
 });
 
-test('renderMetro references all four build-time INJECT directives', () => {
+test('renderMetro references all build-time INJECT directives', () => {
   const html = gen.renderMetro(gen.METROS[0]);
+  // Head partials (meta/og/favicons/consent now come from shared HTML partials).
+  assert.ok(html.includes('<!-- INJECT:head-meta.html -->'));
+  assert.ok(html.includes('<!-- INJECT:head-og.html -->'));
+  assert.ok(html.includes('<!-- INJECT:head-favicons.html -->'));
+  assert.ok(html.includes('<!-- INJECT:consent-init.html -->'));
+  // CSS.
   assert.ok(html.includes('<!-- INJECT:site-header.css -->'));
   assert.ok(html.includes('<!-- INJECT:site-base.css -->'));
   assert.ok(html.includes('<!-- INJECT:smoke-weather.css -->'));
+  // Header + footer partials (site-utils.js + site-header.js + consent bootstrap
+  // are nested inside site-footer-smoke.html).
+  assert.ok(html.includes('<!-- INJECT:site-header-smoke.html -->'));
+  assert.ok(html.includes('<!-- INJECT:site-footer-smoke.html -->'));
+  // Per-page smoke-weather scripts (still inline alongside the footer partial).
   assert.ok(html.includes('<!-- INJECT:smoke-weather-app.js:script -->'));
-  assert.ok(html.includes('<!-- INJECT:site-utils.js:script -->'));
   assert.ok(html.includes('<!-- INJECT:weather-score-shared.js:script -->'));
-  assert.ok(html.includes('<!-- INJECT:site-header.js:script -->'));
 });
 
 test('every metro renders a body with at least 300 plain-text words (F16)', () => {
