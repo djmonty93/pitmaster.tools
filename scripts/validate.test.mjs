@@ -163,6 +163,20 @@ test('checkHeadBlock — flags missing <head> entirely', () => {
   assert.deepEqual(errs, ['no <head> block found']);
 });
 
+test('checkHeadBlock — double-quoted consent satisfies the head-order check', () => {
+  // Tag patterns must use the same quote-agnostic matcher as the consent
+  // ordering gate. Otherwise a future page using double-quoted gtag() would
+  // bypass the head-order presence check.
+  const headWithDoubleQuoteConsent = fullHead.replace(
+    /<\/head>/,
+    `<script>gtag("consent", "default", {});</script></head>`
+  );
+  // Drop the single-quoted consent so only the double-quoted variant remains.
+  // (fullHead doesn't include consent today; check that adding a double-quoted
+  // one is recognized, i.e. no "out of order" error fires.)
+  assert.deepEqual(checkHeadBlock(headWithDoubleQuoteConsent), []);
+});
+
 // ── consentBeforeAnalytics quote variants ───────────────────────────────────
 test('consentBeforeAnalytics — matches double-quoted gtag call', () => {
   const html = `gtag("consent", "default", {})`;

@@ -97,7 +97,9 @@ export function findUnresolvedTokens(content) {
 
 // Matches gtag('consent', 'default'...) and the double-quoted variant. The
 // project standard is single quotes today, but the gate must not silently
-// pass if a future page or partial uses double-quoted JS strings.
+// pass if a future page or partial uses double-quoted JS strings. Shared
+// with HEAD_TAG_PATTERNS['consent'] below so head-order detection uses
+// the exact same matcher.
 const CONSENT_RE = /gtag\(\s*['"]consent['"]\s*,\s*['"]default['"]/;
 
 export function consentBeforeAnalytics(content) {
@@ -139,7 +141,7 @@ const HEAD_TAG_PATTERNS = {
   'twitter:description':  /<meta\s+name="twitter:description"/,
   'twitter:image':        /<meta\s+name="twitter:image"/,
   'favicon':              /<link\s+rel="icon"\s+href=/,
-  'consent':              /gtag\('consent', 'default'/
+  'consent':              CONSENT_RE
 };
 
 // Expected ordering (only enforced for tags that are present).

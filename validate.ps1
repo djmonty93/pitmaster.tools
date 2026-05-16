@@ -201,7 +201,9 @@ function Test-HeadOrder {
     'twitter:description' = '<meta\s+name="twitter:description"'
     'twitter:image'       = '<meta\s+name="twitter:image"'
     'favicon'             = '<link\s+rel="icon"\s+href='
-    'consent'             = "gtag\('consent', 'default'"
+    # Quote-agnostic to match the consent-before-analytics gate above; a
+    # double-quoted gtag() call must not silently pass the head-order check.
+    'consent'             = "gtag\(\s*['""]consent['""]\s*,\s*['""]default['""]"
   }
   $universal = @('charset', 'viewport', 'title', 'description', 'canonical')
   $social    = @('og:title', 'og:description', 'og:type', 'og:url', 'og:image',
