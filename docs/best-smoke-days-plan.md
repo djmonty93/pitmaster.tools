@@ -2,7 +2,7 @@
 
 ## Status
 
-**Shipped 2026-05-15.** All 19 sequence steps merged to `main` across PRs #33–#51. v1 verification sweep green (see Step 19 in README). 22 features F1–F22 delivered; F17 weekly article cron, F18 BreadcrumbList schema, F19 seasonal pages, F20 NaN-score guard + microclimate disclaimer test, F21 Sentry + status page, F22 methodology + FAQ pages. Real editorial copy for `_src/seasonal/*.html` is the only follow-up Monty has on his plate; the placeholder content shipped is SEO-valid in the meantime.
+**Shipped 2026-05-15.** Steps 1–18 merged to `main` across PRs #33–#51; Step 19 is the current open PR (#52) completing the v1 documentation pass. 22 features F1–F22 delivered; F17 weekly article cron, F18 BreadcrumbList schema, F19 seasonal pages, F20 NaN-score guard + microclimate disclaimer test, F21 Sentry + status page, F22 methodology + FAQ pages. Real editorial copy for `_src/seasonal/*.html` is the only follow-up Monty has on his plate; the placeholder content shipped is SEO-valid in the meantime.
 
 ## Context
 
