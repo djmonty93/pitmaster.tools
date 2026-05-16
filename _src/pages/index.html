@@ -276,6 +276,7 @@
 .hero-forecast-card h2 { font-family: Georgia,serif; font-size: 1.25rem; margin: 0 0 .4rem; color: var(--amber-dark); }
 .hero-forecast-card p { margin: 0 0 .85rem; font-size: .95rem; line-height: 1.5; }
 .hero-forecast-card__form { display: flex; gap: .5rem; margin-bottom: .6rem; }
+.hero-forecast-card__form .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .hero-forecast-card__form input { flex: 1 1 0; min-width: 0; padding: .55rem .75rem; border: 1px solid var(--card-border); border-radius: 6px; font: inherit; }
 .hero-forecast-card__form input:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; border-color: var(--amber); }
 .hero-forecast-card__form button { padding: .55rem 1rem; background: var(--amber); color: #fff; border: none; border-radius: 6px; font-family: inherit; font-size: .9rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
@@ -306,7 +307,8 @@
       <h2>Best Smoke Days</h2>
       <p>7-day forecast scored for wind, humidity, and rain &mdash; see which day the weather is on your side.</p>
       <form class="hero-forecast-card__form" id="heroForecastForm" action="/smoke-weather/" method="get" autocomplete="off" novalidate>
-        <input type="text" id="heroZipInput" name="zip" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder="ZIP code" aria-label="ZIP code">
+        <label for="heroZipInput" class="visually-hidden">ZIP code</label>
+        <input type="text" id="heroZipInput" name="zip" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder="ZIP code">
         <button type="submit">Get forecast</button>
       </form>
       <p class="hero-forecast-card__alt"><a href="/smoke-weather/">Or browse 50+ US metros &rarr;</a></p>
