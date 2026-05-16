@@ -270,7 +270,7 @@
 .calc-btn--sm:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .resolve-result { margin-top: .5rem; font-size: .9rem; font-weight: 600; color: var(--charcoal); min-height: 1.4em; }
 .model-note { font-size: .8rem; color: var(--text-muted); line-height: 1.6; margin-top: 1.25rem; padding: .875rem 1rem; background: #FAFAF8; border: 1px solid var(--card-border); border-radius: var(--radius); }
-.hero-row { display: flex; gap: 1.5rem; align-items: stretch; flex-wrap: wrap; margin: 1.25rem 0 1.5rem; }
+.hero-row { display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap; margin: 1.25rem 0 1.5rem; }
 .hero-row > .page-hero { flex: 1 1 360px; margin: 0; }
 .hero-forecast-card { flex: 1 1 320px; padding: 1.25rem 1.5rem; background: rgba(255,180,80,.08); border: 1px solid var(--amber); border-radius: 12px; display: flex; flex-direction: column; justify-content: center; }
 .hero-forecast-card h2 { font-family: Georgia,serif; font-size: 1.25rem; margin: 0 0 .4rem; color: var(--amber-dark); }
@@ -279,8 +279,8 @@
 .hero-forecast-card__form .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .hero-forecast-card__form input { flex: 1 1 0; min-width: 0; padding: .55rem .75rem; border: 1px solid var(--card-border); border-radius: 6px; font: inherit; }
 .hero-forecast-card__form input:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; border-color: var(--amber); }
-.hero-forecast-card__form button { padding: .55rem 1rem; background: var(--amber); color: #fff; border: none; border-radius: 6px; font-family: inherit; font-size: .9rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
-.hero-forecast-card__form button:hover, .hero-forecast-card__form button:focus-visible { background: var(--amber-dark); outline: none; }
+.hero-forecast-card__btn { padding: .55rem 1rem; background: var(--amber); color: #fff; border: none; border-radius: 6px; font-family: inherit; font-size: .9rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.hero-forecast-card__btn:hover, .hero-forecast-card__btn:focus-visible { background: var(--amber-dark); outline: none; }
 .hero-forecast-card__alt { margin: 0; font-size: .85rem; }
 .hero-forecast-card__alt a { color: var(--amber-dark); text-decoration: underline; font-weight: 600; }
 .hero-forecast-card__alt a:hover { color: var(--charcoal); }
@@ -309,7 +309,7 @@
       <form class="hero-forecast-card__form" id="heroForecastForm" action="/smoke-weather/" method="get" autocomplete="off" novalidate>
         <label for="heroZipInput" class="visually-hidden">ZIP code</label>
         <input type="text" id="heroZipInput" name="zip" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder="ZIP code">
-        <button type="submit">Get forecast</button>
+        <button type="submit" class="hero-forecast-card__btn">Get forecast</button>
       </form>
       <p class="hero-forecast-card__alt"><a href="/smoke-weather/">Or browse 50+ US metros &rarr;</a></p>
     </aside>
