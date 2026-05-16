@@ -270,10 +270,20 @@
 .calc-btn--sm:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .resolve-result { margin-top: .5rem; font-size: .9rem; font-weight: 600; color: var(--charcoal); min-height: 1.4em; }
 .model-note { font-size: .8rem; color: var(--text-muted); line-height: 1.6; margin-top: 1.25rem; padding: .875rem 1rem; background: #FAFAF8; border: 1px solid var(--card-border); border-radius: var(--radius); }
-.hero-promo { margin: .75rem auto 1.25rem; padding: .75rem 1rem; max-width: 720px; border: 1px solid var(--amber); border-radius: 10px; background: rgba(255,180,80,.08); text-align: center; font-size: .95rem; }
-.hero-promo p { margin: 0; }
-.hero-promo a { color: var(--amber-dark); font-weight: 600; text-decoration: underline; }
-.hero-promo a:hover { color: var(--charcoal); }
+.hero-row { display: flex; gap: 1.5rem; align-items: stretch; flex-wrap: wrap; margin: 1.25rem 0 1.5rem; }
+.hero-row > .page-hero { flex: 1 1 360px; margin: 0; }
+.hero-forecast-card { flex: 1 1 320px; padding: 1.25rem 1.5rem; background: rgba(255,180,80,.08); border: 1px solid var(--amber); border-radius: 12px; display: flex; flex-direction: column; justify-content: center; }
+.hero-forecast-card h2 { font-family: Georgia,serif; font-size: 1.25rem; margin: 0 0 .4rem; color: var(--amber-dark); }
+.hero-forecast-card p { margin: 0 0 .85rem; font-size: .95rem; line-height: 1.5; }
+.hero-forecast-card__form { display: flex; gap: .5rem; margin-bottom: .6rem; }
+.hero-forecast-card__form input { flex: 1 1 0; min-width: 0; padding: .55rem .75rem; border: 1px solid var(--card-border); border-radius: 6px; font: inherit; }
+.hero-forecast-card__form input:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; border-color: var(--amber); }
+.hero-forecast-card__form button { padding: .55rem 1rem; background: var(--amber); color: #fff; border: none; border-radius: 6px; font-family: inherit; font-size: .9rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.hero-forecast-card__form button:hover, .hero-forecast-card__form button:focus-visible { background: var(--amber-dark); outline: none; }
+.hero-forecast-card__alt { margin: 0; font-size: .85rem; }
+.hero-forecast-card__alt a { color: var(--amber-dark); text-decoration: underline; font-weight: 600; }
+.hero-forecast-card__alt a:hover { color: var(--charcoal); }
+@media (max-width: 600px) { .hero-row { gap: 1rem; } .hero-forecast-card { padding: 1rem 1.1rem; } }
 </style>
 </head>
 <body>
@@ -286,14 +296,22 @@
     <div class="pm" id="pmeta"></div>
   </div>
 
-  <section class="page-hero" aria-label="Page introduction">
-    <h1>Meat Smoking Calculator</h1>
-    <p>Plan your brisket, pork butt, ribs, chicken, turkey, and more with a calculator that works backward from your serving time and gives you a cleaner smoking timeline.</p>
-  </section>
+  <div class="hero-row">
+    <section class="page-hero" aria-label="Page introduction">
+      <h1>Meat Smoking Calculator</h1>
+      <p>Plan your brisket, pork butt, ribs, chicken, turkey, and more with a calculator that works backward from your serving time and gives you a cleaner smoking timeline.</p>
+    </section>
 
-  <aside class="hero-promo" aria-label="Best Smoke Days forecast">
-    <p><strong>New:</strong> Check the <a href="/smoke-weather/">7-day smoke forecast</a> for your ZIP &mdash; wind, humidity, and temperature scored so you know which day to cook.</p>
-  </aside>
+    <aside class="hero-forecast-card" aria-label="Best Smoke Days forecast">
+      <h2>Best Smoke Days</h2>
+      <p>7-day forecast scored for wind, humidity, and rain &mdash; see which day the weather is on your side.</p>
+      <form class="hero-forecast-card__form" id="heroForecastForm" action="/smoke-weather/" method="get" autocomplete="off" novalidate>
+        <input type="text" id="heroZipInput" name="zip" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder="ZIP code" aria-label="ZIP code">
+        <button type="submit">Get forecast</button>
+      </form>
+      <p class="hero-forecast-card__alt"><a href="/smoke-weather/">Or browse 50+ US metros &rarr;</a></p>
+    </aside>
+  </div>
 
   <section id="calculator" aria-labelledby="calculator-title">
     <h2 class="calculator-section-title" id="calculator-title">Build your smoking timeline</h2>
@@ -1585,6 +1603,23 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
 })();
 </script>
 <!-- INJECT:site-header.js:script -->
+<script>
+(function () {
+  var form = document.getElementById('heroForecastForm');
+  if (!form) return;
+  form.addEventListener('submit', function (e) {
+    var input = document.getElementById('heroZipInput');
+    var zip = (input && input.value || '').trim();
+    if (/^\d{5}$/.test(zip)) {
+      try { localStorage.setItem('pitmaster_zip', zip); } catch (_) {}
+      e.preventDefault();
+      window.location.href = '/smoke-weather/';
+    }
+    // Otherwise let the form submit as GET to /smoke-weather/; the
+    // smoke page falls back to geo-IP or asks for a ZIP.
+  });
+})();
+</script>
 </body>
 </html>
 
