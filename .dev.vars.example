@@ -2,6 +2,7 @@
 # Copy to .dev.vars (gitignored) and fill in values when needed.
 
 # SENTRY_DSN=
+# SENTRY_ENVIRONMENT=production
 # MAILERLITE_API_KEY=
 # SUBSCRIBER_TOKEN_SECRET=
 # NWS_USER_AGENT=pitmaster.tools (contact@pitmaster.tools)

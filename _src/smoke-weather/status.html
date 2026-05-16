@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Status — Best Smoke Days | Pitmaster Tools</title>
+<meta name="description" content="Live operational status for the Pitmaster Tools Best Smoke Days subsystem — MailerLite retry queue depth, subscriber counts, and recent error events.">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="https://pitmaster.tools/smoke-weather/status">
+<meta property="og:title" content="System Status — Best Smoke Days">
+<meta property="og:description" content="Live operational status for the Pitmaster Tools Best Smoke Days subsystem.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://pitmaster.tools/smoke-weather/status">
+<meta property="og:image" content="https://pitmaster.tools/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pitmaster Tools - Free BBQ Calculators">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="System Status — Best Smoke Days">
+<meta name="twitter:description" content="Live operational status for the Pitmaster Tools Best Smoke Days subsystem.">
+<meta name="twitter:image" content="https://pitmaster.tools/og-image.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23EF9F27' d='M36 4c2 10-3 15-8 21-5 6-9 11-9 19 0 10 7 16 15 16 11 0 19-8 19-19 0-12-7-19-17-37z'/%3E%3Cpath fill='%23D78108' d='M33 27c1 6-2 9-5 12-3 3-5 6-5 10 0 6 4 10 9 10 7 0 12-5 12-12 0-7-4-11-11-20z'/%3E%3C/svg%3E">
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'analytics_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'wait_for_update': 500
+  });
+</script>
+<!-- INJECT:site-header.css -->
+<!-- INJECT:site-base.css -->
+<!-- INJECT:smoke-weather.css -->
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<header>
+  <a href="/" class="logo">Pitmaster<span> Tools</span></a>
+  <div class="header-right">
+  <nav class="header-nav" aria-label="Site navigation">
+    <div class="nav-dropdown">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="/tools">All Tools</a></li>
+        <li><a href="/">Meat Smoking Calculator</a></li>
+        <li><a href="/smoke-weather/">Best Smoke Days</a></li>
+        <li><a href="/brisket-calculator">Brisket Calculator</a></li>
+        <li><a href="/pork-shoulder-calculator">Pork Shoulder Calculator</a></li>
+        <li><a href="/rib-calculator">Rib Calculator</a></li>
+        <li><a href="/turkey-smoking-calculator">Turkey Calculator</a></li>
+        <li><a href="/meat-per-person">Meat Per Person</a></li>
+        <li><a href="/cook-time-coordinator">Cook Time Coordinator</a></li>
+        <li><a href="/charcoal-calculator">Charcoal Calculator</a></li>
+        <li><a href="/brine-calculator">Brine Calculator</a></li>
+        <li><a href="/dry-rub-calculator">Dry Rub Calculator</a></li>
+        <li><a href="/bbq-cost-calculator">BBQ Cost Calculator</a></li>
+        <li><a href="/catering-calculator">Catering Calculator</a></li>
+        <li><a href="/brisket-yield-calculator">Brisket Yield Calculator</a></li>
+      </ul>
+    </div>
+    <a href="/about">About</a>
+  </nav>
+  </div>
+</header>
+
+<main id="main-content">
+  <section class="page-hero" aria-label="Page introduction">
+    <h1>System Status</h1>
+    <p>Operational view of the Best Smoke Days backend. Refreshes on page load and includes MailerLite retry queue depth, subscriber counts, and the last ten redacted error events.</p>
+  </section>
+
+  <section class="form-card" aria-labelledby="status-live" id="status-section">
+    <h2 id="status-live">Live status</h2>
+    <p id="status-meta" class="sw-disclaimer">Loading status…</p>
+
+    <h3>MailerLite retry queue</h3>
+    <ul id="status-mailerlite">
+      <li>Queued rows: <span data-status-field="queuedRows">—</span></li>
+      <li>Parked rows: <span data-status-field="parkedRows">—</span></li>
+      <li>Next attempt at: <span data-status-field="nextAttemptAt">—</span></li>
+    </ul>
+
+    <h3>Subscribers</h3>
+    <ul id="status-subscribers">
+      <li>Total: <span data-status-field="subscribersTotal">—</span></li>
+      <li>Active: <span data-status-field="subscribersActive">—</span></li>
+    </ul>
+
+    <h3>Recent errors (last 10)</h3>
+    <ol id="status-errors">
+      <li>Loading…</li>
+    </ol>
+
+    <p class="sw-disclaimer">
+      This page reads from <code>/api/status</code> with <code>Cache-Control: no-store</code>. Error payloads are redacted at write time; emails and Bearer tokens never reach this view. For real-time alerting, Sentry receives unhandled errors from the same worker.
+    </p>
+  </section>
+</main>
+
+<script>
+  (function () {
+    'use strict';
+    function fmtEpoch(ms) {
+      if (typeof ms !== 'number' || !isFinite(ms)) return '—';
+      try {
+        return new Date(ms).toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+      } catch (_e) {
+        return '—';
+      }
+    }
+    function setText(selector, text) {
+      var el = document.querySelector(selector);
+      if (el) el.textContent = text;
+    }
+    function renderError(message) {
+      setText('#status-meta', 'Status unavailable: ' + message);
+      var list = document.getElementById('status-errors');
+      if (list) list.innerHTML = '<li>—</li>';
+    }
+    function renderOk(body) {
+      setText('#status-meta', 'Generated at ' + body.generatedAt);
+      setText('[data-status-field="queuedRows"]', String(body.mailerlite.queuedRows));
+      setText('[data-status-field="parkedRows"]', String(body.mailerlite.parkedRows));
+      setText('[data-status-field="nextAttemptAt"]', fmtEpoch(body.mailerlite.nextAttemptAt));
+      setText('[data-status-field="subscribersTotal"]', String(body.subscribers.total));
+      setText('[data-status-field="subscribersActive"]', String(body.subscribers.active));
+      var list = document.getElementById('status-errors');
+      if (!list) return;
+      list.innerHTML = '';
+      var errs = Array.isArray(body.recentErrors) ? body.recentErrors : [];
+      if (errs.length === 0) {
+        var none = document.createElement('li');
+        none.textContent = 'No recent errors.';
+        list.appendChild(none);
+        return;
+      }
+      errs.forEach(function (e) {
+        var li = document.createElement('li');
+        // textContent only — never innerHTML — so any odd character in
+        // a redacted summary can't ever break out into markup.
+        li.textContent = '#' + e.id + ' (' + fmtEpoch(e.createdAt) + ') — ' + e.summary;
+        list.appendChild(li);
+      });
+    }
+    fetch('/api/status', { cache: 'no-store', headers: { 'Accept': 'application/json' } })
+      .then(function (r) {
+        if (!r.ok) {
+          throw new Error('HTTP ' + r.status);
+        }
+        return r.json();
+      })
+      .then(renderOk)
+      .catch(function (err) {
+        renderError(err && err.message ? err.message : 'unknown error');
+      });
+  })();
+</script>
+
+<!-- Cookie consent banner -->
+<div class="cookie-banner" id="cookieBanner" role="dialog" aria-live="polite" aria-label="Cookie consent">
+  <div class="cookie-banner__inner">
+    <p class="cookie-banner__text">We use cookies for analytics and advertising. See our <a href="/privacy-policy">Privacy Policy</a> for details.</p>
+    <div class="cookie-banner__actions">
+      <button class="cookie-accept" id="cookieAccept" type="button">Accept</button>
+      <button class="cookie-reject" id="cookieReject" type="button">Reject</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>&#169; 2026 Pitmaster Tools. All rights reserved.</div>
+  <nav aria-label="Footer">
+    <a href="/">Calculator</a>
+    <span>|</span>
+    <a href="/tools">All Tools</a>
+    <span>|</span>
+    <a href="/privacy-policy">Privacy Policy</a>
+    <span>|</span>
+    <a href="/terms-of-service">Terms of Service</a>
+    <span>|</span>
+    <a href="mailto:contact@pitmaster.tools">contact@pitmaster.tools</a>
+  </nav>
+  <p class="footer-small">Last updated: May 15, 2026</p>
+</footer>
+
+<!-- INJECT:site-utils.js:script -->
+<!-- INJECT:site-header.js:script -->
+</body>
+</html>

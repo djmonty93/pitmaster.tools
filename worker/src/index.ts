@@ -1,7 +1,13 @@
 // Worker entry. Step 7 wires the router with /api/* + /articles/:slug
 // handlers. Anything that doesn't match a route (including HTML pages
 // served from dist/) falls through to env.ASSETS.fetch.
+//
+// Step 17 (F21) wraps the export with @sentry/cloudflare's withSentry()
+// so unhandled fetch + scheduled errors are captured. Options are built
+// by lib/observability/sentryOptions.ts; missing SENTRY_DSN keeps the
+// SDK disabled so dev / test environments never ship events.
 
+import { withSentry } from '@sentry/cloudflare';
 import { runFridayCron } from './crons/fridayEmail.js';
 import { runWeeklyArticleCron } from './crons/weeklyArticle.js';
 import { handleArticles } from './handlers/articles.js';
@@ -12,6 +18,7 @@ import { handleSubscribe } from './handlers/subscribe.js';
 import { handleUnsubscribe } from './handlers/unsubscribe.js';
 import { createMailerLiteClient } from './lib/mailerlite/client.js';
 import { drain } from './lib/mailerlite/retry.js';
+import { buildSentryOptions } from './lib/observability/sentryOptions.js';
 import { compileRoutes, dispatch, jsonError } from './router.js';
 
 export interface Env {
@@ -43,6 +50,18 @@ export interface Env {
   MAILERLITE_AUTOMATION_SOUTH_CENTRAL_ID?: string;
   MAILERLITE_AUTOMATION_MOUNTAIN_ID?: string;
   MAILERLITE_AUTOMATION_PACIFIC_ID?: string;
+  /**
+   * Sentry DSN (https://o<…>.ingest.sentry.io/<…>). Provisioned with
+   * `wrangler secret put SENTRY_DSN`. Empty / unset → SDK runs in
+   * disabled mode so dev and test environments never ship events.
+   */
+  SENTRY_DSN?: string;
+  /**
+   * Override for Sentry's environment tag. Defaults to "production"
+   * when unset; operators can flip a preview/staging deployment to a
+   * separate environment without code changes.
+   */
+  SENTRY_ENVIRONMENT?: string;
 }
 
 const routes = compileRoutes([
@@ -64,16 +83,16 @@ function handleHealth(): Response {
   });
 }
 
-export default {
+const handler = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     try {
       const matched = await dispatch(routes, request, env, ctx);
       if (matched) return matched;
       return env.ASSETS.fetch(request);
     } catch (err) {
-      // Last-line-of-defense 500. Sentry (Step 17) will hook this and
-      // capture properly; for now log + return a JSON envelope so the
-      // client doesn't get an opaque workerd error page.
+      // Last-line-of-defense 500. withSentry() captures the throw via
+      // instrumented fetch — we still emit a JSON envelope so the
+      // client doesn't see an opaque workerd error page.
       console.error('worker unhandled error', err);
       return jsonError(500, 'internal_error', 'An unexpected error occurred');
     }
@@ -113,3 +132,5 @@ export default {
     console.warn('scheduled: unrecognized cron expression', { cron: controller.cron });
   },
 } satisfies ExportedHandler<Env>;
+
+export default withSentry((env: Env) => buildSentryOptions(env), handler);
