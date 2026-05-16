@@ -92,13 +92,6 @@
 <!-- INJECT:site-base.css -->
 <style>
 .unit-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
-.form-group input[type="number"] {
-  border: 1.5px solid var(--card-border); border-radius: 6px; padding: .55rem .75rem; font-size: .95rem;
-  color: var(--charcoal); background: #FAFAF8; font-family: inherit; transition: border-color .15s;
-  width: 100%; appearance: none; -webkit-appearance: none;
-}
-.form-group input:focus:not(:focus-visible) { outline: none; border-color: var(--amber); background: #fff; }
-.form-group input:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; border-color: var(--amber); background: #fff; }
 .grade-toggle { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .5rem; }
 .grade-btn { border: 2px solid var(--card-border); border-radius: 8px; padding: .75rem .5rem; background: #FAFAF8; text-align: center; cursor: pointer; font-family: inherit; transition: border-color .15s, background .15s; }
 .grade-btn.active { border-color: var(--amber); background: var(--amber-light); }
@@ -131,8 +124,6 @@
 .yield-legend-dot.point { background: #854D0E; }
 .yield-legend-dot.loss { background: #D1D5DB; border: 1px solid #9CA3AF; }
 .shrink-summary { background: var(--amber-light); border: 1px solid #F5DDA0; border-radius: var(--radius); padding: 1rem 1.15rem; font-size: .95rem; color: #5C3D02; line-height: 1.65; margin-bottom: 1.5rem; }
-.editorial-section p + p, .editorial-section p + h3, .editorial-section h3 + p,
-.editorial-section ul + p, .editorial-section p + ul { margin-top: .9rem; }
 .editorial-section ul { padding-left: 1.25rem; margin-top: .5rem; }
 .editorial-section li + li { margin-top: .3rem; }
 .ref-table-wrap { overflow-x: auto; border: 1px solid var(--card-border); border-radius: var(--radius); background: #fff; box-shadow: var(--shadow); margin: 1rem 0; }
