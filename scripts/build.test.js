@@ -54,6 +54,52 @@ test('parseFrontmatter — ignores frontmatter that is not at the very start', (
   assert.deepEqual(vars, {});
 });
 
+test('parseFrontmatter — allows a leading non-meta HTML comment before the meta block', () => {
+  // The metro generator emits a "<!-- generated:... -->" marker on line 1 and
+  // the meta block on line 2. parseFrontmatter must skip past the marker,
+  // parse the meta, strip only the meta comment, and pass the marker through
+  // to the body so it survives into dist for traceability and the sweep step.
+  const src = `<!-- generated:metro-page -->
+<!-- meta: title="Hello" -->
+<html>body</html>`;
+  const { vars, body } = parseFrontmatter(src);
+  assert.equal(vars.title, 'Hello');
+  assert.ok(body.startsWith('<!-- generated:metro-page -->'),
+    'generator marker must survive into body');
+  assert.ok(body.includes('<html>body</html>'));
+  assert.ok(!body.includes('<!-- meta:'),
+    'meta comment must be stripped from body');
+});
+
+test('parseFrontmatter — allows multiple leading non-meta comments before the meta block', () => {
+  // Contract pinned: any number of leading non-meta HTML comments (license
+  // headers, generator markers, audit notes, etc.) may appear before the meta
+  // block. They all survive into the body; only the meta block is stripped.
+  // The parser stays intentionally generic — special-casing one marker would
+  // make this more brittle, not less.
+  const src = `<!-- license: MIT -->
+<!-- audit: 2026-05-15 -->
+<!-- meta: title="Multi" -->
+<html>body</html>`;
+  const { vars, body } = parseFrontmatter(src);
+  assert.equal(vars.title, 'Multi');
+  assert.ok(body.includes('<!-- license: MIT -->'));
+  assert.ok(body.includes('<!-- audit: 2026-05-15 -->'));
+  assert.ok(!body.includes('<!-- meta:'));
+});
+
+test('parseFrontmatter — still ignores a meta comment that follows non-comment content', () => {
+  // Confirms the loosened parser only walks leading HTML comments — DOCTYPE,
+  // plain text, or any non-comment markup still anchors the search, so a
+  // "<!-- meta: ... -->" sitting inside the page body cannot be mistaken for
+  // frontmatter.
+  const src = `<!-- generator -->
+<!DOCTYPE html>
+<!-- meta: title="Ignored" -->`;
+  const { vars } = parseFrontmatter(src);
+  assert.deepEqual(vars, {});
+});
+
 test('substituteVars — replaces known tokens, leaves unknown ones', () => {
   const out = substituteVars('Hi {{TITLE}} / {{MYSTERY}}', { title: 'World' });
   assert.equal(out, 'Hi World / {{MYSTERY}}');
