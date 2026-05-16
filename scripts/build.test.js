@@ -2,7 +2,9 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { parseFrontmatter, substituteVars, injectPartials } = require('../build.js');
+const {
+  parseFrontmatter, substituteVars, injectPartials, resolvePermalink
+} = require('../build.js');
 
 test('parseFrontmatter — extracts simple key/value pairs', () => {
   const src = `<!-- meta:
@@ -86,6 +88,122 @@ test('parseFrontmatter — allows multiple leading non-meta comments before the 
   assert.ok(body.includes('<!-- license: MIT -->'));
   assert.ok(body.includes('<!-- audit: 2026-05-15 -->'));
   assert.ok(!body.includes('<!-- meta:'));
+});
+
+test('parseFrontmatter — throws on unquoted assignment so malformed permalink cannot silently bypass validation', () => {
+  // Without this gate, `permalink=/bad.html` (no quotes) is dropped by KV_RE,
+  // vars.permalink stays unset, resolvePermalink falls back to the source path,
+  // and the entire `permalink` validation block (leading-slash, traversal,
+  // .html suffix, etc.) is silently skipped. Catching it at parse time fails
+  // loudly instead.
+  const src = `<!-- meta:
+  title="Hello"
+  permalink=/bad.html
+-->
+rest`;
+  assert.throws(
+    () => parseFrontmatter(src),
+    /Malformed frontmatter assignment "permalink=\.\.\."/
+  );
+});
+
+test('parseFrontmatter — throws on any malformed key, not just permalink', () => {
+  // The gate must catch malformed assignments for any frontmatter key — a
+  // permalink-only check would let a future required field silently disappear
+  // the same way. Pin that the validation is general.
+  const src = `<!-- meta: title=raw -->
+rest`;
+  assert.throws(
+    () => parseFrontmatter(src),
+    /Malformed frontmatter assignment "title=\.\.\."/
+  );
+});
+
+test('parseFrontmatter — throws on empty-value assignment (permalink=)', () => {
+  // A bare `key=` (no value at all) also skips KV_RE and would silently
+  // bypass downstream validation. The residue scan must catch it.
+  const src = `<!-- meta:
+  title="Hello"
+  permalink=
+-->
+rest`;
+  assert.throws(
+    () => parseFrontmatter(src),
+    /Malformed frontmatter assignment "permalink=\.\.\."/
+  );
+});
+
+test('parseFrontmatter — throws on hyphenated key (not-permalink="foo")', () => {
+  // Without anchoring KV_RE, `not-permalink="foo.html"` was partial-matched
+  // as `permalink="foo.html"`, leaving `not-` as residue. The old `\b\w+=`
+  // residue scan never fired (no = after the residue), so the partial-match
+  // silently parsed the wrong key. The anchored KV_RE refuses the partial
+  // and the trim-check residue scan catches the leftover token.
+  const src = `<!-- meta:
+  title="Hello"
+  not-permalink="foo.html"
+-->
+rest`;
+  assert.throws(
+    () => parseFrontmatter(src),
+    /Malformed frontmatter assignment "not-permalink=\.\.\."/
+  );
+});
+
+test('parseFrontmatter — throws on hyphenated prefix even when valid key follows (data-title="X")', () => {
+  // Same shape, different key — `data-title="X"` would have partial-matched
+  // as `title="X"` under the old regex.
+  const src = `<!-- meta: data-title="X" -->
+rest`;
+  assert.throws(
+    () => parseFrontmatter(src),
+    /Malformed frontmatter assignment "data-title=\.\.\."/
+  );
+});
+
+test('parseFrontmatter — throws on plain garbage in the meta block', () => {
+  // The trim-check residue scan also catches stray text that isn't an
+  // assignment at all — e.g. an author leaves a stray note inside the meta
+  // comment. Backstops every other gate.
+  const src = `<!-- meta:
+  title="Hello"
+  random stray text
+-->
+rest`;
+  assert.throws(
+    () => parseFrontmatter(src),
+    /Unparsed content in meta block/
+  );
+});
+
+test('parseFrontmatter — throws on unterminated quoted value', () => {
+  // KV_RE requires a closing double-quote; an unterminated value never
+  // matches, so the residue keeps the broken `key="...` and the scan must
+  // catch it.
+  const src = `<!-- meta:
+  title="Hello"
+  permalink="unterminated
+-->
+rest`;
+  assert.throws(
+    () => parseFrontmatter(src),
+    /Malformed frontmatter assignment "permalink=\.\.\."/
+  );
+});
+
+test('parseFrontmatter — allows whitespace and newlines in a well-formed meta block', () => {
+  // Sanity check: the residue scan must not false-positive on the whitespace
+  // and newlines that legitimately separate well-formed key="value" pairs.
+  const src = `<!-- meta:
+  title="Hello"
+  description="A page"
+  permalink="ok.html"
+-->
+rest`;
+  const { vars } = parseFrontmatter(src);
+  assert.equal(vars.title, 'Hello');
+  assert.equal(vars.description, 'A page');
+  assert.equal(vars.permalink, 'ok.html');
 });
 
 test('parseFrontmatter — still ignores a meta comment that follows non-comment content', () => {
@@ -185,4 +303,131 @@ test('injectPartials — throws on partial-inclusion cycle', () => {
   assert.throws(() => {
     injectPartials('<!-- INJECT:a.html -->', {}, partials, 'test.html');
   }, /INJECT depth exceeded/);
+});
+
+// ── resolvePermalink ────────────────────────────────────────────────────────
+
+test('resolvePermalink — without permalink, normalizes the source rel to forward slashes', () => {
+  // Windows source paths come in with backslashes; dist-relative paths must be
+  // forward-slashed regardless of platform so downstream string keys (collision
+  // map, validator output) are stable.
+  const rel = ['smoke-weather', 'index.html'].join(require('node:path').sep);
+  assert.equal(resolvePermalink(rel, {}, rel), 'smoke-weather/index.html');
+});
+
+test('resolvePermalink — passes through a flat .html source unchanged', () => {
+  assert.equal(resolvePermalink('about.html', {}, 'about.html'), 'about.html');
+});
+
+test('resolvePermalink — uses permalink when set, overriding source rel', () => {
+  assert.equal(
+    resolvePermalink('tools/brisket-calculator.html',
+      { permalink: 'brisket-calculator.html' }, 'tools/brisket-calculator.html'),
+    'brisket-calculator.html'
+  );
+});
+
+test('resolvePermalink — permalink with subdirectory survives', () => {
+  assert.equal(
+    resolvePermalink('legal/privacy.html',
+      { permalink: 'legal/privacy-policy.html' }, 'legal/privacy.html'),
+    'legal/privacy-policy.html'
+  );
+});
+
+test('resolvePermalink — normalizes backslashes in permalink to forward slashes', () => {
+  // An author writing a Windows-style path in frontmatter shouldn't break the
+  // dist tree on Linux CI. Backslashes are treated as separators.
+  assert.equal(
+    resolvePermalink('x.html', { permalink: 'a\\b.html' }, 'x.html'),
+    'a/b.html'
+  );
+});
+
+test('resolvePermalink — rejects leading slash', () => {
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: '/abs.html' }, 'x.html'),
+    /must not start with "\/"/
+  );
+});
+
+test('resolvePermalink — rejects leading backslash', () => {
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: '\\abs.html' }, 'x.html'),
+    /must not start with "\/"/
+  );
+});
+
+test('resolvePermalink — rejects ".." traversal', () => {
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: '../escape.html' }, 'x.html'),
+    /must not contain "\.\."/
+  );
+});
+
+test('resolvePermalink — rejects ".." segment anywhere in the path', () => {
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: 'a/../b.html' }, 'x.html'),
+    /must not contain "\.\."/
+  );
+});
+
+test('resolvePermalink — rejects empty segment from double slash (a//b.html)', () => {
+  // path.join collapses // to /, so a//b.html and a/b.html would both write to
+  // dist/a/b.html. Without this gate the collision check is bypassed.
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: 'a//b.html' }, 'x.html'),
+    /must not contain empty or "\." segments/
+  );
+});
+
+test('resolvePermalink — rejects "." segment (a/./b.html)', () => {
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: 'a/./b.html' }, 'x.html'),
+    /must not contain empty or "\." segments/
+  );
+});
+
+test('resolvePermalink — rejects trailing slash (empty final segment)', () => {
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: 'a/b/' }, 'x.html'),
+    /must not contain empty or "\." segments/
+  );
+});
+
+test('resolvePermalink — rejects "?" before .html suffix', () => {
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: 'foo?x.html' }, 'x.html'),
+    /must not contain "\?" or "#"/
+  );
+});
+
+test('resolvePermalink — rejects "?" after .html suffix', () => {
+  // Without the explicit ?/# gate this would slip past the endsWith check on
+  // Linux (literal "foo.html?x" filename) and crash at write time on Windows.
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: 'foo.html?x' }, 'x.html'),
+    /must not contain "\?" or "#"/
+  );
+});
+
+test('resolvePermalink — rejects "#"', () => {
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: 'foo#bar.html' }, 'x.html'),
+    /must not contain "\?" or "#"/
+  );
+});
+
+test('resolvePermalink — rejects non-.html extension', () => {
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: 'feed.xml' }, 'x.html'),
+    /must end with "\.html"/
+  );
+});
+
+test('resolvePermalink — rejects empty permalink', () => {
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: '   ' }, 'x.html'),
+    /must not be empty/
+  );
 });

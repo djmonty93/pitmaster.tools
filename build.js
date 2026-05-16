@@ -21,11 +21,18 @@
  *     robots="…"
  *     og_title="…"
  *     og_desc="…"
+ *     permalink="…"
  *   -->
  *
  * Frontmatter values are substituted into injected partial bodies only
  * (never the surrounding page body), via {{TITLE}} / {{DESCRIPTION}} /
  * {{CANONICAL}} / {{ROBOTS}} / {{OG_TITLE}} / {{OG_DESC}} tokens.
+ *
+ * The `permalink` value is a build directive (not a template token): when
+ * present it overrides the default `_src/<rel> → dist/<rel>` mapping so a
+ * source file can move under `_src/` without changing its public URL.
+ * Paths are forward-slashed, must end in `.html`, may not start with `/`,
+ * and may not contain `..`.
  *
  * Pure functions (parseFrontmatter, substituteVars, injectPartials) are
  * exported via module.exports so scripts/build.test.js can exercise them
@@ -71,8 +78,28 @@ const STATIC_ASSETS = [
 // two-character sequences since meta values don't carry control characters.
 const NONMETA_COMMENT_RE = /^\s*<!--(?!\s*meta:)[\s\S]*?-->\s*/;
 const META_COMMENT_RE = /^\s*<!--\s*meta:\s*([\s\S]*?)\s*-->\s*\r?\n?/;
-const KV_RE = /(\w+)\s*=\s*"((?:\\.|[^"\\])*)"/g;
+// Anchored: a recognized key must be preceded by start-of-string or whitespace,
+// never by another non-whitespace char. Without the lookbehind, KV_RE matched
+// `permalink="foo"` inside `not-permalink="foo"` (the hyphen is a \w boundary),
+// silently parsing the partial and dropping `not-` to the residue. A typoed
+// hyphenated key would then bypass validation by partial-match instead of
+// failing.
+const KV_RE = /(?<![^\s])(\w+)\s*=\s*"((?:\\.|[^"\\])*)"/g;
 const FRONTMATTER_UNESCAPE_RE = /\\(["\\])/g;
+
+// After stripping every recognized `key="value"` from a working copy of the
+// meta block, the only legitimate residue is whitespace. Any non-whitespace
+// content was either a malformed assignment or stray garbage — both must
+// fail loudly. This invariant catches every silent-bypass shape at once:
+//   - unquoted:        permalink=/bad.html
+//   - empty value:     permalink=
+//   - unterminated:    permalink="oops
+//   - hyphenated typo: not-permalink="foo"  (anchored KV_RE refuses to
+//                                            partial-match, residue keeps
+//                                            the full token)
+// RESIDUAL_KV_RE is the targeted pattern used to surface a useful key name
+// in the error; the trim-check below is the catch-all backstop.
+const RESIDUAL_KV_RE = /(\S+?)\s*=/;
 
 function parseFrontmatter(html) {
   var prefixLen = 0;
@@ -84,11 +111,31 @@ function parseFrontmatter(html) {
   }
   var m = rest.match(META_COMMENT_RE);
   if (!m) return { vars: {}, body: html };
+  var meta = m[1];
   var vars = {};
   var kv;
   KV_RE.lastIndex = 0;
-  while ((kv = KV_RE.exec(m[1])) !== null) {
+  // Strip each recognized `key="value"` from a working copy as we parse it.
+  // Anything that survives must be whitespace or a malformed assignment.
+  var residue = meta;
+  while ((kv = KV_RE.exec(meta)) !== null) {
     vars[kv[1].toLowerCase()] = kv[2].replace(FRONTMATTER_UNESCAPE_RE, '$1');
+    residue = residue.replace(kv[0], '');
+  }
+  if (residue.trim() !== '') {
+    // Prefer a "key=..." message if we can extract one; otherwise surface the
+    // raw garbage so the author can see exactly what didn't parse.
+    var malformed = residue.match(RESIDUAL_KV_RE);
+    if (malformed) {
+      throw new Error(
+        'Malformed frontmatter assignment "' + malformed[1] +
+        '=..." — keys must be unhyphenated identifiers and values must be ' +
+        'double-quoted, non-empty, and properly terminated'
+      );
+    }
+    throw new Error(
+      'Unparsed content in meta block: "' + residue.trim() + '"'
+    );
   }
   var prefix = html.slice(0, prefixLen);
   var afterMeta = rest.slice(m[0].length);
@@ -154,6 +201,53 @@ function injectPartials(html, vars, partials, sourceFile) {
   throw new Error('INJECT depth exceeded in ' + sourceFile + ' (likely a partial-inclusion cycle)');
 }
 
+// ── Permalink resolution ────────────────────────────────────────────────────
+// A `permalink` frontmatter value overrides the default `_src/<rel> → dist/<rel>`
+// mapping. Forward-slashed, must end in .html, no leading slash, no traversal,
+// no empty or "." segments (those collapse via path.join and break the
+// emitted-map collision check), and no URL syntax characters that would emit
+// platform-dependent filenames.
+// Returns the dist-relative path (forward-slashed) the file should be written to.
+function resolvePermalink(rel, vars, sourceFile) {
+  if (vars.permalink == null) {
+    return rel.split(path.sep).join('/');
+  }
+  var p = String(vars.permalink).trim();
+  if (p === '') {
+    throw new Error('permalink in ' + sourceFile + ' must not be empty');
+  }
+  if (p.startsWith('/') || p.startsWith('\\')) {
+    throw new Error('permalink in ' + sourceFile + ' must not start with "/" (got "' + p + '")');
+  }
+  // Reject URL-syntax characters before the .html suffix check: "foo.html?x"
+  // and "foo?x.html" both pass an endsWith test but emit literal-question-mark
+  // filenames on Linux and crash on write on Windows. Validation must be
+  // platform-agnostic.
+  if (/[?#]/.test(p)) {
+    throw new Error('permalink in ' + sourceFile + ' must not contain "?" or "#" (got "' + p + '")');
+  }
+  var segments = p.split(/[\\/]/);
+  for (var i = 0; i < segments.length; i++) {
+    var seg = segments[i];
+    if (seg === '..') {
+      throw new Error('permalink in ' + sourceFile + ' must not contain ".." (got "' + p + '")');
+    }
+    if (seg === '' || seg === '.') {
+      // Empty segments (a//b.html) and "." segments (a/./b.html) survive the
+      // string-key collision map but path.join normalizes them out, so two
+      // sources can write to the same dist path without tripping the collision
+      // check. Reject both.
+      throw new Error(
+        'permalink in ' + sourceFile + ' must not contain empty or "." segments (got "' + p + '")'
+      );
+    }
+  }
+  if (!p.endsWith('.html')) {
+    throw new Error('permalink in ' + sourceFile + ' must end with ".html" (got "' + p + '")');
+  }
+  return segments.join('/');
+}
+
 // ── Walk a directory recursively, yield relative .html paths ────────────────
 function listHtml(dir) {
   var out = [];
@@ -169,7 +263,9 @@ function listHtml(dir) {
 }
 
 // ── Exports for unit tests ──────────────────────────────────────────────────
-module.exports = { parseFrontmatter, substituteVars, injectPartials, listHtml };
+module.exports = {
+  parseFrontmatter, substituteVars, injectPartials, listHtml, resolvePermalink
+};
 
 // ── Script entry point (skipped when imported as a module) ──────────────────
 function runBuild() {
@@ -183,14 +279,37 @@ function runBuild() {
   fs.rmSync(DIST, { recursive: true, force: true });
   fs.mkdirSync(DIST, { recursive: true });
 
-  // Build HTML files
+  // Build HTML files. Track emitted dist-relative paths so two source files
+  // claiming the same permalink fail loudly instead of silently clobbering.
+  // Case-insensitive Windows filesystems would otherwise let "Foo.html" and
+  // "foo.html" pass the exact-match map and clobber on disk while emitting
+  // two distinct files on Linux CI — break dist parity across platforms.
+  // A secondary lowercase key catches that.
   var htmlFiles = listHtml(SRC);
+  var emitted = Object.create(null);
+  var emittedCi = Object.create(null);
   var built = 0;
   htmlFiles.forEach(function(srcPath) {
     var rel      = path.relative(SRC, srcPath);
-    var distPath = path.join(DIST, rel);
     var source   = fs.readFileSync(srcPath, 'utf8');
     var fm       = parseFrontmatter(source);
+    var distRel  = resolvePermalink(rel, fm.vars, rel);
+    if (emitted[distRel] != null) {
+      throw new Error(
+        'Permalink collision: both ' + emitted[distRel] + ' and ' + rel +
+        ' emit to dist/' + distRel
+      );
+    }
+    var ciKey = distRel.toLowerCase();
+    if (emittedCi[ciKey] != null && emittedCi[ciKey] !== distRel) {
+      throw new Error(
+        'Case-insensitive permalink collision: ' + emittedCi[ciKey] +
+        ' and ' + distRel + ' differ only in case (would clobber on Windows)'
+      );
+    }
+    emitted[distRel] = rel;
+    emittedCi[ciKey] = distRel;
+    var distPath = path.join(DIST, distRel);
     var output   = injectPartials(fm.body, fm.vars, partials, rel);
     fs.mkdirSync(path.dirname(distPath), { recursive: true });
     fs.writeFileSync(distPath, output);
