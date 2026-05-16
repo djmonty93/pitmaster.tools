@@ -90,6 +90,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
 .unit-toggle { display: flex; background: #333; border-radius: 20px; padding: 3px; gap: 2px; }
 .unit-toggle button { background: none; border: none; color: #aaa; font-size: .75rem; font-weight: 600; padding: 4px 10px; border-radius: 16px; cursor: pointer; transition: background .15s,color .15s; letter-spacing: .03em; }
 .unit-toggle button.active { background: var(--amber); color: #fff; }
+.unit-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 
 /* ----- Section headings & dividers ----- */
 .calculator-section-title { font-family: Georgia,serif; font-size: 1.45rem; margin-bottom: .75rem; }
@@ -159,6 +160,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
 }
 .calc-btn:hover { box-shadow: 0 12px 24px rgba(24,23,20,.16); }
 .calc-btn:active { transform: scale(.99); }
+.calc-btn:focus-visible { outline: 2px solid var(--amber-dark); outline-offset: 2px; }
 .vmsg { margin-top: .75rem; padding: .6rem .875rem; border-radius: 6px; font-size: .875rem; display: none; }
 .vmsg.error { background: #FDECEA; border: 1px solid #F5C6C1; color: #922B21; display: block; }
 .vmsg.warn { background: var(--yellow-warn); border: 1px solid var(--yellow-warn-border); color: #856404; display: block; }
@@ -214,6 +216,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
   line-height: 1;
   cursor: pointer;
 }
+.results-close:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 
 /* ----- Stat cards ----- */
 .stat-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 1.5rem; }
@@ -290,6 +293,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
 .faq-item summary { list-style: none; cursor: pointer; padding: 1rem 1.15rem; font-family: Georgia,serif; font-size: 1.2rem; font-weight: 700; }
 .faq-item summary::-webkit-details-marker { display: none; }
 .faq-item summary::after { content: '+'; float: right; font-size: 1rem; }
+.faq-item summary:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
 .faq-item[open] summary::after { content: '−'; }
 .faq-answer { padding: 0 1.15rem 1rem; }
 .faq-answer p + p { margin-top: .9rem; }
@@ -355,6 +359,7 @@ footer a:hover, footer a:focus-visible { text-decoration: underline; }
 .cookie-banner__actions button { border: 1px solid transparent; border-radius: 999px; padding: .7rem 1rem; font: inherit; font-weight: 700; cursor: pointer; }
 .cookie-accept { background: var(--amber); color: #fff; }
 .cookie-reject { background: transparent; border-color: rgba(255,255,255,.28); color: #fff; }
+.cookie-accept:focus-visible, .cookie-reject:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 
 /* ----- Responsive ----- */
 @media (max-width:640px) {
