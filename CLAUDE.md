@@ -27,6 +27,8 @@ Every HTML file must include **all** of the following in `<head>`, in this order
   gtag('consent', 'default', {
     'ad_storage': 'denied',
     'analytics_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
     'wait_for_update': 500
   });
 </script>
