@@ -49,19 +49,19 @@ const GENERATED_MARKER = '<!-- generated:best-smoke-days-metro -->';
  * across the OS check below (we normalize at compare time).
  */
 const EXEMPT_PAGES = new Set([
-  '_src/404.html',
-  '_src/privacy-policy.html',
-  '_src/terms-of-service.html',
+  '_src/pages/404.html',
+  '_src/legal/privacy-policy.html',
+  '_src/legal/terms-of-service.html',
   // FTC affiliate-disclosure page — Step 10 (#43). `noindex, follow`,
   // omitted from sitemap.xml, no tool functionality.
   '_src/smoke-weather/disclosures.html',
   // Editorial "About" page — legitimately uses Organization +
   // ContactPoint schema (organizational identity), not the tool-page
   // WebApplication + FAQPage pattern.
-  '_src/about.html',
+  '_src/pages/about.html',
   // Tools index / catalog page — emits ItemList + ListItem to describe
   // the collection of calculators, not a tool itself.
-  '_src/tools.html',
+  '_src/pages/tools.html',
   // Operational status page — Step 17 (F21). `noindex, follow`, reads
   // /api/status, surfaces MailerLite queue and recent errors. Not a
   // tool placement; no JSON-LD value for an operational dashboard.
@@ -174,12 +174,12 @@ test('exempt-page set matches the documented allowlist (no silent drift)', () =>
   // Pin the exemption count + names so an accidental addition stands out
   // in code review.
   assert.equal(EXEMPT_PAGES.size, 7);
-  assert.ok(EXEMPT_PAGES.has('_src/404.html'));
-  assert.ok(EXEMPT_PAGES.has('_src/privacy-policy.html'));
-  assert.ok(EXEMPT_PAGES.has('_src/terms-of-service.html'));
+  assert.ok(EXEMPT_PAGES.has('_src/pages/404.html'));
+  assert.ok(EXEMPT_PAGES.has('_src/legal/privacy-policy.html'));
+  assert.ok(EXEMPT_PAGES.has('_src/legal/terms-of-service.html'));
   assert.ok(EXEMPT_PAGES.has('_src/smoke-weather/disclosures.html'));
-  assert.ok(EXEMPT_PAGES.has('_src/about.html'));
-  assert.ok(EXEMPT_PAGES.has('_src/tools.html'));
+  assert.ok(EXEMPT_PAGES.has('_src/pages/about.html'));
+  assert.ok(EXEMPT_PAGES.has('_src/pages/tools.html'));
   assert.ok(EXEMPT_PAGES.has('_src/smoke-weather/status.html'));
 });
 
