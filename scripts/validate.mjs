@@ -31,14 +31,9 @@ export function stripJsonc(text) {
 // ── XML balance parser ──────────────────────────────────────────────────────
 // Stream-tokenizes XML and verifies that every open tag has a matching close.
 // Handles <?prolog?>, <!--comments-->, <![CDATA[...]]>, <self-closing/>, and
-// standard elements. Returns null on success or a string describing the first
-// structural error.
-//
-// Scope: well-quoted XML with no literal '>' inside attribute values. The
-// parser finds the tag end via indexOf('>'), so an attribute like
-// title="A > B" would be truncated mid-tag and produce a spurious mismatch.
-// Sitemap.xml has no such attributes; widen the parser only if this validator
-// is repointed at arbitrary XML.
+// standard elements. Skips over quoted attribute regions so a literal '>'
+// inside an attribute value doesn't end the tag prematurely. Returns null
+// on success or a string describing the first structural error.
 export function validateXmlBalance(text) {
   let i = 0;
   const stack = [];
@@ -64,8 +59,26 @@ export function validateXmlBalance(text) {
       i = end + 3;
       continue;
     }
-    const gt = text.indexOf('>', lt);
-    if (gt < 0) return `unterminated tag starting at offset ${lt}`;
+
+    // Find the matching '>' that closes this tag, skipping past any '>'
+    // that appears inside a "double-quoted" or 'single-quoted' attribute
+    // value. Without this, <a title="A > B"> would terminate at the
+    // attribute '>' and produce a spurious mismatch.
+    let j = lt + 1;
+    let inQuote = null;
+    while (j < len) {
+      const ch = text[j];
+      if (inQuote) {
+        if (ch === inQuote) inQuote = null;
+      } else if (ch === '"' || ch === "'") {
+        inQuote = ch;
+      } else if (ch === '>') {
+        break;
+      }
+      j++;
+    }
+    if (j >= len) return `unterminated tag starting at offset ${lt}`;
+    const gt = j;
     const tag = text.slice(lt + 1, gt);
     if (tag.startsWith('/')) {
       const name = tag.slice(1).trim().split(/\s+/)[0];
@@ -193,7 +206,10 @@ export function checkHeadBlock(content, { isMinimalPage = false } = {}) {
 
 // ── Link resolution (filesystem-aware) ──────────────────────────────────────
 
-const HREF_SRC_RE = /<[^>\r\n]+\b(?:href|src)="([^"]+)"/g;
+// Matches href/src attributes with single OR double quotes. The captured
+// group is always the URL value; we use a backreference so quote characters
+// must match (no mixing).
+const HREF_SRC_RE = /<[^>\r\n]+\b(?:href|src)=(["'])([^"']+)\1/g;
 
 export function resolveLocalLink(target, fullPath, baseDir) {
   if (/^(https?:\/\/|mailto:|data:|#)/.test(target)) return { skip: true };
@@ -220,8 +236,10 @@ export function findBrokenLocalLinks(content, fullPath, baseDir) {
   HREF_SRC_RE.lastIndex = 0;
   let m;
   while ((m = HREF_SRC_RE.exec(content)) !== null) {
-    const r = resolveLocalLink(m[1], fullPath, baseDir);
-    if (!r.skip && !r.exists) broken.push(m[1]);
+    // m[1] is the quote character (captured for backref); m[2] is the URL.
+    const target = m[2];
+    const r = resolveLocalLink(target, fullPath, baseDir);
+    if (!r.skip && !r.exists) broken.push(target);
   }
   return broken;
 }
@@ -253,8 +271,12 @@ export function discoverHtmlFiles(baseDir) {
 }
 
 function runScript() {
+  // Derive repoRoot from the script's own location rather than process.cwd(),
+  // so `node scripts/validate.mjs` works regardless of where it's invoked from.
+  // dist/ always lives at repoRoot/dist.
   const __filename = fileURLToPath(import.meta.url);
-  const repoRoot = dirname(dirname(__filename));
+  const scriptsDir = dirname(__filename);
+  const repoRoot = dirname(scriptsDir);
   const distRoot = join(repoRoot, 'dist');
   const errors = [];
   const addError = (msg) => errors.push(msg);

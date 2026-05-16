@@ -30,6 +30,23 @@ rest`;
   assert.equal(vars.title, 'A "quoted" name');
 });
 
+test('parseFrontmatter — literal backslash escape \\\\ is unescaped', () => {
+  const src = `<!-- meta: path="C:\\\\Users\\\\file" -->
+rest`;
+  const { vars } = parseFrontmatter(src);
+  assert.equal(vars.path, 'C:\\Users\\file');
+});
+
+test('parseFrontmatter — other escape sequences pass through literally', () => {
+  // \n and \t aren't recognized escapes; they survive as the literal two-
+  // character sequences backslash-n and backslash-t (meta values don't
+  // contain control characters).
+  const src = `<!-- meta: title="line\\none\\ttwo" -->
+rest`;
+  const { vars } = parseFrontmatter(src);
+  assert.equal(vars.title, 'line\\none\\ttwo');
+});
+
 test('parseFrontmatter — ignores frontmatter that is not at the very start', () => {
   const src = `<!DOCTYPE html>
 <!-- meta: title="X" -->`;

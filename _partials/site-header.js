@@ -91,12 +91,20 @@
   // aria-current="page", and tag any containing nav-dropdown trigger with
   // .is-current. Lets shared partials stay static — pages don't need to
   // hand-mark their own location in the nav.
+  //
+  // markActiveLinks() runs once on script load (which is at end-of-body via
+  // INJECT:site-header.js:script, so the DOM is fully parsed). It does NOT
+  // re-run on history.pushState or hash changes; if the site ever adds
+  // client-side routing, this needs to wire up a popstate/click handler that
+  // re-invokes it after each navigation.
   function normalizePath(p) {
     if (!p) return '/';
-    // Strip trailing slash so '/about/' and '/about' match, and treat the
-    // clean-URL form ('/about') as equivalent to the .html form ('/about.html').
+    // Strip trailing slash so '/about/' and '/about' match. Strip .html so
+    // the clean-URL form ('/about') matches '/about.html'. Strip a trailing
+    // '/index' so '/smoke-weather/index.html' matches '/smoke-weather/'.
     var clean = p.replace(/\/$/, '') || '/';
     if (clean.endsWith('.html')) clean = clean.slice(0, -5);
+    if (clean.endsWith('/index')) clean = clean.slice(0, -6) || '/';
     return clean;
   }
 
