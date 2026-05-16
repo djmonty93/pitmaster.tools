@@ -578,23 +578,6 @@
   </section>
 </main>
 
-<footer>
-  <div style="font-family:Georgia,serif;font-size:1.1rem;font-weight:700;color:var(--amber);">Pitmaster Tools</div>
-  <nav aria-label="Footer navigation">
-    <a href="/">Calculator</a>
-    <span>|</span>
-    <a href="tools">All Tools</a>
-    <span>|</span>
-    <a href="privacy-policy">Privacy Policy</a>
-    <span>|</span>
-    <a href="terms-of-service">Terms</a>
-  </nav>
-  <div class="footer-small">
-    &copy; <span id="fyear"></span> Pitmaster Tools. For entertainment and planning purposes. Always verify doneness with a calibrated thermometer.
-    <br>Contact: <a href="mailto:contact@pitmaster.tools" style="color:var(--amber);">contact@pitmaster.tools</a>
-  </div>
-</footer>
-
 <!-- INJECT:site-footer-tool.html -->
 <!-- INJECT:smoke-physics.js:script -->
 <script>
@@ -1063,9 +1046,6 @@
     resultEl.textContent = r.error ? r.error : 'Estimated time remaining: ' + spFmtHrs(r.remainingH);
   }
   window.resolveNow = resolveNow;
-
-  /* ---- Footer year ---- */
-  document.getElementById('fyear').textContent = new Date().getFullYear();
 
   /* ---- Init ---- */
   initUnits();
