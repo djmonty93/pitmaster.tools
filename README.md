@@ -347,6 +347,25 @@ verified, and rolled back independently.
   carries the `sw-disclaimer` wrapper and the required text fragments
   ("microclimate", "step outside"). Catches accidental removal during
   refactors. Chained from `test:scripts`.
+- **Step 17.** Status page + Sentry (F21). Two pieces:
+  (1) **Sentry wrapper.** The worker entry now exports through
+  `withSentry()` from `@sentry/cloudflare`. Options are built by
+  `worker/src/lib/observability/sentryOptions.ts`. Policy: missing
+  `SENTRY_DSN` keeps the SDK disabled so dev / test / CI never ship
+  events; `SENTRY_ENVIRONMENT` defaults to `production`;
+  `tracesSampleRate` is pinned at 0.1 (free-tier compromise). 6
+  vitest specs in `tests/unit/observability/sentryOptions.test.ts`
+  pin the disabled-without-DSN guarantee, the environment override,
+  and the sample-rate constant.
+  (2) **Status page.** New `_src/smoke-weather/status.html` (`noindex,
+  follow`) reads `/api/status` on load and renders MailerLite retry
+  queue depth, subscriber counts, and the last 10 redacted error
+  events. Pure client JS, `textContent`-only DOM updates so any odd
+  character in a redacted summary can't escape into markup. Added to
+  the schema-validator EXEMPT_PAGES set (operational dashboard, not a
+  tool placement); sitemap entry uses `monthly` changefreq and 0.4
+  priority. Provision the DSN via
+  `wrangler secret put SENTRY_DSN` (free hobby project on Sentry).
 
 ## DNS setup — MailerLite sending domain
 

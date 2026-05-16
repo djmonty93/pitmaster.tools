@@ -62,6 +62,10 @@ const EXEMPT_PAGES = new Set([
   // Tools index / catalog page — emits ItemList + ListItem to describe
   // the collection of calculators, not a tool itself.
   '_src/tools.html',
+  // Operational status page — Step 17 (F21). `noindex, follow`, reads
+  // /api/status, surfaces MailerLite queue and recent errors. Not a
+  // tool placement; no JSON-LD value for an operational dashboard.
+  '_src/smoke-weather/status.html',
 ]);
 
 function listHtmlRecursive(dir) {
@@ -169,13 +173,14 @@ test('every non-exempt _src/**.html carries the CLAUDE.md JSON-LD shape', () => 
 test('exempt-page set matches the documented allowlist (no silent drift)', () => {
   // Pin the exemption count + names so an accidental addition stands out
   // in code review.
-  assert.equal(EXEMPT_PAGES.size, 6);
+  assert.equal(EXEMPT_PAGES.size, 7);
   assert.ok(EXEMPT_PAGES.has('_src/404.html'));
   assert.ok(EXEMPT_PAGES.has('_src/privacy-policy.html'));
   assert.ok(EXEMPT_PAGES.has('_src/terms-of-service.html'));
   assert.ok(EXEMPT_PAGES.has('_src/smoke-weather/disclosures.html'));
   assert.ok(EXEMPT_PAGES.has('_src/about.html'));
   assert.ok(EXEMPT_PAGES.has('_src/tools.html'));
+  assert.ok(EXEMPT_PAGES.has('_src/smoke-weather/status.html'));
 });
 
 test('generated metro pages carry a valid 3-level BreadcrumbList', () => {
