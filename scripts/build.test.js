@@ -103,7 +103,7 @@ test('parseFrontmatter — throws on unquoted assignment so malformed permalink 
 rest`;
   assert.throws(
     () => parseFrontmatter(src),
-    /Malformed frontmatter assignment "permalink=\.\.\." — values must be double-quoted/
+    /Malformed frontmatter assignment "permalink=\.\.\."/
   );
 });
 
@@ -130,6 +130,49 @@ rest`;
   assert.throws(
     () => parseFrontmatter(src),
     /Malformed frontmatter assignment "permalink=\.\.\."/
+  );
+});
+
+test('parseFrontmatter — throws on hyphenated key (not-permalink="foo")', () => {
+  // Without anchoring KV_RE, `not-permalink="foo.html"` was partial-matched
+  // as `permalink="foo.html"`, leaving `not-` as residue. The old `\b\w+=`
+  // residue scan never fired (no = after the residue), so the partial-match
+  // silently parsed the wrong key. The anchored KV_RE refuses the partial
+  // and the trim-check residue scan catches the leftover token.
+  const src = `<!-- meta:
+  title="Hello"
+  not-permalink="foo.html"
+-->
+rest`;
+  assert.throws(
+    () => parseFrontmatter(src),
+    /Malformed frontmatter assignment "not-permalink=\.\.\."/
+  );
+});
+
+test('parseFrontmatter — throws on hyphenated prefix even when valid key follows (data-title="X")', () => {
+  // Same shape, different key — `data-title="X"` would have partial-matched
+  // as `title="X"` under the old regex.
+  const src = `<!-- meta: data-title="X" -->
+rest`;
+  assert.throws(
+    () => parseFrontmatter(src),
+    /Malformed frontmatter assignment "data-title=\.\.\."/
+  );
+});
+
+test('parseFrontmatter — throws on plain garbage in the meta block', () => {
+  // The trim-check residue scan also catches stray text that isn't an
+  // assignment at all — e.g. an author leaves a stray note inside the meta
+  // comment. Backstops every other gate.
+  const src = `<!-- meta:
+  title="Hello"
+  random stray text
+-->
+rest`;
+  assert.throws(
+    () => parseFrontmatter(src),
+    /Unparsed content in meta block/
   );
 });
 

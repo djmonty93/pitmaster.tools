@@ -78,19 +78,28 @@ const STATIC_ASSETS = [
 // two-character sequences since meta values don't carry control characters.
 const NONMETA_COMMENT_RE = /^\s*<!--(?!\s*meta:)[\s\S]*?-->\s*/;
 const META_COMMENT_RE = /^\s*<!--\s*meta:\s*([\s\S]*?)\s*-->\s*\r?\n?/;
-const KV_RE = /(\w+)\s*=\s*"((?:\\.|[^"\\])*)"/g;
+// Anchored: a recognized key must be preceded by start-of-string or whitespace,
+// never by another non-whitespace char. Without the lookbehind, KV_RE matched
+// `permalink="foo"` inside `not-permalink="foo"` (the hyphen is a \w boundary),
+// silently parsing the partial and dropping `not-` to the residue. A typoed
+// hyphenated key would then bypass validation by partial-match instead of
+// failing.
+const KV_RE = /(?<![^\s])(\w+)\s*=\s*"((?:\\.|[^"\\])*)"/g;
 const FRONTMATTER_UNESCAPE_RE = /\\(["\\])/g;
 
 // After stripping every recognized `key="value"` from a working copy of the
-// meta block, anything matching `\bkey\s*=` is by definition a malformed
-// assignment. This shape catches all three silent-bypass patterns at once:
-//   - unquoted:     permalink=/bad.html
-//   - empty value:  permalink=
-//   - unterminated: permalink="oops
-// All three skip KV_RE so vars.permalink stays unset and resolvePermalink
-// falls back to the source path — the entire permalink-validation block
-// would otherwise be silently skipped. Fail loudly at parse time instead.
-const RESIDUAL_KV_RE = /\b(\w+)\s*=/;
+// meta block, the only legitimate residue is whitespace. Any non-whitespace
+// content was either a malformed assignment or stray garbage — both must
+// fail loudly. This invariant catches every silent-bypass shape at once:
+//   - unquoted:        permalink=/bad.html
+//   - empty value:     permalink=
+//   - unterminated:    permalink="oops
+//   - hyphenated typo: not-permalink="foo"  (anchored KV_RE refuses to
+//                                            partial-match, residue keeps
+//                                            the full token)
+// RESIDUAL_KV_RE is the targeted pattern used to surface a useful key name
+// in the error; the trim-check below is the catch-all backstop.
+const RESIDUAL_KV_RE = /(\S+?)\s*=/;
 
 function parseFrontmatter(html) {
   var prefixLen = 0;
@@ -113,11 +122,19 @@ function parseFrontmatter(html) {
     vars[kv[1].toLowerCase()] = kv[2].replace(FRONTMATTER_UNESCAPE_RE, '$1');
     residue = residue.replace(kv[0], '');
   }
-  var malformed = residue.match(RESIDUAL_KV_RE);
-  if (malformed) {
+  if (residue.trim() !== '') {
+    // Prefer a "key=..." message if we can extract one; otherwise surface the
+    // raw garbage so the author can see exactly what didn't parse.
+    var malformed = residue.match(RESIDUAL_KV_RE);
+    if (malformed) {
+      throw new Error(
+        'Malformed frontmatter assignment "' + malformed[1] +
+        '=..." — keys must be unhyphenated identifiers and values must be ' +
+        'double-quoted, non-empty, and properly terminated'
+      );
+    }
     throw new Error(
-      'Malformed frontmatter assignment "' + malformed[1] +
-      '=..." — values must be double-quoted, non-empty, and properly terminated'
+      'Unparsed content in meta block: "' + residue.trim() + '"'
     );
   }
   var prefix = html.slice(0, prefixLen);
