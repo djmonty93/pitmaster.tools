@@ -270,6 +270,10 @@
 .calc-btn--sm:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .resolve-result { margin-top: .5rem; font-size: .9rem; font-weight: 600; color: var(--charcoal); min-height: 1.4em; }
 .model-note { font-size: .8rem; color: var(--text-muted); line-height: 1.6; margin-top: 1.25rem; padding: .875rem 1rem; background: #FAFAF8; border: 1px solid var(--card-border); border-radius: var(--radius); }
+.hero-promo { margin: .75rem auto 1.25rem; padding: .75rem 1rem; max-width: 720px; border: 1px solid var(--amber); border-radius: 10px; background: rgba(255,180,80,.08); text-align: center; font-size: .95rem; }
+.hero-promo p { margin: 0; }
+.hero-promo a { color: var(--amber-dark); font-weight: 600; text-decoration: underline; }
+.hero-promo a:hover { color: var(--charcoal); }
 </style>
 </head>
 <body>
@@ -286,6 +290,10 @@
     <h1>Meat Smoking Calculator</h1>
     <p>Plan your brisket, pork butt, ribs, chicken, turkey, and more with a calculator that works backward from your serving time and gives you a cleaner smoking timeline.</p>
   </section>
+
+  <aside class="hero-promo" aria-label="Best Smoke Days forecast">
+    <p><strong>New:</strong> Check the <a href="/smoke-weather/">7-day smoke forecast</a> for your ZIP &mdash; wind, humidity, and temperature scored so you know which day to cook.</p>
+  </aside>
 
   <section id="calculator" aria-labelledby="calculator-title">
     <h2 class="calculator-section-title" id="calculator-title">Build your smoking timeline</h2>
@@ -724,6 +732,13 @@
         </div>
       </details>
     </div>
+  </section>
+
+  <section class="editorial-section" aria-labelledby="smoke-forecast-title">
+    <h2 id="smoke-forecast-title">Pick the right day to cook</h2>
+    <p>The calculator above tells you when to start once the cook is on the calendar. The weather tells you whether the calendar was a good choice. Wind strips heat off the pit and burns through fuel. Humidity slows bark formation. Cold ambient temperatures stretch every cook time. A 30&deg;F windy day and a 70&deg;F still day are not the same brisket.</p>
+    <p>The <a href="/smoke-weather/">Best Smoke Days forecast</a> scores the next seven days for wind, humidity, temperature, and rain at your ZIP code so you know which day the weather is on your side. There are pre-built pages for 50+ US metros &mdash; see, for example, <a href="/smoke-weather/austin-tx">Austin, TX</a> &mdash; or enter any ZIP for an instant local forecast.</p>
+    <p><a class="tool-card__link" href="/smoke-weather/">Open the 7-day smoke forecast</a></p>
   </section>
 
   <div class="ad-slot">
