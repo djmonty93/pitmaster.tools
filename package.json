@@ -8,7 +8,7 @@
     "dev:worker": "wrangler dev",
     "deploy": "wrangler deploy",
     "test": "npm run test:scripts && vitest run --root worker",
-    "test:scripts": "node --test scripts/generate-metros.test.js scripts/validate-schema.test.js scripts/validate-disclaimers.test.js",
+    "test:scripts": "node --test scripts/generate-metros.test.js scripts/validate-schema.test.js scripts/validate-disclaimers.test.js scripts/build.test.js scripts/validate.test.mjs",
     "test:watch": "vitest --root worker",
     "test:e2e": "playwright test",
     "browser:smoke": "playwright test",

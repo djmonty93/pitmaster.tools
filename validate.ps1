@@ -132,9 +132,10 @@ function Test-UnresolvedTokens {
 
   foreach ($path in $Paths) {
     $fullPath = Join-Path $BaseDirectory $path
-    $matches = Select-String -Path $fullPath -Pattern '\{\{[A-Z_]+\}\}'
-    if ($matches) {
-      foreach ($m in $matches) {
+    # Renamed from $matches to avoid shadowing the automatic variable.
+    $tokenMatches = Select-String -Path $fullPath -Pattern '\{\{[A-Z_]+\}\}'
+    if ($tokenMatches) {
+      foreach ($m in $tokenMatches) {
         Add-Error("Unresolved {{token}} in ${path}: $($m.Line.Trim())")
       }
     } else {
@@ -154,12 +155,13 @@ function Test-ConsentBeforeAnalytics {
   foreach ($path in $Paths) {
     $fullPath = Join-Path $BaseDirectory $path
     $content = Get-Content $fullPath -Raw
-    $consentIdx  = $content.IndexOf("gtag('consent', 'default'")
-    $analyticsIdx = [Math]::Min(
-      ($content.IndexOf('googletagmanager.com') + [int]($content.IndexOf('googletagmanager.com') -lt 0) * [int]::MaxValue),
-      ($content.IndexOf('pagead2.googlesyndication') + [int]($content.IndexOf('pagead2.googlesyndication') -lt 0) * [int]::MaxValue)
-    )
-    if ($consentIdx -ge 0 -and $analyticsIdx -lt [int]::MaxValue -and $analyticsIdx -lt $consentIdx) {
+    $consentIdx = $content.IndexOf("gtag('consent', 'default'")
+    $analyticsIdx = @('googletagmanager.com', 'pagead2.googlesyndication') |
+      ForEach-Object { $content.IndexOf($_) } |
+      Where-Object { $_ -ge 0 } |
+      Sort-Object |
+      Select-Object -First 1
+    if ($consentIdx -ge 0 -and $null -ne $analyticsIdx -and $analyticsIdx -lt $consentIdx) {
       Add-Error("Consent default must precede analytics loader in ${path}")
     } else {
       Write-Host "OK CON  $path"
@@ -168,33 +170,47 @@ function Test-ConsentBeforeAnalytics {
 }
 
 function Test-HeadOrder {
-  # Enforces the ordered head block required by CLAUDE.md: each present tag
-  # must appear in the expected sequence. Missing tags are skipped (so minimal
-  # pages like 404.html don't trip the check); only mis-ordering fails.
+  # Enforces the ordered head block required by CLAUDE.md. Three layers:
+  #  1. Universal presence — every page must carry charset, viewport, title,
+  #     description, canonical (no page is allowed to ship without them).
+  #  2. Social presence — every non-minimal page must carry OG + Twitter tags.
+  #     404.html is the only exempted minimal page today.
+  #  3. Ordering — present tags must appear in the canonical sequence.
   param(
     [string]$BaseDirectory,
     [string[]]$Paths
   )
 
-  $expectedTags = @(
-    @{ name = 'charset';       pattern = '<meta\s+charset=' },
-    @{ name = 'viewport';      pattern = '<meta\s+name="viewport"' },
-    @{ name = 'title';         pattern = '<title>' },
-    @{ name = 'description';   pattern = '<meta\s+name="description"' },
-    @{ name = 'robots';        pattern = '<meta\s+name="robots"' },
-    @{ name = 'canonical';     pattern = '<link\s+rel="canonical"' },
-    @{ name = 'og:title';      pattern = '<meta\s+property="og:title"' },
-    @{ name = 'og:description';pattern = '<meta\s+property="og:description"' },
-    @{ name = 'og:type';       pattern = '<meta\s+property="og:type"' },
-    @{ name = 'og:url';        pattern = '<meta\s+property="og:url"' },
-    @{ name = 'og:image';      pattern = '<meta\s+property="og:image"' },
-    @{ name = 'twitter:card';  pattern = '<meta\s+name="twitter:card"' },
-    @{ name = 'twitter:title'; pattern = '<meta\s+name="twitter:title"' },
-    @{ name = 'twitter:description'; pattern = '<meta\s+name="twitter:description"' },
-    @{ name = 'twitter:image'; pattern = '<meta\s+name="twitter:image"' },
-    @{ name = 'favicon';       pattern = '<link\s+rel="icon"\s+href=' },
-    @{ name = 'consent';       pattern = "gtag\('consent', 'default'" }
+  $tagPatterns = @{
+    'charset'             = '<meta\s+charset='
+    'viewport'            = '<meta\s+name="viewport"'
+    'title'               = '<title>'
+    'description'         = '<meta\s+name="description"'
+    'robots'              = '<meta\s+name="robots"'
+    'canonical'           = '<link\s+rel="canonical"'
+    'og:title'            = '<meta\s+property="og:title"'
+    'og:description'      = '<meta\s+property="og:description"'
+    'og:type'             = '<meta\s+property="og:type"'
+    'og:url'              = '<meta\s+property="og:url"'
+    'og:image'            = '<meta\s+property="og:image"'
+    'twitter:card'        = '<meta\s+name="twitter:card"'
+    'twitter:title'       = '<meta\s+name="twitter:title"'
+    'twitter:description' = '<meta\s+name="twitter:description"'
+    'twitter:image'       = '<meta\s+name="twitter:image"'
+    'favicon'             = '<link\s+rel="icon"\s+href='
+    'consent'             = "gtag\('consent', 'default'"
+  }
+  $universal = @('charset', 'viewport', 'title', 'description', 'canonical')
+  $social    = @('og:title', 'og:description', 'og:type', 'og:url', 'og:image',
+                 'twitter:card', 'twitter:title', 'twitter:description', 'twitter:image')
+  $orderedTags = @(
+    'charset', 'viewport', 'title', 'description', 'robots', 'canonical',
+    'og:title', 'og:description', 'og:type', 'og:url', 'og:image',
+    'twitter:card', 'twitter:title', 'twitter:description', 'twitter:image',
+    'favicon', 'consent'
   )
+  # Minimal pages don't carry social metadata. Keep this list small and explicit.
+  $minimalPages = @('404.html')
 
   foreach ($path in $Paths) {
     $fullPath = Join-Path $BaseDirectory $path
@@ -205,20 +221,39 @@ function Test-HeadOrder {
       continue
     }
     $head = $headMatch.Groups[1].Value
+    $pageOk = $true
 
+    # Presence: universal
+    foreach ($name in $universal) {
+      if ($head -notmatch $tagPatterns[$name]) {
+        Add-Error("Missing required head tag '$name' in ${path}")
+        $pageOk = $false
+      }
+    }
+    # Presence: social (non-minimal only)
+    $isMinimal = $minimalPages -contains $path
+    if (-not $isMinimal) {
+      foreach ($name in $social) {
+        if ($head -notmatch $tagPatterns[$name]) {
+          Add-Error("Missing required head tag '$name' in ${path}")
+          $pageOk = $false
+        }
+      }
+    }
+
+    # Ordering
     $lastIdx = -1
     $lastName = '(start)'
-    $pageOk = $true
-    foreach ($tag in $expectedTags) {
-      $m = [regex]::Match($head, $tag.pattern)
+    foreach ($name in $orderedTags) {
+      $m = [regex]::Match($head, $tagPatterns[$name])
       if (-not $m.Success) { continue }
       if ($m.Index -lt $lastIdx) {
-        Add-Error("Head tag out of order in ${path}: '$($tag.name)' appears before '$lastName'")
+        Add-Error("Head tag out of order in ${path}: '$name' appears before '$lastName'")
         $pageOk = $false
         break
       }
       $lastIdx = $m.Index
-      $lastName = $tag.name
+      $lastName = $name
     }
     if ($pageOk) { Write-Host "OK HEAD $path" }
   }

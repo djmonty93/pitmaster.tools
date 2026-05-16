@@ -27,6 +27,11 @@
  * (never the surrounding page body), via {{TITLE}} / {{DESCRIPTION}} /
  * {{CANONICAL}} / {{ROBOTS}} / {{OG_TITLE}} / {{OG_DESC}} tokens.
  *
+ * Pure functions (parseFrontmatter, substituteVars, injectPartials) are
+ * exported via module.exports so scripts/build.test.js can exercise them
+ * without touching the filesystem. The script body at the bottom runs only
+ * when this file is invoked directly.
+ *
  * Usage: node build.js
  * No npm dependencies required.
  */
@@ -45,12 +50,6 @@ const STATIC_ASSETS = [
   'favicon.ico', 'robots.txt', 'sitemap.xml', 'ads.txt',
   '_headers', '_redirects', 'og-image.png', 'llms.txt',
 ];
-
-// ── Load partials ───────────────────────────────────────────────────────────
-const partials = {};
-fs.readdirSync(PARTIALS).forEach(function(file) {
-  partials[file] = fs.readFileSync(path.join(PARTIALS, file), 'utf8').trimEnd();
-});
 
 // ── Frontmatter parsing ─────────────────────────────────────────────────────
 // Matches a leading "<!-- meta: ... -->" comment (whitespace-tolerant) at the
@@ -72,6 +71,9 @@ function parseFrontmatter(html) {
 }
 
 // ── Variable substitution (scoped to partial bodies) ────────────────────────
+// Frontmatter values are treated as trusted (they come from repo-controlled
+// _src/ files, never user input) and are emitted verbatim — no HTML escaping.
+// Don't pipe untrusted data through this function.
 const TOKEN_RE = /\{\{([A-Z_]+)\}\}/g;
 
 function substituteVars(content, vars) {
@@ -88,13 +90,16 @@ function substituteVars(content, vars) {
 
 // ── Inject partials into HTML ────────────────────────────────────────────────
 // Runs passes until no INJECT placeholders remain, so HTML partials may
-// themselves reference further partials. Caps depth to prevent infinite loops.
+// themselves reference further partials. MAX_PASSES caps recursion depth to
+// catch partial-include cycles (an A.html that injects B.html that injects
+// A.html). Today the deepest legitimate chain is 1, so any value above 2 is
+// safety margin; 8 is generous without being absurd.
 const INJECT_RE = /<!--\s*INJECT:([^\s:>]+)(:script)?\s*-->/g;
 const MAX_PASSES = 8;
 
-function injectPartials(html, vars, sourceFile) {
+function injectPartials(html, vars, partials, sourceFile) {
   for (var pass = 0; pass < MAX_PASSES; pass++) {
-    if (!INJECT_RE.test(html)) return html;
+    if (!html.includes('<!-- INJECT:')) return html;
     INJECT_RE.lastIndex = 0;
     html = html.replace(INJECT_RE, function(match, name, isScript) {
       var content = partials[name];
@@ -110,7 +115,7 @@ function injectPartials(html, vars, sourceFile) {
   throw new Error('INJECT depth exceeded in ' + sourceFile + ' (likely a partial-inclusion cycle)');
 }
 
-// ── Walk _src/ recursively, yield relative .html paths ──────────────────────
+// ── Walk a directory recursively, yield relative .html paths ────────────────
 function listHtml(dir) {
   var out = [];
   fs.readdirSync(dir, { withFileTypes: true }).forEach(function(entry) {
@@ -124,11 +129,23 @@ function listHtml(dir) {
   return out;
 }
 
-// ── Recreate dist/ from a clean slate ───────────────────────────────────────
+// ── Exports for unit tests ──────────────────────────────────────────────────
+module.exports = { parseFrontmatter, substituteVars, injectPartials, listHtml };
+
+// ── Script entry point (skipped when imported as a module) ──────────────────
+if (require.main !== module) return;
+
+// Load partials from _partials/
+const partials = {};
+fs.readdirSync(PARTIALS).forEach(function(file) {
+  partials[file] = fs.readFileSync(path.join(PARTIALS, file), 'utf8').trimEnd();
+});
+
+// Recreate dist/ from a clean slate
 fs.rmSync(DIST, { recursive: true, force: true });
 fs.mkdirSync(DIST, { recursive: true });
 
-// ── Build HTML files ─────────────────────────────────────────────────────────
+// Build HTML files
 var htmlFiles = listHtml(SRC);
 var built = 0;
 htmlFiles.forEach(function(srcPath) {
@@ -136,14 +153,14 @@ htmlFiles.forEach(function(srcPath) {
   var distPath = path.join(DIST, rel);
   var source   = fs.readFileSync(srcPath, 'utf8');
   var fm       = parseFrontmatter(source);
-  var output   = injectPartials(fm.body, fm.vars, rel);
+  var output   = injectPartials(fm.body, fm.vars, partials, rel);
   fs.mkdirSync(path.dirname(distPath), { recursive: true });
   fs.writeFileSync(distPath, output);
   built++;
 });
 console.log('Built ' + built + ' HTML files → ' + DIST + '/');
 
-// ── Copy static assets ───────────────────────────────────────────────────────
+// Copy static assets
 var copied = 0;
 STATIC_ASSETS.forEach(function(file) {
   if (fs.existsSync(file)) {
