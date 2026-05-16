@@ -366,6 +366,25 @@ verified, and rolled back independently.
   tool placement); sitemap entry uses `monthly` changefreq and 0.4
   priority. Provision the DSN via
   `wrangler secret put SENTRY_DSN` (free hobby project on Sentry).
+- **Step 18.** Methodology + FAQ pages (F22). Two new static HTML
+  files under `_src/smoke-weather/`:
+  - `methodology.html` — explains the 0-100 score calculation
+    (five weather signals, wet-bulb stall model, cooker-specific
+    wind sensitivity, data sources, confidence labels). 6 FAQ
+    entries in JSON-LD cover the most common methodology questions
+    so they're eligible for Google rich results.
+  - `faq.html` — 8 user-facing FAQ entries on cost, signup,
+    score swings, supported cuts/cookers, international coverage,
+    unsubscribe, and data handling.
+  Both pages carry full CLAUDE.md head + WebApplication +
+  FAQPage + BreadcrumbList JSON-LD and pass the Step 14 schema
+  validator without exemption.
+  Plan said "link from the footer block" — done by extending
+  `scripts/generate-metros.js` footer template with Methodology +
+  FAQ + Disclosures links, which propagates to all 50 metro pages
+  on next regeneration. `/smoke-weather/index.html` footer updated by
+  hand. Both new pages cross-link to each other, to disclosures, and
+  to the verdict landing. Sitemap entries at 0.6 priority.
 
 ## DNS setup — MailerLite sending domain
 

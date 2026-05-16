@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Methodology — Best Smoke Days | Pitmaster Tools</title>
+<meta name="description" content="How the Best Smoke Days score is calculated — the five weather signals, the wet-bulb stall model, cooker-specific wind sensitivity, and the data sources Pitmaster Tools uses.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://pitmaster.tools/smoke-weather/methodology">
+<meta property="og:title" content="Methodology — Best Smoke Days">
+<meta property="og:description" content="How the Best Smoke Days score is calculated — five weather signals, wet-bulb stall modeling, cooker-specific wind sensitivity, and data sources.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://pitmaster.tools/smoke-weather/methodology">
+<meta property="og:image" content="https://pitmaster.tools/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pitmaster Tools - Free BBQ Calculators">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Methodology — Best Smoke Days">
+<meta name="twitter:description" content="How the Best Smoke Days score is calculated.">
+<meta name="twitter:image" content="https://pitmaster.tools/og-image.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23EF9F27' d='M36 4c2 10-3 15-8 21-5 6-9 11-9 19 0 10 7 16 15 16 11 0 19-8 19-19 0-12-7-19-17-37z'/%3E%3Cpath fill='%23D78108' d='M33 27c1 6-2 9-5 12-3 3-5 6-5 10 0 6 4 10 9 10 7 0 12-5 12-12 0-7-4-11-11-20z'/%3E%3C/svg%3E">
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'analytics_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'wait_for_update': 500
+  });
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Pitmaster Tools — Best Smoke Days Methodology",
+  "url": "https://pitmaster.tools/smoke-weather/methodology",
+  "description": "How the Best Smoke Days score is calculated — five weather signals, wet-bulb stall modeling, cooker-specific wind sensitivity, and data sources.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "isAccessibleForFree": true,
+  "browserRequirements": "Requires JavaScript enabled in a modern browser.",
+  "dateModified": "2026-05-15",
+  "featureList": [
+    "Open-Meteo primary forecast source with NWS failover",
+    "Wet-bulb stall-risk modeling using Stull 2011 formula",
+    "Cooker-specific wind sensitivity coefficient",
+    "Cut-aware stall weighting",
+    "Day-by-day confidence labels"
+  ],
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Where does the weather data come from?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Pitmaster Tools uses the Open-Meteo API as the primary forecast source. If Open-Meteo is unavailable or returns malformed data, the worker fails over to the US National Weather Service (api.weather.gov). Both sources are airport-grade — they don't see your specific yard's microclimate. The day's confidence label drops from high to medium to low as the forecast horizon grows."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How is the 0-100 score calculated?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "We start at 100 and subtract penalties for five weather signals: precipitation (probability × accumulation, up to 50 points), wind / gusts (scaled by cooker sensitivity, up to 30 points after the coefficient), cold mornings (below 40 °F low, up to 20 points), hot afternoons (above 85 °F high, up to 25 points), and stall risk for stall-sensitive cuts (wet-bulb-driven, up to 20 points). The remaining score lands in one of four bands: red (under 50), yellow (50-69), green (70-84), or ideal (85+)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is wet-bulb temperature and why does it matter?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Wet-bulb temperature is the lowest temperature evaporation can cool a wet surface down to. It's a function of air temperature and humidity. For a low-and-slow cook, the meat's surface evaporates moisture and is cooled by it — this is the source of the stall plateau around 150-165 °F. We compute the wet-bulb inside the cooker cavity using the Stull 2011 closed-form formula and adjust it for the cooker's baseline RH (offset is dry, electric is humid). Higher cavity wet-bulb means a longer stall."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does cooker type affect the score?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Different cookers respond differently to weather. An offset stick burner's fire is exposed to wind and shifts pit temperature with every gust — we apply a 1.5× wind sensitivity coefficient. An electric smoker doesn't notice wind at all (0.1×). A kamado is well-insulated but holds high humidity (25% RH baseline) so its stall pattern is different from an offset's (4% RH baseline). The score weighs both effects."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is the score the same for every cut?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. The stall-risk penalty only applies to stall-sensitive cuts: brisket flat, brisket packer, pork butt, spare ribs, baby back ribs, and lamb shoulder. Quick cuts like chicken thighs, spatchcock chicken, fish, or pork loin don't sit in the stall band long enough for evaporative cooling to dominate, so the same humid day scores worse for brisket than it does for chicken."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How accurate is the forecast?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "We pull from professional-grade sources, but every forecast carries uncertainty that grows with the horizon. The day index gets a confidence label — high for the next 24-48 hours, dropping to medium and then low further out. Treat the day-5 through day-7 end of the window as a planning signal, not a commitment. Also: the airport-grade forecast doesn't model your yard's trees, structures, or elevation. Step outside before lighting the fire."
+      }
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://pitmaster.tools/" },
+    { "@type": "ListItem", "position": 2, "name": "Best Smoke Days", "item": "https://pitmaster.tools/smoke-weather/" },
+    { "@type": "ListItem", "position": 3, "name": "Methodology", "item": "https://pitmaster.tools/smoke-weather/methodology" }
+  ]
+}
+</script>
+<!-- INJECT:site-header.css -->
+<!-- INJECT:site-base.css -->
+<!-- INJECT:smoke-weather.css -->
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<header>
+  <a href="/" class="logo">Pitmaster<span> Tools</span></a>
+  <div class="header-right">
+  <nav class="header-nav" aria-label="Site navigation">
+    <div class="nav-dropdown">
+      <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
+      <ul class="nav-dropdown__menu" id="tools-menu" role="list">
+        <li><a href="/tools">All Tools</a></li>
+        <li><a href="/">Meat Smoking Calculator</a></li>
+        <li><a href="/smoke-weather/">Best Smoke Days</a></li>
+        <li><a href="/brisket-calculator">Brisket Calculator</a></li>
+        <li><a href="/pork-shoulder-calculator">Pork Shoulder Calculator</a></li>
+        <li><a href="/rib-calculator">Rib Calculator</a></li>
+        <li><a href="/turkey-smoking-calculator">Turkey Calculator</a></li>
+        <li><a href="/meat-per-person">Meat Per Person</a></li>
+        <li><a href="/cook-time-coordinator">Cook Time Coordinator</a></li>
+        <li><a href="/charcoal-calculator">Charcoal Calculator</a></li>
+        <li><a href="/brine-calculator">Brine Calculator</a></li>
+        <li><a href="/dry-rub-calculator">Dry Rub Calculator</a></li>
+        <li><a href="/bbq-cost-calculator">BBQ Cost Calculator</a></li>
+        <li><a href="/catering-calculator">Catering Calculator</a></li>
+        <li><a href="/brisket-yield-calculator">Brisket Yield Calculator</a></li>
+      </ul>
+    </div>
+    <a href="/about">About</a>
+  </nav>
+  </div>
+</header>
+
+<main id="main-content">
+  <section class="page-hero" aria-label="Page introduction">
+    <h1>Best Smoke Days — Methodology</h1>
+    <p>How the 0-100 smoke score is calculated. Five weather signals, a wet-bulb stall model, cooker-specific wind sensitivity, and full transparency on the data sources.</p>
+  </section>
+
+  <section class="form-card" aria-labelledby="data-sources">
+    <h2 id="data-sources">Data sources</h2>
+    <p>
+      Forecasts are pulled from <a href="https://open-meteo.com/" rel="noopener" target="_blank">Open-Meteo</a> as the
+      primary source, with the <a href="https://www.weather.gov/" rel="noopener" target="_blank">US National Weather
+      Service</a> as failover. The worker tries Open-Meteo first; if Open-Meteo returns 5xx, times out, or sends
+      malformed JSON, the request fails over to NWS within the same fetch cycle. Successful Open-Meteo responses
+      are cached in Cloudflare KV with a 30-minute freshness window and a 6-hour stale-while-error window — so a
+      brief upstream outage doesn't blank the forecast.
+    </p>
+    <p>
+      Both sources are airport-grade. They don't see your yard's trees, structures, or elevation. Step outside
+      before lighting the fire — the score is a planning signal, not a ground truth.
+    </p>
+
+    <h2 id="signals">The five scoring signals</h2>
+    <ol>
+      <li><strong>Precipitation (up to 50 points).</strong> Probability times accumulation. 90% rain + 0.5″ accumulation costs the full 50 points so the day lands in the red band on its own.</li>
+      <li><strong>Wind and gusts (scaled by cooker sensitivity).</strong> Effective gust = reported gust if present, otherwise sustained wind × 1.4 (CONUS inland gust factor). Penalty grows linearly from 10 mph and caps at 35 mph. Coefficient: offset 1.5×, pellet 1.0×, kettle 1.2×, kamado 0.5×, electric 0.1×.</li>
+      <li><strong>Cold mornings (up to 20 points).</strong> Penalty starts below 40 °F low and reaches full at 10 °F. Catches the days where startup is hard and fuel rate explodes.</li>
+      <li><strong>Hot afternoons (up to 25 points).</strong> Penalty starts above 85 °F high and reaches full above 110 °F (the danger-zone end of the operating range).</li>
+      <li><strong>Stall risk (up to 20 points, stall-sensitive cuts only).</strong> Computes the wet-bulb temperature inside the cooker cavity using the Stull 2011 formula. Maps wet-bulb 110 °F → 160 °F to 0–100% stall risk; applies as a penalty for brisket flat, brisket packer, pork butt, spare ribs, baby back ribs, and lamb shoulder.</li>
+    </ol>
+
+    <h2 id="bands">The four bands</h2>
+    <ul>
+      <li><strong>Ideal (85-100).</strong> Light the fire.</li>
+      <li><strong>Green (70-84).</strong> Solid cook conditions with one or two minor caveats.</li>
+      <li><strong>Yellow (50-69).</strong> Cook is workable but requires attention — wind, humidity, or temperature are pushing the edges.</li>
+      <li><strong>Red (0-49).</strong> Pick a different day if you can.</li>
+    </ul>
+
+    <h2 id="confidence">Confidence labels</h2>
+    <p>
+      Each day in the 7-day window carries a confidence label that reflects the forecast horizon, not the score:
+      <strong>high</strong> for the next 24-48 hours, <strong>medium</strong> for days 3-4, <strong>low</strong> for days 5-7. The
+      label is a forecast-uncertainty signal — a high-confidence red day is more reliable bad news than a
+      low-confidence ideal day is reliable good news.
+    </p>
+
+    <h2 id="open-source">Open-source guarantees</h2>
+    <p>
+      The scoring engine lives in <code>packages/shared/src/scoring.ts</code> and is mirrored to
+      <code>_partials/weather-score-shared.js</code> so the browser computes the same score the server does. A
+      parity test runs both implementations on identical fixtures and asserts byte-for-byte agreement; if either
+      side drifts, CI fails. The repository is at
+      <a href="https://github.com/djmonty93/pitmaster.tools" rel="noopener" target="_blank">github.com/djmonty93/pitmaster.tools</a>.
+    </p>
+
+    <p>
+      Have a question this page doesn't answer? See the <a href="/smoke-weather/faq">FAQ</a> or
+      <a href="/smoke-weather/disclosures">affiliate disclosures</a>.
+    </p>
+  </section>
+</main>
+
+<!-- Cookie consent banner -->
+<div class="cookie-banner" id="cookieBanner" role="dialog" aria-live="polite" aria-label="Cookie consent">
+  <div class="cookie-banner__inner">
+    <p class="cookie-banner__text">We use cookies for analytics and advertising. See our <a href="/privacy-policy">Privacy Policy</a> for details.</p>
+    <div class="cookie-banner__actions">
+      <button class="cookie-accept" id="cookieAccept" type="button">Accept</button>
+      <button class="cookie-reject" id="cookieReject" type="button">Reject</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>&#169; 2026 Pitmaster Tools. All rights reserved.</div>
+  <nav aria-label="Footer">
+    <a href="/">Calculator</a>
+    <span>|</span>
+    <a href="/tools">All Tools</a>
+    <span>|</span>
+    <a href="/smoke-weather/methodology">Methodology</a>
+    <span>|</span>
+    <a href="/smoke-weather/faq">FAQ</a>
+    <span>|</span>
+    <a href="/smoke-weather/disclosures">Disclosures</a>
+    <span>|</span>
+    <a href="/privacy-policy">Privacy Policy</a>
+    <span>|</span>
+    <a href="/terms-of-service">Terms of Service</a>
+    <span>|</span>
+    <a href="mailto:contact@pitmaster.tools">contact@pitmaster.tools</a>
+  </nav>
+  <p class="footer-small">Last updated: May 15, 2026</p>
+</footer>
+
+<!-- INJECT:site-utils.js:script -->
+<!-- INJECT:site-header.js:script -->
+</body>
+</html>
