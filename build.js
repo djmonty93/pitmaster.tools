@@ -21,11 +21,18 @@
  *     robots="…"
  *     og_title="…"
  *     og_desc="…"
+ *     permalink="…"
  *   -->
  *
  * Frontmatter values are substituted into injected partial bodies only
  * (never the surrounding page body), via {{TITLE}} / {{DESCRIPTION}} /
  * {{CANONICAL}} / {{ROBOTS}} / {{OG_TITLE}} / {{OG_DESC}} tokens.
+ *
+ * The `permalink` value is a build directive (not a template token): when
+ * present it overrides the default `_src/<rel> → dist/<rel>` mapping so a
+ * source file can move under `_src/` without changing its public URL.
+ * Paths are forward-slashed, must end in `.html`, may not start with `/`,
+ * and may not contain `..`.
  *
  * Pure functions (parseFrontmatter, substituteVars, injectPartials) are
  * exported via module.exports so scripts/build.test.js can exercise them
@@ -154,6 +161,31 @@ function injectPartials(html, vars, partials, sourceFile) {
   throw new Error('INJECT depth exceeded in ' + sourceFile + ' (likely a partial-inclusion cycle)');
 }
 
+// ── Permalink resolution ────────────────────────────────────────────────────
+// A `permalink` frontmatter value overrides the default `_src/<rel> → dist/<rel>`
+// mapping. Forward-slashed, must end in .html, no leading slash, no traversal.
+// Returns the dist-relative path (forward-slashed) the file should be written to.
+function resolvePermalink(rel, vars, sourceFile) {
+  if (vars.permalink == null) {
+    return rel.split(path.sep).join('/');
+  }
+  var p = String(vars.permalink).trim();
+  if (p === '') {
+    throw new Error('permalink in ' + sourceFile + ' must not be empty');
+  }
+  if (p.startsWith('/') || p.startsWith('\\')) {
+    throw new Error('permalink in ' + sourceFile + ' must not start with "/" (got "' + p + '")');
+  }
+  var segments = p.split(/[\\/]/);
+  if (segments.indexOf('..') !== -1) {
+    throw new Error('permalink in ' + sourceFile + ' must not contain ".." (got "' + p + '")');
+  }
+  if (!p.endsWith('.html')) {
+    throw new Error('permalink in ' + sourceFile + ' must end with ".html" (got "' + p + '")');
+  }
+  return segments.join('/');
+}
+
 // ── Walk a directory recursively, yield relative .html paths ────────────────
 function listHtml(dir) {
   var out = [];
@@ -169,7 +201,9 @@ function listHtml(dir) {
 }
 
 // ── Exports for unit tests ──────────────────────────────────────────────────
-module.exports = { parseFrontmatter, substituteVars, injectPartials, listHtml };
+module.exports = {
+  parseFrontmatter, substituteVars, injectPartials, listHtml, resolvePermalink
+};
 
 // ── Script entry point (skipped when imported as a module) ──────────────────
 function runBuild() {
@@ -183,14 +217,24 @@ function runBuild() {
   fs.rmSync(DIST, { recursive: true, force: true });
   fs.mkdirSync(DIST, { recursive: true });
 
-  // Build HTML files
+  // Build HTML files. Track emitted dist-relative paths so two source files
+  // claiming the same permalink fail loudly instead of silently clobbering.
   var htmlFiles = listHtml(SRC);
+  var emitted = Object.create(null);
   var built = 0;
   htmlFiles.forEach(function(srcPath) {
     var rel      = path.relative(SRC, srcPath);
-    var distPath = path.join(DIST, rel);
     var source   = fs.readFileSync(srcPath, 'utf8');
     var fm       = parseFrontmatter(source);
+    var distRel  = resolvePermalink(rel, fm.vars, rel);
+    if (emitted[distRel] != null) {
+      throw new Error(
+        'Permalink collision: both ' + emitted[distRel] + ' and ' + rel +
+        ' emit to dist/' + distRel
+      );
+    }
+    emitted[distRel] = rel;
+    var distPath = path.join(DIST, distRel);
     var output   = injectPartials(fm.body, fm.vars, partials, rel);
     fs.mkdirSync(path.dirname(distPath), { recursive: true });
     fs.writeFileSync(distPath, output);

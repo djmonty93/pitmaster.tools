@@ -2,7 +2,9 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { parseFrontmatter, substituteVars, injectPartials } = require('../build.js');
+const {
+  parseFrontmatter, substituteVars, injectPartials, resolvePermalink
+} = require('../build.js');
 
 test('parseFrontmatter — extracts simple key/value pairs', () => {
   const src = `<!-- meta:
@@ -185,4 +187,85 @@ test('injectPartials — throws on partial-inclusion cycle', () => {
   assert.throws(() => {
     injectPartials('<!-- INJECT:a.html -->', {}, partials, 'test.html');
   }, /INJECT depth exceeded/);
+});
+
+// ── resolvePermalink ────────────────────────────────────────────────────────
+
+test('resolvePermalink — without permalink, normalizes the source rel to forward slashes', () => {
+  // Windows source paths come in with backslashes; dist-relative paths must be
+  // forward-slashed regardless of platform so downstream string keys (collision
+  // map, validator output) are stable.
+  const rel = ['smoke-weather', 'index.html'].join(require('node:path').sep);
+  assert.equal(resolvePermalink(rel, {}, rel), 'smoke-weather/index.html');
+});
+
+test('resolvePermalink — passes through a flat .html source unchanged', () => {
+  assert.equal(resolvePermalink('about.html', {}, 'about.html'), 'about.html');
+});
+
+test('resolvePermalink — uses permalink when set, overriding source rel', () => {
+  assert.equal(
+    resolvePermalink('tools/brisket-calculator.html',
+      { permalink: 'brisket-calculator.html' }, 'tools/brisket-calculator.html'),
+    'brisket-calculator.html'
+  );
+});
+
+test('resolvePermalink — permalink with subdirectory survives', () => {
+  assert.equal(
+    resolvePermalink('legal/privacy.html',
+      { permalink: 'legal/privacy-policy.html' }, 'legal/privacy.html'),
+    'legal/privacy-policy.html'
+  );
+});
+
+test('resolvePermalink — normalizes backslashes in permalink to forward slashes', () => {
+  // An author writing a Windows-style path in frontmatter shouldn't break the
+  // dist tree on Linux CI. Backslashes are treated as separators.
+  assert.equal(
+    resolvePermalink('x.html', { permalink: 'a\\b.html' }, 'x.html'),
+    'a/b.html'
+  );
+});
+
+test('resolvePermalink — rejects leading slash', () => {
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: '/abs.html' }, 'x.html'),
+    /must not start with "\/"/
+  );
+});
+
+test('resolvePermalink — rejects leading backslash', () => {
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: '\\abs.html' }, 'x.html'),
+    /must not start with "\/"/
+  );
+});
+
+test('resolvePermalink — rejects ".." traversal', () => {
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: '../escape.html' }, 'x.html'),
+    /must not contain "\.\."/
+  );
+});
+
+test('resolvePermalink — rejects ".." segment anywhere in the path', () => {
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: 'a/../b.html' }, 'x.html'),
+    /must not contain "\.\."/
+  );
+});
+
+test('resolvePermalink — rejects non-.html extension', () => {
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: 'feed.xml' }, 'x.html'),
+    /must end with "\.html"/
+  );
+});
+
+test('resolvePermalink — rejects empty permalink', () => {
+  assert.throws(
+    () => resolvePermalink('x.html', { permalink: '   ' }, 'x.html'),
+    /must not be empty/
+  );
 });
