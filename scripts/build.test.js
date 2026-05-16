@@ -119,6 +119,35 @@ rest`;
   );
 });
 
+test('parseFrontmatter — throws on empty-value assignment (permalink=)', () => {
+  // A bare `key=` (no value at all) also skips KV_RE and would silently
+  // bypass downstream validation. The residue scan must catch it.
+  const src = `<!-- meta:
+  title="Hello"
+  permalink=
+-->
+rest`;
+  assert.throws(
+    () => parseFrontmatter(src),
+    /Malformed frontmatter assignment "permalink=\.\.\."/
+  );
+});
+
+test('parseFrontmatter — throws on unterminated quoted value', () => {
+  // KV_RE requires a closing double-quote; an unterminated value never
+  // matches, so the residue keeps the broken `key="...` and the scan must
+  // catch it.
+  const src = `<!-- meta:
+  title="Hello"
+  permalink="unterminated
+-->
+rest`;
+  assert.throws(
+    () => parseFrontmatter(src),
+    /Malformed frontmatter assignment "permalink=\.\.\."/
+  );
+});
+
 test('parseFrontmatter — allows whitespace and newlines in a well-formed meta block', () => {
   // Sanity check: the residue scan must not false-positive on the whitespace
   // and newlines that legitimately separate well-formed key="value" pairs.

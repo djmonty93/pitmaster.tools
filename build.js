@@ -81,11 +81,16 @@ const META_COMMENT_RE = /^\s*<!--\s*meta:\s*([\s\S]*?)\s*-->\s*\r?\n?/;
 const KV_RE = /(\w+)\s*=\s*"((?:\\.|[^"\\])*)"/g;
 const FRONTMATTER_UNESCAPE_RE = /\\(["\\])/g;
 
-// Detects a `key=` assignment whose value is NOT a double-quoted string. This
-// is how `permalink=/bad.html` (no quotes) or `title=raw` slips past KV_RE
-// without populating `vars` — resolvePermalink then never runs and the source-
-// path fallback silently bypasses validation. Catching it here fails loudly.
-const MALFORMED_KV_RE = /\b(\w+)\s*=\s*(?!")\S/;
+// After stripping every recognized `key="value"` from a working copy of the
+// meta block, anything matching `\bkey\s*=` is by definition a malformed
+// assignment. This shape catches all three silent-bypass patterns at once:
+//   - unquoted:     permalink=/bad.html
+//   - empty value:  permalink=
+//   - unterminated: permalink="oops
+// All three skip KV_RE so vars.permalink stays unset and resolvePermalink
+// falls back to the source path — the entire permalink-validation block
+// would otherwise be silently skipped. Fail loudly at parse time instead.
+const RESIDUAL_KV_RE = /\b(\w+)\s*=/;
 
 function parseFrontmatter(html) {
   var prefixLen = 0;
@@ -108,11 +113,11 @@ function parseFrontmatter(html) {
     vars[kv[1].toLowerCase()] = kv[2].replace(FRONTMATTER_UNESCAPE_RE, '$1');
     residue = residue.replace(kv[0], '');
   }
-  var malformed = residue.match(MALFORMED_KV_RE);
+  var malformed = residue.match(RESIDUAL_KV_RE);
   if (malformed) {
     throw new Error(
       'Malformed frontmatter assignment "' + malformed[1] +
-      '=..." — values must be double-quoted'
+      '=..." — values must be double-quoted, non-empty, and properly terminated'
     );
   }
   var prefix = html.slice(0, prefixLen);
