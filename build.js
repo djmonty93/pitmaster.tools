@@ -61,8 +61,15 @@ const STATIC_ASSETS = [
 // Matches a leading "<!-- meta: ... -->" comment (whitespace-tolerant) at the
 // very top of the file. Returns the parsed key/value map plus the body with
 // the comment removed.
+//
+// Value escapes: KV_RE skips past any backslash-pair inside a value so the
+// captured group is the raw content. We then drop the backslash from \" and
+// \\ — those are the only two escapes a frontmatter author needs (literal
+// quote, literal backslash). Other escapes (\n, \t) survive as literal
+// two-character sequences since meta values don't carry control characters.
 const FRONTMATTER_RE = /^\s*<!--\s*meta:\s*([\s\S]*?)\s*-->\s*\r?\n?/;
 const KV_RE = /(\w+)\s*=\s*"((?:\\.|[^"\\])*)"/g;
+const FRONTMATTER_UNESCAPE_RE = /\\(["\\])/g;
 
 function parseFrontmatter(html) {
   var m = html.match(FRONTMATTER_RE);
@@ -71,7 +78,7 @@ function parseFrontmatter(html) {
   var kv;
   KV_RE.lastIndex = 0;
   while ((kv = KV_RE.exec(m[1])) !== null) {
-    vars[kv[1].toLowerCase()] = kv[2].replace(/\\"/g, '"');
+    vars[kv[1].toLowerCase()] = kv[2].replace(FRONTMATTER_UNESCAPE_RE, '$1');
   }
   return { vars: vars, body: html.slice(m[0].length) };
 }
@@ -153,40 +160,42 @@ function listHtml(dir) {
 module.exports = { parseFrontmatter, substituteVars, injectPartials, listHtml };
 
 // ── Script entry point (skipped when imported as a module) ──────────────────
-if (require.main !== module) return;
+function runBuild() {
+  // Load partials from _partials/
+  var partials = {};
+  fs.readdirSync(PARTIALS).forEach(function(file) {
+    partials[file] = fs.readFileSync(path.join(PARTIALS, file), 'utf8').trimEnd();
+  });
 
-// Load partials from _partials/
-const partials = {};
-fs.readdirSync(PARTIALS).forEach(function(file) {
-  partials[file] = fs.readFileSync(path.join(PARTIALS, file), 'utf8').trimEnd();
-});
+  // Recreate dist/ from a clean slate
+  fs.rmSync(DIST, { recursive: true, force: true });
+  fs.mkdirSync(DIST, { recursive: true });
 
-// Recreate dist/ from a clean slate
-fs.rmSync(DIST, { recursive: true, force: true });
-fs.mkdirSync(DIST, { recursive: true });
+  // Build HTML files
+  var htmlFiles = listHtml(SRC);
+  var built = 0;
+  htmlFiles.forEach(function(srcPath) {
+    var rel      = path.relative(SRC, srcPath);
+    var distPath = path.join(DIST, rel);
+    var source   = fs.readFileSync(srcPath, 'utf8');
+    var fm       = parseFrontmatter(source);
+    var output   = injectPartials(fm.body, fm.vars, partials, rel);
+    fs.mkdirSync(path.dirname(distPath), { recursive: true });
+    fs.writeFileSync(distPath, output);
+    built++;
+  });
+  console.log('Built ' + built + ' HTML files → ' + DIST + '/');
 
-// Build HTML files
-var htmlFiles = listHtml(SRC);
-var built = 0;
-htmlFiles.forEach(function(srcPath) {
-  var rel      = path.relative(SRC, srcPath);
-  var distPath = path.join(DIST, rel);
-  var source   = fs.readFileSync(srcPath, 'utf8');
-  var fm       = parseFrontmatter(source);
-  var output   = injectPartials(fm.body, fm.vars, partials, rel);
-  fs.mkdirSync(path.dirname(distPath), { recursive: true });
-  fs.writeFileSync(distPath, output);
-  built++;
-});
-console.log('Built ' + built + ' HTML files → ' + DIST + '/');
+  // Copy static assets
+  var copied = 0;
+  STATIC_ASSETS.forEach(function(file) {
+    if (fs.existsSync(file)) {
+      fs.copyFileSync(file, path.join(DIST, file));
+      copied++;
+    }
+  });
+  console.log('Copied ' + copied + ' static assets → ' + DIST + '/');
+  console.log('Build complete.');
+}
 
-// Copy static assets
-var copied = 0;
-STATIC_ASSETS.forEach(function(file) {
-  if (fs.existsSync(file)) {
-    fs.copyFileSync(file, path.join(DIST, file));
-    copied++;
-  }
-});
-console.log('Copied ' + copied + ' static assets → ' + DIST + '/');
-console.log('Build complete.');
+if (require.main === module) runBuild();

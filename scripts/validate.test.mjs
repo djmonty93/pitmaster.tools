@@ -62,6 +62,23 @@ test('validateXmlBalance — comments and prolog are skipped', () => {
   assert.equal(validateXmlBalance(xml), null);
 });
 
+test('validateXmlBalance — literal > inside double-quoted attribute is not a tag terminator', () => {
+  // Without the quote-aware parser, this would terminate at the > inside
+  // the title attribute and produce a spurious mismatch.
+  const xml = `<root><item title="A > B"/></root>`;
+  assert.equal(validateXmlBalance(xml), null);
+});
+
+test('validateXmlBalance — literal > inside single-quoted attribute is not a tag terminator', () => {
+  const xml = `<root><item title='A > B'/></root>`;
+  assert.equal(validateXmlBalance(xml), null);
+});
+
+test('validateXmlBalance — handles CDATA blocks containing < and >', () => {
+  const xml = `<root><![CDATA[ if (a < b && b > c) {} ]]></root>`;
+  assert.equal(validateXmlBalance(xml), null);
+});
+
 // ── findUnresolvedInjects / findUnresolvedTokens ────────────────────────────
 test('findUnresolvedInjects — true when placeholder present', () => {
   assert.equal(findUnresolvedInjects('<p><!-- INJECT:x.html --></p>'), true);
@@ -276,6 +293,18 @@ test('findBrokenLocalLinks — flags only the broken href; skips external + vali
       '<a href="mailto:a@b">mail</a>';
     const broken = findBrokenLocalLinks(content, join(t.dir, 'i.html'), t.dir);
     assert.deepEqual(broken, ['/missing']);
+  } finally { t.cleanup(); }
+});
+
+test('findBrokenLocalLinks — also matches single-quoted href and src attributes', () => {
+  const t = withTempDist({ 'tools.html': 'x', 'i.html': 'x' });
+  try {
+    const content =
+      "<a href='/tools'>ok</a>" +
+      "<img src='/missing.png'>" +
+      "<script src='/also-missing.js'></script>";
+    const broken = findBrokenLocalLinks(content, join(t.dir, 'i.html'), t.dir);
+    assert.deepEqual(broken, ['/missing.png', '/also-missing.js']);
   } finally { t.cleanup(); }
 });
 
