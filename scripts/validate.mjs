@@ -218,13 +218,23 @@ function isMinimal(rel) {
   return rel === '404.html';
 }
 
-function discoverSubdir(baseDir, name) {
-  const dir = join(baseDir, name);
-  if (!existsSync(dir)) return [];
-  return readdirSync(dir)
-    .filter((f) => f.endsWith('.html'))
-    .sort()
-    .map((f) => `${name}/${f}`);
+// Recursively discover every .html file under baseDir, the same way build.js
+// walks _src/. Returns paths relative to baseDir, forward-slashed for output
+// consistency across Windows/Linux.
+export function discoverHtmlFiles(baseDir) {
+  const out = [];
+  function walk(dir) {
+    if (!existsSync(dir)) return;
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.isFile() && entry.name.endsWith('.html')) {
+        out.push(full.slice(baseDir.length + 1).replace(/\\/g, '/'));
+      }
+    }
+  }
+  walk(baseDir);
+  return out.sort();
 }
 
 function runScript() {
@@ -265,19 +275,9 @@ function runScript() {
     addError(`Invalid JSON: wrangler.jsonc: ${e.message}`);
   }
 
-  const htmlFiles = [
-    '404.html', 'about.html', 'bbq-cost-calculator.html', 'brisket-calculator.html',
-    'brisket-yield-calculator.html', 'brine-calculator.html', 'catering-calculator.html',
-    'cook-time-coordinator.html', 'pork-shoulder-calculator.html', 'index.html',
-    'charcoal-calculator.html', 'dry-rub-calculator.html', 'meat-per-person.html',
-    'privacy-policy.html', 'rib-calculator.html', 'tools.html',
-    'turkey-smoking-calculator.html', 'terms-of-service.html'
-  ];
-  const allHtmlFiles = [
-    ...htmlFiles,
-    ...discoverSubdir(distRoot, 'smoke-weather'),
-    ...discoverSubdir(distRoot, 'seasonal')
-  ];
+  // Auto-discover every dist HTML file the same way build.js walks _src/, so
+  // a newly added page is gated by every check without touching this list.
+  const allHtmlFiles = discoverHtmlFiles(distRoot);
 
   for (const rel of allHtmlFiles) {
     const fullPath = join(distRoot, rel);

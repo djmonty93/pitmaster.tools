@@ -71,20 +71,34 @@ function parseFrontmatter(html) {
 }
 
 // ── Variable substitution (scoped to partial bodies) ────────────────────────
-// Frontmatter values are treated as trusted (they come from repo-controlled
-// _src/ files, never user input) and are emitted verbatim — no HTML escaping.
-// Don't pipe untrusted data through this function.
+// Substituted values are HTML-escaped before insertion so that a title or
+// description containing &, <, >, ", or ' cannot break out of an attribute
+// context. Frontmatter values are author-controlled (not end-user input), but
+// escaping defends against simple punctuation in titles and against any future
+// caller that pipes less-trusted data through these functions.
 const TOKEN_RE = /\{\{([A-Z_]+)\}\}/g;
+const HTML_ESCAPE_RE = /[&<>"']/g;
+const HTML_ESCAPE_MAP = {
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+};
+
+function escapeHtml(s) {
+  return String(s).replace(HTML_ESCAPE_RE, function(c) { return HTML_ESCAPE_MAP[c]; });
+}
+
+function resolveVar(key, vars) {
+  if (vars[key] != null) return vars[key];
+  // Sensible fallbacks: og_title → title, og_desc → description.
+  if (key === 'og_title' && vars.title != null) return vars.title;
+  if (key === 'og_desc'  && vars.description != null) return vars.description;
+  if (key === 'robots'   && vars.robots == null)      return 'index, follow';
+  return null;
+}
 
 function substituteVars(content, vars) {
   return content.replace(TOKEN_RE, function(match, name) {
-    var key = name.toLowerCase();
-    // Sensible fallbacks: og_title → title, og_desc → description.
-    if (vars[key] != null) return vars[key];
-    if (key === 'og_title' && vars.title != null) return vars.title;
-    if (key === 'og_desc'  && vars.description != null) return vars.description;
-    if (key === 'robots'   && vars.robots == null) return 'index, follow';
-    return match;
+    var value = resolveVar(name.toLowerCase(), vars);
+    return value == null ? match : escapeHtml(value);
   });
 }
 

@@ -59,6 +59,22 @@ test('substituteVars — explicit robots value beats the default', () => {
   assert.equal(out, 'noindex, follow');
 });
 
+test('substituteVars — HTML-escapes substituted values so they cannot break attributes', () => {
+  const out = substituteVars(
+    '<meta name="description" content="{{DESCRIPTION}}">',
+    { description: 'A "smart" title with <script>alert(1)</script> & ampersand' }
+  );
+  assert.equal(
+    out,
+    '<meta name="description" content="A &quot;smart&quot; title with &lt;script&gt;alert(1)&lt;/script&gt; &amp; ampersand">'
+  );
+});
+
+test('substituteVars — escapes single quotes and ampersands too', () => {
+  const out = substituteVars("{{TITLE}}", { title: "Mike's & Mary's" });
+  assert.equal(out, 'Mike&#39;s &amp; Mary&#39;s');
+});
+
 test('injectPartials — wraps .css as <style>, .js:script as <script>, .html raw', () => {
   const partials = {
     'a.css': 'body{}',

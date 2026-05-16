@@ -259,26 +259,18 @@ function Test-HeadOrder {
   }
 }
 
-$htmlFiles = @(
-  '404.html',
-  'about.html',
-  'bbq-cost-calculator.html',
-  'brisket-calculator.html',
-  'brisket-yield-calculator.html',
-  'brine-calculator.html',
-  'catering-calculator.html',
-  'cook-time-coordinator.html',
-  'pork-shoulder-calculator.html',
-  'index.html',
-  'charcoal-calculator.html',
-  'dry-rub-calculator.html',
-  'meat-per-person.html',
-  'privacy-policy.html',
-  'rib-calculator.html',
-  'tools.html',
-  'turkey-smoking-calculator.html',
-  'terms-of-service.html'
-)
+# Auto-discover every dist HTML file recursively. Mirrors build.js's _src/
+# walk so a newly added page is gated by every check without editing this list.
+function Get-DistHtmlFiles {
+  param([string]$BaseDirectory)
+  if (-not (Test-Path $BaseDirectory)) { return @() }
+  Get-ChildItem -Path $BaseDirectory -Filter '*.html' -Recurse -File |
+    ForEach-Object {
+      $rel = $_.FullName.Substring($BaseDirectory.Length).TrimStart('\', '/')
+      $rel -replace '\\', '/'
+    } |
+    Sort-Object
+}
 
 Write-Host 'Building dist/ before validation...'
 npm run build
@@ -301,27 +293,7 @@ if (-not (Test-Path (Join-Path $distRoot 'og-image.png'))) {
 Test-XmlFile (Join-Path $distRoot 'sitemap.xml')
 Test-JsonFile 'wrangler.jsonc'
 
-# Auto-discover every page under dist/smoke-weather/ so the 50 generated metro
-# pages (and any hand-authored siblings like index.html / disclosures.html)
-# get the same link + INJECT validation as the hardcoded site pages.
-$smokeWeatherDir = Join-Path $distRoot 'smoke-weather'
-$smokeWeatherFiles = @()
-if (Test-Path $smokeWeatherDir) {
-  $smokeWeatherFiles = Get-ChildItem -Path $smokeWeatherDir -Filter '*.html' |
-    Sort-Object Name |
-    ForEach-Object { "smoke-weather/$($_.Name)" }
-}
-# Step 15 (F19): same auto-discovery for the seasonal/ subdirectory — the four
-# winter/spring/summer/fall placeholder pages live here and need the same
-# link + INJECT validation as the smoke-weather siblings.
-$seasonalDir = Join-Path $distRoot 'seasonal'
-$seasonalFiles = @()
-if (Test-Path $seasonalDir) {
-  $seasonalFiles = Get-ChildItem -Path $seasonalDir -Filter '*.html' |
-    Sort-Object Name |
-    ForEach-Object { "seasonal/$($_.Name)" }
-}
-$allHtmlFiles = $htmlFiles + $smokeWeatherFiles + $seasonalFiles
+$allHtmlFiles = @(Get-DistHtmlFiles -BaseDirectory $distRoot)
 
 Test-LocalLinks -BaseDirectory $distRoot -Paths $allHtmlFiles
 Test-NoInjectPlaceholders -BaseDirectory $distRoot -Paths $allHtmlFiles
