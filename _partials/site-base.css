@@ -160,7 +160,6 @@ main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
 }
 .calc-btn:hover { box-shadow: 0 12px 24px rgba(24,23,20,.16); }
 .calc-btn:active { transform: scale(.99); }
-.calc-btn:focus-visible { outline: 2px solid var(--amber-dark); outline-offset: 2px; }
 .vmsg { margin-top: .75rem; padding: .6rem .875rem; border-radius: 6px; font-size: .875rem; display: none; }
 .vmsg.error { background: #FDECEA; border: 1px solid #F5C6C1; color: #922B21; display: block; }
 .vmsg.warn { background: var(--yellow-warn); border: 1px solid var(--yellow-warn-border); color: #856404; display: block; }
