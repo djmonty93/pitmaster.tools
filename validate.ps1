@@ -124,26 +124,153 @@ function Test-NoInjectPlaceholders {
   }
 }
 
-$htmlFiles = @(
-  '404.html',
-  'about.html',
-  'bbq-cost-calculator.html',
-  'brisket-calculator.html',
-  'brisket-yield-calculator.html',
-  'brine-calculator.html',
-  'catering-calculator.html',
-  'cook-time-coordinator.html',
-  'pork-shoulder-calculator.html',
-  'index.html',
-  'charcoal-calculator.html',
-  'dry-rub-calculator.html',
-  'meat-per-person.html',
-  'privacy-policy.html',
-  'rib-calculator.html',
-  'tools.html',
-  'turkey-smoking-calculator.html',
-  'terms-of-service.html'
-)
+function Test-UnresolvedTokens {
+  param(
+    [string]$BaseDirectory,
+    [string[]]$Paths
+  )
+
+  foreach ($path in $Paths) {
+    $fullPath = Join-Path $BaseDirectory $path
+    # Renamed from $matches to avoid shadowing the automatic variable.
+    $tokenMatches = Select-String -Path $fullPath -Pattern '\{\{[A-Z_]+\}\}'
+    if ($tokenMatches) {
+      foreach ($m in $tokenMatches) {
+        Add-Error("Unresolved {{token}} in ${path}: $($m.Line.Trim())")
+      }
+    } else {
+      Write-Host "OK TOK  $path"
+    }
+  }
+}
+
+function Test-ConsentBeforeAnalytics {
+  # Asserts the Consent Mode v2 default-deny gtag call appears before any
+  # googletagmanager.com or pagead2/adsbygoogle reference, per CLAUDE.md.
+  param(
+    [string]$BaseDirectory,
+    [string[]]$Paths
+  )
+
+  foreach ($path in $Paths) {
+    $fullPath = Join-Path $BaseDirectory $path
+    $content = Get-Content $fullPath -Raw
+    $consentIdx = $content.IndexOf("gtag('consent', 'default'")
+    $analyticsIdx = @('googletagmanager.com', 'pagead2.googlesyndication') |
+      ForEach-Object { $content.IndexOf($_) } |
+      Where-Object { $_ -ge 0 } |
+      Sort-Object |
+      Select-Object -First 1
+    if ($consentIdx -ge 0 -and $null -ne $analyticsIdx -and $analyticsIdx -lt $consentIdx) {
+      Add-Error("Consent default must precede analytics loader in ${path}")
+    } else {
+      Write-Host "OK CON  $path"
+    }
+  }
+}
+
+function Test-HeadOrder {
+  # Enforces the ordered head block required by CLAUDE.md. Three layers:
+  #  1. Universal presence — every page must carry charset, viewport, title,
+  #     description, canonical (no page is allowed to ship without them).
+  #  2. Social presence — every non-minimal page must carry OG + Twitter tags.
+  #     404.html is the only exempted minimal page today.
+  #  3. Ordering — present tags must appear in the canonical sequence.
+  param(
+    [string]$BaseDirectory,
+    [string[]]$Paths
+  )
+
+  $tagPatterns = @{
+    'charset'             = '<meta\s+charset='
+    'viewport'            = '<meta\s+name="viewport"'
+    'title'               = '<title>'
+    'description'         = '<meta\s+name="description"'
+    'robots'              = '<meta\s+name="robots"'
+    'canonical'           = '<link\s+rel="canonical"'
+    'og:title'            = '<meta\s+property="og:title"'
+    'og:description'      = '<meta\s+property="og:description"'
+    'og:type'             = '<meta\s+property="og:type"'
+    'og:url'              = '<meta\s+property="og:url"'
+    'og:image'            = '<meta\s+property="og:image"'
+    'twitter:card'        = '<meta\s+name="twitter:card"'
+    'twitter:title'       = '<meta\s+name="twitter:title"'
+    'twitter:description' = '<meta\s+name="twitter:description"'
+    'twitter:image'       = '<meta\s+name="twitter:image"'
+    'favicon'             = '<link\s+rel="icon"\s+href='
+    'consent'             = "gtag\('consent', 'default'"
+  }
+  $universal = @('charset', 'viewport', 'title', 'description', 'canonical')
+  $social    = @('og:title', 'og:description', 'og:type', 'og:url', 'og:image',
+                 'twitter:card', 'twitter:title', 'twitter:description', 'twitter:image')
+  $orderedTags = @(
+    'charset', 'viewport', 'title', 'description', 'robots', 'canonical',
+    'og:title', 'og:description', 'og:type', 'og:url', 'og:image',
+    'twitter:card', 'twitter:title', 'twitter:description', 'twitter:image',
+    'favicon', 'consent'
+  )
+  # Minimal pages don't carry social metadata. Keep this list small and explicit.
+  $minimalPages = @('404.html')
+
+  foreach ($path in $Paths) {
+    $fullPath = Join-Path $BaseDirectory $path
+    $content = Get-Content $fullPath -Raw
+    $headMatch = [regex]::Match($content, '(?s)<head>(.*?)</head>')
+    if (-not $headMatch.Success) {
+      Add-Error("No <head> block found in ${path}")
+      continue
+    }
+    $head = $headMatch.Groups[1].Value
+    $pageOk = $true
+
+    # Presence: universal
+    foreach ($name in $universal) {
+      if ($head -notmatch $tagPatterns[$name]) {
+        Add-Error("Missing required head tag '$name' in ${path}")
+        $pageOk = $false
+      }
+    }
+    # Presence: social (non-minimal only)
+    $isMinimal = $minimalPages -contains $path
+    if (-not $isMinimal) {
+      foreach ($name in $social) {
+        if ($head -notmatch $tagPatterns[$name]) {
+          Add-Error("Missing required head tag '$name' in ${path}")
+          $pageOk = $false
+        }
+      }
+    }
+
+    # Ordering
+    $lastIdx = -1
+    $lastName = '(start)'
+    foreach ($name in $orderedTags) {
+      $m = [regex]::Match($head, $tagPatterns[$name])
+      if (-not $m.Success) { continue }
+      if ($m.Index -lt $lastIdx) {
+        Add-Error("Head tag out of order in ${path}: '$name' appears before '$lastName'")
+        $pageOk = $false
+        break
+      }
+      $lastIdx = $m.Index
+      $lastName = $name
+    }
+    if ($pageOk) { Write-Host "OK HEAD $path" }
+  }
+}
+
+# Auto-discover every dist HTML file recursively. Mirrors build.js's _src/
+# walk so a newly added page is gated by every check without editing this list.
+function Get-DistHtmlFiles {
+  param([string]$BaseDirectory)
+  if (-not (Test-Path $BaseDirectory)) { return @() }
+  Get-ChildItem -Path $BaseDirectory -Filter '*.html' -Recurse -File |
+    ForEach-Object {
+      $rel = $_.FullName.Substring($BaseDirectory.Length).TrimStart('\', '/')
+      $rel -replace '\\', '/'
+    } |
+    Sort-Object
+}
 
 Write-Host 'Building dist/ before validation...'
 npm run build
@@ -166,30 +293,13 @@ if (-not (Test-Path (Join-Path $distRoot 'og-image.png'))) {
 Test-XmlFile (Join-Path $distRoot 'sitemap.xml')
 Test-JsonFile 'wrangler.jsonc'
 
-# Auto-discover every page under dist/smoke-weather/ so the 50 generated metro
-# pages (and any hand-authored siblings like index.html / disclosures.html)
-# get the same link + INJECT validation as the hardcoded site pages.
-$smokeWeatherDir = Join-Path $distRoot 'smoke-weather'
-$smokeWeatherFiles = @()
-if (Test-Path $smokeWeatherDir) {
-  $smokeWeatherFiles = Get-ChildItem -Path $smokeWeatherDir -Filter '*.html' |
-    Sort-Object Name |
-    ForEach-Object { "smoke-weather/$($_.Name)" }
-}
-# Step 15 (F19): same auto-discovery for the seasonal/ subdirectory — the four
-# winter/spring/summer/fall placeholder pages live here and need the same
-# link + INJECT validation as the smoke-weather siblings.
-$seasonalDir = Join-Path $distRoot 'seasonal'
-$seasonalFiles = @()
-if (Test-Path $seasonalDir) {
-  $seasonalFiles = Get-ChildItem -Path $seasonalDir -Filter '*.html' |
-    Sort-Object Name |
-    ForEach-Object { "seasonal/$($_.Name)" }
-}
-$allHtmlFiles = $htmlFiles + $smokeWeatherFiles + $seasonalFiles
+$allHtmlFiles = @(Get-DistHtmlFiles -BaseDirectory $distRoot)
 
 Test-LocalLinks -BaseDirectory $distRoot -Paths $allHtmlFiles
 Test-NoInjectPlaceholders -BaseDirectory $distRoot -Paths $allHtmlFiles
+Test-UnresolvedTokens -BaseDirectory $distRoot -Paths $allHtmlFiles
+Test-ConsentBeforeAnalytics -BaseDirectory $distRoot -Paths $allHtmlFiles
+Test-HeadOrder -BaseDirectory $distRoot -Paths $allHtmlFiles
 
 if ($errors.Count -gt 0) {
   Write-Host ''
