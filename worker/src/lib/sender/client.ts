@@ -54,7 +54,9 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
   const baseUrl = (opts.baseUrl ?? DEFAULT_BASE_URL).replace(/\/$/, '');
   const auth = `Bearer ${opts.apiToken}`;
 
-  const allowedHostname = new URL(baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`).hostname;
+  const parsedBaseUrl = new URL(baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`);
+  const allowedHostname = parsedBaseUrl.hostname;
+  const allowedProtocol = parsedBaseUrl.protocol;
 
   async function request(
     requestKind: SenderRequestKind,
@@ -64,11 +66,11 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
   ): Promise<unknown> {
     const url = pathOrUrl.startsWith('http') ? pathOrUrl : `${baseUrl}${pathOrUrl}`;
     const targetUrl = new URL(url);
-    if (targetUrl.hostname !== allowedHostname) {
+    if (targetUrl.hostname !== allowedHostname || targetUrl.protocol !== allowedProtocol) {
       throw new SenderError(
         requestKind,
         'malformed',
-        `Refusing to send Authorization header to unexpected host: ${targetUrl.hostname}`
+        `Refusing to send Authorization header to ${targetUrl.protocol}//${targetUrl.hostname}: must match ${allowedProtocol}//${allowedHostname}`
       );
     }
     const controller = new AbortController();

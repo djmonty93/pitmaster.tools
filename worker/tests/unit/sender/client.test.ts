@@ -273,4 +273,20 @@ describe('SenderClient.triggerWeeklyDigest', () => {
       expect(stub.calls).toHaveLength(0); // critical: fetch was NEVER called
     } finally { stub.restore(); }
   });
+
+  it('refuses to call triggerWeeklyDigest URL with downgraded protocol (security: prevents bearer-over-plaintext)', async () => {
+    const stub = installFetchStub([]);
+    try {
+      const client = createSenderClient({ apiToken: 'tok' });
+      const err = await client.triggerWeeklyDigest({
+        triggerUrl: 'http://api.sender.net/v2/automations/trigger/abc',
+        idempotencyTag: 'x:1',
+      }).catch((e) => e);
+      expect(err).toBeInstanceOf(SenderError);
+      expect((err as SenderError).requestKind).toBe('digest_trigger');
+      expect((err as SenderError).kind).toBe('malformed');
+      expect((err as SenderError).shouldRetry).toBe(false);
+      expect(stub.calls).toHaveLength(0); // critical: fetch was NEVER called
+    } finally { stub.restore(); }
+  });
 });
