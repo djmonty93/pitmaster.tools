@@ -257,4 +257,20 @@ describe('SenderClient.triggerWeeklyDigest', () => {
       expect((err as SenderError).requestKind).toBe('digest_trigger');
     } finally { stub.restore(); }
   });
+
+  it('refuses to call triggerWeeklyDigest URL on a non-Sender host (security: prevents auth leak)', async () => {
+    const stub = installFetchStub([]);
+    try {
+      const client = createSenderClient({ apiToken: 'tok' });
+      const err = await client.triggerWeeklyDigest({
+        triggerUrl: 'https://evil.example.com/trigger/abc',
+        idempotencyTag: 'x:1',
+      }).catch((e) => e);
+      expect(err).toBeInstanceOf(SenderError);
+      expect((err as SenderError).requestKind).toBe('digest_trigger');
+      expect((err as SenderError).kind).toBe('malformed');
+      expect((err as SenderError).shouldRetry).toBe(false);
+      expect(stub.calls).toHaveLength(0); // critical: fetch was NEVER called
+    } finally { stub.restore(); }
+  });
 });

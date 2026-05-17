@@ -54,6 +54,8 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
   const baseUrl = (opts.baseUrl ?? DEFAULT_BASE_URL).replace(/\/$/, '');
   const auth = `Bearer ${opts.apiToken}`;
 
+  const allowedHostname = new URL(baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`).hostname;
+
   async function request(
     requestKind: SenderRequestKind,
     method: string,
@@ -61,6 +63,14 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
     body?: unknown
   ): Promise<unknown> {
     const url = pathOrUrl.startsWith('http') ? pathOrUrl : `${baseUrl}${pathOrUrl}`;
+    const targetUrl = new URL(url);
+    if (targetUrl.hostname !== allowedHostname) {
+      throw new SenderError(
+        requestKind,
+        'malformed',
+        `Refusing to send Authorization header to unexpected host: ${targetUrl.hostname}`
+      );
+    }
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout> | undefined;
 
