@@ -88,6 +88,77 @@ describe('SenderClient.subscribe', () => {
     }
   });
 
+  it('429 with Retry-After: 30 (seconds) → err.retryAfterMs === 30000', async () => {
+    const stub = installFetchStub([
+      {
+        match: 'api.sender.net/v2/subscribers',
+        respond: () => {
+          const res = new Response(JSON.stringify({ message: 'rate limited' }), {
+            status: 429,
+            headers: { 'Content-Type': 'application/json', 'Retry-After': '30' },
+          });
+          return res;
+        },
+      },
+    ]);
+    try {
+      const client = createSenderClient({ apiToken: 'tok' });
+      const err = await client.subscribe({ email: 'a@b.co', fields: baseFields }).catch((e) => e);
+      expect(err).toBeInstanceOf(SenderError);
+      expect((err as SenderError).status).toBe(429);
+      expect((err as SenderError).retryAfterMs).toBe(30_000);
+    } finally {
+      stub.restore();
+    }
+  });
+
+  it('429 with Retry-After: <HTTP-date 60s in the future> → retryAfterMs ≈ 60000', async () => {
+    const futureDate = new Date(Date.now() + 60_000).toUTCString();
+    const stub = installFetchStub([
+      {
+        match: 'api.sender.net/v2/subscribers',
+        respond: () =>
+          new Response(JSON.stringify({ message: 'rate limited' }), {
+            status: 429,
+            headers: { 'Content-Type': 'application/json', 'Retry-After': futureDate },
+          }),
+      },
+    ]);
+    try {
+      const client = createSenderClient({ apiToken: 'tok' });
+      const err = await client.subscribe({ email: 'a@b.co', fields: baseFields }).catch((e) => e);
+      expect(err).toBeInstanceOf(SenderError);
+      expect((err as SenderError).status).toBe(429);
+      const ram = (err as SenderError).retryAfterMs;
+      expect(ram).toBeDefined();
+      expect(Math.abs(ram! - 60_000)).toBeLessThan(1500);
+    } finally {
+      stub.restore();
+    }
+  });
+
+  it('429 without Retry-After → err.retryAfterMs === undefined', async () => {
+    const stub = installFetchStub([
+      {
+        match: 'api.sender.net/v2/subscribers',
+        respond: () =>
+          new Response(JSON.stringify({ message: 'rate limited' }), {
+            status: 429,
+            headers: { 'Content-Type': 'application/json' },
+          }),
+      },
+    ]);
+    try {
+      const client = createSenderClient({ apiToken: 'tok' });
+      const err = await client.subscribe({ email: 'a@b.co', fields: baseFields }).catch((e) => e);
+      expect(err).toBeInstanceOf(SenderError);
+      expect((err as SenderError).status).toBe(429);
+      expect((err as SenderError).retryAfterMs).toBeUndefined();
+    } finally {
+      stub.restore();
+    }
+  });
+
   it('does not send an Idempotency-Key header (Sender does not honor it)', async () => {
     const stub = installFetchStub([
       { match: 'api.sender.net/v2/subscribers', respond: () => jsonResponse(200, { data: { id: 'x', email: 'a@b.co', status: 'active' } }) },

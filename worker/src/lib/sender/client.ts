@@ -118,7 +118,8 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
     if (!res.ok) {
       const errKind = res.status >= 500 ? 'http_5xx' : 'http_4xx';
       const msg = extractMessage(parsed) ?? `HTTP ${res.status}`;
-      throw new SenderError(requestKind, errKind, msg, res.status);
+      const retryAfterMs = res.status === 429 ? parseRetryAfter(res.headers.get('retry-after')) : undefined;
+      throw new SenderError(requestKind, errKind, msg, res.status, retryAfterMs);
     }
     return parsed;
   }
@@ -234,6 +235,19 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
       await request('digest_trigger', 'POST', input.triggerUrl, { tag: input.idempotencyTag });
     },
   };
+}
+
+function parseRetryAfter(value: string | null): number | undefined {
+  if (!value) return undefined;
+  const trimmed = value.trim();
+  if (/^\d+$/.test(trimmed)) {
+    const secs = Number(trimmed);
+    return Number.isFinite(secs) ? Math.min(secs * 1000, 3_600_000) : undefined;
+  }
+  const ts = Date.parse(trimmed);
+  if (Number.isNaN(ts)) return undefined;
+  const ms = ts - Date.now();
+  return ms > 0 ? Math.min(ms, 3_600_000) : undefined;
 }
 
 function extractMessage(parsed: unknown): string | null {

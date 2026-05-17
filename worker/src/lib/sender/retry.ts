@@ -93,7 +93,12 @@ export async function enqueue(db: D1Database, input: EnqueueInput): Promise<void
   // First replay attempt is 1m out (backoffMs(1)) — matches the
   // canonical "give the upstream a minute to recover" gap before we
   // burn an internal retry slot on a still-broken provider.
-  const nextAttemptAt = now + backoffMs(1);
+  // If Sender returned a Retry-After header, prefer it over the default
+  // backoff, capped at MAX_BACKOFF_MS to guard against absurd values.
+  const firstBackoff = input.cause?.retryAfterMs !== undefined
+    ? Math.min(input.cause.retryAfterMs, MAX_BACKOFF_MS)
+    : backoffMs(1);
+  const nextAttemptAt = now + firstBackoff;
   const causeMessage = input.cause ? summarizeError(input.cause) : null;
   const lastError = causeMessage ? causeMessage.slice(0, 500) : null;
   const lastStatus = input.cause?.status ?? null;
@@ -245,11 +250,14 @@ async function replayRow(
       await recordError(db, row, err, now());
       return { row, status: 'parked', error: err };
     }
-    // backoffMs(attempts + 1) so consecutive failures grow the gap
-    // (1m, 2m, 4m, …). Using backoffMs(attempts) would reuse the
-    // same delay twice on attempts=1 because enqueue already used
-    // backoffMs(1) as the initial schedule.
-    const nextAttemptAt = now() + backoffMs(attempts + 1);
+    // Prefer Retry-After from the error when present — Sender told us
+    // exactly how long to wait. Fall back to exponential backoffMs so
+    // consecutive failures grow the gap (1m, 2m, 4m, …). Cap at
+    // MAX_BACKOFF_MS regardless of source.
+    const rawBackoff = err instanceof SenderError && err.retryAfterMs !== undefined
+      ? err.retryAfterMs
+      : backoffMs(attempts + 1);
+    const nextAttemptAt = now() + Math.min(rawBackoff, MAX_BACKOFF_MS);
     await db
       .prepare(
         `UPDATE sender_retry

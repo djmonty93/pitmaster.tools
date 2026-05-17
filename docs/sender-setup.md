@@ -71,4 +71,4 @@ Sender's webhooks require the Standard plan or above. If/when wired, the worker 
 
 ## 7. Rate limits
 
-Sender returns `429` with a `Retry-After: <seconds>` header on rate-limit. The worker treats 429 as retryable and the retry queue's exponential backoff handles it. Free-tier limits are not publicly published — read `X-RateLimit-Remaining` on responses to monitor headroom.
+Sender returns `429` with a `Retry-After: <seconds>` header on rate-limit. The worker treats 429 as retryable and the retry queue prefers `Retry-After` over the default exponential backoff when present (capped at 1 hour). Free-tier limits are not publicly published — read `X-RateLimit-Remaining` on responses to monitor headroom.

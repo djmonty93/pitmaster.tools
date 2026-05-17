@@ -131,6 +131,25 @@ describe('sender retry — enqueue', () => {
     expect(row?.last_error).toMatch(/Bearer \[redacted\]|Authorization: \[redacted\]/);
   });
 
+  it('uses cause.retryAfterMs for next_attempt_at when present (overrides backoffMs(1))', async () => {
+    const t0 = 1_700_000_000_000;
+    const cause = new SenderError('subscribe', 'http_4xx', 'rate limited', 429, 45_000);
+    await enqueue(DB, {
+      kind: 'subscribe',
+      payload: { email: 'a@b.com', fields: {} },
+      idempotencyKey: 'subscribe:retry-after',
+      firstAttemptAtMs: t0,
+      cause,
+    });
+    const row = await DB.prepare(
+      `SELECT next_attempt_at FROM sender_retry WHERE idempotency_key = ?`
+    )
+      .bind('subscribe:retry-after')
+      .first<{ next_attempt_at: number }>();
+    // Should be ~t0 + 45_000, not t0 + backoffMs(1) (= t0 + 60_000).
+    expect(Math.abs(row!.next_attempt_at - (t0 + 45_000))).toBeLessThan(1000);
+  });
+
   it('is idempotent on duplicate key — preserves attempts, refreshes payload, clamps next_attempt_at down', async () => {
     const t0 = 1_700_000_000_000;
     await enqueue(DB, {
@@ -617,7 +636,6 @@ describe('sender retry — drain — unsubscribe', () => {
       payload: {
         email: 'gone@example.com',
         subscriberId: 'sub_88',
-        stage: 'remove_groups',
       },
       idempotencyKey: 'unsubscribe:uns',
       firstAttemptAtMs: t0,

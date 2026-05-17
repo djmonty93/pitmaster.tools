@@ -28,7 +28,8 @@ export class SenderError extends Error {
     public readonly requestKind: SenderRequestKind,
     public readonly kind: SenderErrorKind,
     message: string,
-    public readonly status?: number
+    public readonly status?: number,
+    public readonly retryAfterMs?: number
   ) {
     super(
       `sender ${requestKind}: ${kind}${status !== undefined ? ` (${status})` : ''}: ${message}`
