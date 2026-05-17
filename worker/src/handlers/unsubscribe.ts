@@ -23,10 +23,10 @@
 
 import { z } from 'zod';
 import { verifyToken } from '../lib/auth/token.js';
-import { createMailerLiteClient } from '../lib/mailerlite/client.js';
-import { MailerLiteError } from '../lib/mailerlite/errors.js';
-import { removeBbqGroups } from '../lib/mailerlite/groups.js';
-import { enqueue } from '../lib/mailerlite/retry.js';
+import { createSenderClient } from '../lib/sender/client.js';
+import { SenderError } from '../lib/sender/errors.js';
+import { removeBbqGroups } from '../lib/sender/groups.js';
+import { enqueue } from '../lib/sender/retry.js';
 import { summarizeError } from '../lib/redact.js';
 import { json, jsonError, type RouteContext } from '../router.js';
 
@@ -52,18 +52,18 @@ export async function handleUnsubscribe(rc: RouteContext): Promise<Response> {
     return jsonError(401, 'invalid_token', 'Token does not match this email');
   }
 
-  const client = createMailerLiteClient({ apiKey: rc.env.MAILERLITE_API_KEY });
+  const client = createSenderClient({ apiToken: rc.env.SENDER_API_TOKEN });
   let status: 'sent' | 'queued' = 'sent';
   let subscriberId: string | null = null;
   try {
     const found = await client.getSubscriberByEmail(email);
     subscriberId = found?.id ?? null;
   } catch (err) {
-    if (!(err instanceof MailerLiteError)) {
+    if (!(err instanceof SenderError)) {
       throw err;
     }
     // client.getSubscriberByEmail ALREADY swallows 404 (returns null),
-    // so any MailerLiteError that propagates here is something else:
+    // so any SenderError that propagates here is something else:
     // 401/403 (revoked key), 5xx, timeout, etc. Treating these as
     // "not in MailerLite" would let the handler skip group removal
     // and report unsubscribe success while the user remains in
@@ -94,7 +94,7 @@ export async function handleUnsubscribe(rc: RouteContext): Promise<Response> {
       // removal used to be swallowed and the response still said
       // 'sent', leaving the subscriber on the regional automation's
       // audience even though D1 said unsubscribed.
-      const cause = err instanceof MailerLiteError ? err : undefined;
+      const cause = err instanceof SenderError ? err : undefined;
       await enqueue(rc.env.SMOKE_DB, {
         kind: 'unsubscribe',
         payload: { email, subscriberId, stage: 'remove_groups' },
@@ -102,7 +102,7 @@ export async function handleUnsubscribe(rc: RouteContext): Promise<Response> {
         cause,
       });
       status = 'queued';
-      if (!(err instanceof MailerLiteError)) {
+      if (!(err instanceof SenderError)) {
         console.warn('unsubscribe: removeBbqGroups unexpected error', summarizeError(err));
       }
     }
