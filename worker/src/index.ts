@@ -108,7 +108,7 @@ const handler = {
     //   re-attempts the only matching 6am-local tick for a failed
     //   region.
     //
-    //   `*/5 * * * *` — mailerlite_retry drain. Without this nothing
+    //   `*/5 * * * *` — sender_retry drain. Without this nothing
     //   ever calls drain() in production, so subscribe/unsubscribe/
     //   preferences/group-assign retryable failures would queue
     //   forever. The 5-minute cadence aligns with the retry queue's

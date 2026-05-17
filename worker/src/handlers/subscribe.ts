@@ -7,12 +7,12 @@
 // Writes happen in this order:
 //   1. resolveZip → (state, timezone, lat/lon, metroSlug)
 //   2. stateToRegion → Region (or null if state can't be resolved)
-//   3. MailerLite subscribe (upsert) with bbq_* fields
+//   3. Sender.net subscribe (upsert) with bbq_* fields
 //   4. assignBbqGroups: pitmaster_all + pitmaster_<region>
 //   5. D1 INSERT … ON CONFLICT (email) DO UPDATE on `subscribers`
 //
-// On retryable MailerLite failures the call enqueues on
-// `mailerlite_retry` and STILL writes the D1 row so the user can
+// On retryable Sender.net failures the call enqueues on
+// `sender_retry` and STILL writes the D1 row so the user can
 // receive Friday emails once the queue drains. Non-retryable failures
 // surface 4xx and the D1 row is not created.
 //
@@ -172,7 +172,7 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
       // MailerLite outage during a zip move would leave the user in
       // BOTH pitmaster_<old> and pitmaster_<new> after recovery —
       // the handler's own detach logic was bypassed because we never
-      // got a mailerliteId on the original call.
+      // got an espId on the original call.
       await enqueue(rc.env.SMOKE_DB, {
         kind: 'subscribe',
         payload: { email: body.email, fields, region, oldRegion },

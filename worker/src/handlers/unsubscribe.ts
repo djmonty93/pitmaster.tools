@@ -3,22 +3,22 @@
 // Body JSON: { email, token }.
 //
 // Portfolio-aware behavior: instead of setting status=unsubscribed at
-// the MailerLite account level (which would also remove the subscriber
+// the Sender.net account level (which would also remove the subscriber
 // from any future powersizing_*, overlanding_* groups they belong to),
 // we remove them from the BBQ-prefixed groups only. The subscriber
-// stays in MailerLite as `status=active` so sibling sites can keep
+// stays in Sender.net as `status=active` so sibling sites can keep
 // emailing them.
 //
 // Flow:
 //   1. Verify HMAC token against the email.
-//   2. Look up the subscriber's MailerLite id (GET /api/subscribers/:email).
-//      Null result means "never made it into MailerLite" — still mark
+//   2. Look up the subscriber's Sender.net id (GET /v2/subscribers/:email).
+//      Null result means "never made it into Sender.net" — still mark
 //      D1 unsubscribed and return success.
 //   3. removeBbqGroups: DELETE from pitmaster_all + every pitmaster_<region>.
 //   4. UPDATE D1 subscribers SET unsubscribed_at = now.
 //
-// Retryable MailerLite failures during group removal enqueue on
-// mailerlite_retry and still update D1 — the user sees immediate
+// Retryable Sender.net failures during group removal enqueue on
+// sender_retry and still update D1 — the user sees immediate
 // success and the queue catches up later.
 
 import { z } from 'zod';

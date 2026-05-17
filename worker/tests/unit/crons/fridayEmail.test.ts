@@ -208,7 +208,7 @@ describe('runFridayCron — region-by-region', () => {
     // the throw, the handler resolves and the region's only 6am-local
     // tick is gone for the week.
     const trigger = vi.fn().mockRejectedValue(
-      new SenderError('campaign', 'http_5xx', 'status 503', 503)
+      new SenderError('digest_trigger', 'http_5xx', 'status 503', 503)
     );
     await expect(
       runFridayCron(buildEnv(), FRIDAY_6AM_ET, { client: fakeClient(trigger) })
@@ -231,7 +231,7 @@ describe('runFridayCron — region-by-region', () => {
 
   it('outcome.retryable is true for retryable failures and false for non-retryable', async () => {
     const retryableTrigger = vi.fn().mockRejectedValue(
-      new SenderError('campaign', 'http_5xx', 'x', 503)
+      new SenderError('digest_trigger', 'http_5xx', 'x', 503)
     );
     const retryableOutcomes = await runFridayCron(buildEnv(), FRIDAY_6AM_ET, {
       client: fakeClient(retryableTrigger),
@@ -242,7 +242,7 @@ describe('runFridayCron — region-by-region', () => {
 
     await DB.prepare(`DELETE FROM friday_campaign_log`).run();
     const nonRetryableTrigger = vi.fn().mockRejectedValue(
-      new SenderError('campaign', 'http_4xx', 'x', 400)
+      new SenderError('digest_trigger', 'http_4xx', 'x', 400)
     );
     const nonRetryableOutcomes = await runFridayCron(buildEnv(), FRIDAY_6AM_ET, {
       client: fakeClient(nonRetryableTrigger),
@@ -256,7 +256,7 @@ describe('runFridayCron — region-by-region', () => {
     // 'queued' (we suppress the throw in tests). A second invocation
     // re-claims via the queued→sending transition and triggers again.
     const failingTrigger = vi.fn().mockRejectedValue(
-      new SenderError('campaign', 'http_5xx', 'transient', 503)
+      new SenderError('digest_trigger', 'http_5xx', 'transient', 503)
     );
     await runFridayCron(buildEnv(), FRIDAY_6AM_ET, {
       client: fakeClient(failingTrigger),
@@ -447,7 +447,7 @@ describe('runFridayCron — region-by-region', () => {
     // 'already-sent' — telemetry/event readers need to distinguish a
     // successful prior send from a needs-attention prior failure.
     const trigger = vi.fn().mockRejectedValue(
-      new SenderError('campaign', 'http_4xx', 'status 400', 400)
+      new SenderError('digest_trigger', 'http_4xx', 'status 400', 400)
     );
     const outcomes = await runFridayCron(buildEnv(), FRIDAY_6AM_ET, {
       client: fakeClient(trigger),

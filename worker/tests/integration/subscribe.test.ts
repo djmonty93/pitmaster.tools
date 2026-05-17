@@ -154,7 +154,7 @@ describe('POST /api/subscribe', () => {
     stub = installFetchStub([
       { match: '/groups/', respond: groupAssignOk },
       {
-        match: 'connect.mailerlite.com',
+        match: 'api.sender.net',
         respond: () =>
           jsonResponse(200, { data: { id: 'sub_1', email: 'me@example.com', status: 'active' } }),
       },
