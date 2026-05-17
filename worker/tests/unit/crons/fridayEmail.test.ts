@@ -519,6 +519,83 @@ describe('runFridayCron — region-by-region', () => {
     ).toBe(true);
   });
 
+  it('429 with Retry-After: 1800 → friday_campaign_log row has next_attempt_at ≈ now + 1_800_000, status = failed', async () => {
+    const fixedNow = FRIDAY_6AM_ET;
+    const nowMs = fixedNow.getTime();
+    const retryAfterSec = 1800;
+    const trigger = vi.fn().mockRejectedValue(
+      new SenderError('digest_trigger', 'http_4xx', 'rate limited', 429, retryAfterSec * 1000)
+    );
+    // swallowRetryableThrow so we can inspect outcomes without the test throwing
+    await runFridayCron(buildEnv(), fixedNow, {
+      client: fakeClient(trigger),
+      now: () => fixedNow,
+      swallowRetryableThrow: true,
+    });
+    // Both ET-anchored regions get a 429 with Retry-After.
+    const log = await DB.prepare(
+      `SELECT region, status, next_attempt_at FROM friday_campaign_log ORDER BY region`
+    ).all<{ region: string; status: string; next_attempt_at: number | null }>();
+    const etRows = log.results.filter((r) => r.region === 'northeast' || r.region === 'southeast');
+    expect(etRows).toHaveLength(2);
+    for (const row of etRows) {
+      expect(row.status).toBe('failed');
+      expect(row.next_attempt_at).not.toBeNull();
+      // next_attempt_at ≈ now + 1_800_000 (within 1s tolerance)
+      expect(Math.abs(row.next_attempt_at! - (nowMs + 1_800_000))).toBeLessThan(1000);
+    }
+  });
+
+  it('subsequent cron invocation with next_attempt_at still in the future → skipped with reason retry-after-pending, no trigger fires', async () => {
+    const fixedNow = FRIDAY_6AM_ET;
+    const nowMs = fixedNow.getTime();
+    const futureAttempt = nowMs + 1_800_000; // 30 min from now — still in future
+    // Seed a 'failed' row with next_attempt_at in the future for northeast.
+    await DB.prepare(
+      `INSERT INTO friday_campaign_log (region, send_date, status, attempted_at, next_attempt_at)
+         VALUES ('northeast', '2026-05-15', 'failed', ?, ?)`
+    )
+      .bind(nowMs, futureAttempt)
+      .run();
+    const trigger = vi.fn().mockResolvedValue(undefined);
+    const outcomes = await runFridayCron(buildEnv(), fixedNow, {
+      client: fakeClient(trigger),
+      now: () => fixedNow,
+    });
+    const ne = outcomes.find((o) => o.region === 'northeast')!;
+    expect(ne.status).toBe('skipped');
+    expect((ne as Extract<FridayCronOutcome, { status: 'skipped' }>).reason).toBe('retry-after-pending');
+    // Only southeast fires — northeast is skipped due to retry-after-pending.
+    expect(trigger).toHaveBeenCalledTimes(1);
+    expect(trigger).not.toHaveBeenCalledWith(
+      expect.objectContaining({ idempotencyTag: 'northeast:2026-05-15' })
+    );
+  });
+
+  it('subsequent cron invocation AFTER next_attempt_at has passed → trigger fires normally', async () => {
+    const fixedNow = FRIDAY_6AM_ET;
+    const nowMs = fixedNow.getTime();
+    const pastAttempt = nowMs - 1000; // 1 second ago — already passed
+    // Seed a 'failed' row with next_attempt_at in the past for northeast.
+    await DB.prepare(
+      `INSERT INTO friday_campaign_log (region, send_date, status, attempted_at, next_attempt_at)
+         VALUES ('northeast', '2026-05-15', 'failed', ?, ?)`
+    )
+      .bind(nowMs, pastAttempt)
+      .run();
+    const trigger = vi.fn().mockResolvedValue(undefined);
+    const outcomes = await runFridayCron(buildEnv(), fixedNow, {
+      client: fakeClient(trigger),
+      now: () => fixedNow,
+    });
+    const ne = outcomes.find((o) => o.region === 'northeast')!;
+    // Past next_attempt_at → re-claimed and triggered normally.
+    expect(ne.status).toBe('sent');
+    expect(trigger).toHaveBeenCalledWith(
+      expect.objectContaining({ idempotencyTag: 'northeast:2026-05-15' })
+    );
+  });
+
   it('triggers Pacific at 14:00 UTC during winter (standard time)', async () => {
     // Regression for the [P2] cron-range bug: in standard time
     // (Nov–Mar), Pacific 6am local lands at 14:00 UTC, which the

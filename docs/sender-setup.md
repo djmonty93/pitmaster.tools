@@ -71,4 +71,4 @@ Sender's webhooks require the Standard plan or above. If/when wired, the worker 
 
 ## 7. Rate limits
 
-Sender returns `429` with a `Retry-After: <seconds>` header on rate-limit. The worker treats 429 as retryable and the retry queue prefers `Retry-After` over the default exponential backoff when present (capped at 1 hour). Free-tier limits are not publicly published — read `X-RateLimit-Remaining` on responses to monitor headroom.
+Sender returns `429` with a `Retry-After: <seconds>` header on rate-limit. The worker treats 429 as retryable and the retry queue prefers `Retry-After` over the default exponential backoff when present (capped at `MAX_BACKOFF_MS` = 6 h in the retry queue — the parser itself no longer caps at 1 h). The Friday digest cron also honors `Retry-After` — a region that returns 429 with `Retry-After: <N>` will be skipped until `now + N` on subsequent hourly cron invocations within the send window. Free-tier limits are not publicly published — read `X-RateLimit-Remaining` on responses to monitor headroom.

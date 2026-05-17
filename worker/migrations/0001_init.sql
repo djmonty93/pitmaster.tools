@@ -212,14 +212,15 @@ CREATE INDEX IF NOT EXISTS idx_articles_metro_slug
 -- timing to /api/status.
 
 CREATE TABLE IF NOT EXISTS friday_campaign_log (
-  id           INTEGER PRIMARY KEY AUTOINCREMENT,
-  region       TEXT    NOT NULL CHECK (region IN (
-                  'northeast', 'southeast', 'midwest',
-                  'south_central', 'mountain', 'pacific'
-                )),
-  send_date    TEXT    NOT NULL,  -- YYYY-MM-DD in the region's anchor tz
-  status       TEXT    NOT NULL CHECK (status IN ('queued', 'sending', 'sent', 'failed')),
-  attempted_at INTEGER NOT NULL,
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  region          TEXT    NOT NULL CHECK (region IN (
+                    'northeast', 'southeast', 'midwest',
+                    'south_central', 'mountain', 'pacific'
+                  )),
+  send_date       TEXT    NOT NULL,  -- YYYY-MM-DD in the region's anchor tz
+  status          TEXT    NOT NULL CHECK (status IN ('queued', 'sending', 'sent', 'failed')),
+  attempted_at    INTEGER NOT NULL,
+  next_attempt_at INTEGER,          -- when set + status='failed', cron defers re-attempts until this epoch ms (used to honor Sender's Retry-After header)
   UNIQUE (region, send_date)
 );
 

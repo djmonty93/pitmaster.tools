@@ -50,7 +50,7 @@ export interface FridayCronOptions {
 }
 
 export type FridayCronOutcome =
-  | { region: Region; status: 'skipped'; reason: 'already-sent' | 'previously-failed' | 'no-trigger-url' | 'not-local-friday-6' }
+  | { region: Region; status: 'skipped'; reason: 'already-sent' | 'previously-failed' | 'no-trigger-url' | 'not-local-friday-6' | 'retry-after-pending' }
   | { region: Region; status: 'sent'; sendDate: string }
   | { region: Region; status: 'failed'; sendDate: string; error: string; retryable: boolean };
 
@@ -227,12 +227,16 @@ async function processRegion(
     `INSERT INTO friday_campaign_log (region, send_date, status, attempted_at)
        VALUES (?, ?, 'sending', ?)
        ON CONFLICT (region, send_date) DO UPDATE
-         SET status = 'sending', attempted_at = excluded.attempted_at
+         SET status = 'sending', attempted_at = excluded.attempted_at,
+             next_attempt_at = NULL
          WHERE friday_campaign_log.status = 'queued'
             OR (friday_campaign_log.status = 'sending'
-                AND friday_campaign_log.attempted_at <= ?)`
+                AND friday_campaign_log.attempted_at <= ?)
+            OR (friday_campaign_log.status = 'failed'
+                AND friday_campaign_log.next_attempt_at IS NOT NULL
+                AND friday_campaign_log.next_attempt_at <= ?)`
   )
-    .bind(region, sendDate, nowMs, staleCutoff)
+    .bind(region, sendDate, nowMs, staleCutoff, nowMs)
     .run();
   if ((claim.meta.changes ?? 0) === 0) {
     // The ON CONFLICT WHERE clause rejected the UPDATE. That's one of:
@@ -254,15 +258,24 @@ async function processRegion(
     // expires the stale-cutoff will have elapsed and the next attempt
     // will re-claim. For (a)/(b) report the real status.
     const current = await env.SMOKE_DB.prepare(
-      `SELECT status, attempted_at FROM friday_campaign_log
+      `SELECT status, attempted_at, next_attempt_at FROM friday_campaign_log
         WHERE region = ? AND send_date = ?`
     )
       .bind(region, sendDate)
-      .first<{ status: 'queued' | 'sending' | 'sent' | 'failed'; attempted_at: number }>();
+      .first<{ status: 'queued' | 'sending' | 'sent' | 'failed'; attempted_at: number; next_attempt_at: number | null }>();
     if (current?.status === 'sent') {
       return { region, status: 'skipped', reason: 'already-sent' };
     }
     if (current?.status === 'failed') {
+      // A 'failed' row with next_attempt_at > now means a 429 with Retry-After
+      // landed on a prior attempt — honor Sender's signal and skip until the
+      // deadline passes. A subsequent hourly cron invocation after next_attempt_at
+      // will re-claim and retry via the updated claim SQL.
+      if (current.next_attempt_at !== null && current.next_attempt_at > nowMs) {
+        return { region, status: 'skipped', reason: 'retry-after-pending' };
+      }
+      // next_attempt_at is null or already past — this is a terminal non-retryable
+      // failure that an operator must investigate before re-attempting.
       return { region, status: 'skipped', reason: 'previously-failed' };
     }
     // 'sending' (or any unexpected state) → treat as still in-flight.
@@ -299,14 +312,21 @@ async function processRegion(
     const reason = err instanceof SenderError ? summarizeError(err) : 'trigger failed';
     const retryable = err instanceof SenderError && err.shouldRetry;
     if (retryable) {
-      // Revert the row to 'queued' so a subsequent claim (Cloudflare
-      // scheduled-handler auto-retry or operator-triggered replay)
-      // can re-attempt. Without the revert the row stays 'sending'
-      // and only a stale-timeout re-claim would recover it. Best-
-      // effort — a revert failure here means the row sits 'sending'
-      // until staleness expires, which is still correct (re-claimable).
-      await safeUpdateStatus(env.SMOKE_DB, region, sendDate, 'queued', nowMs);
-      await recordEvent(env.SMOKE_DB, region, sendDate, 'failed', `${reason} (retryable)`, nowMs);
+      const retryAfterMs = err instanceof SenderError ? err.retryAfterMs : undefined;
+      if (retryAfterMs !== undefined) {
+        // Sender signalled an explicit Retry-After. Mark the row 'failed' with
+        // next_attempt_at so subsequent hourly cron invocations skip until the
+        // deadline passes, then re-claim and retry (see claim SQL + disambiguation).
+        // We still throw below so Cloudflare's scheduled-handler fires the first
+        // retry pass; after next_attempt_at the claim SQL will re-claim normally.
+        await safeUpdateNextAttemptAt(env.SMOKE_DB, region, sendDate, nowMs + retryAfterMs, nowMs);
+        await recordEvent(env.SMOKE_DB, region, sendDate, 'failed', `${reason} (retryable, retry-after=${retryAfterMs}ms)`, nowMs);
+      } else {
+        // Plain retryable failure (5xx without Retry-After): revert to 'queued'
+        // so the CF scheduled-handler auto-retry can re-claim immediately.
+        await safeUpdateStatus(env.SMOKE_DB, region, sendDate, 'queued', nowMs);
+        await recordEvent(env.SMOKE_DB, region, sendDate, 'failed', `${reason} (retryable)`, nowMs);
+      }
       return { region, status: 'failed', sendDate, error: reason, retryable: true };
     }
     await safeUpdateStatus(env.SMOKE_DB, region, sendDate, 'failed', nowMs);
@@ -365,6 +385,37 @@ async function updateStatus(
     )
     .bind(status, now, region, sendDate)
     .run();
+}
+
+/**
+ * Best-effort: set status='failed' + next_attempt_at on the row to honor
+ * Sender's Retry-After signal. A failure here leaves the row in 'sending'
+ * (stale-claimable after SENDING_STALE_MS), which is still recoverable.
+ */
+async function safeUpdateNextAttemptAt(
+  db: D1Database,
+  region: Region,
+  sendDate: string,
+  nextAttemptAt: number,
+  now: number
+): Promise<void> {
+  try {
+    await db
+      .prepare(
+        `UPDATE friday_campaign_log
+            SET status = 'failed', attempted_at = ?, next_attempt_at = ?
+          WHERE region = ? AND send_date = ?`
+      )
+      .bind(now, nextAttemptAt, region, sendDate)
+      .run();
+  } catch (err) {
+    console.warn('friday_campaign_log: next_attempt_at update failed (best-effort)', {
+      region,
+      send_date: sendDate,
+      next_attempt_at: nextAttemptAt,
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
 }
 
 async function recordEvent(
