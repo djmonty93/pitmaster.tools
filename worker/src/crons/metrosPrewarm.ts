@@ -168,16 +168,19 @@ export async function runMetrosPrewarm(env: Env, now: Date): Promise<MetrosSumma
   // cache's stale window (30 h = 24 h fresh + 6 h stale-while-error
   // grace from worker/src/lib/cache/weather.ts).
   //
-  // Caveat: during EST the 04:00 UTC tick rewrites the PRIOR ET day's
+  // Caveat: during EST the 04:00 UTC tick rewrites the same ET day's
   // aggregate at 23:00 EST and resets its TTL to a fresh 30 h. The
-  // per-metro weather entries that aggregate was built from are
-  // about to expire (they were written ~25 h ago at the previous
-  // EST 05:00 UTC tick), so the aggregate can outlive its source
-  // data by ~24 h. That's harmless — the /api/metros yesterday
-  // fallback would prefer today's fresh aggregate anyway, and the
-  // per-metro forecast handler still has its own stale-while-error
-  // path. The 30 h ceiling is a defense against the aggregate
-  // lingering indefinitely if BOTH crons silently miss several days.
+  // per-metro weather entries it was built from are 23 h old at
+  // that moment (written at the previous EST 05:00 UTC tick = 24 h
+  // earlier, minus the 1 h gap between the two daily ticks). With
+  // their own 30 h TTL they expire 7 h later — meaning this rewrite
+  // extends the aggregate's lifetime to ~23 h past its source data's
+  // KV expiry. That's harmless — the /api/metros yesterday fallback
+  // would prefer the NEXT day's fresh aggregate anyway (written at
+  // the following 05:00 UTC tick), and the per-metro forecast
+  // handler still has its own stale-while-error path. The 30 h
+  // ceiling is a defense against the aggregate lingering
+  // indefinitely if BOTH crons silently miss several days.
   await env.WEATHER_KV.put(aggregateKey(etDate), JSON.stringify(summary), {
     expirationTtl: 30 * 60 * 60,
   });
