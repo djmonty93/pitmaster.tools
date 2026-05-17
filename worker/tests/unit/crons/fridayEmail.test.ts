@@ -250,7 +250,7 @@ describe('runFridayCron — region-by-region', () => {
     );
     await expect(
       runFridayCron(buildEnv(), FRIDAY_6AM_ET, { client: fakeClient(trigger) })
-    ).rejects.toThrow(/retryable failure/);
+    ).rejects.toThrow('Friday cron: retry required (failed retryable or retry-after pending)');
     const log = await DB.prepare(
       `SELECT region, status FROM friday_campaign_log ORDER BY region`
     ).all<{ region: string; status: string }>();
@@ -379,7 +379,7 @@ describe('runFridayCron — region-by-region', () => {
         client: fakeClient(),
         now: () => fixedNow,
       })
-    ).rejects.toThrow(/retryable failure.*northeast/);
+    ).rejects.toThrow('Friday cron: retry required (failed retryable or retry-after pending)');
   });
 
   it("reports 'sent' even if the post-trigger D1 UPDATE fails — does NOT revert the row to a re-claimable state", async () => {
@@ -558,9 +558,12 @@ describe('runFridayCron — region-by-region', () => {
       .bind(nowMs, futureAttempt)
       .run();
     const trigger = vi.fn().mockResolvedValue(undefined);
+    // swallowRetryableThrow: true so we can inspect outcomes; the throw
+    // behavior is covered by the dedicated "throws on retry-after-pending" test.
     const outcomes = await runFridayCron(buildEnv(), fixedNow, {
       client: fakeClient(trigger),
       now: () => fixedNow,
+      swallowRetryableThrow: true,
     });
     const ne = outcomes.find((o) => o.region === 'northeast')!;
     expect(ne.status).toBe('skipped');
@@ -590,6 +593,70 @@ describe('runFridayCron — region-by-region', () => {
     });
     const ne = outcomes.find((o) => o.region === 'northeast')!;
     // Past next_attempt_at → re-claimed and triggered normally.
+    expect(ne.status).toBe('sent');
+    expect(trigger).toHaveBeenCalledWith(
+      expect.objectContaining({ idempotencyTag: 'northeast:2026-05-15' })
+    );
+  });
+
+  it('retry-after-pending: runFridayCron throws when a region has a pending retry-after row (no swallow)', async () => {
+    const fixedNow = FRIDAY_6AM_ET;
+    const nowMs = fixedNow.getTime();
+    const futureAttempt = nowMs + 1_800_000; // 30 min from now — still in future
+    await DB.prepare(
+      `INSERT INTO friday_campaign_log (region, send_date, status, attempted_at, next_attempt_at)
+         VALUES ('northeast', '2026-05-15', 'failed', ?, ?)`
+    )
+      .bind(nowMs, futureAttempt)
+      .run();
+    const trigger = vi.fn().mockResolvedValue(undefined);
+    await expect(
+      runFridayCron(buildEnv(), fixedNow, {
+        client: fakeClient(trigger),
+        now: () => fixedNow,
+        // no swallowRetryableThrow — should throw
+      })
+    ).rejects.toThrow('Friday cron: retry required (failed retryable or retry-after pending)');
+  });
+
+  it('retry-after-pending: with swallowRetryableThrow:true outcome is retry-after-pending and no throw fires', async () => {
+    const fixedNow = FRIDAY_6AM_ET;
+    const nowMs = fixedNow.getTime();
+    const futureAttempt = nowMs + 1_800_000;
+    await DB.prepare(
+      `INSERT INTO friday_campaign_log (region, send_date, status, attempted_at, next_attempt_at)
+         VALUES ('northeast', '2026-05-15', 'failed', ?, ?)`
+    )
+      .bind(nowMs, futureAttempt)
+      .run();
+    const trigger = vi.fn().mockResolvedValue(undefined);
+    const outcomes = await runFridayCron(buildEnv(), fixedNow, {
+      client: fakeClient(trigger),
+      now: () => fixedNow,
+      swallowRetryableThrow: true,
+    });
+    const ne = outcomes.find((o) => o.region === 'northeast')!;
+    expect(ne.status).toBe('skipped');
+    expect((ne as Extract<FridayCronOutcome, { status: 'skipped' }>).reason).toBe('retry-after-pending');
+  });
+
+  it('retry-after-pending: after next_attempt_at expires, follow-up invocation re-attempts the digest_trigger', async () => {
+    const fixedNow = FRIDAY_6AM_ET;
+    const nowMs = fixedNow.getTime();
+    const pastAttempt = nowMs - 1000; // 1 second ago — already expired
+    await DB.prepare(
+      `INSERT INTO friday_campaign_log (region, send_date, status, attempted_at, next_attempt_at)
+         VALUES ('northeast', '2026-05-15', 'failed', ?, ?)`
+    )
+      .bind(nowMs, pastAttempt)
+      .run();
+    const trigger = vi.fn().mockResolvedValue(undefined);
+    const outcomes = await runFridayCron(buildEnv(), fixedNow, {
+      client: fakeClient(trigger),
+      now: () => fixedNow,
+    });
+    const ne = outcomes.find((o) => o.region === 'northeast')!;
+    // Expired next_attempt_at → re-claimed and triggered normally.
     expect(ne.status).toBe('sent');
     expect(trigger).toHaveBeenCalledWith(
       expect.objectContaining({ idempotencyTag: 'northeast:2026-05-15' })

@@ -170,26 +170,32 @@ export async function runFridayCron(
     outcomes.push(outcome);
   }
 
-  // If any region failed retryably, throw so Cloudflare's
-  // scheduled-handler auto-retry fires. Without this the
-  // ctx.waitUntil(runFridayCron(...)) in index.ts resolves normally,
-  // Cloudflare considers the invocation a success, and the failed
-  // region's only Fri-06:00 anchor-tz tick has passed by the next
-  // hourly cron — the digest is dark for that region for the week.
+  // If any region failed retryably OR has a retry-after-pending outcome,
+  // throw so Cloudflare's scheduled-handler auto-retry fires. Without this
+  // ctx.waitUntil(runFridayCron(...)) resolves normally, Cloudflare
+  // considers the invocation a success, and the failed region's only
+  // Fri-06:00 anchor-tz tick has passed by the next hourly cron — the
+  // digest is dark for that region for the week.
   // Successful regions are NOT re-attempted on auto-retry because the
   // claim SQL skips 'sent' rows.
+  //
+  // We throw on retry-after-pending so Cloudflare's scheduled-event auto-retry
+  // re-fires the same event ~5-30 min later with the SAME scheduledTime
+  // (still passes the per-region local-Friday-6am gate). When next_attempt_at
+  // has expired by the time the auto-retry runs, the cron attempts the
+  // digest_trigger normally. For Retry-After values that exceed Cloudflare's
+  // auto-retry budget (~30-60 min), the region is silently skipped until next
+  // Friday's send_date — acceptable degradation under sustained rate limiting.
   if (!opts.swallowRetryableThrow) {
-    const retryable = outcomes.find(
-      (o): o is Extract<FridayCronOutcome, { status: 'failed' }> =>
-        o.status === 'failed' && o.retryable
+    const hasRetryableFailure = outcomes.some(
+      (o) => o.status === 'failed' && o.retryable
     );
-    if (retryable) {
+    const hasRetryAfterPending = outcomes.some(
+      (o) => o.status === 'skipped' && o.reason === 'retry-after-pending'
+    );
+    if (hasRetryableFailure || hasRetryAfterPending) {
       throw new Error(
-        `runFridayCron: retryable failure for region(s) ` +
-          `[${outcomes
-            .filter((o) => o.status === 'failed' && o.retryable)
-            .map((o) => (o as { region: Region }).region)
-            .join(', ')}] — Cloudflare scheduled-handler retry should re-attempt`
+        'Friday cron: retry required (failed retryable or retry-after pending)'
       );
     }
   }
