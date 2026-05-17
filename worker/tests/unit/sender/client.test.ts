@@ -151,3 +151,18 @@ describe('SenderClient.updateSubscriberFields', () => {
     } finally { stub.restore(); }
   });
 });
+
+describe('SenderClient.unsubscribe', () => {
+  it('PATCHes status=unsubscribed', async () => {
+    const stub = installFetchStub([
+      { match: 'api.sender.net/v2/subscribers/a%40b.co', respond: () => jsonResponse(200, { data: { id: 'sub_1' } }) },
+    ]);
+    try {
+      const client = createSenderClient({ apiToken: 'tok' });
+      await client.unsubscribe({ email: 'a@b.co' });
+      const call = stub.calls[0];
+      expect(call.method).toBe('PATCH');
+      expect(call.body).toMatchObject({ status: 'unsubscribed' });
+    } finally { stub.restore(); }
+  });
+});

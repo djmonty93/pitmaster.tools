@@ -173,7 +173,14 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
         throw err;
       }
     },
-    async unsubscribe() { throw new Error('not implemented'); },
+    async unsubscribe(input) {
+      await request(
+        'unsubscribe',
+        'PATCH',
+        `/subscribers/${encodeURIComponent(input.email)}`,
+        { status: 'unsubscribed' }
+      );
+    },
     async listGroups() { throw new Error('not implemented'); },
     async assignGroup() { throw new Error('not implemented'); },
     async removeGroup() { throw new Error('not implemented'); },
