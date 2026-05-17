@@ -440,7 +440,14 @@
   // previous in-flight request before starting a new one. Without
   // this, a slow first response can land AFTER the second and
   // overwrite the DOM with stale day cards.
+  //
+  // The `inflightCtrl === ctrl` identity check doesn't work when
+  // AbortController is unavailable (both ctrl values are `null`, and
+  // null === null), so we also bump a request sequence counter and
+  // compare against `latestRequestSeq` — that's the actual ownership
+  // signal in the AbortController-missing fallback.
   var inflightCtrl = null;
+  var latestRequestSeq = 0;
 
   function loadForecast(opts) {
     var zip = opts.zip || '';
@@ -454,6 +461,7 @@
     }
     var ctrl = typeof AbortController === 'function' ? new AbortController() : null;
     inflightCtrl = ctrl;
+    var mySeq = ++latestRequestSeq;
     var timeoutId = null;
     if (ctrl) {
       timeoutId = setTimeout(function () { ctrl.abort(); }, 12000);
@@ -496,10 +504,15 @@
       // Only commit a render if this fetch is still the active one.
       // A newer request may have already aborted us during a rapid
       // cut/cooker change; in that case the newer call owns the DOM.
+      // The sequence guard is the authoritative ownership check; the
+      // controller-identity check is kept as a defense-in-depth signal
+      // for the supported (AbortController-present) path.
       // Pass the cut/cooker that produced this forecast so the per-hour
       // color-coding inside the day cards stays in sync with the
       // request (not with a newer pending one).
-      if (inflightCtrl === ctrl) renderForecast(forecast, { cut: cut, cooker: cooker });
+      if (mySeq === latestRequestSeq && inflightCtrl === ctrl) {
+        renderForecast(forecast, { cut: cut, cooker: cooker });
+      }
     }).catch(function (err) {
       // Always clear the pending 12s timer on the failure path so a
       // superseded fetch doesn't leak a no-op abort up to 12 seconds
@@ -509,8 +522,9 @@
       // surfacing a stale 503 (or AbortError, or timeout) on top of a
       // newer successful render would tell the user the page failed
       // when in fact it just succeeded with newer parameters. The
-      // active request is the only one that owns #swStatus.
-      if (inflightCtrl !== ctrl) return;
+      // sequence guard distinguishes the active request from a
+      // superseded one even when AbortController is unavailable.
+      if (mySeq !== latestRequestSeq) return;
       if (err && err.name === 'AbortError') {
         setStatus('The forecast request timed out. Check your connection and try again.', true);
         return;

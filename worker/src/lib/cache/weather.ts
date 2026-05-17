@@ -42,9 +42,15 @@ export function cacheKey(zip: string, dayBucket: string): string {
 // "Today in America/New_York" as a sortable YYYY-MM-DD string. en-CA's
 // locale formats dates as YYYY-MM-DD natively, which sidesteps the
 // month/day/year ordering pitfall of en-US. Cloudflare Workers ship the
-// full ICU tz database, so DST transitions resolve correctly: 2026-03-08
-// 06:30 UTC (= 02:30 EDT, one hour after spring-forward) returns
-// "2026-03-08", not "2026-03-07".
+// full ICU tz database, so DST transitions resolve correctly:
+//   • Spring-forward (2026-03-08): wall clock jumps 02:00 EST → 03:00
+//     EDT, so 02:00-02:59 ET does not exist. The corresponding UTC
+//     window is 07:00-07:59 UTC. Any input in that window resolves to
+//     2026-03-08 in ET (the post-jump local clock).
+//   • Fall-back (2026-11-01): wall clock falls 02:00 EDT → 01:00 EST,
+//     so 01:00-01:59 ET happens twice. Both occurrences (05:00-05:59
+//     UTC pre-fallback and 06:00-06:59 UTC post-fallback) resolve to
+//     2026-11-01 in ET.
 export function etDayBucket(now: number = Date.now()): string {
   return new Date(now).toLocaleDateString('en-CA', {
     timeZone: 'America/New_York',

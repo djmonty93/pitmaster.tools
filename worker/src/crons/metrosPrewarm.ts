@@ -1,11 +1,24 @@
 // Nightly metros pre-warm + aggregate writer.
 //
-// Schedule: `0 4,5 * * *` — 04:00 UTC (= 00:00 EDT, mid-Mar through
-// early-Nov) and 05:00 UTC (= 00:00 EST, the rest of the year).
-// Workers cron is UTC-only, so firing both ticks gives us "midnight ET"
-// year-round without a DST-aware scheduler. Whichever tick fires
-// second on a given day is a fast no-op against the day's already-
-// written entries (KV reads only).
+// Schedule: `0 4,5 * * *` — two UTC ticks per day (04:00 + 05:00).
+// Cloudflare cron is UTC-only and DST shifts which UTC moment is
+// "midnight in America/New_York" by an hour. The ticks cover both
+// possibilities:
+//   • EDT (mid-Mar–early-Nov): 04:00 UTC = 00:00 EDT (today rolls in
+//     here). 05:00 UTC = 01:00 EDT (no-op — same ET day, cache fresh).
+//   • EST (early-Nov–mid-Mar): 04:00 UTC = 23:00 EST on the prior ET
+//     day (warms YESTERDAY's bucket, which has not actually rolled
+//     yet; the on-disk etDayBucket value still reads as the prior
+//     day). 05:00 UTC = 00:00 EST (today rolls in here; warms the
+//     new bucket).
+// Net effect across the year: exactly one tick per day writes the new
+// ET-day bucket. The other tick either no-ops (EDT 05:00) or writes
+// the prior day's bucket once at 23:00 ET (EST 04:00). The 23:00 ET
+// write is harmless — it refreshes that day's aggregate with the
+// latest data right before rollover, so visitors browsing in the last
+// hour of the ET day get a fresher tile than the previous morning's
+// warm. The 24h fresh window on the per-metro cache absorbs both
+// writes idempotently.
 //
 // What it does:
 //   1. Read every row from the D1 `metros` table.
@@ -150,11 +163,16 @@ export async function runMetrosPrewarm(env: Env, now: Date): Promise<MetrosSumma
     metros: tiles,
   };
 
-  // Write the aggregate with a 36h TTL so a missed-cron day still
-  // serves yesterday's data instead of a 404. Next successful cron
-  // overwrites the entry with the fresh ET date.
+  // Write the aggregate with a TTL that matches the per-metro weather
+  // cache's stale window (30 h = 24 h fresh + 6 h stale-while-error
+  // grace from worker/src/lib/cache/weather.ts). Keeping both windows
+  // aligned means: if both crons silently miss a day, the aggregate
+  // and the per-metro entries fall out of cache at the same time, so
+  // the /api/metros handler's "yesterday-fallback" branch and the
+  // forecast handler's stale-while-error branch surface the same
+  // outage signal rather than disagreeing about staleness.
   await env.WEATHER_KV.put(aggregateKey(etDate), JSON.stringify(summary), {
-    expirationTtl: 36 * 60 * 60,
+    expirationTtl: 30 * 60 * 60,
   });
 
   return summary;

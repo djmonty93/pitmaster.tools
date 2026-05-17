@@ -26,16 +26,21 @@ describe('etDayBucket', () => {
   });
 
   it('handles DST spring-forward (2026-03-08 02:00 EST → 03:00 EDT)', () => {
-    // 06:30 UTC = 01:30 EST (before jump) — still the 8th in ET
-    expect(etDayBucket(Date.UTC(2026, 2, 8, 6, 30))).toBe('2026-03-08');
-    // 06:59 UTC = 01:59 EST (last second pre-jump) — still the 8th
-    expect(etDayBucket(Date.UTC(2026, 2, 8, 6, 59))).toBe('2026-03-08');
-    // 07:00 UTC = 03:00 EDT (wall clock jumps past 02:xx entirely)
-    expect(etDayBucket(Date.UTC(2026, 2, 8, 7, 0))).toBe('2026-03-08');
-    // 03:59 UTC = 22:59 EST on the 7th — last moment of the 7th in ET
-    expect(etDayBucket(Date.UTC(2026, 2, 8, 3, 59))).toBe('2026-03-07');
-    // 05:00 UTC = 00:00 EST on the 8th — first moment of the 8th
+    // 04:59 UTC = 23:59 EST on the 7th — the last second of the 7th in ET.
+    expect(etDayBucket(Date.UTC(2026, 2, 8, 4, 59))).toBe('2026-03-07');
+    // 05:00 UTC = 00:00 EST on the 8th — the first moment of the 8th.
     expect(etDayBucket(Date.UTC(2026, 2, 8, 5, 0))).toBe('2026-03-08');
+    // 06:30 UTC = 01:30 EST on the 8th (before jump) — still the 8th.
+    expect(etDayBucket(Date.UTC(2026, 2, 8, 6, 30))).toBe('2026-03-08');
+    // 06:59 UTC = 01:59 EST (last second pre-jump) — still the 8th.
+    expect(etDayBucket(Date.UTC(2026, 2, 8, 6, 59))).toBe('2026-03-08');
+    // 07:30 UTC sits inside the nonexistent 02:00-02:59 ET window
+    // (skipped at spring-forward). ICU resolves it to the post-jump
+    // 03:30 EDT — still the 8th. This is the assertion the prior
+    // version of the test was attempting but had wrong UTC offsets.
+    expect(etDayBucket(Date.UTC(2026, 2, 8, 7, 30))).toBe('2026-03-08');
+    // 08:00 UTC = 04:00 EDT (well after the jump) — still the 8th.
+    expect(etDayBucket(Date.UTC(2026, 2, 8, 8, 0))).toBe('2026-03-08');
   });
 
   it('handles DST fall-back (2026-11-01 02:00 EDT → 01:00 EST)', () => {

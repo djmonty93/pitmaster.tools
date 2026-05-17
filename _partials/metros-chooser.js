@@ -7,8 +7,15 @@
    text. On fetch failure, the skeleton "Score loading…" copy stays
    visible so navigation still works.
 
-   Filter input does a substring match against name + state and toggles
-   each tile's display. 50 elements → no debounce needed. */
+   Filter input toggles each tile's display by:
+     • substring match against the metro name (so "orle" finds New
+       Orleans, "kansas" finds Kansas City), and
+     • prefix match against the 2-letter state code (so "ca" finds
+       every California metro but "a" doesn't pull in NY/AZ/MA just
+       because their state code contains "a").
+   The asymmetry is intentional — state codes are short and almost
+   always typed at the start of a query, while names need substring
+   matching to be useful. 50 elements → no debounce needed. */
 
 (function () {
   'use strict';
