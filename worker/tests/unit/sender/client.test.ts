@@ -197,3 +197,30 @@ describe('SenderClient.listGroups', () => {
     } finally { stub.restore(); }
   });
 });
+
+describe('SenderClient.assignGroup', () => {
+  it('POSTs to /v2/subscribers/groups/{id} with subscribers array', async () => {
+    const stub = installFetchStub([
+      { match: 'api.sender.net/v2/subscribers/groups/g1', respond: () => jsonResponse(200, { data: {} }) },
+    ]);
+    try {
+      const client = createSenderClient({ apiToken: 'tok' });
+      await client.assignGroup('sub_1', 'g1');
+      const call = stub.calls[0];
+      expect(call.method).toBe('POST');
+      expect(call.body).toEqual({ subscribers: ['sub_1'] });
+    } finally { stub.restore(); }
+  });
+});
+
+describe('SenderClient.removeGroup', () => {
+  it('DELETEs and swallows 404', async () => {
+    const stub = installFetchStub([
+      { match: 'api.sender.net/v2/subscribers/groups/g1', respond: () => jsonResponse(404, {}) },
+    ]);
+    try {
+      const client = createSenderClient({ apiToken: 'tok' });
+      await expect(client.removeGroup('sub_1', 'g1')).resolves.toBeUndefined();
+    } finally { stub.restore(); }
+  });
+});

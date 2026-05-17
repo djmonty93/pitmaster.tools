@@ -197,8 +197,27 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
       }
       return out;
     },
-    async assignGroup() { throw new Error('not implemented'); },
-    async removeGroup() { throw new Error('not implemented'); },
+    async assignGroup(subscriberId, groupId) {
+      await request(
+        'group_assign',
+        'POST',
+        `/subscribers/groups/${encodeURIComponent(groupId)}`,
+        { subscribers: [subscriberId] }
+      );
+    },
+    async removeGroup(subscriberId, groupId) {
+      try {
+        await request(
+          'group_remove',
+          'DELETE',
+          `/subscribers/groups/${encodeURIComponent(groupId)}`,
+          { subscribers: [subscriberId] }
+        );
+      } catch (err) {
+        if (err instanceof SenderError && err.kind === 'http_4xx' && err.status === 404) return;
+        throw err;
+      }
+    },
     async triggerWeeklyDigest() { throw new Error('not implemented'); },
   };
 }
