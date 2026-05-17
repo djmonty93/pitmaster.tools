@@ -97,8 +97,11 @@ verified, and rolled back independently.
   replays due rows in FIFO order with doubling backoff
   (1m, 2m, 4m, … capped at 6 h), parks rows after 10 attempts, and
   writes an `events` audit row on every drop or park. `tags.ts`
-  validates metro slugs and emits `metro:`/`cut:`/`cooker:`
-  segmentation as Sender.net subscriber custom fields. The `request_kind`
+  validates metro slugs and writes segmentation as Sender.net subscriber
+  custom fields (`bbq_zip`, `bbq_city`, `bbq_state`, `bbq_region`,
+  `bbq_cut_pref`, `bbq_cooker_pref`, `bbq_timezone`, `bbq_signup_date`).
+  Group membership is set to `pitmaster_all` plus one of six regional
+  groups (`pitmaster_<region>`). No colon-prefixed tag strings are emitted. The `request_kind`
   CHECK constraint allows `'subscribe' | 'unsubscribe' | 'digest_trigger'`,
   but in practice only `'subscribe'` and `'unsubscribe'` are enqueued
   by their handlers on retryable Sender failures; `drain()` replays only
