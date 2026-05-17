@@ -224,3 +224,37 @@ describe('SenderClient.removeGroup', () => {
     } finally { stub.restore(); }
   });
 });
+
+describe('SenderClient.triggerWeeklyDigest', () => {
+  it('POSTs to the per-region trigger URL with tag body', async () => {
+    const stub = installFetchStub([
+      { match: 'api.sender.net/v2/automations/trigger/se-token', respond: () => jsonResponse(200, {}) },
+    ]);
+    try {
+      const client = createSenderClient({ apiToken: 'tok' });
+      await client.triggerWeeklyDigest({
+        triggerUrl: 'https://api.sender.net/v2/automations/trigger/se-token',
+        idempotencyTag: 'southeast:2026-05-15',
+      });
+      const call = stub.calls[0];
+      expect(call.method).toBe('POST');
+      expect(call.body).toEqual({ tag: 'southeast:2026-05-15' });
+      expect(call.headers['authorization']).toBe('Bearer tok');
+    } finally { stub.restore(); }
+  });
+
+  it('throws SenderError(digest_trigger) on non-2xx', async () => {
+    const stub = installFetchStub([
+      { match: 'api.sender.net/v2/automations/trigger/se-token', respond: () => jsonResponse(500, { message: 'boom' }) },
+    ]);
+    try {
+      const client = createSenderClient({ apiToken: 'tok' });
+      const err = await client.triggerWeeklyDigest({
+        triggerUrl: 'https://api.sender.net/v2/automations/trigger/se-token',
+        idempotencyTag: 'x:1',
+      }).catch((e) => e);
+      expect(err).toBeInstanceOf(SenderError);
+      expect((err as SenderError).requestKind).toBe('digest_trigger');
+    } finally { stub.restore(); }
+  });
+});

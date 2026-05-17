@@ -218,7 +218,9 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
         throw err;
       }
     },
-    async triggerWeeklyDigest() { throw new Error('not implemented'); },
+    async triggerWeeklyDigest(input) {
+      await request('digest_trigger', 'POST', input.triggerUrl, { tag: input.idempotencyTag });
+    },
   };
 }
 
