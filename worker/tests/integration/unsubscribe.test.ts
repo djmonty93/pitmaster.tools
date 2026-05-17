@@ -19,13 +19,13 @@ beforeAll(async () => {
 });
 
 async function seedGroupIds() {
-  await KV.put('mailerlite_group_id:pitmaster_all', '1');
-  await KV.put('mailerlite_group_id:pitmaster_northeast', '2');
-  await KV.put('mailerlite_group_id:pitmaster_southeast', '3');
-  await KV.put('mailerlite_group_id:pitmaster_midwest', '4');
-  await KV.put('mailerlite_group_id:pitmaster_south_central', '5');
-  await KV.put('mailerlite_group_id:pitmaster_mountain', '6');
-  await KV.put('mailerlite_group_id:pitmaster_pacific', '7');
+  await KV.put('sender_group_id:pitmaster_all', '1');
+  await KV.put('sender_group_id:pitmaster_northeast', '2');
+  await KV.put('sender_group_id:pitmaster_southeast', '3');
+  await KV.put('sender_group_id:pitmaster_midwest', '4');
+  await KV.put('sender_group_id:pitmaster_south_central', '5');
+  await KV.put('sender_group_id:pitmaster_mountain', '6');
+  await KV.put('sender_group_id:pitmaster_pacific', '7');
 }
 
 let stub: FetchStub | null = null;
@@ -33,7 +33,7 @@ let validToken = '';
 
 beforeEach(async () => {
   await DB.prepare(`DELETE FROM subscribers`).run();
-  await DB.prepare(`DELETE FROM mailerlite_retry`).run();
+  await DB.prepare(`DELETE FROM sender_retry`).run();
   await seedGroupIds();
   const now = Date.now();
   await DB.prepare(
@@ -61,12 +61,12 @@ function buildReq(body: unknown): Request {
  * Happy-path stub: getSubscriberByEmail returns sub_42, every group
  * DELETE returns 200. `/groups/` match must come first because
  * substring matcher picks the first hit and the GET hits
- * `connect.mailerlite.com/api/subscribers/<email>`.
+ * `api.sender.net/v2/subscribers/<email>`.
  */
 const happyPathHits = () => [
-  { match: '/groups/', respond: () => jsonResponse(200, {}) },
+  { match: '/groups/', respond: () => jsonResponse(200, { data: {} }) },
   {
-    match: 'connect.mailerlite.com',
+    match: 'api.sender.net',
     respond: () => jsonResponse(200, { data: { id: 'sub_42' } }),
   },
 ];
@@ -96,7 +96,7 @@ describe('POST /api/unsubscribe', () => {
     expect(removeCalls).toHaveLength(7);
   });
 
-  it('401s on a token that does not match the email — D1 row untouched, no MailerLite call', async () => {
+  it('401s on a token that does not match the email — D1 row untouched, no Sender call', async () => {
     stub = installFetchStub([]);
     const wrongToken = await signToken('someone-else@example.com', TEST_SUBSCRIBER_TOKEN_SECRET);
     const res = await handleUnsubscribe(
@@ -114,7 +114,7 @@ describe('POST /api/unsubscribe', () => {
     stub = installFetchStub([
       { match: '/groups/', respond: () => jsonResponse(502, {}) },
       {
-        match: 'connect.mailerlite.com',
+        match: 'api.sender.net',
         respond: () => jsonResponse(200, { data: { id: 'sub_42' } }),
       },
     ]);
@@ -128,7 +128,7 @@ describe('POST /api/unsubscribe', () => {
       .first<{ unsubscribed_at: number | null }>();
     expect(row?.unsubscribed_at).not.toBeNull();
     const retry = await DB.prepare(
-      `SELECT request_kind FROM mailerlite_retry WHERE idempotency_key = ?`
+      `SELECT request_kind FROM sender_retry WHERE idempotency_key = ?`
     )
       .bind('unsubscribe:gone@example.com')
       .first<{ request_kind: string }>();
@@ -139,11 +139,11 @@ describe('POST /api/unsubscribe', () => {
     // Regression for [P2] pass-9: getSubscriberByEmail already
     // swallows 404 → null; anything else reaching the handler is a
     // distinct failure (revoked key, account issue) and must NOT be
-    // treated as "subscriber not in MailerLite". Otherwise the
+    // treated as "subscriber not in Sender". Otherwise the
     // handler skips group removal and reports success while the
     // user remains in pitmaster_* groups receiving the digest.
     stub = installFetchStub([
-      { match: 'connect.mailerlite.com', respond: () => jsonResponse(401, { error: 'unauthorized' }) },
+      { match: 'api.sender.net', respond: () => jsonResponse(401, { error: 'unauthorized' }) },
     ]);
     const res = await handleUnsubscribe(
       buildContext(buildReq({ email: 'gone@example.com', token: validToken }))
@@ -159,16 +159,16 @@ describe('POST /api/unsubscribe', () => {
     // (after key rotation or upstream recovery) can finish group
     // removal.
     const retry = await DB.prepare(
-      `SELECT request_kind FROM mailerlite_retry WHERE idempotency_key = ?`
+      `SELECT request_kind FROM sender_retry WHERE idempotency_key = ?`
     )
       .bind('unsubscribe:gone@example.com')
       .first<{ request_kind: string }>();
     expect(retry?.request_kind).toBe('unsubscribe');
   });
 
-  it('treats MailerLite 404 (subscriber not in MailerLite) as soft success — D1 still marked', async () => {
+  it('treats Sender 404 (subscriber not in Sender) as soft success — D1 still marked', async () => {
     stub = installFetchStub([
-      { match: 'connect.mailerlite.com', respond: () => jsonResponse(404, {}) },
+      { match: 'api.sender.net', respond: () => jsonResponse(404, {}) },
     ]);
     const res = await handleUnsubscribe(
       buildContext(buildReq({ email: 'gone@example.com', token: validToken }))
@@ -207,7 +207,7 @@ describe('POST /api/unsubscribe', () => {
       // never happen because removeBbqGroups iterates and one throws.
       { match: '/groups/', respond: () => jsonResponse(400, { error: 'bad' }) },
       {
-        match: 'connect.mailerlite.com',
+        match: 'api.sender.net',
         respond: () => jsonResponse(200, { data: { id: 'sub_42' } }),
       },
     ]);
@@ -217,7 +217,7 @@ describe('POST /api/unsubscribe', () => {
     expect(res.status).toBe(200);
     expect((await res.json()) as { status: string }).toMatchObject({ status: 'queued' });
     const retryRow = await DB.prepare(
-      `SELECT request_kind, request_payload FROM mailerlite_retry WHERE idempotency_key = ?`
+      `SELECT request_kind, request_payload FROM sender_retry WHERE idempotency_key = ?`
     )
       .bind('unsubscribe:gone@example.com')
       .first<{ request_kind: string; request_payload: string }>();
@@ -239,7 +239,7 @@ describe('POST /api/unsubscribe', () => {
 
   it('queues a 5xx on the getSubscriber lookup and still marks D1 unsubscribed', async () => {
     stub = installFetchStub([
-      { match: 'connect.mailerlite.com', respond: () => jsonResponse(503, {}) },
+      { match: 'api.sender.net', respond: () => jsonResponse(503, {}) },
     ]);
     const res = await handleUnsubscribe(
       buildContext(buildReq({ email: 'gone@example.com', token: validToken }))

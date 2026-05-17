@@ -152,11 +152,11 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
 
   const client = createSenderClient({ apiToken: rc.env.SENDER_API_TOKEN });
 
-  let mailerliteId: string | null = null;
-  let mailerliteStatus: 'sent' | 'queued' = 'sent';
+  let espId: string | null = null;
+  let espStatus: 'sent' | 'queued' = 'sent';
   try {
     const res = await client.subscribe({ email: body.email, fields });
-    mailerliteId = res.id;
+    espId = res.id;
   } catch (err) {
     if (err instanceof SenderError && err.shouldRetry) {
       const idempotencyKey = `subscribe:${body.email.toLowerCase()}`;
@@ -179,7 +179,7 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
         idempotencyKey,
         cause: err,
       });
-      mailerliteStatus = 'queued';
+      espStatus = 'queued';
     } else if (err instanceof SenderError) {
       return jsonError(
         err.status === 422 ? 422 : 400,
@@ -203,18 +203,18 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
   // (the queued path). Drain will re-issue subscribe and re-attempt
   // group assignment on its next pass.
   let groupAssignSucceeded = false;
-  if (mailerliteId) {
+  if (espId) {
     try {
       if (region) {
-        await assignBbqGroups(client, rc.env.WEATHER_KV, mailerliteId, region);
+        await assignBbqGroups(client, rc.env.WEATHER_KV, espId, region);
       } else {
         const allGroupId = await resolveGroupId(client, rc.env.WEATHER_KV, ALL_GROUP_NAME);
-        await client.assignGroup(mailerliteId, allGroupId);
+        await client.assignGroup(espId, allGroupId);
       }
       groupAssignSucceeded = true;
     } catch (err) {
       const cause = err instanceof SenderError ? err : undefined;
-      const idempotencyKey = `group_assign:${mailerliteId}`;
+      const idempotencyKey = `group_assign:${espId}`;
       // oldRegion rides along so the drain can detach pitmaster_<oldRegion>
       // after it assigns the new group. Without it, a region-change
       // resubscribe whose group_assign step failed retryably would
@@ -224,14 +224,14 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
         kind: 'subscribe',
         payload: {
           stage: 'group_assign',
-          subscriberId: mailerliteId,
+          subscriberId: espId,
           region,
           oldRegion,
         },
         idempotencyKey,
         cause,
       });
-      mailerliteStatus = 'queued';
+      espStatus = 'queued';
       if (!(err instanceof SenderError)) {
         console.warn('subscribe: group_assign unexpected error', summarizeError(err));
       }
@@ -244,7 +244,7 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
     // regional audience until the drain catches up — a near-Friday zip
     // move would miss the digest entirely.
     //
-    // MailerLite returns 404 for "not a member", which the client
+    // Sender returns 404 for "not a member", which the client
     // swallows, so a stale D1 row that's already out of sync stays a
     // no-op. Best-effort: a transient failure here is logged but
     // doesn't change the user-visible outcome.
@@ -256,7 +256,7 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
           rc.env.WEATHER_KV,
           staleGroupName
         );
-        await client.removeGroup(mailerliteId, staleGroupId);
+        await client.removeGroup(espId!, staleGroupId);
       } catch (err) {
         // Original [P2] pass-7: a transient failure here used to be
         // logged and dropped, leaving the subscriber in BOTH regional
@@ -269,10 +269,10 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
           kind: 'subscribe',
           payload: {
             stage: 'group_remove',
-            subscriberId: mailerliteId,
+            subscriberId: espId,
             groupName: staleGroupName,
           },
-          idempotencyKey: `group_remove:${mailerliteId}:${oldRegion}`,
+          idempotencyKey: `group_remove:${espId}:${oldRegion}`,
           cause,
         });
         console.warn(
@@ -309,11 +309,11 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
   const token = await signToken(body.email, rc.env.SUBSCRIBER_TOKEN_SECRET);
 
   return json(202, {
-    status: mailerliteStatus,
+    status: espStatus,
     email: body.email,
     region,
     timezone,
-    mailerliteId,
+    espId,
     token,
   });
 }

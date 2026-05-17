@@ -174,11 +174,11 @@ async function handlePatch(rc: RouteContext): Promise<Response> {
     });
   }
 
-  const mailerliteFields: Record<string, string> = {
+  const espFields: Record<string, string> = {
     bbq_cut_pref: snapshot?.cut ?? '',
     bbq_cooker_pref: snapshot?.cooker ?? '',
   };
-  let mailerliteStatus: 'sent' | 'queued' = 'sent';
+  let espStatus: 'sent' | 'queued' = 'sent';
   {
     const client = createSenderClient({ apiToken: rc.env.SENDER_API_TOKEN });
     try {
@@ -188,10 +188,10 @@ async function handlePatch(rc: RouteContext): Promise<Response> {
       // check already short-circuits the common case; this is the
       // race-safe backstop for an unsubscribe that lands between the
       // snapshot read and this call.
-      await client.updateSubscriberFields(email, mailerliteFields);
+      await client.updateSubscriberFields(email, espFields);
     } catch (err) {
       if (err instanceof SenderError) {
-        // Both retryable and non-retryable MailerLite failures enqueue
+        // Both retryable and non-retryable Sender failures enqueue
         // a retry. Retryable will replay until success/park; non-
         // retryable (missing field, revoked key) will replay once,
         // fail, and the drain drops the row with an events audit
@@ -202,32 +202,32 @@ async function handlePatch(rc: RouteContext): Promise<Response> {
           payload: {
             stage: 'preferences',
             email,
-            fields: mailerliteFields,
+            fields: espFields,
           },
           idempotencyKey: `preferences:${email}`,
           cause: err.shouldRetry ? err : undefined,
         });
-        mailerliteStatus = 'queued';
+        espStatus = 'queued';
         if (!err.shouldRetry) {
           console.warn(
-            'preferences: MailerLite field update non-retryable failure (queued for one replay+audit)',
+            'preferences: Sender field update non-retryable failure (queued for one replay+audit)',
             summarizeError(err)
           );
         }
       } else {
-        // Non-MailerLite error: queue defensively so the drain can
+        // Non-Sender error: queue defensively so the drain can
         // re-attempt rather than losing the sync entirely.
         await enqueue(rc.env.SMOKE_DB, {
           kind: 'subscribe',
           payload: {
             stage: 'preferences',
             email,
-            fields: mailerliteFields,
+            fields: espFields,
           },
           idempotencyKey: `preferences:${email}`,
         });
-        mailerliteStatus = 'queued';
-        console.warn('preferences: unexpected error syncing to MailerLite', summarizeError(err));
+        espStatus = 'queued';
+        console.warn('preferences: unexpected error syncing to Sender', summarizeError(err));
       }
     }
   }
@@ -236,6 +236,6 @@ async function handlePatch(rc: RouteContext): Promise<Response> {
     email,
     cut: cut ?? undefined,
     cooker: cooker ?? undefined,
-    status: mailerliteStatus,
+    status: espStatus,
   });
 }

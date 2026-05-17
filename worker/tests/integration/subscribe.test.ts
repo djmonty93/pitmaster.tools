@@ -18,23 +18,23 @@ beforeAll(async () => {
   await applyMigrations(DB);
 });
 
-// Pre-seed MailerLite group ids so the handler skips the listGroups
+// Pre-seed Sender group ids so the handler skips the listGroups
 // network call. The integration tests don't care about cache-fill
-// behavior — that's covered by tests/unit/mailerlite/groups.test.ts.
+// behavior — that's covered by tests/unit/sender/groups.test.ts.
 async function seedGroupIds() {
-  await KV.put('mailerlite_group_id:pitmaster_all', '1');
-  await KV.put('mailerlite_group_id:pitmaster_northeast', '2');
-  await KV.put('mailerlite_group_id:pitmaster_southeast', '3');
-  await KV.put('mailerlite_group_id:pitmaster_midwest', '4');
-  await KV.put('mailerlite_group_id:pitmaster_south_central', '5');
-  await KV.put('mailerlite_group_id:pitmaster_mountain', '6');
-  await KV.put('mailerlite_group_id:pitmaster_pacific', '7');
+  await KV.put('sender_group_id:pitmaster_all', '1');
+  await KV.put('sender_group_id:pitmaster_northeast', '2');
+  await KV.put('sender_group_id:pitmaster_southeast', '3');
+  await KV.put('sender_group_id:pitmaster_midwest', '4');
+  await KV.put('sender_group_id:pitmaster_south_central', '5');
+  await KV.put('sender_group_id:pitmaster_mountain', '6');
+  await KV.put('sender_group_id:pitmaster_pacific', '7');
 }
 
 let stub: FetchStub | null = null;
 beforeEach(async () => {
   await DB.prepare(`DELETE FROM subscribers`).run();
-  await DB.prepare(`DELETE FROM mailerlite_retry`).run();
+  await DB.prepare(`DELETE FROM sender_retry`).run();
   await seedGroupIds();
 });
 afterEach(() => {
@@ -42,12 +42,12 @@ afterEach(() => {
   stub = null;
 });
 
-const mailerliteOk = () =>
+const senderOk = () =>
   jsonResponse(200, {
     data: { id: 'sub_123', email: 'pitmaster@example.com', status: 'active' },
   });
 
-const groupAssignOk = () => jsonResponse(200, {});
+const groupAssignOk = () => jsonResponse(200, { data: {} });
 
 /**
  * Standard stub for the happy path: subscribe POST returns sub_123 and
@@ -57,7 +57,7 @@ const groupAssignOk = () => jsonResponse(200, {});
  */
 const happyPathHits = () => [
   { match: '/groups/', respond: groupAssignOk },
-  { match: 'connect.mailerlite.com', respond: mailerliteOk },
+  { match: 'api.sender.net', respond: senderOk },
 ];
 
 function buildReq(body: unknown): Request {
@@ -69,7 +69,7 @@ function buildReq(body: unknown): Request {
 }
 
 describe('POST /api/subscribe', () => {
-  it('writes to MailerLite + D1, derives region from zip, assigns groups, returns token', async () => {
+  it('writes to Sender + D1, derives region from zip, assigns groups, returns token', async () => {
     stub = installFetchStub(happyPathHits());
     const res = await handleSubscribe(
       buildContext(
@@ -85,12 +85,12 @@ describe('POST /api/subscribe', () => {
     expect(res.status).toBe(202);
     const body = (await res.json()) as {
       status: string;
-      mailerliteId: string;
+      espId: string;
       token: string;
       region: string;
     };
     expect(body.status).toBe('sent');
-    expect(body.mailerliteId).toBe('sub_123');
+    expect(body.espId).toBe('sub_123');
     expect(body.region).toBe('southeast');
     const expected = await signToken('pitmaster@example.com', TEST_SUBSCRIBER_TOKEN_SECRET);
     expect(body.token).toBe(expected);
@@ -102,22 +102,23 @@ describe('POST /api/subscribe', () => {
       .first<{ region: string }>();
     expect(row?.region).toBe('southeast');
 
-    // MailerLite POST body carries bbq_* fields with bbq_region populated.
+    // Sender POST body carries bbq_* fields with bbq_region populated.
     const subscribeCall = stub.calls.find(
       (c) =>
         c.method === 'POST' &&
-        c.url.endsWith('/api/subscribers') &&
+        c.url.endsWith('/subscribers') &&
         !c.url.includes('/groups/')
     );
     expect(subscribeCall).toBeDefined();
     const subBody = subscribeCall!.body as { fields: Record<string, string> };
+    // Sender wraps field keys in {$...} syntax via wrapFieldKeys.
     expect(subBody.fields).toMatchObject({
-      bbq_zip: '30303',
-      bbq_state: 'GA',
-      bbq_region: 'southeast',
-      bbq_cut_pref: 'brisket-packer',
-      bbq_cooker_pref: 'offset',
-      bbq_timezone: 'America/New_York',
+      '{$bbq_zip}': '30303',
+      '{$bbq_state}': 'GA',
+      '{$bbq_region}': 'southeast',
+      '{$bbq_cut_pref}': 'brisket-packer',
+      '{$bbq_cooker_pref}': 'offset',
+      '{$bbq_timezone}': 'America/New_York',
     });
 
     // Two group assignment POSTs: pitmaster_all (id=1) + pitmaster_southeast (id=3).
@@ -205,9 +206,9 @@ describe('POST /api/subscribe', () => {
     expect(row?.region).toBe('southeast');
   });
 
-  it('queues retryable MailerLite failures but still writes the D1 row + returns a token', async () => {
+  it('queues retryable Sender failures but still writes the D1 row + returns a token', async () => {
     stub = installFetchStub([
-      { match: 'connect.mailerlite.com', respond: () => jsonResponse(503, {}) },
+      { match: 'api.sender.net', respond: () => jsonResponse(503, {}) },
     ]);
     const res = await handleSubscribe(
       buildContext(
@@ -227,10 +228,10 @@ describe('POST /api/subscribe', () => {
       .bind('retry@example.com')
       .first<{ email: string; region: string }>();
     expect(subRow?.email).toBe('retry@example.com');
-    // Region is still derived locally even when MailerLite is down.
+    // Region is still derived locally even when Sender is down.
     expect(subRow?.region).toBe('southeast');
     const retryRow = await DB.prepare(
-      `SELECT request_kind FROM mailerlite_retry WHERE idempotency_key = ?`
+      `SELECT request_kind FROM sender_retry WHERE idempotency_key = ?`
     )
       .bind('subscribe:retry@example.com')
       .first<{ request_kind: string }>();
@@ -238,8 +239,8 @@ describe('POST /api/subscribe', () => {
   });
 
   it('includes oldRegion in the queued payload on a region-change resubscribe during outage', async () => {
-    // Regression for [Self-P1] pass-14: when MailerLite is down on a
-    // region-change resubscribe, the handler never got a mailerliteId
+    // Regression for [Self-P1] pass-14: when Sender is down on a
+    // region-change resubscribe, the handler never got an espId
     // so the stale-region detach is skipped. Without plumbing oldRegion
     // through to the retry payload, the drain assigns the new region's
     // group but leaves the user in the old region too. The payload
@@ -251,8 +252,8 @@ describe('POST /api/subscribe', () => {
     );
     stub.restore();
 
-    // Now MailerLite goes down. Resubscribe to 78701 (south_central) —
-    // geocode succeeds, but the MailerLite subscribe call 5xx's so we
+    // Now Sender goes down. Resubscribe to 78701 (south_central) —
+    // geocode succeeds, but the Sender subscribe call 5xx's so we
     // queue. The payload MUST carry oldRegion='southeast' for the
     // drain to detach pitmaster_southeast after recovery.
     stub = installFetchStub([
@@ -262,7 +263,7 @@ describe('POST /api/subscribe', () => {
           country_code: 'US', admin1: 'Texas', timezone: 'America/Chicago',
         }],
       }) },
-      { match: 'connect.mailerlite.com', respond: () => jsonResponse(503, {}) },
+      { match: 'api.sender.net', respond: () => jsonResponse(503, {}) },
     ]);
     const res = await handleSubscribe(
       buildContext(buildReq({ email: 'move-outage@example.com', zip: '78701' }))
@@ -271,7 +272,7 @@ describe('POST /api/subscribe', () => {
     expect((await res.json()) as { status: string }).toMatchObject({ status: 'queued' });
 
     const retryRow = await DB.prepare(
-      `SELECT request_payload FROM mailerlite_retry WHERE idempotency_key = ?`
+      `SELECT request_payload FROM sender_retry WHERE idempotency_key = ?`
     )
       .bind('subscribe:move-outage@example.com')
       .first<{ request_payload: string }>();
@@ -286,10 +287,10 @@ describe('POST /api/subscribe', () => {
     expect(payload.oldRegion).toBe('southeast');
   });
 
-  it('returns 422 when MailerLite returns 422 (non-retryable) — D1 row NOT created', async () => {
+  it('returns 422 when Sender returns 422 (non-retryable) — D1 row NOT created', async () => {
     stub = installFetchStub([
       {
-        match: 'connect.mailerlite.com',
+        match: 'api.sender.net',
         respond: () => jsonResponse(422, { errors: { email: ['bad'] } }),
       },
     ]);
@@ -297,7 +298,7 @@ describe('POST /api/subscribe', () => {
       buildContext(buildReq({ email: 'bad@example.com', zip: '30303' }))
     );
     expect(res.status).toBe(422);
-    expect(await res.json()).toMatchObject({ error: 'mailerlite_rejected' });
+    expect(await res.json()).toMatchObject({ error: 'sender_rejected' });
     const row = await DB.prepare(`SELECT email FROM subscribers WHERE email = ?`)
       .bind('bad@example.com')
       .first();
@@ -355,11 +356,12 @@ describe('POST /api/subscribe', () => {
     const subscribeCall = stub.calls.find(
       (c) =>
         c.method === 'POST' &&
-        c.url.endsWith('/api/subscribers') &&
+        c.url.endsWith('/subscribers') &&
         !c.url.includes('/groups/')
     );
     const body = subscribeCall!.body as { fields: Record<string, string> };
-    expect(body.fields.bbq_signup_date).toBe('2024-03-15');
+    // Sender wraps field keys in {$...} syntax.
+    expect(body.fields['{$bbq_signup_date}']).toBe('2024-03-15');
   });
 
   it('on resubscribe with a different region: detaches stale region group, assigns the new one', async () => {
@@ -385,7 +387,8 @@ describe('POST /api/subscribe', () => {
     // POST /groups/5 (new south_central) AND DELETE /groups/3 (old
     // southeast) both happened. pitmaster_all (id=1) is re-asserted
     // by assignBbqGroups but a duplicate assign is a no-op server-side
-    // so we don't strictly assert on it.
+    // so we don't strictly assert on it. Note: DELETE calls to
+    // /groups/ go to api.sender.net/v2/subscribers/groups/<id>.
     const assignCalls = stub.calls.filter(
       (c) => c.method === 'POST' && c.url.includes('/groups/')
     );
@@ -435,7 +438,7 @@ describe('POST /api/subscribe', () => {
       if (url.includes('/groups/')) {
         return jsonResponse(200, {});
       }
-      return mailerliteOk();
+      return senderOk();
     }) as typeof fetch;
 
     try {
@@ -446,7 +449,7 @@ describe('POST /api/subscribe', () => {
       const body = (await res.json()) as { status: string };
       expect(body.status).toBe('sent');
       const retryRow = await DB.prepare(
-        `SELECT request_kind, request_payload FROM mailerlite_retry WHERE idempotency_key LIKE 'group_remove:%'`
+        `SELECT request_kind, request_payload FROM sender_retry WHERE idempotency_key LIKE 'group_remove:%'`
       ).first<{ request_kind: string; request_payload: string }>();
       expect(retryRow?.request_kind).toBe('subscribe');
       const payload = JSON.parse(retryRow!.request_payload) as {
@@ -477,7 +480,7 @@ describe('POST /api/subscribe', () => {
       // Treat assignment as terminal-fail so the handler enqueues a
       // group_assign retry instead of catching with the retry path.
       { match: '/groups/', respond: () => jsonResponse(400, { error: 'bad' }) },
-      { match: 'connect.mailerlite.com', respond: mailerliteOk },
+      { match: 'api.sender.net', respond: senderOk },
     ]);
     const res = await handleSubscribe(
       buildContext(buildReq({ email: 'switcher@example.com', zip: '78701' }))
@@ -511,7 +514,7 @@ describe('POST /api/subscribe', () => {
     stub = installFetchStub([
       { match: 'geocoding-api.open-meteo.com', respond: () => jsonResponse(503, {}) },
       { match: '/groups/', respond: groupAssignOk },
-      { match: 'connect.mailerlite.com', respond: mailerliteOk },
+      { match: 'api.sender.net', respond: senderOk },
     ]);
     const res = await handleSubscribe(
       buildContext(buildReq({ email: 'sticky@example.com', zip: '99999' }))
@@ -556,23 +559,23 @@ describe('POST /api/subscribe', () => {
     // Regression for [P2] from review pass 2: a 4xx on group_assign
     // (cached id stale, group renamed, etc.) used to be swallowed
     // and the response still reported status='sent'. The subscriber
-    // would land in MailerLite but not in pitmaster_<region>, so the
+    // would land in Sender but not in pitmaster_<region>, so the
     // Friday cron would skip them. Now every group failure surfaces
     // via the retry queue and the response says 'queued'.
     stub = installFetchStub([
       { match: '/groups/', respond: () => jsonResponse(400, { error: 'bad' }) },
-      { match: 'connect.mailerlite.com', respond: mailerliteOk },
+      { match: 'api.sender.net', respond: senderOk },
     ]);
     const res = await handleSubscribe(
       buildContext(buildReq({ email: 'p2@example.com', zip: '30303' }))
     );
     expect(res.status).toBe(202);
-    const body = (await res.json()) as { status: string; mailerliteId: string };
+    const body = (await res.json()) as { status: string; espId: string };
     expect(body.status).toBe('queued');
-    expect(body.mailerliteId).toBe('sub_123');
+    expect(body.espId).toBe('sub_123');
     // Retry queue carries a staged group_assign row for the failed assignment.
     const retryRow = await DB.prepare(
-      `SELECT request_kind, request_payload FROM mailerlite_retry WHERE idempotency_key = ?`
+      `SELECT request_kind, request_payload FROM sender_retry WHERE idempotency_key = ?`
     )
       .bind('group_assign:sub_123')
       .first<{ request_kind: string; request_payload: string }>();
@@ -588,24 +591,25 @@ describe('POST /api/subscribe', () => {
   });
 
   it('enqueues a group_assign retry when resolveGroupId throws because the group is missing', async () => {
-    // resolveGroupId throws a plain Error (not a MailerLiteError) when
+    // resolveGroupId throws a plain Error (not a SenderError) when
     // the group doesn't exist in the cache + listGroups doesn't return
     // it. That error path was the silent-swallow case in [P2]. Force
     // it by deleting the KV cache and returning a partial group list.
-    await KV.delete('mailerlite_group_id:pitmaster_all');
-    await KV.delete('mailerlite_group_id:pitmaster_southeast');
+    await KV.delete('sender_group_id:pitmaster_all');
+    await KV.delete('sender_group_id:pitmaster_southeast');
     stub = installFetchStub([
       // listGroups: returns only pitmaster_all, missing pitmaster_southeast.
       {
-        match: '/api/groups?',
+        match: '/v2/groups',
         respond: () =>
           jsonResponse(200, {
             data: [{ id: '1', name: 'pitmaster_all' }],
-            meta: { current_page: 1, last_page: 1 },
+            links: { next: null },
+            meta: {},
           }),
       },
-      { match: '/groups/', respond: () => jsonResponse(200, {}) },
-      { match: 'connect.mailerlite.com', respond: mailerliteOk },
+      { match: '/groups/', respond: () => jsonResponse(200, { data: {} }) },
+      { match: 'api.sender.net', respond: senderOk },
     ]);
     const res = await handleSubscribe(
       buildContext(buildReq({ email: 'missing@example.com', zip: '30303' }))
@@ -614,7 +618,7 @@ describe('POST /api/subscribe', () => {
     const body = (await res.json()) as { status: string };
     expect(body.status).toBe('queued');
     const retryRow = await DB.prepare(
-      `SELECT COUNT(*) AS c FROM mailerlite_retry WHERE idempotency_key = ?`
+      `SELECT COUNT(*) AS c FROM sender_retry WHERE idempotency_key = ?`
     )
       .bind('group_assign:sub_123')
       .first<{ c: number }>();
@@ -625,7 +629,7 @@ describe('POST /api/subscribe', () => {
     stub = installFetchStub([
       { match: 'geocoding-api.open-meteo.com', respond: () => jsonResponse(503, {}) },
       { match: '/groups/', respond: groupAssignOk },
-      { match: 'connect.mailerlite.com', respond: mailerliteOk },
+      { match: 'api.sender.net', respond: senderOk },
     ]);
     await KV.delete('geo:v2:99999');
     const res = await handleSubscribe(
