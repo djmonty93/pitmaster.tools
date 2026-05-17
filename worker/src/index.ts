@@ -16,8 +16,8 @@ import { handlePreferences } from './handlers/preferences.js';
 import { handleStatus } from './handlers/status.js';
 import { handleSubscribe } from './handlers/subscribe.js';
 import { handleUnsubscribe } from './handlers/unsubscribe.js';
-import { createMailerLiteClient } from './lib/mailerlite/client.js';
-import { drain } from './lib/mailerlite/retry.js';
+import { createSenderClient } from './lib/sender/client.js';
+import { drain } from './lib/sender/retry.js';
 import { buildSentryOptions } from './lib/observability/sentryOptions.js';
 import { compileRoutes, dispatch, jsonError } from './router.js';
 
@@ -122,7 +122,7 @@ const handler = {
       return;
     }
     if (controller.cron === '*/5 * * * *') {
-      const client = createMailerLiteClient({ apiKey: env.MAILERLITE_API_KEY });
+      const client = createSenderClient({ apiToken: env.SENDER_API_TOKEN });
       await drain(env.SMOKE_DB, client, env.WEATHER_KV);
       return;
     }

@@ -28,14 +28,14 @@
 // dynamic content — see docs/portfolio-email-architecture.md.
 
 import type { Env } from '../index.js';
-import { createMailerLiteClient, type MailerLiteClient } from '../lib/mailerlite/client.js';
-import { MailerLiteError } from '../lib/mailerlite/errors.js';
+import { createSenderClient, type SenderClient } from '../lib/sender/client.js';
+import { SenderError } from '../lib/sender/errors.js';
 import { REGIONS, type Region } from '../lib/regions/index.js';
 import { summarizeError } from '../lib/redact.js';
 
 export interface FridayCronOptions {
   now?: () => Date;
-  client?: MailerLiteClient;
+  client?: SenderClient;
   /** Per-region telemetry — invoked once per processed region. */
   onResult?: (outcome: FridayCronOutcome) => void;
   /**
@@ -48,7 +48,7 @@ export interface FridayCronOptions {
 }
 
 export type FridayCronOutcome =
-  | { region: Region; status: 'skipped'; reason: 'already-sent' | 'previously-failed' | 'no-automation-id' | 'not-local-friday-6' }
+  | { region: Region; status: 'skipped'; reason: 'already-sent' | 'previously-failed' | 'no-trigger-url' | 'not-local-friday-6' }
   | { region: Region; status: 'sent'; sendDate: string }
   | { region: Region; status: 'failed'; sendDate: string; error: string; retryable: boolean };
 
@@ -77,14 +77,14 @@ const REGION_ANCHOR_TZ: Readonly<Record<Region, string>> = {
   pacific: 'America/Los_Angeles',
 };
 
-/** Env var name carrying the automation id for each region. */
-const REGION_ENV_KEY: Readonly<Record<Region, keyof Env>> = {
-  northeast: 'MAILERLITE_AUTOMATION_NORTHEAST_ID',
-  southeast: 'MAILERLITE_AUTOMATION_SOUTHEAST_ID',
-  midwest: 'MAILERLITE_AUTOMATION_MIDWEST_ID',
-  south_central: 'MAILERLITE_AUTOMATION_SOUTH_CENTRAL_ID',
-  mountain: 'MAILERLITE_AUTOMATION_MOUNTAIN_ID',
-  pacific: 'MAILERLITE_AUTOMATION_PACIFIC_ID',
+/** Env var name carrying the per-region Sender trigger URL. */
+const REGION_TO_TRIGGER_URL_ENV: Readonly<Record<Region, keyof Env>> = {
+  northeast:     'SENDER_DIGEST_TRIGGER_URL_NORTHEAST',
+  southeast:     'SENDER_DIGEST_TRIGGER_URL_SOUTHEAST',
+  midwest:       'SENDER_DIGEST_TRIGGER_URL_MIDWEST',
+  south_central: 'SENDER_DIGEST_TRIGGER_URL_SOUTH_CENTRAL',
+  mountain:      'SENDER_DIGEST_TRIGGER_URL_MOUNTAIN',
+  pacific:       'SENDER_DIGEST_TRIGGER_URL_PACIFIC',
 };
 
 /**
@@ -129,7 +129,7 @@ export async function runFridayCron(
   opts: FridayCronOptions = {}
 ): Promise<FridayCronOutcome[]> {
   const client =
-    opts.client ?? createMailerLiteClient({ apiKey: env.MAILERLITE_API_KEY });
+    opts.client ?? createSenderClient({ apiToken: env.SENDER_API_TOKEN });
   const outcomes: FridayCronOutcome[] = [];
   const nowFn = opts.now ?? (() => new Date());
 
@@ -145,18 +145,18 @@ export async function runFridayCron(
       outcomes.push(o);
       continue;
     }
-    const automationId = env[REGION_ENV_KEY[region]] as string | undefined;
-    if (!automationId) {
+    const triggerUrl = env[REGION_TO_TRIGGER_URL_ENV[region]] as string | undefined;
+    if (!triggerUrl) {
       const o: FridayCronOutcome = {
         region,
         status: 'skipped',
-        reason: 'no-automation-id',
+        reason: 'no-trigger-url',
       };
       opts.onResult?.(o);
       outcomes.push(o);
       continue;
     }
-    const outcome = await processRegion(env, client, region, automationId, slot.date, nowFn);
+    const outcome = await processRegion(env, client, region, triggerUrl, slot.date, nowFn);
     opts.onResult?.(outcome);
     outcomes.push(outcome);
   }
@@ -189,9 +189,9 @@ export async function runFridayCron(
 
 async function processRegion(
   env: Env,
-  client: MailerLiteClient,
+  client: SenderClient,
   region: Region,
-  automationId: string,
+  triggerUrl: string,
   sendDate: string,
   nowFn: () => Date
 ): Promise<FridayCronOutcome> {
@@ -282,13 +282,13 @@ async function processRegion(
   // row in D1, and the stale-cutoff guard plus the campaign-side
   // idempotency tag prevent the re-claim path from re-triggering.
   try {
-    await client.triggerCampaign({
-      automationId,
+    await client.triggerWeeklyDigest({
+      triggerUrl,
       idempotencyTag: `${region}:${sendDate}`,
     });
   } catch (err) {
-    const reason = err instanceof MailerLiteError ? summarizeError(err) : 'trigger failed';
-    const retryable = err instanceof MailerLiteError && err.shouldRetry;
+    const reason = err instanceof SenderError ? summarizeError(err) : 'trigger failed';
+    const retryable = err instanceof SenderError && err.shouldRetry;
     if (retryable) {
       // Revert the row to 'queued' so a subsequent claim (Cloudflare
       // scheduled-handler auto-retry or operator-triggered replay)
