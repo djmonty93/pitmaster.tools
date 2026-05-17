@@ -223,10 +223,8 @@ describe('POST /api/unsubscribe', () => {
       .first<{ request_kind: string; request_payload: string }>();
     expect(retryRow?.request_kind).toBe('unsubscribe');
     const payload = JSON.parse(retryRow!.request_payload) as {
-      stage: string;
       subscriberId: string;
     };
-    expect(payload.stage).toBe('remove_groups');
     expect(payload.subscriberId).toBe('sub_42');
     // D1 still marked unsubscribed — the row was claimed by the
     // original handler before the queue replay finishes the

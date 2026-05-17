@@ -97,7 +97,7 @@ export async function handleUnsubscribe(rc: RouteContext): Promise<Response> {
       const cause = err instanceof SenderError ? err : undefined;
       await enqueue(rc.env.SMOKE_DB, {
         kind: 'unsubscribe',
-        payload: { email, subscriberId, stage: 'remove_groups' },
+        payload: { email, subscriberId },
         idempotencyKey: `unsubscribe:${email}`,
         cause,
       });
