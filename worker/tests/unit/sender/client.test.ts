@@ -166,3 +166,34 @@ describe('SenderClient.unsubscribe', () => {
     } finally { stub.restore(); }
   });
 });
+
+describe('SenderClient.listGroups', () => {
+  it('paginates via links.next', async () => {
+    let call = 0;
+    const stub = installFetchStub([
+      {
+        match: 'api.sender.net/v2/groups',
+        respond: () => {
+          call++;
+          if (call === 1) return jsonResponse(200, {
+            data: [{ id: 'g1', name: 'pitmaster_all' }],
+            links: { next: 'https://api.sender.net/v2/groups?page=2' },
+          });
+          return jsonResponse(200, {
+            data: [{ id: 'g2', name: 'pitmaster_northeast' }],
+            links: { next: null },
+          });
+        },
+      },
+    ]);
+    try {
+      const client = createSenderClient({ apiToken: 'tok' });
+      const groups = await client.listGroups();
+      expect(groups).toEqual([
+        { id: 'g1', name: 'pitmaster_all' },
+        { id: 'g2', name: 'pitmaster_northeast' },
+      ]);
+      expect(stub.calls).toHaveLength(2);
+    } finally { stub.restore(); }
+  });
+});

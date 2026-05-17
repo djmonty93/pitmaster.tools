@@ -181,7 +181,22 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
         { status: 'unsubscribed' }
       );
     },
-    async listGroups() { throw new Error('not implemented'); },
+    async listGroups() {
+      const out: SenderGroup[] = [];
+      let url: string | null = '/groups?limit=100';
+      while (url !== null) {
+        const parsed = await request('group_list', 'GET', url) as
+          | { data?: Array<{ id?: string; name?: string }>; links?: { next?: string | null } }
+          | null;
+        for (const row of parsed?.data ?? []) {
+          if (typeof row.id === 'string' && typeof row.name === 'string') {
+            out.push({ id: row.id, name: row.name });
+          }
+        }
+        url = parsed?.links?.next ?? null;
+      }
+      return out;
+    },
     async assignGroup() { throw new Error('not implemented'); },
     async removeGroup() { throw new Error('not implemented'); },
     async triggerWeeklyDigest() { throw new Error('not implemented'); },
