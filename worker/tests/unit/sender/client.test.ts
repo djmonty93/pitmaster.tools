@@ -137,6 +137,30 @@ describe('SenderClient.subscribe', () => {
     }
   });
 
+  it('429 with Retry-After: 7200 (2h) → err.retryAfterMs === 7200000 (no 1h cap in parser)', async () => {
+    const stub = installFetchStub([
+      {
+        match: 'api.sender.net/v2/subscribers',
+        respond: () =>
+          new Response(JSON.stringify({ message: 'rate limited' }), {
+            status: 429,
+            headers: { 'Content-Type': 'application/json', 'Retry-After': '7200' },
+          }),
+      },
+    ]);
+    try {
+      const client = createSenderClient({ apiToken: 'tok' });
+      const err = await client.subscribe({ email: 'a@b.co', fields: baseFields }).catch((e) => e);
+      expect(err).toBeInstanceOf(SenderError);
+      expect((err as SenderError).status).toBe(429);
+      // Parser must NOT cap at 1h (3_600_000ms) — the raw 2h value is returned.
+      // MAX_BACKOFF_MS (6h) in retry.ts is the single cap applied at queue time.
+      expect((err as SenderError).retryAfterMs).toBe(7_200_000);
+    } finally {
+      stub.restore();
+    }
+  });
+
   it('429 without Retry-After → err.retryAfterMs === undefined', async () => {
     const stub = installFetchStub([
       {

@@ -242,12 +242,12 @@ function parseRetryAfter(value: string | null): number | undefined {
   const trimmed = value.trim();
   if (/^\d+$/.test(trimmed)) {
     const secs = Number(trimmed);
-    return Number.isFinite(secs) ? Math.min(secs * 1000, 3_600_000) : undefined;
+    return Number.isFinite(secs) && secs > 0 ? secs * 1000 : undefined;
   }
   const ts = Date.parse(trimmed);
   if (Number.isNaN(ts)) return undefined;
   const ms = ts - Date.now();
-  return ms > 0 ? Math.min(ms, 3_600_000) : undefined;
+  return ms > 0 ? ms : undefined;
 }
 
 function extractMessage(parsed: unknown): string | null {
