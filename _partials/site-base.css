@@ -434,6 +434,16 @@ body.embed-mode main { padding-top: .5rem; }
   color: var(--charcoal, #2a2a2a);
   box-shadow: 0 20px 60px rgba(0,0,0,.25);
 }
+/* Browsers without native <dialog> render the element inline (no
+   default hiding) and never receive the [open] attribute, so without
+   this rule the modal contents would be exposed on page load.
+   Browsers that DO support <dialog> already hide it when closed and
+   add [open] on showModal(); the :not([open]) selector matches both
+   the unsupported-browser case and the closed-state of the supported
+   browser, so the rule is safe in both. */
+.embed-cta__dialog:not([open]) {
+  display: none;
+}
 .embed-cta__dialog::backdrop {
   background: rgba(0,0,0,.45);
 }
