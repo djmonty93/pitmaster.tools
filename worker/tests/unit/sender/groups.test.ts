@@ -6,7 +6,8 @@ import {
   regionToGroupName,
   removeBbqGroups,
   resolveGroupId,
-} from '../../../src/lib/mailerlite/groups';
+} from '../../../src/lib/sender/groups';
+import { SenderError } from '../../../src/lib/sender/errors';
 import type { Region } from '../../../src/lib/regions';
 
 interface FakeKVStore {
@@ -82,12 +83,12 @@ describe('resolveGroupId', () => {
     expect(listGroups).toHaveBeenCalledTimes(1);
     // Cache populated for BOTH groups, not just the one we asked for —
     // one listGroups call should hydrate every name we'll need.
-    expect(kv._data.get('mailerlite_group_id:pitmaster_all')).toBe('101');
-    expect(kv._data.get('mailerlite_group_id:pitmaster_southeast')).toBe('202');
+    expect(kv._data.get('sender_group_id:pitmaster_all')).toBe('101');
+    expect(kv._data.get('sender_group_id:pitmaster_southeast')).toBe('202');
   });
 
   it('returns from cache without calling listGroups', async () => {
-    kv._data.set('mailerlite_group_id:pitmaster_midwest', '303');
+    kv._data.set('sender_group_id:pitmaster_midwest', '303');
     const id = await resolveGroupId(
       { listGroups } as unknown as Parameters<typeof resolveGroupId>[0],
       kv as unknown as KVNamespace,
@@ -97,15 +98,24 @@ describe('resolveGroupId', () => {
     expect(listGroups).not.toHaveBeenCalled();
   });
 
-  it('throws when the group does not exist in MailerLite', async () => {
+  it('throws SenderError with kind=malformed (non-retryable) when group does not exist in Sender', async () => {
     listGroups.mockResolvedValue([{ id: '1', name: 'pitmaster_all' }]);
-    await expect(
-      resolveGroupId(
+    let thrown: unknown;
+    try {
+      await resolveGroupId(
         { listGroups } as unknown as Parameters<typeof resolveGroupId>[0],
         kv as unknown as KVNamespace,
         'pitmaster_pacific'
-      )
-    ).rejects.toThrow(/pitmaster_pacific/);
+      );
+    } catch (err) {
+      thrown = err;
+    }
+    expect(thrown).toBeInstanceOf(SenderError);
+    const se = thrown as SenderError;
+    expect(se.kind).toBe('malformed');
+    expect(se.requestKind).toBe('group_list');
+    expect(se.shouldRetry).toBe(false);
+    expect(se.message).toContain('pitmaster_pacific');
   });
 
   it('returns the matched id even when KV cache writes fail (best-effort hydration)', async () => {
@@ -133,8 +143,8 @@ describe('resolveGroupId', () => {
 describe('assignBbqGroups', () => {
   it('assigns subscriber to pitmaster_all AND pitmaster_<region>', async () => {
     const kv = makeKv();
-    kv._data.set('mailerlite_group_id:pitmaster_all', '1');
-    kv._data.set('mailerlite_group_id:pitmaster_south_central', '5');
+    kv._data.set('sender_group_id:pitmaster_all', '1');
+    kv._data.set('sender_group_id:pitmaster_south_central', '5');
     const assignGroup = vi.fn().mockResolvedValue(undefined);
     const listGroups = vi.fn();
     await assignBbqGroups(
@@ -150,8 +160,8 @@ describe('assignBbqGroups', () => {
 
   it('propagates a 5xx from the underlying client so the retry queue can pick it up', async () => {
     const kv = makeKv();
-    kv._data.set('mailerlite_group_id:pitmaster_all', '1');
-    kv._data.set('mailerlite_group_id:pitmaster_pacific', '6');
+    kv._data.set('sender_group_id:pitmaster_all', '1');
+    kv._data.set('sender_group_id:pitmaster_pacific', '6');
     const assignGroup = vi
       .fn()
       .mockResolvedValueOnce(undefined)
@@ -166,7 +176,7 @@ describe('assignBbqGroups', () => {
     ).rejects.toThrow(/boom/);
     // First call succeeded; partial state is acceptable because the
     // caller enqueues a retry and `assignGroup` is idempotent at the
-    // MailerLite layer (a repeat is a no-op).
+    // Sender layer (a repeat is a no-op).
     expect(assignGroup).toHaveBeenCalledTimes(2);
   });
 });
@@ -174,13 +184,13 @@ describe('assignBbqGroups', () => {
 describe('removeBbqGroups', () => {
   it('removes subscriber from every pitmaster_* group (account-scoped per spec)', async () => {
     const kv = makeKv();
-    kv._data.set('mailerlite_group_id:pitmaster_all', '1');
-    kv._data.set('mailerlite_group_id:pitmaster_northeast', '2');
-    kv._data.set('mailerlite_group_id:pitmaster_southeast', '3');
-    kv._data.set('mailerlite_group_id:pitmaster_midwest', '4');
-    kv._data.set('mailerlite_group_id:pitmaster_south_central', '5');
-    kv._data.set('mailerlite_group_id:pitmaster_mountain', '6');
-    kv._data.set('mailerlite_group_id:pitmaster_pacific', '7');
+    kv._data.set('sender_group_id:pitmaster_all', '1');
+    kv._data.set('sender_group_id:pitmaster_northeast', '2');
+    kv._data.set('sender_group_id:pitmaster_southeast', '3');
+    kv._data.set('sender_group_id:pitmaster_midwest', '4');
+    kv._data.set('sender_group_id:pitmaster_south_central', '5');
+    kv._data.set('sender_group_id:pitmaster_mountain', '6');
+    kv._data.set('sender_group_id:pitmaster_pacific', '7');
     const removeGroup = vi.fn().mockResolvedValue(undefined);
     await removeBbqGroups(
       { removeGroup, listGroups: vi.fn() } as unknown as Parameters<typeof removeBbqGroups>[0],
@@ -189,26 +199,26 @@ describe('removeBbqGroups', () => {
     );
     // 7 group IDs = 1 (all) + 6 regional. Caller doesn't know which
     // regional group the subscriber was in, so we remove from all of
-    // them — MailerLite treats DELETE on a non-member as a no-op.
+    // them — Sender treats DELETE on a non-member as a no-op.
     expect(removeGroup).toHaveBeenCalledTimes(7);
     const groupIds = removeGroup.mock.calls.map((c) => c[1]);
     expect(new Set(groupIds)).toEqual(new Set(['1', '2', '3', '4', '5', '6', '7']));
   });
 
   it('issues DELETE for every group even when most are no-op (client swallows 404)', async () => {
-    // The MailerLite client maps a 404 from /api/subscribers/:id/groups/:id
+    // The Sender client maps a 404 from /api/subscribers/:id/groups/:id
     // to a resolved promise — see client.removeGroup. removeBbqGroups
     // therefore sees a clean resolution for not-a-member calls and
     // continues iterating. This test mirrors that contract: the fake
     // returns undefined for the "not a member" group rather than throwing.
     const kv = makeKv();
-    kv._data.set('mailerlite_group_id:pitmaster_all', '1');
-    kv._data.set('mailerlite_group_id:pitmaster_northeast', '2');
-    kv._data.set('mailerlite_group_id:pitmaster_southeast', '3');
-    kv._data.set('mailerlite_group_id:pitmaster_midwest', '4');
-    kv._data.set('mailerlite_group_id:pitmaster_south_central', '5');
-    kv._data.set('mailerlite_group_id:pitmaster_mountain', '6');
-    kv._data.set('mailerlite_group_id:pitmaster_pacific', '7');
+    kv._data.set('sender_group_id:pitmaster_all', '1');
+    kv._data.set('sender_group_id:pitmaster_northeast', '2');
+    kv._data.set('sender_group_id:pitmaster_southeast', '3');
+    kv._data.set('sender_group_id:pitmaster_midwest', '4');
+    kv._data.set('sender_group_id:pitmaster_south_central', '5');
+    kv._data.set('sender_group_id:pitmaster_mountain', '6');
+    kv._data.set('sender_group_id:pitmaster_pacific', '7');
     const removeGroup = vi.fn().mockResolvedValue(undefined);
     await removeBbqGroups(
       { removeGroup, listGroups: vi.fn() } as unknown as Parameters<typeof removeBbqGroups>[0],

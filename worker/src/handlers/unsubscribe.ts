@@ -3,30 +3,30 @@
 // Body JSON: { email, token }.
 //
 // Portfolio-aware behavior: instead of setting status=unsubscribed at
-// the MailerLite account level (which would also remove the subscriber
+// the Sender.net account level (which would also remove the subscriber
 // from any future powersizing_*, overlanding_* groups they belong to),
 // we remove them from the BBQ-prefixed groups only. The subscriber
-// stays in MailerLite as `status=active` so sibling sites can keep
+// stays in Sender.net as `status=active` so sibling sites can keep
 // emailing them.
 //
 // Flow:
 //   1. Verify HMAC token against the email.
-//   2. Look up the subscriber's MailerLite id (GET /api/subscribers/:email).
-//      Null result means "never made it into MailerLite" — still mark
+//   2. Look up the subscriber's Sender.net id (GET /v2/subscribers/:email).
+//      Null result means "never made it into Sender.net" — still mark
 //      D1 unsubscribed and return success.
 //   3. removeBbqGroups: DELETE from pitmaster_all + every pitmaster_<region>.
 //   4. UPDATE D1 subscribers SET unsubscribed_at = now.
 //
-// Retryable MailerLite failures during group removal enqueue on
-// mailerlite_retry and still update D1 — the user sees immediate
+// Retryable Sender.net failures during group removal enqueue on
+// sender_retry and still update D1 — the user sees immediate
 // success and the queue catches up later.
 
 import { z } from 'zod';
 import { verifyToken } from '../lib/auth/token.js';
-import { createMailerLiteClient } from '../lib/mailerlite/client.js';
-import { MailerLiteError } from '../lib/mailerlite/errors.js';
-import { removeBbqGroups } from '../lib/mailerlite/groups.js';
-import { enqueue } from '../lib/mailerlite/retry.js';
+import { createSenderClient } from '../lib/sender/client.js';
+import { SenderError } from '../lib/sender/errors.js';
+import { removeBbqGroups } from '../lib/sender/groups.js';
+import { enqueue } from '../lib/sender/retry.js';
 import { summarizeError } from '../lib/redact.js';
 import { json, jsonError, type RouteContext } from '../router.js';
 
@@ -52,20 +52,20 @@ export async function handleUnsubscribe(rc: RouteContext): Promise<Response> {
     return jsonError(401, 'invalid_token', 'Token does not match this email');
   }
 
-  const client = createMailerLiteClient({ apiKey: rc.env.MAILERLITE_API_KEY });
+  const client = createSenderClient({ apiToken: rc.env.SENDER_API_TOKEN });
   let status: 'sent' | 'queued' = 'sent';
   let subscriberId: string | null = null;
   try {
     const found = await client.getSubscriberByEmail(email);
     subscriberId = found?.id ?? null;
   } catch (err) {
-    if (!(err instanceof MailerLiteError)) {
+    if (!(err instanceof SenderError)) {
       throw err;
     }
     // client.getSubscriberByEmail ALREADY swallows 404 (returns null),
-    // so any MailerLiteError that propagates here is something else:
+    // so any SenderError that propagates here is something else:
     // 401/403 (revoked key), 5xx, timeout, etc. Treating these as
-    // "not in MailerLite" would let the handler skip group removal
+    // "not in Sender.net" would let the handler skip group removal
     // and report unsubscribe success while the user remains in
     // pitmaster_* groups. Queue the retry instead so the drain can
     // complete the cleanup once the upstream recovers (or park the
@@ -94,15 +94,15 @@ export async function handleUnsubscribe(rc: RouteContext): Promise<Response> {
       // removal used to be swallowed and the response still said
       // 'sent', leaving the subscriber on the regional automation's
       // audience even though D1 said unsubscribed.
-      const cause = err instanceof MailerLiteError ? err : undefined;
+      const cause = err instanceof SenderError ? err : undefined;
       await enqueue(rc.env.SMOKE_DB, {
         kind: 'unsubscribe',
-        payload: { email, subscriberId, stage: 'remove_groups' },
+        payload: { email, subscriberId },
         idempotencyKey: `unsubscribe:${email}`,
         cause,
       });
       status = 'queued';
-      if (!(err instanceof MailerLiteError)) {
+      if (!(err instanceof SenderError)) {
         console.warn('unsubscribe: removeBbqGroups unexpected error', summarizeError(err));
       }
     }

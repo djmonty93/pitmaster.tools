@@ -5,8 +5,8 @@ import {
   runFridayCron,
   type FridayCronOutcome,
 } from '../../../src/crons/fridayEmail';
-import type { MailerLiteClient, TriggerCampaignInput } from '../../../src/lib/mailerlite/client';
-import { MailerLiteError } from '../../../src/lib/mailerlite/errors';
+import type { SenderClient, TriggerDigestInput } from '../../../src/lib/sender/client';
+import { SenderError } from '../../../src/lib/sender/errors';
 import type { Env } from '../../../src/index';
 import { applyMigrations } from '../../helpers/d1';
 
@@ -47,21 +47,21 @@ function buildEnv(overrides: Partial<Env> = {}): Env {
     ASSETS: undefined as unknown as Fetcher,
     WEATHER_KV: KV,
     SMOKE_DB: DB,
-    MAILERLITE_API_KEY: 'ml_test_key',
+    SENDER_API_TOKEN: 'sender_test_token',
     SUBSCRIBER_TOKEN_SECRET: 'test-secret-32-bytes-long-aaaaaaaaa',
-    MAILERLITE_AUTOMATION_NORTHEAST_ID: 'auto_ne',
-    MAILERLITE_AUTOMATION_SOUTHEAST_ID: 'auto_se',
-    MAILERLITE_AUTOMATION_MIDWEST_ID: 'auto_mw',
-    MAILERLITE_AUTOMATION_SOUTH_CENTRAL_ID: 'auto_sc',
-    MAILERLITE_AUTOMATION_MOUNTAIN_ID: 'auto_mt',
-    MAILERLITE_AUTOMATION_PACIFIC_ID: 'auto_pa',
+    SENDER_DIGEST_TRIGGER_URL_NORTHEAST: 'https://api.sender.net/v2/automations/trigger/ne-test',
+    SENDER_DIGEST_TRIGGER_URL_SOUTHEAST: 'https://api.sender.net/v2/automations/trigger/se-test',
+    SENDER_DIGEST_TRIGGER_URL_MIDWEST: 'https://api.sender.net/v2/automations/trigger/mw-test',
+    SENDER_DIGEST_TRIGGER_URL_SOUTH_CENTRAL: 'https://api.sender.net/v2/automations/trigger/sc-test',
+    SENDER_DIGEST_TRIGGER_URL_MOUNTAIN: 'https://api.sender.net/v2/automations/trigger/mt-test',
+    SENDER_DIGEST_TRIGGER_URL_PACIFIC: 'https://api.sender.net/v2/automations/trigger/pa-test',
   };
   return { ...base, ...overrides };
 }
 
 function fakeClient(
-  trigger: (input: TriggerCampaignInput) => Promise<void> = async () => {}
-): MailerLiteClient {
+  trigger: (input: TriggerDigestInput) => Promise<void> = async () => {}
+): SenderClient {
   return {
     subscribe: vi.fn(),
     updateSubscriberFields: vi.fn(),
@@ -70,8 +70,8 @@ function fakeClient(
     listGroups: vi.fn(),
     assignGroup: vi.fn(),
     removeGroup: vi.fn(),
-    triggerCampaign: vi.fn().mockImplementation(trigger),
-  } as MailerLiteClient;
+    triggerWeeklyDigest: vi.fn().mockImplementation(trigger),
+  } as SenderClient;
 }
 
 describe('regionLocalFridaySlot', () => {
@@ -118,11 +118,11 @@ describe('runFridayCron — region-by-region', () => {
     ]);
     expect(trigger).toHaveBeenCalledTimes(2);
     expect(trigger).toHaveBeenCalledWith({
-      automationId: 'auto_ne',
+      triggerUrl: 'https://api.sender.net/v2/automations/trigger/ne-test',
       idempotencyTag: 'northeast:2026-05-15',
     });
     expect(trigger).toHaveBeenCalledWith({
-      automationId: 'auto_se',
+      triggerUrl: 'https://api.sender.net/v2/automations/trigger/se-test',
       idempotencyTag: 'southeast:2026-05-15',
     });
     // The other 4 regions are 'skipped' as not-local-friday-6.
@@ -172,17 +172,55 @@ describe('runFridayCron — region-by-region', () => {
     expect(trigger).toHaveBeenCalledTimes(2); // only the first run
   });
 
-  it('skips a region whose automation id is missing from env', async () => {
+  it('skips a region whose trigger URL is missing from env', async () => {
     const trigger = vi.fn().mockResolvedValue(undefined);
     const outcomes = await runFridayCron(
-      buildEnv({ MAILERLITE_AUTOMATION_NORTHEAST_ID: undefined }),
+      buildEnv({ SENDER_DIGEST_TRIGGER_URL_NORTHEAST: undefined }),
       FRIDAY_6AM_ET,
       { client: fakeClient(trigger) }
     );
     expect(trigger).toHaveBeenCalledTimes(1); // only southeast
     const ne = outcomes.find((o) => o.region === 'northeast')!;
     expect(ne.status).toBe('skipped');
-    expect((ne as Extract<FridayCronOutcome, { status: 'skipped' }>).reason).toBe('no-automation-id');
+    expect((ne as Extract<FridayCronOutcome, { status: 'skipped' }>).reason).toBe('no-trigger-url');
+  });
+
+  it('writes an events row when a region is skipped for missing trigger URL', async () => {
+    await runFridayCron(
+      buildEnv({ SENDER_DIGEST_TRIGGER_URL_NORTHEAST: undefined }),
+      FRIDAY_6AM_ET,
+      { client: fakeClient() }
+    );
+    const rows = await DB.prepare(
+      `SELECT kind, payload FROM events WHERE kind = 'error'`
+    ).all<{ kind: string; payload: string }>();
+    expect(rows.results).toHaveLength(1);
+    const parsed = JSON.parse(rows.results[0]!.payload) as {
+      source: string;
+      region: string;
+      send_date: string;
+      reason: string;
+    };
+    expect(parsed.source).toBe('friday_cron');
+    expect(parsed.region).toBe('northeast');
+    expect(parsed.send_date).toBe('2026-05-15');
+    expect(parsed.reason).toBe('no-trigger-url');
+  });
+
+  it('does NOT write a second events row on a repeated cron invocation for the same missing-URL region+date', async () => {
+    const envWithoutNe = buildEnv({ SENDER_DIGEST_TRIGGER_URL_NORTHEAST: undefined });
+    // First invocation: should write one error event row for northeast.
+    await runFridayCron(envWithoutNe, FRIDAY_6AM_ET, { client: fakeClient() });
+    // Second invocation (same Friday window, northeast still missing URL).
+    // Southeast is already 'sent' so it won't fire again; northeast still
+    // has no trigger URL so the missing-url path runs again — but the
+    // idempotency check on the events table must suppress the second insert.
+    await runFridayCron(envWithoutNe, FRIDAY_6AM_ET, { client: fakeClient() });
+    const rows = await DB.prepare(
+      `SELECT kind FROM events WHERE kind = 'error'`
+    ).all<{ kind: string }>();
+    // Only ONE error event despite two invocations — idempotent write.
+    expect(rows.results).toHaveLength(1);
   });
 
   it('records a sent event in the events table on success', async () => {
@@ -208,11 +246,11 @@ describe('runFridayCron — region-by-region', () => {
     // the throw, the handler resolves and the region's only 6am-local
     // tick is gone for the week.
     const trigger = vi.fn().mockRejectedValue(
-      new MailerLiteError('campaign', 'http_5xx', 'status 503', 503)
+      new SenderError('digest_trigger', 'http_5xx', 'status 503', 503)
     );
     await expect(
       runFridayCron(buildEnv(), FRIDAY_6AM_ET, { client: fakeClient(trigger) })
-    ).rejects.toThrow(/retryable failure/);
+    ).rejects.toThrow('Friday cron: retry required (failed retryable or retry-after pending)');
     const log = await DB.prepare(
       `SELECT region, status FROM friday_campaign_log ORDER BY region`
     ).all<{ region: string; status: string }>();
@@ -231,7 +269,7 @@ describe('runFridayCron — region-by-region', () => {
 
   it('outcome.retryable is true for retryable failures and false for non-retryable', async () => {
     const retryableTrigger = vi.fn().mockRejectedValue(
-      new MailerLiteError('campaign', 'http_5xx', 'x', 503)
+      new SenderError('digest_trigger', 'http_5xx', 'x', 503)
     );
     const retryableOutcomes = await runFridayCron(buildEnv(), FRIDAY_6AM_ET, {
       client: fakeClient(retryableTrigger),
@@ -242,7 +280,7 @@ describe('runFridayCron — region-by-region', () => {
 
     await DB.prepare(`DELETE FROM friday_campaign_log`).run();
     const nonRetryableTrigger = vi.fn().mockRejectedValue(
-      new MailerLiteError('campaign', 'http_4xx', 'x', 400)
+      new SenderError('digest_trigger', 'http_4xx', 'x', 400)
     );
     const nonRetryableOutcomes = await runFridayCron(buildEnv(), FRIDAY_6AM_ET, {
       client: fakeClient(nonRetryableTrigger),
@@ -256,7 +294,7 @@ describe('runFridayCron — region-by-region', () => {
     // 'queued' (we suppress the throw in tests). A second invocation
     // re-claims via the queued→sending transition and triggers again.
     const failingTrigger = vi.fn().mockRejectedValue(
-      new MailerLiteError('campaign', 'http_5xx', 'transient', 503)
+      new SenderError('digest_trigger', 'http_5xx', 'transient', 503)
     );
     await runFridayCron(buildEnv(), FRIDAY_6AM_ET, {
       client: fakeClient(failingTrigger),
@@ -284,7 +322,7 @@ describe('runFridayCron — region-by-region', () => {
     // Regression for [Codex P2] pass-14: the prior code reported
     // 'already-sent' the moment claim.meta.changes === 0, but a fresh
     // 'sending' lock is NOT the same as 'sent'. If a sibling invocation
-    // claimed the row and then crashed before triggerCampaign,
+    // claimed the row and then crashed before triggerWeeklyDigest,
     // returning 'already-sent' lets Cloudflare consider the retry
     // successful — no further retries fire, and by the time the lock
     // ages out past SENDING_STALE_MS the local-Friday-6 anchor hour
@@ -317,7 +355,7 @@ describe('runFridayCron — region-by-region', () => {
     expect(se.status).toBe('sent');
     expect(trigger).toHaveBeenCalledTimes(1);
     expect(trigger).toHaveBeenCalledWith({
-      automationId: 'auto_se',
+      triggerUrl: 'https://api.sender.net/v2/automations/trigger/se-test',
       idempotencyTag: 'southeast:2026-05-15',
     });
   });
@@ -341,7 +379,7 @@ describe('runFridayCron — region-by-region', () => {
         client: fakeClient(),
         now: () => fixedNow,
       })
-    ).rejects.toThrow(/retryable failure.*northeast/);
+    ).rejects.toThrow('Friday cron: retry required (failed retryable or retry-after pending)');
   });
 
   it("reports 'sent' even if the post-trigger D1 UPDATE fails — does NOT revert the row to a re-claimable state", async () => {
@@ -349,12 +387,12 @@ describe('runFridayCron — region-by-region', () => {
     // treat a post-send D1 error as a campaign failure → row reverted
     // to 'queued' and the next cron tick would re-fire the automation,
     // producing a duplicate weekly digest. Fix narrows the catch to
-    // triggerCampaign; D1 bookkeeping is best-effort after a successful
-    // trigger. MailerLite's per-(region, send_date) idempotency tag is
+    // triggerWeeklyDigest; D1 bookkeeping is best-effort after a successful
+    // trigger. Sender's per-(region, send_date) idempotency tag is
     // the backstop if the row IS somehow re-claimed.
     const fixedNow = FRIDAY_6AM_ET;
     // Sabotage updateStatus by injecting an env whose D1 throws ONLY
-    // on the UPDATE issued after triggerCampaign. We do this by
+    // on the UPDATE issued after triggerWeeklyDigest. We do this by
     // wrapping prepare() such that a query targeting friday_campaign_log
     // status='sent' rejects.
     const realEnv = buildEnv();
@@ -435,7 +473,7 @@ describe('runFridayCron — region-by-region', () => {
     const ne = outcomes.find((o) => o.region === 'northeast')!;
     expect(ne.status).toBe('sent');
     expect(trigger).toHaveBeenCalledWith({
-      automationId: 'auto_ne',
+      triggerUrl: 'https://api.sender.net/v2/automations/trigger/ne-test',
       idempotencyTag: 'northeast:2026-05-15',
     });
   });
@@ -447,7 +485,7 @@ describe('runFridayCron — region-by-region', () => {
     // 'already-sent' — telemetry/event readers need to distinguish a
     // successful prior send from a needs-attention prior failure.
     const trigger = vi.fn().mockRejectedValue(
-      new MailerLiteError('campaign', 'http_4xx', 'status 400', 400)
+      new SenderError('digest_trigger', 'http_4xx', 'status 400', 400)
     );
     const outcomes = await runFridayCron(buildEnv(), FRIDAY_6AM_ET, {
       client: fakeClient(trigger),
@@ -481,6 +519,150 @@ describe('runFridayCron — region-by-region', () => {
     ).toBe(true);
   });
 
+  it('429 with Retry-After: 1800 → friday_campaign_log row has next_attempt_at ≈ now + 1_800_000, status = failed', async () => {
+    const fixedNow = FRIDAY_6AM_ET;
+    const nowMs = fixedNow.getTime();
+    const retryAfterSec = 1800;
+    const trigger = vi.fn().mockRejectedValue(
+      new SenderError('digest_trigger', 'http_4xx', 'rate limited', 429, retryAfterSec * 1000)
+    );
+    // swallowRetryableThrow so we can inspect outcomes without the test throwing
+    await runFridayCron(buildEnv(), fixedNow, {
+      client: fakeClient(trigger),
+      now: () => fixedNow,
+      swallowRetryableThrow: true,
+    });
+    // Both ET-anchored regions get a 429 with Retry-After.
+    const log = await DB.prepare(
+      `SELECT region, status, next_attempt_at FROM friday_campaign_log ORDER BY region`
+    ).all<{ region: string; status: string; next_attempt_at: number | null }>();
+    const etRows = log.results.filter((r) => r.region === 'northeast' || r.region === 'southeast');
+    expect(etRows).toHaveLength(2);
+    for (const row of etRows) {
+      expect(row.status).toBe('failed');
+      expect(row.next_attempt_at).not.toBeNull();
+      // next_attempt_at ≈ now + 1_800_000 (within 1s tolerance)
+      expect(Math.abs(row.next_attempt_at! - (nowMs + 1_800_000))).toBeLessThan(1000);
+    }
+  });
+
+  it('subsequent cron invocation with next_attempt_at still in the future → skipped with reason retry-after-pending, no trigger fires', async () => {
+    const fixedNow = FRIDAY_6AM_ET;
+    const nowMs = fixedNow.getTime();
+    const futureAttempt = nowMs + 1_800_000; // 30 min from now — still in future
+    // Seed a 'failed' row with next_attempt_at in the future for northeast.
+    await DB.prepare(
+      `INSERT INTO friday_campaign_log (region, send_date, status, attempted_at, next_attempt_at)
+         VALUES ('northeast', '2026-05-15', 'failed', ?, ?)`
+    )
+      .bind(nowMs, futureAttempt)
+      .run();
+    const trigger = vi.fn().mockResolvedValue(undefined);
+    // swallowRetryableThrow: true so we can inspect outcomes; the throw
+    // behavior is covered by the dedicated "throws on retry-after-pending" test.
+    const outcomes = await runFridayCron(buildEnv(), fixedNow, {
+      client: fakeClient(trigger),
+      now: () => fixedNow,
+      swallowRetryableThrow: true,
+    });
+    const ne = outcomes.find((o) => o.region === 'northeast')!;
+    expect(ne.status).toBe('skipped');
+    expect((ne as Extract<FridayCronOutcome, { status: 'skipped' }>).reason).toBe('retry-after-pending');
+    // Only southeast fires — northeast is skipped due to retry-after-pending.
+    expect(trigger).toHaveBeenCalledTimes(1);
+    expect(trigger).not.toHaveBeenCalledWith(
+      expect.objectContaining({ idempotencyTag: 'northeast:2026-05-15' })
+    );
+  });
+
+  it('subsequent cron invocation AFTER next_attempt_at has passed → trigger fires normally', async () => {
+    const fixedNow = FRIDAY_6AM_ET;
+    const nowMs = fixedNow.getTime();
+    const pastAttempt = nowMs - 1000; // 1 second ago — already passed
+    // Seed a 'failed' row with next_attempt_at in the past for northeast.
+    await DB.prepare(
+      `INSERT INTO friday_campaign_log (region, send_date, status, attempted_at, next_attempt_at)
+         VALUES ('northeast', '2026-05-15', 'failed', ?, ?)`
+    )
+      .bind(nowMs, pastAttempt)
+      .run();
+    const trigger = vi.fn().mockResolvedValue(undefined);
+    const outcomes = await runFridayCron(buildEnv(), fixedNow, {
+      client: fakeClient(trigger),
+      now: () => fixedNow,
+    });
+    const ne = outcomes.find((o) => o.region === 'northeast')!;
+    // Past next_attempt_at → re-claimed and triggered normally.
+    expect(ne.status).toBe('sent');
+    expect(trigger).toHaveBeenCalledWith(
+      expect.objectContaining({ idempotencyTag: 'northeast:2026-05-15' })
+    );
+  });
+
+  it('retry-after-pending: runFridayCron throws when a region has a pending retry-after row (no swallow)', async () => {
+    const fixedNow = FRIDAY_6AM_ET;
+    const nowMs = fixedNow.getTime();
+    const futureAttempt = nowMs + 1_800_000; // 30 min from now — still in future
+    await DB.prepare(
+      `INSERT INTO friday_campaign_log (region, send_date, status, attempted_at, next_attempt_at)
+         VALUES ('northeast', '2026-05-15', 'failed', ?, ?)`
+    )
+      .bind(nowMs, futureAttempt)
+      .run();
+    const trigger = vi.fn().mockResolvedValue(undefined);
+    await expect(
+      runFridayCron(buildEnv(), fixedNow, {
+        client: fakeClient(trigger),
+        now: () => fixedNow,
+        // no swallowRetryableThrow — should throw
+      })
+    ).rejects.toThrow('Friday cron: retry required (failed retryable or retry-after pending)');
+  });
+
+  it('retry-after-pending: with swallowRetryableThrow:true outcome is retry-after-pending and no throw fires', async () => {
+    const fixedNow = FRIDAY_6AM_ET;
+    const nowMs = fixedNow.getTime();
+    const futureAttempt = nowMs + 1_800_000;
+    await DB.prepare(
+      `INSERT INTO friday_campaign_log (region, send_date, status, attempted_at, next_attempt_at)
+         VALUES ('northeast', '2026-05-15', 'failed', ?, ?)`
+    )
+      .bind(nowMs, futureAttempt)
+      .run();
+    const trigger = vi.fn().mockResolvedValue(undefined);
+    const outcomes = await runFridayCron(buildEnv(), fixedNow, {
+      client: fakeClient(trigger),
+      now: () => fixedNow,
+      swallowRetryableThrow: true,
+    });
+    const ne = outcomes.find((o) => o.region === 'northeast')!;
+    expect(ne.status).toBe('skipped');
+    expect((ne as Extract<FridayCronOutcome, { status: 'skipped' }>).reason).toBe('retry-after-pending');
+  });
+
+  it('retry-after-pending: after next_attempt_at expires, follow-up invocation re-attempts the digest_trigger', async () => {
+    const fixedNow = FRIDAY_6AM_ET;
+    const nowMs = fixedNow.getTime();
+    const pastAttempt = nowMs - 1000; // 1 second ago — already expired
+    await DB.prepare(
+      `INSERT INTO friday_campaign_log (region, send_date, status, attempted_at, next_attempt_at)
+         VALUES ('northeast', '2026-05-15', 'failed', ?, ?)`
+    )
+      .bind(nowMs, pastAttempt)
+      .run();
+    const trigger = vi.fn().mockResolvedValue(undefined);
+    const outcomes = await runFridayCron(buildEnv(), fixedNow, {
+      client: fakeClient(trigger),
+      now: () => fixedNow,
+    });
+    const ne = outcomes.find((o) => o.region === 'northeast')!;
+    // Expired next_attempt_at → re-claimed and triggered normally.
+    expect(ne.status).toBe('sent');
+    expect(trigger).toHaveBeenCalledWith(
+      expect.objectContaining({ idempotencyTag: 'northeast:2026-05-15' })
+    );
+  });
+
   it('triggers Pacific at 14:00 UTC during winter (standard time)', async () => {
     // Regression for the [P2] cron-range bug: in standard time
     // (Nov–Mar), Pacific 6am local lands at 14:00 UTC, which the
@@ -499,7 +681,7 @@ describe('runFridayCron — region-by-region', () => {
     const pacific = outcomes.find((o) => o.region === 'pacific');
     expect(pacific?.status).toBe('sent');
     expect(trigger).toHaveBeenCalledWith({
-      automationId: 'auto_pa',
+      triggerUrl: 'https://api.sender.net/v2/automations/trigger/pa-test',
       idempotencyTag: 'pacific:2026-01-16',
     });
   });

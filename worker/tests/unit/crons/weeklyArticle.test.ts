@@ -28,7 +28,7 @@ function buildEnv(): Env {
     ASSETS: undefined as unknown as Fetcher,
     WEATHER_KV: KV,
     SMOKE_DB: DB,
-    MAILERLITE_API_KEY: 'ml_test_key',
+    SENDER_API_TOKEN: 'sender_test_token',
     SUBSCRIBER_TOKEN_SECRET: 'test-secret-32-bytes-long-aaaaaaaaa',
   };
 }

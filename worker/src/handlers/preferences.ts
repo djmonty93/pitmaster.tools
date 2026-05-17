@@ -15,9 +15,9 @@
 
 import { z } from 'zod';
 import { verifyToken } from '../lib/auth/token.js';
-import { createMailerLiteClient } from '../lib/mailerlite/client.js';
-import { MailerLiteError } from '../lib/mailerlite/errors.js';
-import { enqueue } from '../lib/mailerlite/retry.js';
+import { createSenderClient } from '../lib/sender/client.js';
+import { SenderError } from '../lib/sender/errors.js';
+import { enqueue } from '../lib/sender/retry.js';
 import { summarizeError } from '../lib/redact.js';
 import { json, jsonError, type RouteContext } from '../router.js';
 
@@ -139,9 +139,9 @@ async function handlePatch(rc: RouteContext): Promise<Response> {
   }
 
   // Read the current preference snapshot AFTER our UPDATE so the
-  // MailerLite-side fields reflect the merged outcome of any
+  // Sender.net-side fields reflect the merged outcome of any
   // concurrent PATCHes, and so we can check unsubscribed_at before
-  // touching MailerLite.
+  // touching Sender.net.
   //
   // Concurrent PATCH safety: two simultaneous PATCHes (one setting
   // cut, one setting cooker) would both queue under the same
@@ -159,7 +159,7 @@ async function handlePatch(rc: RouteContext): Promise<Response> {
     .bind(email)
     .first<{ cut: string | null; cooker: string | null; unsubscribed_at: number | null }>();
 
-  // Skip MailerLite sync entirely for an unsubscribed account.
+  // Skip Sender.net sync entirely for an unsubscribed account.
   // updateSubscriberFields omits the status field (so it won't
   // reactivate), but skipping the network call also avoids leaking
   // a tombstoned email to the upstream and saves a wasted POST.
@@ -174,13 +174,13 @@ async function handlePatch(rc: RouteContext): Promise<Response> {
     });
   }
 
-  const mailerliteFields: Record<string, string> = {
+  const espFields: Record<string, string> = {
     bbq_cut_pref: snapshot?.cut ?? '',
     bbq_cooker_pref: snapshot?.cooker ?? '',
   };
-  let mailerliteStatus: 'sent' | 'queued' = 'sent';
+  let espStatus: 'sent' | 'queued' = 'sent';
   {
-    const client = createMailerLiteClient({ apiKey: rc.env.MAILERLITE_API_KEY });
+    const client = createSenderClient({ apiToken: rc.env.SENDER_API_TOKEN });
     try {
       // updateSubscriberFields POSTs without `status: 'active'`, so an
       // unsubscribed user who edits prefs via a stale link is NOT
@@ -188,10 +188,10 @@ async function handlePatch(rc: RouteContext): Promise<Response> {
       // check already short-circuits the common case; this is the
       // race-safe backstop for an unsubscribe that lands between the
       // snapshot read and this call.
-      await client.updateSubscriberFields(email, mailerliteFields);
+      await client.updateSubscriberFields(email, espFields);
     } catch (err) {
-      if (err instanceof MailerLiteError) {
-        // Both retryable and non-retryable MailerLite failures enqueue
+      if (err instanceof SenderError) {
+        // Both retryable and non-retryable Sender failures enqueue
         // a retry. Retryable will replay until success/park; non-
         // retryable (missing field, revoked key) will replay once,
         // fail, and the drain drops the row with an events audit
@@ -202,32 +202,32 @@ async function handlePatch(rc: RouteContext): Promise<Response> {
           payload: {
             stage: 'preferences',
             email,
-            fields: mailerliteFields,
+            fields: espFields,
           },
           idempotencyKey: `preferences:${email}`,
           cause: err.shouldRetry ? err : undefined,
         });
-        mailerliteStatus = 'queued';
+        espStatus = 'queued';
         if (!err.shouldRetry) {
           console.warn(
-            'preferences: MailerLite field update non-retryable failure (queued for one replay+audit)',
+            'preferences: Sender field update non-retryable failure (queued for one replay+audit)',
             summarizeError(err)
           );
         }
       } else {
-        // Non-MailerLite error: queue defensively so the drain can
+        // Non-Sender error: queue defensively so the drain can
         // re-attempt rather than losing the sync entirely.
         await enqueue(rc.env.SMOKE_DB, {
           kind: 'subscribe',
           payload: {
             stage: 'preferences',
             email,
-            fields: mailerliteFields,
+            fields: espFields,
           },
           idempotencyKey: `preferences:${email}`,
         });
-        mailerliteStatus = 'queued';
-        console.warn('preferences: unexpected error syncing to MailerLite', summarizeError(err));
+        espStatus = 'queued';
+        console.warn('preferences: unexpected error syncing to Sender', summarizeError(err));
       }
     }
   }
@@ -236,6 +236,6 @@ async function handlePatch(rc: RouteContext): Promise<Response> {
     email,
     cut: cut ?? undefined,
     cooker: cooker ?? undefined,
-    status: mailerliteStatus,
+    status: espStatus,
   });
 }

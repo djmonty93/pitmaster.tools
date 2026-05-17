@@ -50,7 +50,7 @@ H:\Code\pitmaster.tools\
       index.ts               # router: /api/* + fall-through to env.ASSETS.fetch(request)
       handlers\forecast.ts, subscribe.ts, unsubscribe.ts, preferences.ts, status.ts, articles.ts
       lib\weather\openMeteo.ts, nws.ts, adapter.ts   # F1 data, F20 failover
-      lib\mailerlite\client.ts, retry.ts             # F14
+      lib\sender\client.ts, retry.ts                 # F14
       lib\affiliate\rules.ts                         # F15 (data-driven JSON)
       lib\cache\kv.ts                                # F13 stale-while-error
       crons\fridayEmail.ts, weeklyArticle.ts         # F14, F17
@@ -107,8 +107,8 @@ The existing `smoke-physics.js` is a **cook-time** engine (heat transfer through
 2. **Weather adapter**: Open-Meteo primary + NWS failover; Vitest mocks fetch; tests assert failover triggers on first 5xx/timeout/malformed.
 3. **Scoring engine (F1/F2/F6/F7)**: pure TS, table-driven cut × cooker weights. Mirror to `weather-score-shared.js`; build check asserts both produce identical output on shared fixture set.
 4. **KV caching (F13)**: stale-while-error wrapper around adapter; Miniflare KV in tests.
-5. **D1 migrations**: `subscribers`, `metros`, `events`, `mailerlite_retry`, `articles`. Add indexes: `idx_subscribers_timezone`, `idx_events_created_at`, `idx_articles_slug`. Tests apply migrations against Miniflare D1 and assert schema.
-6. **MailerLite client**: tests stub fetch; 5xx pushes to retry queue; idempotent subscribe; tag-based segmentation (not group-per-region).
+5. **D1 migrations**: `subscribers`, `metros`, `events`, `sender_retry`, `articles`. Add indexes: `idx_subscribers_timezone`, `idx_events_created_at`, `idx_articles_slug`. Tests apply migrations against Miniflare D1 and assert schema.
+6. **Sender.net client**: tests stub fetch; 5xx pushes to retry queue; idempotent subscribe; tag-based segmentation (not group-per-region).
 7. **Worker endpoints**: `/api/forecast`, `/api/subscribe`, `/api/unsubscribe`, `/api/preferences`, `/api/status`, `/articles/:slug`. Router falls through to `env.ASSETS.fetch(request)` for everything else.
 8. **One-screen verdict (F8/F9/F10/F11/F12)**: `_src/smoke-weather/index.html` uses existing header/footer partials so look-and-feel is automatic. Component-test the client renderer; Playwright e2e against `wrangler dev`.
 9. **Detail/hourly view (F3/F4/F5)**: progressive disclosure via `<details>`; e2e covers tap-to-expand.
@@ -118,7 +118,7 @@ The existing `smoke-physics.js` is a **cook-time** engine (heat transfer through
 13. **Weekly article cron (F17)**: template-driven (no LLM polish in v1 — defer Anthropic API until template output proves inadequate); writes article row to D1; route serves with `<!doctype html>` matching site shell.
 14. **Schema markup (F18)**: JSON-LD per `CLAUDE.md` convention on every new page.
 15. **Seasonal (F19)**: 4 static HTML files with placeholder copy (real copy supplied later by Monty).
-16. **F20 failure-mode sweep**: each scenario gets a failing test, then a fix. Includes: Open-Meteo down, NWS down, non-US zip, invalid zip, null forecast day, NaN score, MailerLite 5xx on subscribe, MailerLite 5xx on Friday send, KV/D1 outage, geo-IP wrong location, microclimate disclaimer.
+16. **F20 failure-mode sweep**: each scenario gets a failing test, then a fix. Includes: Open-Meteo down, NWS down, non-US zip, invalid zip, null forecast day, NaN score, Sender.net 5xx on subscribe, Sender.net 5xx on Friday send, KV/D1 outage, geo-IP wrong location, microclimate disclaimer.
 17. **Status + Sentry (F21)**: `@sentry/cloudflare` in `index.ts`; `SENTRY_DSN` env var; `/status` page reads JSON from worker.
 18. **Methodology/FAQ/disclosures (F22)**: static HTML; link from `_partials/site-header.js` footer block.
 19. **Final pass**: full Playwright suite vs `wrangler dev --remote`; Lighthouse mobile ≥95; existing `validate.ps1` still green.
@@ -126,7 +126,7 @@ The existing `smoke-physics.js` is a **cook-time** engine (heat transfer through
 ## Defaults committed (no user sign-off — reasonable calls)
 
 - **URL prefix**: `/smoke-weather/...` (`/smoke-weather/index.html` is the F8 landing); `/articles/:slug` for F17.
-- **MailerLite segmentation**: tags (`metro:kansas-city-mo`, `cut:brisket`, `cooker:offset`) instead of 50 groups — simpler, identical capability.
+- **Sender.net segmentation**: tags (`metro:kansas-city-mo`, `cut:brisket`, `cooker:offset`) instead of 50 groups — simpler, identical capability.
 - **F14 cron strategy**: single hourly Friday trigger + per-subscriber tz gate. Avoids 24 separate crons.
 - **F17 content polish**: template-only in v1, no Anthropic API. Add later if quality demands.
 - **Sentry**: free hobby project; `SENTRY_DSN` added to `.env.example`.
@@ -136,8 +136,8 @@ The existing `smoke-physics.js` is a **cook-time** engine (heat transfer through
 ## Risks
 
 - **smoke-physics.js drift**: parity test (step 1) is the guard. If it ever fails, fix the TS port, never silently update fixtures.
-- **MailerLite rate limits** (~120 req/min on free tier): batch Friday sends with `waitUntil` throttling. Documented in `.env.example` and `lib/mailerlite/client.ts`.
-- **Worker bundle size**: adding `@sentry/cloudflare` + zod + MailerLite client must stay under the 10 MB Worker limit. Treeshake aggressively; verify via `wrangler deploy --dry-run --outdir`.
+- **Sender.net rate limits**: returns `429` with `Retry-After` header; batch Friday sends with `waitUntil` throttling. Documented in `.env.example` and `lib/sender/client.ts`.
+- **Worker bundle size**: adding `@sentry/cloudflare` + zod + Sender.net client must stay under the 10 MB Worker limit. Treeshake aggressively; verify via `wrangler deploy --dry-run --outdir`.
 - **F17 served from D1**: deviates from the build plan's implicit "static page per article." Indexability holds (HTML served with `Content-Type: text/html` is crawlable); avoids the operational mess of cron-driven git commits.
 - **CSP**: existing `_headers` `connect-src 'self'` is fine since `/api/*` is same-origin.
 - **Build coordination**: `npm run build` must run `generate-metros.js` *before* `build.js` — single npm script chains them; no race.
@@ -170,7 +170,7 @@ Every PR for any feature/step in this plan goes through two review loops before 
 End-to-end check before declaring done:
 
 1. **Unit**: `npm run test` — all Vitest specs green, including scoring fixture suite and physics parity test.
-2. **Integration**: Miniflare-driven specs cover Open-Meteo→NWS failover, KV stale-while-error, D1 migrations apply cleanly, MailerLite retry queue path.
+2. **Integration**: Miniflare-driven specs cover Open-Meteo→NWS failover, KV stale-while-error, D1 migrations apply cleanly, Sender.net retry queue path.
 3. **E2E**: `npm run test:e2e` — Playwright drives `wrangler dev`; primary flow (zip → weekend verdict → tap day → hourly) green on mobile viewport; affiliate disclosure visible on every placement.
 4. **Manual smoke** (after deploy to a preview): open `/smoke-weather` on phone, confirm look-and-feel matches existing calculators (header, colors, fonts, card radius, shadow). Try non-US zip, expired KV simulation (block Open-Meteo), Friday email subscribe.
 5. **Performance**: Lighthouse mobile ≥95; first load <100KB; Worker p50 <200ms cold, <50ms warm.

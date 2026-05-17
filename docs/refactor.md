@@ -2,7 +2,7 @@
 
 ## Context
 
-Pitmaster.tools is a static-HTML BBQ calculator site with a Cloudflare Worker backend (D1 + KV + cron + MailerLite + Sentry). Authoring is painful: 70 source HTML files share ~5,075 lines of duplicated boilerplate (nav block, OG/Twitter meta, consent script, favicons, common inline CSS, localStorage init). A working `_src → build.js → dist` pipeline already injects CSS/JS partials but has no HTML-partial or variable-substitution support. There is no GitHub Actions CI — `validate.ps1` runs locally pre-merge. Tool pages are 700–1,700 lines each, most of it inline `<style>` and `<script>`. The worker is already cleanly split (router + handlers/ + crons/ + lib/), so backend work is minor.
+Pitmaster.tools is a static-HTML BBQ calculator site with a Cloudflare Worker backend (D1 + KV + cron + Sender.net + Sentry). Authoring is painful: 70 source HTML files share ~5,075 lines of duplicated boilerplate (nav block, OG/Twitter meta, consent script, favicons, common inline CSS, localStorage init). A working `_src → build.js → dist` pipeline already injects CSS/JS partials but has no HTML-partial or variable-substitution support. There is no GitHub Actions CI — `validate.ps1` runs locally pre-merge. Tool pages are 700–1,700 lines each, most of it inline `<style>` and `<script>`. The worker is already cleanly split (router + handlers/ + crons/ + lib/), so backend work is minor.
 
 Goal: ship the refactor in three stages, lowest-risk first, with main always green.
 

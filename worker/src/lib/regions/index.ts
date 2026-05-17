@@ -1,6 +1,6 @@
 // Portfolio-aware regional segmentation for the Best Smoke Days email
 // system. Six regions cover all 50 states + DC; every subscriber lives
-// in exactly one. MailerLite groups are named `pitmaster_<region>` and
+// in exactly one. Sender.net groups are named `pitmaster_<region>` and
 // the Friday cron sends one campaign per region rather than per
 // subscriber — see docs/portfolio-email-architecture.md for the why.
 //

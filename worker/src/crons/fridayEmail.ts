@@ -1,21 +1,23 @@
 // F14 — Friday digest cron (portfolio-aware regional version).
 //
-// Schedule: `0 10-13 * * 5` — fires hourly Friday UTC across the four
-// anchor-timezone Friday-6am windows in DST:
-//   10:00 UTC  →  06:00 America/New_York   (northeast + southeast)
-//   11:00 UTC  →  06:00 America/Chicago    (midwest + south_central)
-//   12:00 UTC  →  06:00 America/Denver     (mountain)
-//   13:00 UTC  →  06:00 America/Los_Angeles (pacific)
+// Schedule: `0 10-14 * * 5` — fires hourly Friday UTC across the five
+// anchor-timezone Friday-6am windows (covers Pacific standard time at
+// 14:00 UTC plus four DST windows):
+//   10:00 UTC  →  06:00 America/New_York   (northeast + southeast, DST)
+//   11:00 UTC  →  06:00 America/Chicago    (midwest + south_central, DST)
+//   12:00 UTC  →  06:00 America/Denver     (mountain, DST)
+//   13:00 UTC  →  06:00 America/Los_Angeles (pacific, DST)
+//   14:00 UTC  →  06:00 America/Los_Angeles (pacific, standard time)
 //
 // Per tick, for each region whose anchor timezone says it is now
 // Friday 06:00 local, this cron:
 //   1. Claims an idempotency slot in `friday_campaign_log (region, send_date)`
-//   2. Triggers the region's MailerLite automation via
-//      POST /api/automations/<region_automation_id>/run
+//   2. Triggers the region's Sender.net automation via its trigger URL
+//      (SENDER_DIGEST_TRIGGER_URL_<REGION> secret)
 //   3. Records a 'send' row in `events` for /api/status observability
 //   4. Updates the friday_campaign_log slot to 'sent' or 'failed'
 //
-// Audience filtering: the automation is configured in the MailerLite
+// Audience filtering: the automation is configured in the Sender.net
 // dashboard to send only to subscribers in `pitmaster_<region>`. The
 // cron has no per-subscriber loop — that's the portfolio scaling win
 // vs. the v1 per-subscriber tz-gated model.
@@ -28,14 +30,14 @@
 // dynamic content — see docs/portfolio-email-architecture.md.
 
 import type { Env } from '../index.js';
-import { createMailerLiteClient, type MailerLiteClient } from '../lib/mailerlite/client.js';
-import { MailerLiteError } from '../lib/mailerlite/errors.js';
+import { createSenderClient, type SenderClient } from '../lib/sender/client.js';
+import { SenderError } from '../lib/sender/errors.js';
 import { REGIONS, type Region } from '../lib/regions/index.js';
 import { summarizeError } from '../lib/redact.js';
 
 export interface FridayCronOptions {
   now?: () => Date;
-  client?: MailerLiteClient;
+  client?: SenderClient;
   /** Per-region telemetry — invoked once per processed region. */
   onResult?: (outcome: FridayCronOutcome) => void;
   /**
@@ -48,7 +50,7 @@ export interface FridayCronOptions {
 }
 
 export type FridayCronOutcome =
-  | { region: Region; status: 'skipped'; reason: 'already-sent' | 'previously-failed' | 'no-automation-id' | 'not-local-friday-6' }
+  | { region: Region; status: 'skipped'; reason: 'already-sent' | 'previously-failed' | 'no-trigger-url' | 'not-local-friday-6' | 'retry-after-pending' }
   | { region: Region; status: 'sent'; sendDate: string }
   | { region: Region; status: 'failed'; sendDate: string; error: string; retryable: boolean };
 
@@ -77,14 +79,14 @@ const REGION_ANCHOR_TZ: Readonly<Record<Region, string>> = {
   pacific: 'America/Los_Angeles',
 };
 
-/** Env var name carrying the automation id for each region. */
-const REGION_ENV_KEY: Readonly<Record<Region, keyof Env>> = {
-  northeast: 'MAILERLITE_AUTOMATION_NORTHEAST_ID',
-  southeast: 'MAILERLITE_AUTOMATION_SOUTHEAST_ID',
-  midwest: 'MAILERLITE_AUTOMATION_MIDWEST_ID',
-  south_central: 'MAILERLITE_AUTOMATION_SOUTH_CENTRAL_ID',
-  mountain: 'MAILERLITE_AUTOMATION_MOUNTAIN_ID',
-  pacific: 'MAILERLITE_AUTOMATION_PACIFIC_ID',
+/** Env var name carrying the per-region Sender trigger URL. */
+const REGION_TO_TRIGGER_URL_ENV: Readonly<Record<Region, keyof Env>> = {
+  northeast:     'SENDER_DIGEST_TRIGGER_URL_NORTHEAST',
+  southeast:     'SENDER_DIGEST_TRIGGER_URL_SOUTHEAST',
+  midwest:       'SENDER_DIGEST_TRIGGER_URL_MIDWEST',
+  south_central: 'SENDER_DIGEST_TRIGGER_URL_SOUTH_CENTRAL',
+  mountain:      'SENDER_DIGEST_TRIGGER_URL_MOUNTAIN',
+  pacific:       'SENDER_DIGEST_TRIGGER_URL_PACIFIC',
 };
 
 /**
@@ -129,7 +131,7 @@ export async function runFridayCron(
   opts: FridayCronOptions = {}
 ): Promise<FridayCronOutcome[]> {
   const client =
-    opts.client ?? createMailerLiteClient({ apiKey: env.MAILERLITE_API_KEY });
+    opts.client ?? createSenderClient({ apiToken: env.SENDER_API_TOKEN });
   const outcomes: FridayCronOutcome[] = [];
   const nowFn = opts.now ?? (() => new Date());
 
@@ -145,42 +147,55 @@ export async function runFridayCron(
       outcomes.push(o);
       continue;
     }
-    const automationId = env[REGION_ENV_KEY[region]] as string | undefined;
-    if (!automationId) {
+    const triggerUrl = env[REGION_TO_TRIGGER_URL_ENV[region]] as string | undefined;
+    if (!triggerUrl) {
       const o: FridayCronOutcome = {
         region,
         status: 'skipped',
-        reason: 'no-automation-id',
+        reason: 'no-trigger-url',
       };
       opts.onResult?.(o);
       outcomes.push(o);
+      // Write a warning event so operators can observe the missing-URL
+      // condition from the events table. Guarded by a friday_campaign_log
+      // check so repeated cron invocations within the same Friday window
+      // only write the event once per (region, sendDate).
+      const sendDate = slot.date;
+      const nowMs = nowFn().getTime();
+      await recordMissingUrlEvent(env.SMOKE_DB, region, sendDate, nowMs);
       continue;
     }
-    const outcome = await processRegion(env, client, region, automationId, slot.date, nowFn);
+    const outcome = await processRegion(env, client, region, triggerUrl, slot.date, nowFn);
     opts.onResult?.(outcome);
     outcomes.push(outcome);
   }
 
-  // If any region failed retryably, throw so Cloudflare's
-  // scheduled-handler auto-retry fires. Without this the
-  // ctx.waitUntil(runFridayCron(...)) in index.ts resolves normally,
-  // Cloudflare considers the invocation a success, and the failed
-  // region's only Fri-06:00 anchor-tz tick has passed by the next
-  // hourly cron — the digest is dark for that region for the week.
+  // If any region failed retryably OR has a retry-after-pending outcome,
+  // throw so Cloudflare's scheduled-handler auto-retry fires. Without this
+  // ctx.waitUntil(runFridayCron(...)) resolves normally, Cloudflare
+  // considers the invocation a success, and the failed region's only
+  // Fri-06:00 anchor-tz tick has passed by the next hourly cron — the
+  // digest is dark for that region for the week.
   // Successful regions are NOT re-attempted on auto-retry because the
   // claim SQL skips 'sent' rows.
+  //
+  // We throw on retry-after-pending so Cloudflare's scheduled-event auto-retry
+  // re-fires the same event ~5-30 min later with the SAME scheduledTime
+  // (still passes the per-region local-Friday-6am gate). When next_attempt_at
+  // has expired by the time the auto-retry runs, the cron attempts the
+  // digest_trigger normally. For Retry-After values that exceed Cloudflare's
+  // auto-retry budget (~30-60 min), the region is silently skipped until next
+  // Friday's send_date — acceptable degradation under sustained rate limiting.
   if (!opts.swallowRetryableThrow) {
-    const retryable = outcomes.find(
-      (o): o is Extract<FridayCronOutcome, { status: 'failed' }> =>
-        o.status === 'failed' && o.retryable
+    const hasRetryableFailure = outcomes.some(
+      (o) => o.status === 'failed' && o.retryable
     );
-    if (retryable) {
+    const hasRetryAfterPending = outcomes.some(
+      (o) => o.status === 'skipped' && o.reason === 'retry-after-pending'
+    );
+    if (hasRetryableFailure || hasRetryAfterPending) {
       throw new Error(
-        `runFridayCron: retryable failure for region(s) ` +
-          `[${outcomes
-            .filter((o) => o.status === 'failed' && o.retryable)
-            .map((o) => (o as { region: Region }).region)
-            .join(', ')}] — Cloudflare scheduled-handler retry should re-attempt`
+        'Friday cron: retry required (failed retryable or retry-after pending)'
       );
     }
   }
@@ -189,9 +204,9 @@ export async function runFridayCron(
 
 async function processRegion(
   env: Env,
-  client: MailerLiteClient,
+  client: SenderClient,
   region: Region,
-  automationId: string,
+  triggerUrl: string,
   sendDate: string,
   nowFn: () => Date
 ): Promise<FridayCronOutcome> {
@@ -210,7 +225,7 @@ async function processRegion(
   //     time so an honest in-flight call is never preempted.
   //
   // 'sent' and 'failed' are terminal: 'sent' because we shipped the
-  // campaign and MailerLite collapses duplicates by idempotency key,
+  // campaign and Sender.net collapses duplicates by idempotency key,
   // 'failed' because an operator must investigate non-retryable errors
   // via /api/status before any re-attempt.
   const staleCutoff = nowMs - SENDING_STALE_MS;
@@ -218,12 +233,16 @@ async function processRegion(
     `INSERT INTO friday_campaign_log (region, send_date, status, attempted_at)
        VALUES (?, ?, 'sending', ?)
        ON CONFLICT (region, send_date) DO UPDATE
-         SET status = 'sending', attempted_at = excluded.attempted_at
+         SET status = 'sending', attempted_at = excluded.attempted_at,
+             next_attempt_at = NULL
          WHERE friday_campaign_log.status = 'queued'
             OR (friday_campaign_log.status = 'sending'
-                AND friday_campaign_log.attempted_at <= ?)`
+                AND friday_campaign_log.attempted_at <= ?)
+            OR (friday_campaign_log.status = 'failed'
+                AND friday_campaign_log.next_attempt_at IS NOT NULL
+                AND friday_campaign_log.next_attempt_at <= ?)`
   )
-    .bind(region, sendDate, nowMs, staleCutoff)
+    .bind(region, sendDate, nowMs, staleCutoff, nowMs)
     .run();
   if ((claim.meta.changes ?? 0) === 0) {
     // The ON CONFLICT WHERE clause rejected the UPDATE. That's one of:
@@ -245,15 +264,24 @@ async function processRegion(
     // expires the stale-cutoff will have elapsed and the next attempt
     // will re-claim. For (a)/(b) report the real status.
     const current = await env.SMOKE_DB.prepare(
-      `SELECT status, attempted_at FROM friday_campaign_log
+      `SELECT status, attempted_at, next_attempt_at FROM friday_campaign_log
         WHERE region = ? AND send_date = ?`
     )
       .bind(region, sendDate)
-      .first<{ status: 'queued' | 'sending' | 'sent' | 'failed'; attempted_at: number }>();
+      .first<{ status: 'queued' | 'sending' | 'sent' | 'failed'; attempted_at: number; next_attempt_at: number | null }>();
     if (current?.status === 'sent') {
       return { region, status: 'skipped', reason: 'already-sent' };
     }
     if (current?.status === 'failed') {
+      // A 'failed' row with next_attempt_at > now means a 429 with Retry-After
+      // landed on a prior attempt — honor Sender's signal and skip until the
+      // deadline passes. A subsequent hourly cron invocation after next_attempt_at
+      // will re-claim and retry via the updated claim SQL.
+      if (current.next_attempt_at !== null && current.next_attempt_at > nowMs) {
+        return { region, status: 'skipped', reason: 'retry-after-pending' };
+      }
+      // next_attempt_at is null or already past — this is a terminal non-retryable
+      // failure that an operator must investigate before re-attempting.
       return { region, status: 'skipped', reason: 'previously-failed' };
     }
     // 'sending' (or any unexpected state) → treat as still in-flight.
@@ -278,26 +306,33 @@ async function processRegion(
   // cron tick. Now: trigger errors revert/mark-failed, but a successful
   // trigger is committed to a 'sent' state with best-effort D1
   // bookkeeping. If the post-send UPDATE throws, we log and report
-  // sent — operators see the send in MailerLite + the stale 'sending'
+  // sent — operators see the send in Sender.net + the stale 'sending'
   // row in D1, and the stale-cutoff guard plus the campaign-side
   // idempotency tag prevent the re-claim path from re-triggering.
   try {
-    await client.triggerCampaign({
-      automationId,
+    await client.triggerWeeklyDigest({
+      triggerUrl,
       idempotencyTag: `${region}:${sendDate}`,
     });
   } catch (err) {
-    const reason = err instanceof MailerLiteError ? summarizeError(err) : 'trigger failed';
-    const retryable = err instanceof MailerLiteError && err.shouldRetry;
+    const reason = err instanceof SenderError ? summarizeError(err) : 'trigger failed';
+    const retryable = err instanceof SenderError && err.shouldRetry;
     if (retryable) {
-      // Revert the row to 'queued' so a subsequent claim (Cloudflare
-      // scheduled-handler auto-retry or operator-triggered replay)
-      // can re-attempt. Without the revert the row stays 'sending'
-      // and only a stale-timeout re-claim would recover it. Best-
-      // effort — a revert failure here means the row sits 'sending'
-      // until staleness expires, which is still correct (re-claimable).
-      await safeUpdateStatus(env.SMOKE_DB, region, sendDate, 'queued', nowMs);
-      await recordEvent(env.SMOKE_DB, region, sendDate, 'failed', `${reason} (retryable)`, nowMs);
+      const retryAfterMs = err instanceof SenderError ? err.retryAfterMs : undefined;
+      if (retryAfterMs !== undefined) {
+        // Sender signalled an explicit Retry-After. Mark the row 'failed' with
+        // next_attempt_at so subsequent hourly cron invocations skip until the
+        // deadline passes, then re-claim and retry (see claim SQL + disambiguation).
+        // We still throw below so Cloudflare's scheduled-handler fires the first
+        // retry pass; after next_attempt_at the claim SQL will re-claim normally.
+        await safeUpdateNextAttemptAt(env.SMOKE_DB, region, sendDate, nowMs + retryAfterMs, nowMs);
+        await recordEvent(env.SMOKE_DB, region, sendDate, 'failed', `${reason} (retryable, retry-after=${retryAfterMs}ms)`, nowMs);
+      } else {
+        // Plain retryable failure (5xx without Retry-After): revert to 'queued'
+        // so the CF scheduled-handler auto-retry can re-claim immediately.
+        await safeUpdateStatus(env.SMOKE_DB, region, sendDate, 'queued', nowMs);
+        await recordEvent(env.SMOKE_DB, region, sendDate, 'failed', `${reason} (retryable)`, nowMs);
+      }
       return { region, status: 'failed', sendDate, error: reason, retryable: true };
     }
     await safeUpdateStatus(env.SMOKE_DB, region, sendDate, 'failed', nowMs);
@@ -309,8 +344,8 @@ async function processRegion(
   // bookkeeping is best-effort and must not roll the outcome back to
   // 'queued' (which would re-trigger). Log on failure so an operator
   // can clean up the stale 'sending' row manually if needed; the
-  // (region, send_date) idempotency tag on triggerCampaign ensures
-  // MailerLite collapses any accidental re-fire to a no-op even if
+  // (region, send_date) idempotency tag on triggerWeeklyDigest ensures
+  // Sender.net collapses any accidental re-fire to a no-op even if
   // the row is somehow re-claimed before SENDING_STALE_MS elapses.
   await safeUpdateStatus(env.SMOKE_DB, region, sendDate, 'sent', nowMs);
   await recordEvent(env.SMOKE_DB, region, sendDate, 'sent', null, nowMs);
@@ -358,6 +393,37 @@ async function updateStatus(
     .run();
 }
 
+/**
+ * Best-effort: set status='failed' + next_attempt_at on the row to honor
+ * Sender's Retry-After signal. A failure here leaves the row in 'sending'
+ * (stale-claimable after SENDING_STALE_MS), which is still recoverable.
+ */
+async function safeUpdateNextAttemptAt(
+  db: D1Database,
+  region: Region,
+  sendDate: string,
+  nextAttemptAt: number,
+  now: number
+): Promise<void> {
+  try {
+    await db
+      .prepare(
+        `UPDATE friday_campaign_log
+            SET status = 'failed', attempted_at = ?, next_attempt_at = ?
+          WHERE region = ? AND send_date = ?`
+      )
+      .bind(now, nextAttemptAt, region, sendDate)
+      .run();
+  } catch (err) {
+    console.warn('friday_campaign_log: next_attempt_at update failed (best-effort)', {
+      region,
+      send_date: sendDate,
+      next_attempt_at: nextAttemptAt,
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+}
+
 async function recordEvent(
   db: D1Database,
   region: Region,
@@ -374,6 +440,56 @@ async function recordEvent(
       .run();
   } catch (auditErr) {
     console.warn('friday_campaign_log: events insert failed', {
+      region,
+      send_date: sendDate,
+      error: summarizeError(auditErr),
+    });
+  }
+}
+
+/**
+ * Records a warning event when a region is in-window but has no
+ * SENDER_DIGEST_TRIGGER_URL_<REGION> secret configured. Idempotent:
+ * uses INSERT OR IGNORE (via a partial unique index on kind+send_date+region
+ * encoded in the payload) — instead, checks the events table for a prior
+ * no-trigger-url event for this (region, sendDate) so repeated cron
+ * invocations within the same Friday window write at most one event row.
+ */
+async function recordMissingUrlEvent(
+  db: D1Database,
+  region: Region,
+  sendDate: string,
+  now: number
+): Promise<void> {
+  try {
+    // Atomically insert only if no prior 'error' event for this
+    // (region, sendDate, reason) already exists. This guards against
+    // concurrent cron invocations in the same Friday window when the
+    // trigger URL is consistently absent. A single compound statement
+    // is atomic in D1's underlying SQLite serialized writes.
+    const payload = JSON.stringify({
+      source: 'friday_cron',
+      region,
+      send_date: sendDate,
+      reason: 'no-trigger-url',
+    });
+    await db
+      .prepare(
+        `INSERT INTO events (kind, payload, created_at)
+          SELECT ?, ?, ?
+          WHERE NOT EXISTS (
+            SELECT 1 FROM events
+            WHERE kind = 'error'
+              AND json_extract(payload, '$.source') = 'friday_cron'
+              AND json_extract(payload, '$.region') = ?
+              AND json_extract(payload, '$.send_date') = ?
+              AND json_extract(payload, '$.reason') = 'no-trigger-url'
+          )`
+      )
+      .bind('error', payload, now, region, sendDate)
+      .run();
+  } catch (auditErr) {
+    console.warn('friday_campaign_log: missing-url event insert failed', {
       region,
       send_date: sendDate,
       error: summarizeError(auditErr),

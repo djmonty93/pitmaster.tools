@@ -75,35 +75,38 @@ verified, and rolled back independently.
   identical across 13 cuts × 5 cookers × 8 scenarios.
 - **Step 5.** D1 migrations in `worker/migrations/` — `subscribers`,
   `metros` (seeded with 50 US metros, validated for IANA timezone +
-  5-digit ZIP + url-safe slugs), `events`, `mailerlite_retry`, and
+  5-digit ZIP + url-safe slugs), `events`, `sender_retry`, and
   `articles`. Enum-shaped columns use `CHECK` constraints; `articles.metro_slug`
   references `metros.slug`. Apply with
   `wrangler d1 migrations apply SMOKE_DB`. Unit tests run them against
   an in-memory Miniflare D1 via a quote-aware `splitStatements` helper
   in `worker/tests/helpers/d1.ts` (handles `;` and `--` inside string
   literals, SQLite's `''` escape).
-- **Step 6.** MailerLite client + retry queue under
-  `worker/src/lib/mailerlite/`. `client.ts` calls Connect API
-  (`POST /api/subscribers`, `PUT /api/subscribers/:email`) with Bearer
-  auth, an `Idempotency-Key` whose value is a SHA-256 hash of the
-  lowercased email (PII never leaks into proxy logs or D1), and
-  `AbortController` timeouts. Failures are mapped to `MailerLiteError`
+- **Step 6.** Sender.net client + retry queue under
+  `worker/src/lib/sender/`. `client.ts` calls the Sender API
+  (`POST /v2/subscribers`, `PATCH /v2/subscribers/{email}`) with Bearer
+  auth and
+  `AbortController` timeouts. Failures are mapped to `SenderError`
   with a `shouldRetry` rule (5xx, timeout, network, and 408/425/429
   retry; 400/422 + malformed body do not). Every error message is run
   through the shared `lib/redact.ts` so Bearer tokens and emails never
-  reach `mailerlite_retry.last_error`. `retry.ts` enqueues retryable
-  failures onto `mailerlite_retry` (UNIQUE idempotency key,
+  reach `sender_retry.last_error`. `retry.ts` enqueues retryable
+  failures onto `sender_retry` (UNIQUE idempotency key,
   duplicate-safe `ON CONFLICT DO UPDATE` that refreshes payload +
   clamps `next_attempt_at` down + preserves `attempts`); `drain()`
   replays due rows in FIFO order with doubling backoff
   (1m, 2m, 4m, … capped at 6 h), parks rows after 10 attempts, and
   writes an `events` audit row on every drop or park. `tags.ts`
-  validates metro slugs and emits `metro:`/`cut:`/`cooker:`
-  segmentation as MailerLite subscriber custom fields. The campaign
-  send path is owned by Step 11 (Friday cron); Step 6 reserves the
-  `send` kind in the schema and `drain()`'s SQL filter excludes
-  `send` rows entirely, so any pre-existing rows wait untouched in
-  the queue for Step 11 to claim. `MAILERLITE_API_KEY` belongs in
+  validates metro slugs and writes segmentation as Sender.net subscriber
+  custom fields (`bbq_zip`, `bbq_city`, `bbq_state`, `bbq_region`,
+  `bbq_cut_pref`, `bbq_cooker_pref`, `bbq_timezone`, `bbq_signup_date`).
+  Group membership is set to `pitmaster_all` plus one of six regional
+  groups (`pitmaster_<region>`). No colon-prefixed tag strings are emitted. The `request_kind`
+  CHECK constraint allows `'subscribe' | 'unsubscribe' | 'digest_trigger'`,
+  but in practice only `'subscribe'` and `'unsubscribe'` are enqueued
+  by their handlers on retryable Sender failures; `drain()` replays only
+  these two kinds via its `WHERE request_kind IN ('subscribe', 'unsubscribe')`
+  filter, leaving `'digest_trigger'` reserved for future use. `SENDER_API_TOKEN` belongs in
   `wrangler secret put`; `.dev.vars.example` documents the local form.
 - **Step 7.** Worker router (`worker/src/router.ts`) + handlers
   (`worker/src/handlers/`) for the public API:
@@ -114,20 +117,24 @@ verified, and rolled back independently.
     KV for 30 days); fetches forecast via the Step 4 cache wrapper;
     runs the Step 3 scorer per day. Falls back to
     `request.cf.postalCode` when `zip` is omitted (F10 geo-IP).
-  - `POST /api/subscribe` — subscribes to MailerLite, writes a row to
-    `subscribers`, queues onto `mailerlite_retry` on transient
+  - `POST /api/subscribe` — subscribes via Sender.net, writes a row to
+    `subscribers`, queues onto `sender_retry` on transient
     failures (D1 row still created so the cron can resume), surfaces
     4xx for caller-side rejections.
-  - `POST /api/unsubscribe` — flips MailerLite status, sets
-    `subscribers.unsubscribed_at`. 5xx queues; 4xx treated as soft
-    success.
+  - `POST /api/unsubscribe` — removes the subscriber from
+    `pitmaster_all` and each `pitmaster_<region>` group (group-scoped;
+    account status remains `active` so portfolio sites can still email).
+    Verifies request via HMAC token. On retryable Sender.net failures
+    (5xx, timeout, network errors, 408/425/429), enqueues on `sender_retry`
+    for the drain cron to replay; response includes `status: 'queued'`.
+    Sets D1 `subscribers.unsubscribed_at` to the current epoch ms.
   - `GET /api/preferences?email=` and `PATCH /api/preferences` —
     read/update cut and cooker. GET deliberately omits `zip` so a
     leaked URL doesn't dump the subscriber's home zip; PATCH builds
     the SET clause dynamically so a single-field update can't blow
     away the other field.
   - `GET /api/status` — operational JSON for the status page (Step
-    17): mailerlite retry queue depth (queued / parked / next),
+    17): Sender.net retry queue depth (queued / parked / next),
     subscriber counts, and the last 10 redacted error events from the
     `events` table. `Cache-Control: no-store`.
   - `GET /articles/:slug` — renders an article row from D1 as a full
@@ -238,21 +245,21 @@ verified, and rolled back independently.
   disclosure, hidden-slot when no recommendation, `javascript:` URI
   neutralized). `validate.ps1` now checks `smoke-weather/disclosures.html`.
 - **Step 11 (#44).** Friday cron (F14) — portfolio-aware regional digest.
-  `worker/src/crons/fridayEmail.ts` triggers per-region MailerLite
+  `worker/src/crons/fridayEmail.ts` triggers per-region Sender.net
   automations at Fri 06:00 local in each anchor timezone; cron schedule
-  `0 10-13 * * 5` covers ET/CT/MT/PT windows in DST and is idempotent
+  `0 10-14 * * 5` covers five UTC windows (ET/CT/MT/PT DST + PT standard time) and is idempotent
   per `(region, send_date)` via the new `friday_campaign_log` table
-  (migration `0005`). MailerLite custom fields gain the `bbq_` prefix
+  (migration `0005`). Sender.net custom fields gain the `bbq_` prefix
   so this account can host sibling sites (powersizing.com,
   overlanding.tools); D1 columns stay unprefixed. `worker/src/lib/regions/`
   maps state → region (six regions, 50 states + DC; MO sits in
-  south_central on the KC BBQ axis). `worker/src/lib/mailerlite/groups.ts`
+  south_central on the KC BBQ axis). `worker/src/lib/sender/groups.ts`
   manages BBQ-scoped group membership (`pitmaster_all` +
   `pitmaster_<region>`) without disturbing sibling-site groups on the
   same subscriber. `subscribe`/`unsubscribe` were rewritten to derive
   region from the zip's state and assign/remove the right groups.
   See `docs/portfolio-email-architecture.md` for the full multi-tenant
-  rationale and `docs/mailerlite-setup.md` for the operator runbook
+  rationale and `docs/sender-setup.md` for the operator runbook
   (including the existing-subscribers backfill warning baked into the
   migration header).
 - **Step 12 (#45).** Top-metro pages (F16). `scripts/generate-metros.js`
@@ -328,8 +335,8 @@ verified, and rolled back independently.
   catches missing JSON-LD on these pages automatically.
 - **Step 16.** F20 failure-mode sweep. Audit + close known gaps the plan
   flagged. Existing tests already covered Open-Meteo down, NWS down,
-  both-down, invalid zip, unknown zip, geo-IP fallback, MailerLite 5xx
-  on subscribe, MailerLite 5xx on Friday send, and KV outage. Two
+  both-down, invalid zip, unknown zip, geo-IP fallback, Sender.net 5xx
+  on subscribe, Sender.net 5xx on Friday send, and KV outage. Two
   gaps closed in this step:
   (1) **NaN score guard.** `clamp()` in both `packages/shared/src/scoring.ts`
   and the JS mirror `_partials/weather-score-shared.js` now returns `lo`
@@ -358,7 +365,7 @@ verified, and rolled back independently.
   pin the disabled-without-DSN guarantee, the environment override,
   and the sample-rate constant.
   (2) **Status page.** New `_src/smoke-weather/status.html` (`noindex,
-  follow`) reads `/api/status` on load and renders MailerLite retry
+  follow`) reads `/api/status` on load and renders Sender.net retry
   queue depth, subscriber counts, and the last 10 redacted error
   events. Pure client JS, `textContent`-only DOM updates so any odd
   character in a redacted summary can't escape into markup. Added to
@@ -389,7 +396,7 @@ verified, and rolled back independently.
   ship:
   - `npm test` — 922 worker tests across 29 files pass (Vitest +
     Miniflare; covers Open-Meteo/NWS failover, KV stale-while-error,
-    D1 migrations, MailerLite client + retry queue, all worker
+    D1 migrations, Sender.net client + retry queue, all worker
     handlers, both crons, scoring engine + JS-mirror parity, region
     routing, Sentry options, F20 NaN guards, weekly article cron).
   - `npm run test:scripts` — 22 Node-builtin tests pass
@@ -409,38 +416,39 @@ verified, and rolled back independently.
       `/articles/:slug` article.
     - Sentry DSN provisioned via `wrangler secret put SENTRY_DSN`
       before deploy.
-    - MailerLite secrets (API key + token-secret + region automation
-      ids) provisioned via `wrangler secret put`.
+    - Sender.net secrets (`SENDER_API_TOKEN` + token-secret + region
+      trigger URLs) provisioned via `wrangler secret put`.
 
-## DNS setup — MailerLite sending domain
+## DNS setup — Sender.net sending domain
 
 Best Smoke Days emails ship from `pete@mail.pitmaster.tools`. Configure
-the sending domain in MailerLite first (Dashboard → Account →
-Settings → Domains → Add new domain), then add the records MailerLite
+the sending domain in Sender.net first (Dashboard → Settings →
+Sending Domains → Add domain), then add the records Sender.net
 gives you to Cloudflare DNS for `pitmaster.tools`:
 
 | Record                                | Type   | Target / Value                                 |
 | ------------------------------------- | ------ | ---------------------------------------------- |
-| `mail.pitmaster.tools`                | CNAME  | (from MailerLite UI, e.g. `mlsend.com`)        |
-| `pitmaster._domainkey.pitmaster.tools`| TXT    | (DKIM public key from MailerLite UI)           |
-| `pitmaster.tools` SPF                 | TXT    | `v=spf1 include:_spf.mlsend.com -all`          |
+| `mail.pitmaster.tools`                | CNAME  | (from Sender UI)                               |
+| `pitmaster._domainkey.pitmaster.tools`| TXT    | (DKIM public key from Sender UI)               |
+| `pitmaster.tools` SPF                 | TXT    | `v=spf1 include:_spf.sender.net -all`          |
 | `_dmarc.pitmaster.tools`              | TXT    | `v=DMARC1; p=quarantine; rua=mailto:dmarc@pitmaster.tools` |
 
 After Cloudflare propagation (usually < 5 min), click "Verify" in the
-MailerLite domain UI. Once verified, every regional automation can
+Sender.net domain UI. Once verified, every regional automation can
 send from this domain.
 
-Code-side, set the from-address envs:
+Code-side, set the from-address envs (optional; only consumed if
+`POST /v2/message/send` is wired in a handler):
 
 ```bash
-wrangler secret put MAILERLITE_FROM_EMAIL    # pete@mail.pitmaster.tools
-wrangler secret put MAILERLITE_FROM_NAME     # Pitmaster Tools
-wrangler secret put MAILERLITE_REPLY_TO      # pete@mail.pitmaster.tools
+wrangler secret put SENDER_FROM_EMAIL    # pete@mail.pitmaster.tools
+wrangler secret put SENDER_FROM_NAME     # Pitmaster Tools
+wrangler secret put SENDER_REPLY_TO      # pete@mail.pitmaster.tools
 ```
 
 The envs are surfaced into `Env` for future use — the regional
 automation templates are still the canonical place to set the from
-address per send. See `docs/mailerlite-setup.md` for the operator
+address per send. See `docs/sender-setup.md` for the operator
 checklist and `docs/portfolio-email-architecture.md` for why this
 matters at portfolio scale.
 

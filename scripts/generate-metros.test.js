@@ -6,7 +6,7 @@
  * Also chained from `npm test` via the test:scripts npm script.
  *
  * Coverage:
- *   - Parity: every metro in worker/migrations/0002_metros_seed.sql is present
+ *   - Parity: every metro in worker/migrations/0001_init.sql (metros table) is present
  *     in scripts/generate-metros.js and vice versa (slug, name, state, zip,
  *     latitude, longitude, timezone, population all agree).
  *   - renderMetro(metro) produces HTML that:
@@ -32,7 +32,22 @@ const path = require('node:path');
 
 const gen = require('./generate-metros.js');
 
-const SEED_SQL_PATH = path.join('worker', 'migrations', '0002_metros_seed.sql');
+const SEED_SQL_PATH = path.join('worker', 'migrations', '0001_init.sql');
+
+function extractMetrosSection(sqlText) {
+  // Task 12 squashed migrations 0001–0005 into a single 0001_init.sql.
+  // Extract just the metros INSERT block (from the metros table definition
+  // through the final semicolon).
+  const start = sqlText.indexOf('INSERT OR IGNORE INTO metros');
+  if (start === -1) {
+    throw new Error('metros INSERT block not found in ' + SEED_SQL_PATH);
+  }
+  const end = sqlText.indexOf(';', start);
+  if (end === -1) {
+    throw new Error('trailing semicolon for metros INSERT block not found');
+  }
+  return sqlText.slice(start, end + 1);
+}
 
 function parseSqlSeed(sqlText) {
   // Each row is `('slug','name','state','zip',lat,lng,'tz',pop)`. There's a
@@ -113,9 +128,10 @@ test('every metro has a valid 5-digit ZIP', () => {
   }
 });
 
-test('METROS matches worker/migrations/0002_metros_seed.sql exactly', () => {
-  const sqlText = fs.readFileSync(SEED_SQL_PATH, 'utf8');
-  const sqlRows = parseSqlSeed(sqlText);
+test('METROS matches worker/migrations/0001_init.sql metros section exactly', () => {
+  const allSqlText = fs.readFileSync(SEED_SQL_PATH, 'utf8');
+  const metrosSection = extractMetrosSection(allSqlText);
+  const sqlRows = parseSqlSeed(metrosSection);
   assert.equal(sqlRows.length, gen.METROS.length, 'row count');
   const sqlBySlug = new Map(sqlRows.map((r) => [r.slug, r]));
   for (const m of gen.METROS) {

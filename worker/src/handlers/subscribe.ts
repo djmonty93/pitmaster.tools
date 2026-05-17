@@ -7,12 +7,12 @@
 // Writes happen in this order:
 //   1. resolveZip → (state, timezone, lat/lon, metroSlug)
 //   2. stateToRegion → Region (or null if state can't be resolved)
-//   3. MailerLite subscribe (upsert) with bbq_* fields
+//   3. Sender.net subscribe (upsert) with bbq_* fields
 //   4. assignBbqGroups: pitmaster_all + pitmaster_<region>
 //   5. D1 INSERT … ON CONFLICT (email) DO UPDATE on `subscribers`
 //
-// On retryable MailerLite failures the call enqueues on
-// `mailerlite_retry` and STILL writes the D1 row so the user can
+// On retryable Sender.net failures the call enqueues on
+// `sender_retry` and STILL writes the D1 row so the user can
 // receive Friday emails once the queue drains. Non-retryable failures
 // surface 4xx and the D1 row is not created.
 //
@@ -26,16 +26,16 @@
 
 import { z } from 'zod';
 import { signToken } from '../lib/auth/token.js';
-import { createMailerLiteClient } from '../lib/mailerlite/client.js';
-import { MailerLiteError } from '../lib/mailerlite/errors.js';
+import { createSenderClient } from '../lib/sender/client.js';
+import { SenderError } from '../lib/sender/errors.js';
 import {
   ALL_GROUP_NAME,
   assignBbqGroups,
   regionToGroupName,
   resolveGroupId,
-} from '../lib/mailerlite/groups.js';
-import { enqueue } from '../lib/mailerlite/retry.js';
-import { toBbqSubscriberFields, type BbqSubscriberFields } from '../lib/mailerlite/tags.js';
+} from '../lib/sender/groups.js';
+import { enqueue } from '../lib/sender/retry.js';
+import { toBbqSubscriberFields, type BbqSubscriberFields } from '../lib/sender/tags.js';
 import { GeocoderError, resolveZip, type ZipLocation } from '../lib/geo/zipGeocoder.js';
 import { RegionError, stateToRegion, type Region } from '../lib/regions/index.js';
 import { summarizeError } from '../lib/redact.js';
@@ -130,12 +130,12 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
     // toBbqSubscriberFields rejects an invalid state; pass a synthetic
     // "ZZ" sentinel when state is unknown so the field shape is valid
     // for the call. The bbq_state field is stripped below for the
-    // unknown-state path so MailerLite doesn't store the sentinel.
+    // unknown-state path so Sender.net doesn't store the sentinel.
     state: state ?? 'ZZ',
     // Same pattern: bbq_region key is keyed off the freshly-resolved
-    // region (not the oldRegion fallback) so the MailerLite record
+    // region (not the oldRegion fallback) so the Sender.net record
     // reflects what we observed now. When resolvedRegion is null we
-    // strip the key below — the existing MailerLite field value
+    // strip the key below — the existing Sender.net field value
     // (from a prior subscribe) is preserved by an absent key.
     region: resolvedRegion ?? ('pacific' as Region),
     cut: body.cut ?? null,
@@ -150,41 +150,41 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
     delete (fields as Partial<BbqSubscriberFields>).bbq_region;
   }
 
-  const client = createMailerLiteClient({ apiKey: rc.env.MAILERLITE_API_KEY });
+  const client = createSenderClient({ apiToken: rc.env.SENDER_API_TOKEN });
 
-  let mailerliteId: string | null = null;
-  let mailerliteStatus: 'sent' | 'queued' = 'sent';
+  let espId: string | null = null;
+  let espStatus: 'sent' | 'queued' = 'sent';
   try {
     const res = await client.subscribe({ email: body.email, fields });
-    mailerliteId = res.id;
+    espId = res.id;
   } catch (err) {
-    if (err instanceof MailerLiteError && err.shouldRetry) {
+    if (err instanceof SenderError && err.shouldRetry) {
       const idempotencyKey = `subscribe:${body.email.toLowerCase()}`;
       // `region` rides along on the retry payload so the drain
       // replays subscribe AND assignBbqGroups, not just the subscribe
       // POST. Without it the recovered subscriber would be active in
-      // MailerLite but not in any pitmaster_* group — excluded from
+      // Sender.net but not in any pitmaster_* group — excluded from
       // the Friday cron despite the D1 row being active.
       //
       // `oldRegion` rides along when this is a region-change
       // resubscribe so the drain can detach the stale regional group
       // AFTER it assigns the new one. Without this, a transient
-      // MailerLite outage during a zip move would leave the user in
+      // Sender.net outage during a zip move would leave the user in
       // BOTH pitmaster_<old> and pitmaster_<new> after recovery —
       // the handler's own detach logic was bypassed because we never
-      // got a mailerliteId on the original call.
+      // got an espId on the original call.
       await enqueue(rc.env.SMOKE_DB, {
         kind: 'subscribe',
         payload: { email: body.email, fields, region, oldRegion },
         idempotencyKey,
         cause: err,
       });
-      mailerliteStatus = 'queued';
-    } else if (err instanceof MailerLiteError) {
+      espStatus = 'queued';
+    } else if (err instanceof SenderError) {
       return jsonError(
         err.status === 422 ? 422 : 400,
-        'mailerlite_rejected',
-        'MailerLite rejected the subscription request'
+        'sender_rejected',
+        'Sender rejected the subscription request'
       );
     } else {
       throw err;
@@ -199,22 +199,22 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
   // (missing group, stale KV cache, bad id) used to be silently
   // swallowed while the response still said 'sent'.
   //
-  // Skipped entirely when MailerLite hasn't returned a subscriber id
+  // Skipped entirely when Sender.net hasn't returned a subscriber id
   // (the queued path). Drain will re-issue subscribe and re-attempt
   // group assignment on its next pass.
   let groupAssignSucceeded = false;
-  if (mailerliteId) {
+  if (espId) {
     try {
       if (region) {
-        await assignBbqGroups(client, rc.env.WEATHER_KV, mailerliteId, region);
+        await assignBbqGroups(client, rc.env.WEATHER_KV, espId, region);
       } else {
         const allGroupId = await resolveGroupId(client, rc.env.WEATHER_KV, ALL_GROUP_NAME);
-        await client.assignGroup(mailerliteId, allGroupId);
+        await client.assignGroup(espId, allGroupId);
       }
       groupAssignSucceeded = true;
     } catch (err) {
-      const cause = err instanceof MailerLiteError ? err : undefined;
-      const idempotencyKey = `group_assign:${mailerliteId}`;
+      const cause = err instanceof SenderError ? err : undefined;
+      const idempotencyKey = `group_assign:${espId}`;
       // oldRegion rides along so the drain can detach pitmaster_<oldRegion>
       // after it assigns the new group. Without it, a region-change
       // resubscribe whose group_assign step failed retryably would
@@ -224,15 +224,15 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
         kind: 'subscribe',
         payload: {
           stage: 'group_assign',
-          subscriberId: mailerliteId,
+          subscriberId: espId,
           region,
           oldRegion,
         },
         idempotencyKey,
         cause,
       });
-      mailerliteStatus = 'queued';
-      if (!(err instanceof MailerLiteError)) {
+      espStatus = 'queued';
+      if (!(err instanceof SenderError)) {
         console.warn('subscribe: group_assign unexpected error', summarizeError(err));
       }
     }
@@ -244,7 +244,7 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
     // regional audience until the drain catches up — a near-Friday zip
     // move would miss the digest entirely.
     //
-    // MailerLite returns 404 for "not a member", which the client
+    // Sender returns 404 for "not a member", which the client
     // swallows, so a stale D1 row that's already out of sync stays a
     // no-op. Best-effort: a transient failure here is logged but
     // doesn't change the user-visible outcome.
@@ -256,7 +256,7 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
           rc.env.WEATHER_KV,
           staleGroupName
         );
-        await client.removeGroup(mailerliteId, staleGroupId);
+        await client.removeGroup(espId!, staleGroupId);
       } catch (err) {
         // Original [P2] pass-7: a transient failure here used to be
         // logged and dropped, leaving the subscriber in BOTH regional
@@ -264,15 +264,15 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
         // Now we enqueue a group_remove retry so the drain finishes
         // the cleanup. The user response stays 'sent' — the new
         // assignment landed, only the stale detach is owed.
-        const cause = err instanceof MailerLiteError ? err : undefined;
+        const cause = err instanceof SenderError ? err : undefined;
         await enqueue(rc.env.SMOKE_DB, {
           kind: 'subscribe',
           payload: {
             stage: 'group_remove',
-            subscriberId: mailerliteId,
+            subscriberId: espId,
             groupName: staleGroupName,
           },
-          idempotencyKey: `group_remove:${mailerliteId}:${oldRegion}`,
+          idempotencyKey: `group_remove:${espId}:${oldRegion}`,
           cause,
         });
         console.warn(
@@ -309,11 +309,11 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
   const token = await signToken(body.email, rc.env.SUBSCRIBER_TOKEN_SECRET);
 
   return json(202, {
-    status: mailerliteStatus,
+    status: espStatus,
     email: body.email,
     region,
     timezone,
-    mailerliteId,
+    espId,
     token,
   });
 }

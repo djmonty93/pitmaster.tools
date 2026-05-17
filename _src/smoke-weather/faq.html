@@ -100,7 +100,7 @@
       "name": "Where does my data go?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Subscriber emails live in Cloudflare D1 with a one-way SHA-256-hashed idempotency key going to MailerLite — the email itself only appears in MailerLite for sending. ZIPs are stored alongside the email for region routing. Forecast queries are not associated with any user identifier. Affiliate clicks land on the merchant's site without forwarding your inputs. See the privacy policy for the full data map."
+        "text": "Subscriber emails live in Cloudflare D1; the email itself only appears in Sender.net for sending via an encrypted HTTPS connection. We do not include user-identifying tokens in HTTP headers sent to Sender.net — deduplication uses an internal idempotency key stored only in our database. ZIPs are stored alongside the email for region routing. Forecast queries are not associated with any user identifier. Affiliate clicks land on the merchant's site without forwarding your inputs. See the privacy policy for the full data map."
       }
     }
   ]
@@ -153,7 +153,7 @@
     <p>Every email carries a one-click unsubscribe link signed with an HMAC-SHA256 token tied to your email — so no one else can unsubscribe you. If the link ever fails, email <a href="mailto:contact@pitmaster.tools">contact@pitmaster.tools</a>.</p>
 
     <h3>Where does my data go?</h3>
-    <p>Subscriber emails live in Cloudflare D1; the email itself only appears in MailerLite for sending (sent with a SHA-256-hashed idempotency key so it doesn't leak into proxy logs). Forecast queries are not associated with any user identifier. Affiliate clicks land on the merchant's site without forwarding your inputs. See the <a href="/privacy-policy">privacy policy</a> for the full data map.</p>
+    <p>Subscriber emails live in Cloudflare D1; the email itself only appears in Sender.net for sending over HTTPS. We don't include user-identifying tokens in the headers sent to Sender.net — deduplication uses an internal idempotency key stored only in our database, not transmitted as a header. Forecast queries are not associated with any user identifier. Affiliate clicks land on the merchant's site without forwarding your inputs. See the <a href="/privacy-policy">privacy policy</a> for the full data map.</p>
 
     <p>
       Want the math? Read the <a href="/smoke-weather/methodology">methodology</a> page. Want to know how affiliate links work? See <a href="/smoke-weather/disclosures">disclosures</a>.

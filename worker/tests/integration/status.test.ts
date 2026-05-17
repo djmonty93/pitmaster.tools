@@ -1,7 +1,7 @@
 import { env } from 'cloudflare:test';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { handleStatus } from '../../src/handlers/status';
-import { MAX_ATTEMPTS } from '../../src/lib/mailerlite/retry';
+import { MAX_ATTEMPTS } from '../../src/lib/sender/retry';
 import { applyMigrations } from '../helpers/d1';
 import { buildContext } from '../helpers/routeContext';
 
@@ -17,7 +17,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await DB.prepare(`DELETE FROM subscribers`).run();
-  await DB.prepare(`DELETE FROM mailerlite_retry`).run();
+  await DB.prepare(`DELETE FROM sender_retry`).run();
   await DB.prepare(`DELETE FROM events`).run();
 });
 
@@ -27,12 +27,12 @@ describe('GET /api/status', () => {
     expect(res.status).toBe(200);
     const body = (await res.json()) as {
       ok: boolean;
-      mailerlite: { queuedRows: number; parkedRows: number; nextAttemptAt: number | null };
+      esp_retry: { esp_retry_pending: number; esp_retry_parked: number; nextAttemptAt: number | null };
       subscribers: { total: number; active: number };
       recentErrors: unknown[];
     };
     expect(body.ok).toBe(true);
-    expect(body.mailerlite).toEqual({ queuedRows: 0, parkedRows: 0, nextAttemptAt: null });
+    expect(body.esp_retry).toEqual({ esp_retry_pending: 0, esp_retry_parked: 0, nextAttemptAt: null });
     expect(body.subscribers).toEqual({ total: 0, active: 0 });
     expect(body.recentErrors).toEqual([]);
   });
@@ -57,14 +57,14 @@ describe('GET /api/status', () => {
   it('splits queued vs parked rows on the attempts < MAX_ATTEMPTS boundary', async () => {
     const now = Date.now();
     await DB.prepare(
-      `INSERT INTO mailerlite_retry
+      `INSERT INTO sender_retry
          (request_kind, request_payload, idempotency_key, attempts, last_status, last_error, next_attempt_at, created_at)
          VALUES (?, ?, ?, ?, NULL, NULL, ?, ?)`
     )
       .bind('subscribe', '{}', 'k-queued', 2, now + 5000, now)
       .run();
     await DB.prepare(
-      `INSERT INTO mailerlite_retry
+      `INSERT INTO sender_retry
          (request_kind, request_payload, idempotency_key, attempts, last_status, last_error, next_attempt_at, created_at)
          VALUES (?, ?, ?, ?, NULL, NULL, ?, ?)`
     )
@@ -72,11 +72,11 @@ describe('GET /api/status', () => {
       .run();
     const res = await handleStatus(buildContext(new Request('https://x/api/status')));
     const body = (await res.json()) as {
-      mailerlite: { queuedRows: number; parkedRows: number; nextAttemptAt: number };
+      esp_retry: { esp_retry_pending: number; esp_retry_parked: number; nextAttemptAt: number };
     };
-    expect(body.mailerlite.queuedRows).toBe(1);
-    expect(body.mailerlite.parkedRows).toBe(1);
-    expect(body.mailerlite.nextAttemptAt).toBe(now + 5000);
+    expect(body.esp_retry.esp_retry_pending).toBe(1);
+    expect(body.esp_retry.esp_retry_parked).toBe(1);
+    expect(body.esp_retry.nextAttemptAt).toBe(now + 5000);
   });
 
   it('returns the 10 most recent error events, newest first', async () => {

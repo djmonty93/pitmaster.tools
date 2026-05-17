@@ -63,7 +63,7 @@ const EXEMPT_PAGES = new Set([
   // the collection of calculators, not a tool itself.
   '_src/pages/tools.html',
   // Operational status page — Step 17 (F21). `noindex, follow`, reads
-  // /api/status, surfaces MailerLite queue and recent errors. Not a
+  // /api/status, surfaces Sender.net retry queue and recent errors. Not a
   // tool placement; no JSON-LD value for an operational dashboard.
   '_src/smoke-weather/status.html',
 ]);

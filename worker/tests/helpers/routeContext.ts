@@ -16,7 +16,7 @@ const fakeCtx = {
 } as unknown as ExecutionContext;
 
 export interface TestEnvOverrides {
-  MAILERLITE_API_KEY?: string;
+  SENDER_API_TOKEN?: string;
   SUBSCRIBER_TOKEN_SECRET?: string;
 }
 
@@ -36,7 +36,7 @@ export function buildContext(
     ASSETS: e.ASSETS as Fetcher,
     WEATHER_KV: e.WEATHER_KV as KVNamespace,
     SMOKE_DB: e.SMOKE_DB as D1Database,
-    MAILERLITE_API_KEY: overrides.MAILERLITE_API_KEY ?? 'ml_test_secret_key',
+    SENDER_API_TOKEN: overrides.SENDER_API_TOKEN ?? 'sender_test_token',
     SUBSCRIBER_TOKEN_SECRET:
       overrides.SUBSCRIBER_TOKEN_SECRET ?? TEST_SUBSCRIBER_TOKEN_SECRET,
   };

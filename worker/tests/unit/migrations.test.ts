@@ -23,7 +23,7 @@ describe('D1 migrations — schema', () => {
         'articles',
         'events',
         'friday_campaign_log',
-        'mailerlite_retry',
+        'sender_retry',
         'metros',
         'subscribers',
       ])
@@ -44,7 +44,7 @@ describe('D1 migrations — schema', () => {
         'idx_metros_state',
         'idx_events_created_at',
         'idx_events_kind',
-        'idx_mailerlite_retry_next',
+        'idx_sender_retry_next',
         'idx_articles_published_at',
         'idx_articles_metro_slug',
         'idx_friday_campaign_log_send_date',
@@ -119,17 +119,17 @@ describe('D1 migrations — schema', () => {
     expect(row?.hero_band).toBe('green');
   });
 
-  it('mailerlite_retry idempotency_key is UNIQUE', async () => {
+  it('sender_retry idempotency_key is UNIQUE', async () => {
     const now = Date.now();
     await DB.prepare(
-      `INSERT INTO mailerlite_retry (request_kind, request_payload, idempotency_key, next_attempt_at, created_at)
+      `INSERT INTO sender_retry (request_kind, request_payload, idempotency_key, next_attempt_at, created_at)
        VALUES (?, ?, ?, ?, ?)`
     )
       .bind('subscribe', '{}', 'idem-1', now, now)
       .run();
     await expect(
       DB.prepare(
-        `INSERT INTO mailerlite_retry (request_kind, request_payload, idempotency_key, next_attempt_at, created_at)
+        `INSERT INTO sender_retry (request_kind, request_payload, idempotency_key, next_attempt_at, created_at)
          VALUES (?, ?, ?, ?, ?)`
       )
         .bind('subscribe', '{}', 'idem-1', now, now)
@@ -137,11 +137,11 @@ describe('D1 migrations — schema', () => {
     ).rejects.toThrow();
   });
 
-  it('mailerlite_retry rejects unknown request_kind values', async () => {
+  it('sender_retry rejects unknown request_kind values', async () => {
     const now = Date.now();
     await expect(
       DB.prepare(
-        `INSERT INTO mailerlite_retry (request_kind, request_payload, idempotency_key, next_attempt_at, created_at)
+        `INSERT INTO sender_retry (request_kind, request_payload, idempotency_key, next_attempt_at, created_at)
          VALUES (?, ?, ?, ?, ?)`
       )
         .bind('bogus', '{}', 'idem-bogus', now, now)

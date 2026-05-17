@@ -1,9 +1,9 @@
-// Durable retry queue for MailerLite calls backed by the
-// `mailerlite_retry` D1 table (see 0001_init.sql).
+// Durable retry queue for Sender.net calls backed by the
+// `sender_retry` D1 table (see 0001_init.sql).
 //
 // Flow:
 //   1. Caller invokes a client method (subscribe/unsubscribe).
-//   2. If it throws a MailerLiteError where shouldRetry is true, the
+//   2. If it throws a SenderError where shouldRetry is true, the
 //      caller invokes enqueue() with the same payload + idempotency key.
 //   3. A cron (Step 11) periodically calls drain() to replay queued
 //      rows whose next_attempt_at <= now. On success the row is
@@ -28,14 +28,14 @@
 // — a second concurrent failure for the same key shouldn't reset the
 // retry history.
 
-import { MailerLiteError, type MailerLiteRequestKind } from './errors.js';
-import type { MailerLiteClient, SubscribeInput, UnsubscribeInput } from './client.js';
+import { SenderError, type SenderRequestKind } from './errors.js';
+import type { SenderClient, SubscribeInput, UnsubscribeInput } from './client.js';
 import { ALL_GROUP_NAME, assignBbqGroups, regionToGroupName, removeBbqGroups, resolveGroupId } from './groups.js';
 import { summarizeError } from '../redact.js';
 import type { Region } from '../regions/index.js';
 
 export interface EnqueueInput {
-  kind: MailerLiteRequestKind;
+  kind: SenderRequestKind;
   /** Serialized arguments to replay against the client. */
   payload: unknown;
   /** Stable key; reuse the same one across retries to deduplicate. */
@@ -43,7 +43,7 @@ export interface EnqueueInput {
   /** Optional initial scheduling override (tests). */
   firstAttemptAtMs?: number;
   /** Error that caused the enqueue, for diagnostics. */
-  cause?: MailerLiteError;
+  cause?: SenderError;
 }
 
 export interface DrainOptions {
@@ -57,13 +57,13 @@ export interface DrainOptions {
 
 export type DrainOutcome =
   | { row: RetryRow; status: 'sent' }
-  | { row: RetryRow; status: 'retry'; nextAttemptAt: number; error: MailerLiteError }
-  | { row: RetryRow; status: 'parked'; error: MailerLiteError }
-  | { row: RetryRow; status: 'dropped'; error: MailerLiteError };
+  | { row: RetryRow; status: 'retry'; nextAttemptAt: number; error: SenderError }
+  | { row: RetryRow; status: 'parked'; error: SenderError }
+  | { row: RetryRow; status: 'dropped'; error: SenderError };
 
 export interface RetryRow {
   id: number;
-  request_kind: MailerLiteRequestKind;
+  request_kind: SenderRequestKind;
   request_payload: string;
   idempotency_key: string;
   attempts: number;
@@ -93,7 +93,12 @@ export async function enqueue(db: D1Database, input: EnqueueInput): Promise<void
   // First replay attempt is 1m out (backoffMs(1)) — matches the
   // canonical "give the upstream a minute to recover" gap before we
   // burn an internal retry slot on a still-broken provider.
-  const nextAttemptAt = now + backoffMs(1);
+  // If Sender returned a Retry-After header, prefer it over the default
+  // backoff, capped at MAX_BACKOFF_MS to guard against absurd values.
+  const firstBackoff = input.cause?.retryAfterMs !== undefined
+    ? Math.min(input.cause.retryAfterMs, MAX_BACKOFF_MS)
+    : backoffMs(1);
+  const nextAttemptAt = now + firstBackoff;
   const causeMessage = input.cause ? summarizeError(input.cause) : null;
   const lastError = causeMessage ? causeMessage.slice(0, 500) : null;
   const lastStatus = input.cause?.status ?? null;
@@ -107,14 +112,14 @@ export async function enqueue(db: D1Database, input: EnqueueInput): Promise<void
   // across concurrent enqueues.
   await db
     .prepare(
-      `INSERT INTO mailerlite_retry
+      `INSERT INTO sender_retry
          (request_kind, request_payload, idempotency_key, attempts, last_status, last_error, next_attempt_at, created_at)
        VALUES (?, ?, ?, 0, ?, ?, ?, ?)
        ON CONFLICT(idempotency_key) DO UPDATE SET
          request_payload = excluded.request_payload,
          last_status     = excluded.last_status,
          last_error      = excluded.last_error,
-         next_attempt_at = MIN(mailerlite_retry.next_attempt_at, excluded.next_attempt_at)`
+         next_attempt_at = MIN(sender_retry.next_attempt_at, excluded.next_attempt_at)`
     )
     .bind(
       input.kind,
@@ -130,23 +135,26 @@ export async function enqueue(db: D1Database, input: EnqueueInput): Promise<void
 
 export async function drain(
   db: D1Database,
-  client: MailerLiteClient,
+  client: SenderClient,
   kv: KVNamespace,
   opts: DrainOptions = {}
 ): Promise<DrainOutcome[]> {
   const nowFn = opts.now ?? Date.now;
   const now = nowFn();
   const batchSize = opts.batchSize ?? 25;
-  // 'send' is reserved in the schema but Step 11 owns the dispatch
-  // path. Leave any 'send' rows in the queue (do not select them) so
-  // Step 11's cron picks them up exactly once and isn't preceded by a
-  // silent data-loss drop here. The supported kinds will widen when
-  // Step 11 lands; for now this is the gate.
+  // The retry queue's request_kind column accepts only the three kinds
+  // the D1 schema's CHECK constraint allows: 'subscribe', 'unsubscribe',
+  // and 'digest_trigger'. The SenderError.requestKind enum is wider (it
+  // also includes 'group_assign', 'group_remove', 'group_list', and
+  // 'field_update' for error-classification purposes), but those values
+  // are never written to the retry table — they would fail the CHECK.
+  // Only 'subscribe' and 'unsubscribe' are drained here; 'digest_trigger'
+  // is reserved in the schema for future use.
   const rowsRes = await db
     .prepare(
       `SELECT id, request_kind, request_payload, idempotency_key, attempts,
               last_status, last_error, next_attempt_at, created_at
-         FROM mailerlite_retry
+         FROM sender_retry
         WHERE next_attempt_at <= ?
           AND attempts < ?
           AND request_kind IN ('subscribe', 'unsubscribe')
@@ -167,22 +175,21 @@ export async function drain(
 
 async function replayRow(
   db: D1Database,
-  client: MailerLiteClient,
+  client: SenderClient,
   kv: KVNamespace,
   row: RetryRow,
   now: () => number
 ): Promise<DrainOutcome> {
   // Belt-and-braces narrow MUST run before anything that mutates D1.
-  // Drain's SQL filter already excludes 'send' (and any future kind
-  // we haven't owned yet), but if that filter ever drifts we still
-  // refuse to touch a row whose dispatch path doesn't exist — no
-  // DELETE, no UPDATE, no audit. The unsupported row stays in the
-  // queue for the owner step to claim.
+  // Drain's SQL filter already excludes non-subscribe/unsubscribe kinds,
+  // but if that filter ever drifts we still refuse to touch a row whose
+  // dispatch path doesn't exist — no DELETE, no UPDATE, no audit. The
+  // unsupported row stays in the queue for the owner step to claim.
   if (row.request_kind !== 'subscribe' && row.request_kind !== 'unsubscribe') {
     return {
       row,
       status: 'dropped',
-      error: new MailerLiteError(
+      error: new SenderError(
         row.request_kind,
         'malformed',
         `unsupported kind ${row.request_kind} reached replayRow; drain filter is stale`
@@ -194,32 +201,32 @@ async function replayRow(
   try {
     payload = JSON.parse(row.request_payload);
   } catch (err) {
-    const e = new MailerLiteError(
+    const e = new SenderError(
       row.request_kind,
       'malformed',
       summarizeError(err)
     );
-    await db.prepare(`DELETE FROM mailerlite_retry WHERE id = ?`).bind(row.id).run();
+    await db.prepare(`DELETE FROM sender_retry WHERE id = ?`).bind(row.id).run();
     await recordError(db, row, e, now());
     return { row, status: 'dropped', error: e };
   }
 
   try {
     await dispatch(client, kv, row.request_kind, payload);
-    await db.prepare(`DELETE FROM mailerlite_retry WHERE id = ?`).bind(row.id).run();
+    await db.prepare(`DELETE FROM sender_retry WHERE id = ?`).bind(row.id).run();
     return { row, status: 'sent' };
   } catch (err) {
-    if (!(err instanceof MailerLiteError) || !err.shouldRetry) {
+    if (!(err instanceof SenderError) || !err.shouldRetry) {
       // Non-retryable failure (4xx like 400/422 on a stale payload):
       // drop the row to keep the queue moving. The cron context has
       // no user to surface the error to, so we write an `events` row
       // (kind='error') as the audit trail. Step 17's /api/status
       // surfaces these to operators.
       const wrapped =
-        err instanceof MailerLiteError
+        err instanceof SenderError
           ? err
-          : new MailerLiteError(row.request_kind, 'network', summarizeError(err));
-      await db.prepare(`DELETE FROM mailerlite_retry WHERE id = ?`).bind(row.id).run();
+          : new SenderError(row.request_kind, 'network', summarizeError(err));
+      await db.prepare(`DELETE FROM sender_retry WHERE id = ?`).bind(row.id).run();
       await recordError(db, row, wrapped, now());
       return { row, status: 'dropped', error: wrapped };
     }
@@ -228,7 +235,7 @@ async function replayRow(
       const parkedAt = now() + PARK_DELAY_MS;
       await db
         .prepare(
-          `UPDATE mailerlite_retry
+          `UPDATE sender_retry
               SET attempts = ?, last_status = ?, last_error = ?, next_attempt_at = ?
             WHERE id = ?`
         )
@@ -243,14 +250,17 @@ async function replayRow(
       await recordError(db, row, err, now());
       return { row, status: 'parked', error: err };
     }
-    // backoffMs(attempts + 1) so consecutive failures grow the gap
-    // (1m, 2m, 4m, …). Using backoffMs(attempts) would reuse the
-    // same delay twice on attempts=1 because enqueue already used
-    // backoffMs(1) as the initial schedule.
-    const nextAttemptAt = now() + backoffMs(attempts + 1);
+    // Prefer Retry-After from the error when present — Sender told us
+    // exactly how long to wait. Fall back to exponential backoffMs so
+    // consecutive failures grow the gap (1m, 2m, 4m, …). Cap at
+    // MAX_BACKOFF_MS regardless of source.
+    const rawBackoff = err instanceof SenderError && err.retryAfterMs !== undefined
+      ? err.retryAfterMs
+      : backoffMs(attempts + 1);
+    const nextAttemptAt = now() + Math.min(rawBackoff, MAX_BACKOFF_MS);
     await db
       .prepare(
-        `UPDATE mailerlite_retry
+        `UPDATE sender_retry
             SET attempts = ?, last_status = ?, last_error = ?, next_attempt_at = ?
           WHERE id = ?`
       )
@@ -269,7 +279,7 @@ async function replayRow(
 async function recordError(
   db: D1Database,
   row: RetryRow,
-  err: MailerLiteError,
+  err: SenderError,
   now: number
 ): Promise<void> {
   // Best-effort audit log — failures to write here must not mask the
@@ -294,7 +304,7 @@ async function recordError(
     // audit row with a real failure. Still swallowed at the function
     // boundary — the drain outcome takes precedence.
     console.warn(
-      'mailerlite_retry: events audit insert failed',
+      'sender_retry: events audit insert failed',
       { retry_id: row.id, kind: row.request_kind, error: summarizeError(auditErr) }
     );
   }
@@ -306,7 +316,7 @@ interface SubscribeRetryPayload extends SubscribeInput {
    * Region the subscriber WAS in before this resubscribe. When set and
    * different from `region`, the drain detaches pitmaster_<oldRegion>
    * after assigning the new groups so a region-change resubscribe that
-   * happened during a MailerLite outage doesn't leave the subscriber
+   * happened during a Sender.net outage doesn't leave the subscriber
    * in both regional audiences after recovery.
    *
    * Optional because most queued subscribes are first-time signups
@@ -344,7 +354,7 @@ interface PreferencesStagePayload {
 }
 
 interface UnsubscribeRetryPayload extends UnsubscribeInput {
-  /** Pre-resolved MailerLite subscriber id (skip the GET). */
+  /** Pre-resolved Sender subscriber id (skip the GET). */
   subscriberId?: string;
 }
 
@@ -388,13 +398,14 @@ function isUnsubscribePayload(payload: unknown): payload is UnsubscribeRetryPayl
 
 /**
  * `kind` is narrowed to `'subscribe' | 'unsubscribe'` by the drain
- * SQL filter — 'send' rows are skipped at the query level. The narrow
- * type is enforced at compile time by the union the caller passes in.
+ * SQL filter — digest_trigger and other reserved kinds are skipped at
+ * the query level. The narrow type is enforced at compile time by the
+ * union the caller passes in.
  */
 type DispatchableKind = 'subscribe' | 'unsubscribe';
 
 async function dispatch(
-  client: MailerLiteClient,
+  client: SenderClient,
   kv: KVNamespace,
   kind: DispatchableKind,
   payload: unknown
@@ -419,20 +430,20 @@ async function dispatch(
  *      POST /api/subscribers and then assign the BBQ groups so the
  *      recovered subscriber actually ends up in pitmaster_all (and the
  *      regional group when we know it). Skipping the group assign here
- *      was the original [P1] bug: a transient MailerLite 5xx during
+ *      was the original [P1] bug: a transient Sender.net 5xx during
  *      subscribe used to leave the user ungrouped after recovery.
  *   2. Staged group_assign — payload carries {stage:'group_assign',
  *      subscriberId, region}. The subscribe call already succeeded on
  *      a prior pass; only the group assignment is owed.
  */
 async function dispatchSubscribe(
-  client: MailerLiteClient,
+  client: SenderClient,
   kv: KVNamespace,
   payload: unknown
 ): Promise<void> {
   if (isPreferencesStage(payload)) {
     // PATCH /api/preferences sync: push the bbq_* field deltas to
-    // MailerLite WITHOUT a status field so an unsubscribed user who
+    // Sender.net WITHOUT a status field so an unsubscribed user who
     // queued a preference change is not silently reactivated when the
     // drain replays. The handler already short-circuits the unsub case
     // before enqueue, but a user could unsubscribe between enqueue and
@@ -474,7 +485,7 @@ async function dispatchSubscribe(
     return;
   }
   if (!isSubscribePayload(payload)) {
-    throw new MailerLiteError('subscribe', 'malformed', 'missing or invalid email/fields');
+    throw new SenderError('subscribe', 'malformed', 'missing or invalid email/fields');
   }
   const { region: _region, oldRegion: _oldRegion, ...subscribeInput } = payload;
   const result = await client.subscribe(subscribeInput);
@@ -486,11 +497,11 @@ async function dispatchSubscribe(
   }
   // Stale-region cleanup: if this was a region-change resubscribe
   // captured at enqueue time, detach the prior regional group AFTER
-  // the new assign succeeds. Without this, a transient MailerLite
+  // the new assign succeeds. Without this, a transient Sender.net
   // outage during a region-change subscribe leaves the user in BOTH
   // pitmaster_<old> and pitmaster_<new> after drain recovery — the
   // subscribe handler's stale-detach logic was bypassed because
-  // mailerliteId was null at the time. Mirrors the handler's
+  // senderId was null at the time. Mirrors the handler's
   // gated-on-success guard so a partial replay doesn't strand the
   // user in neither regional audience.
   if (payload.oldRegion && payload.oldRegion !== payload.region) {
@@ -510,17 +521,17 @@ async function dispatchSubscribe(
  *
  * Payload may include a pre-resolved subscriberId to skip the GET
  * (set by the handler when group removal failed after the lookup
- * already succeeded). When the GET path runs and MailerLite returns
- * null (subscriber not in MailerLite), nothing further is owed —
+ * already succeeded). When the GET path runs and Sender.net returns
+ * null (subscriber not in Sender.net), nothing further is owed —
  * D1 was already marked unsubscribed by the original handler.
  */
 async function dispatchUnsubscribe(
-  client: MailerLiteClient,
+  client: SenderClient,
   kv: KVNamespace,
   payload: unknown
 ): Promise<void> {
   if (!isUnsubscribePayload(payload)) {
-    throw new MailerLiteError('unsubscribe', 'malformed', 'missing or invalid email');
+    throw new SenderError('unsubscribe', 'malformed', 'missing or invalid email');
   }
   let subscriberId: string | null = payload.subscriberId ?? null;
   if (!subscriberId) {

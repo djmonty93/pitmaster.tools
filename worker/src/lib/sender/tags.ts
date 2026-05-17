@@ -1,9 +1,9 @@
-// Portfolio-aware MailerLite custom-field schema for BBQ subscribers.
+// Portfolio-aware Sender.net custom-field schema for BBQ subscribers.
 //
 // Field keys are prefixed `bbq_*` so a future portfolio site
-// (powersizing.com, overlanding.tools, ...) can share a MailerLite
+// (powersizing.com, overlanding.tools, ...) can share a Sender.net
 // account without colliding on field names. The prefix lives only on
-// the MailerLite side — D1 columns stay unprefixed (region, cut, etc.)
+// the Sender.net side — D1 columns stay unprefixed (region, cut, etc.)
 // and this module maps between the two shapes.
 //
 // What we DON'T emit:
@@ -28,13 +28,13 @@ export interface BbqTagInput {
   /** IANA timezone for per-region cron scheduling. */
   timezone: string;
   /**
-   * Subscription timestamp. Serialized as YYYY-MM-DD because MailerLite
+   * Subscription timestamp. Serialized as YYYY-MM-DD because Sender.net
    * date fields drop time-of-day. Defaults to "today" when omitted.
    */
   signupDate?: Date | null;
 }
 
-/** Exact key shape POSTed to MailerLite's /api/subscribers `fields` map. */
+/** Exact key shape POSTed to Sender.net's /api/subscribers `fields` map. */
 export interface BbqSubscriberFields {
   bbq_zip: string;
   bbq_city?: string;
@@ -50,8 +50,8 @@ const ZIP_RE = /^\d{5}$/;
 const STATE_RE = /^[A-Z]{2}$/;
 
 /**
- * Map domain inputs to the MailerLite-shaped `fields` object. Omits
- * keys with null/undefined values so MailerLite doesn't store empty
+ * Map domain inputs to the Sender.net-shaped `fields` object. Omits
+ * keys with null/undefined values so Sender.net doesn't store empty
  * strings (a stray "" on bbq_cut_pref would still match the conditional
  * merge tag `{$if:bbq_cut_pref=""}` in the email template).
  */

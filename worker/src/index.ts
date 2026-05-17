@@ -16,8 +16,8 @@ import { handlePreferences } from './handlers/preferences.js';
 import { handleStatus } from './handlers/status.js';
 import { handleSubscribe } from './handlers/subscribe.js';
 import { handleUnsubscribe } from './handlers/unsubscribe.js';
-import { createMailerLiteClient } from './lib/mailerlite/client.js';
-import { drain } from './lib/mailerlite/retry.js';
+import { createSenderClient } from './lib/sender/client.js';
+import { drain } from './lib/sender/retry.js';
 import { buildSentryOptions } from './lib/observability/sentryOptions.js';
 import { compileRoutes, dispatch, jsonError } from './router.js';
 
@@ -25,31 +25,32 @@ export interface Env {
   ASSETS: Fetcher;
   WEATHER_KV: KVNamespace;
   SMOKE_DB: D1Database;
-  MAILERLITE_API_KEY: string;
+  SENDER_API_TOKEN: string;
   SUBSCRIBER_TOKEN_SECRET: string;
   /**
-   * From-address / from-name configured on the MailerLite sending
+   * From-address / from-name configured on the Sender.net sending
    * domain (mail.pitmaster.tools). See README "DNS setup" for the
    * CNAME + SPF/DKIM/DMARC records the operator must add on Cloudflare.
    * Surfaced into Env so a per-environment override (staging vs prod)
    * is a wrangler-vars change rather than a code change.
    */
-  MAILERLITE_FROM_EMAIL?: string;
-  MAILERLITE_FROM_NAME?: string;
-  MAILERLITE_REPLY_TO?: string;
+  SENDER_FROM_EMAIL?: string;
+  SENDER_FROM_NAME?: string;
+  SENDER_REPLY_TO?: string;
   /**
-   * Per-region MailerLite automation ids. Each automation has its
-   * audience filtered to `pitmaster_<region>` in the dashboard; the
-   * Friday cron triggers them at 6am local in each region's anchor tz.
-   * Optional — a missing id means that region is dark for this
+   * Per-region Sender.net "API Call Is Made" automation trigger URLs.
+   * Each automation has its audience filtered to `pitmaster_<region>`
+   * in the Sender.net dashboard; the Friday cron POSTs to the trigger
+   * URL at 6am local in each region's anchor tz.
+   * Optional — a missing URL means that region is dark for this
    * environment (useful while staging onboarding for one region first).
    */
-  MAILERLITE_AUTOMATION_NORTHEAST_ID?: string;
-  MAILERLITE_AUTOMATION_SOUTHEAST_ID?: string;
-  MAILERLITE_AUTOMATION_MIDWEST_ID?: string;
-  MAILERLITE_AUTOMATION_SOUTH_CENTRAL_ID?: string;
-  MAILERLITE_AUTOMATION_MOUNTAIN_ID?: string;
-  MAILERLITE_AUTOMATION_PACIFIC_ID?: string;
+  SENDER_DIGEST_TRIGGER_URL_NORTHEAST?: string;
+  SENDER_DIGEST_TRIGGER_URL_SOUTHEAST?: string;
+  SENDER_DIGEST_TRIGGER_URL_MIDWEST?: string;
+  SENDER_DIGEST_TRIGGER_URL_SOUTH_CENTRAL?: string;
+  SENDER_DIGEST_TRIGGER_URL_MOUNTAIN?: string;
+  SENDER_DIGEST_TRIGGER_URL_PACIFIC?: string;
   /**
    * Sentry DSN (https://o<…>.ingest.sentry.io/<…>). Provisioned with
    * `wrangler secret put SENTRY_DSN`. Empty / unset → SDK runs in
@@ -107,7 +108,7 @@ const handler = {
     //   re-attempts the only matching 6am-local tick for a failed
     //   region.
     //
-    //   `*/5 * * * *` — mailerlite_retry drain. Without this nothing
+    //   `*/5 * * * *` — sender_retry drain. Without this nothing
     //   ever calls drain() in production, so subscribe/unsubscribe/
     //   preferences/group-assign retryable failures would queue
     //   forever. The 5-minute cadence aligns with the retry queue's
@@ -121,7 +122,7 @@ const handler = {
       return;
     }
     if (controller.cron === '*/5 * * * *') {
-      const client = createMailerLiteClient({ apiKey: env.MAILERLITE_API_KEY });
+      const client = createSenderClient({ apiToken: env.SENDER_API_TOKEN });
       await drain(env.SMOKE_DB, client, env.WEATHER_KV);
       return;
     }

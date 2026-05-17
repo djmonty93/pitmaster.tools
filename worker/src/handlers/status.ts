@@ -2,27 +2,27 @@
 //
 // Returns JSON describing:
 //   - retry queue: pending / parked counts so an operator can see the
-//     MailerLite backlog at a glance.
+//     Sender.net backlog at a glance.
 //   - recent errors: last 10 events of kind='error', minimal shape so
 //     an operator can correlate without exposing PII (events.payload
 //     is already redacted by lib/redact.ts at write time).
 //   - subscribers: total count and active count.
 //   - build: a static descriptor so dashboards know what's deployed.
 //
-// We don't include MailerLite or weather provider health checks here
+// We don't include Sender.net or weather provider health checks here
 // — those would mean live network calls on every dashboard refresh,
 // which is the wrong cost shape for a status page. Operators read
 // /api/status; Sentry surfaces the real-time failures.
 
 import { json, type RouteContext } from '../router.js';
-import { MAX_ATTEMPTS } from '../lib/mailerlite/retry.js';
+import { MAX_ATTEMPTS } from '../lib/sender/retry.js';
 
 interface StatusResponse {
   ok: true;
   generatedAt: string;
-  mailerlite: {
-    queuedRows: number;
-    parkedRows: number;
+  esp_retry: {
+    esp_retry_pending: number;
+    esp_retry_parked: number;
     nextAttemptAt: number | null;
   };
   subscribers: {
@@ -45,12 +45,12 @@ export async function handleStatus(rc: RouteContext): Promise<Response> {
   const queued = await db
     .prepare(
       `SELECT COUNT(*) AS c, MIN(next_attempt_at) AS next
-         FROM mailerlite_retry WHERE attempts < ?`
+         FROM sender_retry WHERE attempts < ?`
     )
     .bind(MAX_ATTEMPTS)
     .first<{ c: number; next: number | null }>();
   const parked = await db
-    .prepare(`SELECT COUNT(*) AS c FROM mailerlite_retry WHERE attempts >= ?`)
+    .prepare(`SELECT COUNT(*) AS c FROM sender_retry WHERE attempts >= ?`)
     .bind(MAX_ATTEMPTS)
     .first<{ c: number }>();
   const subs = await db
@@ -80,9 +80,9 @@ export async function handleStatus(rc: RouteContext): Promise<Response> {
   const body: StatusResponse = {
     ok: true,
     generatedAt: new Date().toISOString(),
-    mailerlite: {
-      queuedRows: queued?.c ?? 0,
-      parkedRows: parked?.c ?? 0,
+    esp_retry: {
+      esp_retry_pending: queued?.c ?? 0,
+      esp_retry_parked: parked?.c ?? 0,
       nextAttemptAt: queued?.next ?? null,
     },
     subscribers: {

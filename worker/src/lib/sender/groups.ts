@@ -1,4 +1,4 @@
-// Portfolio-aware MailerLite group management.
+// Portfolio-aware Sender.net group management.
 //
 // Group naming follows `<site_prefix>_<scope>`. For Best Smoke Days:
 //   pitmaster_all              — every BBQ subscriber
@@ -11,7 +11,7 @@
 // stay on the subscriber record, not on groups, so subscribers can be
 // moved between regions without losing preferences.
 //
-// Group IDs are resolved by name and cached in KV. MailerLite-assigned
+// Group IDs are resolved by name and cached in KV. Sender-assigned
 // IDs are stable for the life of a group, so we cache without a TTL —
 // a group rename or recreate is a deliberate operator action that
 // should clear the cache (`wrangler kv:key delete`). On cache miss we
@@ -19,14 +19,15 @@
 // requested, so a cold start populates the full portfolio map in a
 // single round-trip.
 
-import type { MailerLiteClient } from './client.js';
+import type { SenderClient } from './client.js';
+import { SenderError } from './errors.js';
 import { REGIONS, type Region } from '../regions/index.js';
 
 /** Group every BBQ subscriber belongs to. */
 export const ALL_GROUP_NAME = 'pitmaster_all';
 
 /** KV key prefix for cached group-id lookups. Bump on rename. */
-const KV_PREFIX = 'mailerlite_group_id';
+const KV_PREFIX = 'sender_group_id';
 
 /** Canonical group name for a region. */
 export function regionToGroupName(region: Region): string {
@@ -48,12 +49,12 @@ export function allBbqGroupNames(): string[] {
 }
 
 /**
- * Resolve a group name to its MailerLite ID, populating the KV cache
+ * Resolve a group name to its Sender ID, populating the KV cache
  * on miss. Throws if the group doesn't exist — the operator must have
  * created it in the dashboard per docs/portfolio-email-architecture.md.
  */
 export async function resolveGroupId(
-  client: Pick<MailerLiteClient, 'listGroups'>,
+  client: Pick<SenderClient, 'listGroups'>,
   kv: KVNamespace,
   name: string
 ): Promise<string> {
@@ -62,8 +63,10 @@ export async function resolveGroupId(
   const groups = await client.listGroups();
   const match = groups.find((g) => g.name === name);
   if (!match) {
-    throw new Error(
-      `mailerlite group "${name}" not found — create it in the MailerLite dashboard`
+    throw new SenderError(
+      'group_list',
+      'malformed',
+      `Sender group not found: ${name}. Configure it in the Sender dashboard (see docs/sender-setup.md §3).`
     );
   }
   // Hydrate every known name in one pass so the next caller for any
@@ -104,12 +107,12 @@ export async function resolveGroupId(
 /**
  * Assign a subscriber to pitmaster_all AND pitmaster_<region>. Calls
  * are issued sequentially (not in parallel) so a 5xx on the first
- * doesn't fan out into compounding rate-limit pressure. MailerLite's
+ * doesn't fan out into compounding rate-limit pressure. Sender's
  * assign endpoint is idempotent server-side, so a retry of either call
  * is a no-op.
  */
 export async function assignBbqGroups(
-  client: Pick<MailerLiteClient, 'listGroups' | 'assignGroup'>,
+  client: Pick<SenderClient, 'listGroups' | 'assignGroup'>,
   kv: KVNamespace,
   subscriberId: string,
   region: Region
@@ -125,7 +128,7 @@ export async function assignBbqGroups(
  * Remove a subscriber from every BBQ group. The caller doesn't know
  * which regional group the subscriber was in (they may have moved
  * regions, or the row was hand-edited), so we issue DELETEs for the
- * all-group plus all six regional groups. MailerLite returns 404 for
+ * all-group plus all six regional groups. Sender returns 404 for
  * "not a member" and the client swallows that to keep this idempotent.
  *
  * Per-group rather than account-level — preserves any future
@@ -133,7 +136,7 @@ export async function assignBbqGroups(
  * doesn't accidentally unsubscribe from a sibling site.
  */
 export async function removeBbqGroups(
-  client: Pick<MailerLiteClient, 'listGroups' | 'removeGroup'>,
+  client: Pick<SenderClient, 'listGroups' | 'removeGroup'>,
   kv: KVNamespace,
   subscriberId: string
 ): Promise<void> {

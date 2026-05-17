@@ -1,5 +1,5 @@
 // Shared secret-redaction helpers, used by both lib/cache/kv.ts (for
-// cache telemetry summaries) and lib/mailerlite/* (for error messages
+// cache telemetry summaries) and lib/sender/* (for error messages
 // that may be persisted to D1 or surfaced via /api/status).
 //
 // The list is not exhaustive — defense-in-depth only. Callers must

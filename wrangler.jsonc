@@ -27,7 +27,7 @@
     }
   ],
   // SMOKE_DB — D1 database backing subscribers, metros, events,
-  // mailerlite_retry, and articles. Migrations live in worker/migrations/
+  // sender_retry, and articles. Migrations live in worker/migrations/
   // and are applied with `wrangler d1 migrations apply SMOKE_DB`.
   // Replace `database_id` after `wrangler d1 create SMOKE_DB`.
   "d1_databases": [
@@ -47,7 +47,7 @@
   //    is a no-op for regions whose anchor tz is not currently
   //    Fri 06:00 local — see worker/src/crons/fridayEmail.ts.
   //
-  // 2. `*/5 * * * *` — mailerlite_retry drain. Subscribe/unsubscribe/
+  // 2. `*/5 * * * *` — sender_retry drain. Subscribe/unsubscribe/
   //    preferences/group-assign retries enqueue on the retry table
   //    and need a steady ticker to replay them. Every 5 minutes
   //    matches the backoffMs(1) minimum so a freshly queued row gets
@@ -69,9 +69,9 @@
       "0 12 * * 1"
     ]
   }
-  // MAILERLITE_API_KEY — Bearer token for the MailerLite Connect API,
-  // used by worker/src/lib/mailerlite/client.ts. Provisioned with
-  // `wrangler secret put MAILERLITE_API_KEY`; never committed.
+  // SENDER_API_TOKEN — Bearer token for the Sender.net API,
+  // used by worker/src/lib/sender/client.ts. Provisioned with
+  // `wrangler secret put SENDER_API_TOKEN`; never committed.
   //
   // SUBSCRIBER_TOKEN_SECRET — HMAC-SHA256 secret used to sign tokens
   // that prove email ownership on /api/unsubscribe and
