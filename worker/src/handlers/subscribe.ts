@@ -26,16 +26,16 @@
 
 import { z } from 'zod';
 import { signToken } from '../lib/auth/token.js';
-import { createMailerLiteClient } from '../lib/mailerlite/client.js';
-import { MailerLiteError } from '../lib/mailerlite/errors.js';
+import { createSenderClient } from '../lib/sender/client.js';
+import { SenderError } from '../lib/sender/errors.js';
 import {
   ALL_GROUP_NAME,
   assignBbqGroups,
   regionToGroupName,
   resolveGroupId,
-} from '../lib/mailerlite/groups.js';
-import { enqueue } from '../lib/mailerlite/retry.js';
-import { toBbqSubscriberFields, type BbqSubscriberFields } from '../lib/mailerlite/tags.js';
+} from '../lib/sender/groups.js';
+import { enqueue } from '../lib/sender/retry.js';
+import { toBbqSubscriberFields, type BbqSubscriberFields } from '../lib/sender/tags.js';
 import { GeocoderError, resolveZip, type ZipLocation } from '../lib/geo/zipGeocoder.js';
 import { RegionError, stateToRegion, type Region } from '../lib/regions/index.js';
 import { summarizeError } from '../lib/redact.js';
@@ -150,7 +150,7 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
     delete (fields as Partial<BbqSubscriberFields>).bbq_region;
   }
 
-  const client = createMailerLiteClient({ apiKey: rc.env.MAILERLITE_API_KEY });
+  const client = createSenderClient({ apiToken: rc.env.SENDER_API_TOKEN });
 
   let mailerliteId: string | null = null;
   let mailerliteStatus: 'sent' | 'queued' = 'sent';
@@ -158,7 +158,7 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
     const res = await client.subscribe({ email: body.email, fields });
     mailerliteId = res.id;
   } catch (err) {
-    if (err instanceof MailerLiteError && err.shouldRetry) {
+    if (err instanceof SenderError && err.shouldRetry) {
       const idempotencyKey = `subscribe:${body.email.toLowerCase()}`;
       // `region` rides along on the retry payload so the drain
       // replays subscribe AND assignBbqGroups, not just the subscribe
@@ -180,11 +180,11 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
         cause: err,
       });
       mailerliteStatus = 'queued';
-    } else if (err instanceof MailerLiteError) {
+    } else if (err instanceof SenderError) {
       return jsonError(
         err.status === 422 ? 422 : 400,
-        'mailerlite_rejected',
-        'MailerLite rejected the subscription request'
+        'sender_rejected',
+        'Sender rejected the subscription request'
       );
     } else {
       throw err;
@@ -213,7 +213,7 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
       }
       groupAssignSucceeded = true;
     } catch (err) {
-      const cause = err instanceof MailerLiteError ? err : undefined;
+      const cause = err instanceof SenderError ? err : undefined;
       const idempotencyKey = `group_assign:${mailerliteId}`;
       // oldRegion rides along so the drain can detach pitmaster_<oldRegion>
       // after it assigns the new group. Without it, a region-change
@@ -232,7 +232,7 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
         cause,
       });
       mailerliteStatus = 'queued';
-      if (!(err instanceof MailerLiteError)) {
+      if (!(err instanceof SenderError)) {
         console.warn('subscribe: group_assign unexpected error', summarizeError(err));
       }
     }
@@ -264,7 +264,7 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
         // Now we enqueue a group_remove retry so the drain finishes
         // the cleanup. The user response stays 'sent' — the new
         // assignment landed, only the stale detach is owed.
-        const cause = err instanceof MailerLiteError ? err : undefined;
+        const cause = err instanceof SenderError ? err : undefined;
         await enqueue(rc.env.SMOKE_DB, {
           kind: 'subscribe',
           payload: {
