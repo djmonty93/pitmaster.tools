@@ -25,31 +25,32 @@ export interface Env {
   ASSETS: Fetcher;
   WEATHER_KV: KVNamespace;
   SMOKE_DB: D1Database;
-  MAILERLITE_API_KEY: string;
+  SENDER_API_TOKEN: string;
   SUBSCRIBER_TOKEN_SECRET: string;
   /**
-   * From-address / from-name configured on the MailerLite sending
+   * From-address / from-name configured on the Sender.net sending
    * domain (mail.pitmaster.tools). See README "DNS setup" for the
    * CNAME + SPF/DKIM/DMARC records the operator must add on Cloudflare.
    * Surfaced into Env so a per-environment override (staging vs prod)
    * is a wrangler-vars change rather than a code change.
    */
-  MAILERLITE_FROM_EMAIL?: string;
-  MAILERLITE_FROM_NAME?: string;
-  MAILERLITE_REPLY_TO?: string;
+  SENDER_FROM_EMAIL?: string;
+  SENDER_FROM_NAME?: string;
+  SENDER_REPLY_TO?: string;
   /**
-   * Per-region MailerLite automation ids. Each automation has its
-   * audience filtered to `pitmaster_<region>` in the dashboard; the
-   * Friday cron triggers them at 6am local in each region's anchor tz.
-   * Optional — a missing id means that region is dark for this
+   * Per-region Sender.net "API Call Is Made" automation trigger URLs.
+   * Each automation has its audience filtered to `pitmaster_<region>`
+   * in the Sender.net dashboard; the Friday cron POSTs to the trigger
+   * URL at 6am local in each region's anchor tz.
+   * Optional — a missing URL means that region is dark for this
    * environment (useful while staging onboarding for one region first).
    */
-  MAILERLITE_AUTOMATION_NORTHEAST_ID?: string;
-  MAILERLITE_AUTOMATION_SOUTHEAST_ID?: string;
-  MAILERLITE_AUTOMATION_MIDWEST_ID?: string;
-  MAILERLITE_AUTOMATION_SOUTH_CENTRAL_ID?: string;
-  MAILERLITE_AUTOMATION_MOUNTAIN_ID?: string;
-  MAILERLITE_AUTOMATION_PACIFIC_ID?: string;
+  SENDER_DIGEST_TRIGGER_URL_NORTHEAST?: string;
+  SENDER_DIGEST_TRIGGER_URL_SOUTHEAST?: string;
+  SENDER_DIGEST_TRIGGER_URL_MIDWEST?: string;
+  SENDER_DIGEST_TRIGGER_URL_SOUTH_CENTRAL?: string;
+  SENDER_DIGEST_TRIGGER_URL_MOUNTAIN?: string;
+  SENDER_DIGEST_TRIGGER_URL_PACIFIC?: string;
   /**
    * Sentry DSN (https://o<…>.ingest.sentry.io/<…>). Provisioned with
    * `wrangler secret put SENTRY_DSN`. Empty / unset → SDK runs in

@@ -1,24 +1,27 @@
-# Best Smoke Days — local dev secrets for `wrangler dev`.
-# Copy to .dev.vars (gitignored) and fill in values when needed.
+# Sender.net API token. Required.
+# Dashboard: Settings -> API access tokens -> Create.
+# SENDER_API_TOKEN=your_token_here
 
-# SENTRY_DSN=
-# SENTRY_ENVIRONMENT=production
-# MAILERLITE_API_KEY=
+# Sending identity (optional; only consumed if POST /v2/message/send is wired).
+# SENDER_FROM_EMAIL=hello@mail.pitmaster.tools
+# SENDER_FROM_NAME=Pitmaster.tools
+# SENDER_REPLY_TO=hello@mail.pitmaster.tools
+
+# Per-region "API Call Is Made" automation trigger URLs.
+# Configure one automation per region in Sender (audience filter = pitmaster_<region> group),
+# copy each automation's trigger URL into the matching var below.
+# A missing var dark-disables that region in the Friday cron.
+# SENDER_DIGEST_TRIGGER_URL_NORTHEAST=
+# SENDER_DIGEST_TRIGGER_URL_SOUTHEAST=
+# SENDER_DIGEST_TRIGGER_URL_MIDWEST=
+# SENDER_DIGEST_TRIGGER_URL_SOUTH_CENTRAL=
+# SENDER_DIGEST_TRIGGER_URL_MOUNTAIN=
+# SENDER_DIGEST_TRIGGER_URL_PACIFIC=
+
+# Subscriber token HMAC secret (used for unsubscribe + preferences links).
+# Generate with: openssl rand -hex 32
 # SUBSCRIBER_TOKEN_SECRET=
-# NWS_USER_AGENT=pitmaster.tools (contact@pitmaster.tools)
 
-# Sending domain — set after MailerLite verifies DNS for mail.pitmaster.tools.
-# MAILERLITE_FROM_EMAIL=pete@mail.pitmaster.tools
-# MAILERLITE_FROM_NAME=Pitmaster Tools
-# MAILERLITE_REPLY_TO=pete@mail.pitmaster.tools
-
-# Per-region weekly-digest automations. Each id is the MailerLite
-# automation that fires on Fri 06:00 local in that region's anchor tz.
-# A missing id makes that region dark — useful for staging one region
-# at a time.
-# MAILERLITE_AUTOMATION_NORTHEAST_ID=
-# MAILERLITE_AUTOMATION_SOUTHEAST_ID=
-# MAILERLITE_AUTOMATION_MIDWEST_ID=
-# MAILERLITE_AUTOMATION_SOUTH_CENTRAL_ID=
-# MAILERLITE_AUTOMATION_MOUNTAIN_ID=
-# MAILERLITE_AUTOMATION_PACIFIC_ID=
+# Optional Sentry observability.
+# SENTRY_DSN=
+# SENTRY_ENVIRONMENT=
