@@ -130,12 +130,12 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
     // toBbqSubscriberFields rejects an invalid state; pass a synthetic
     // "ZZ" sentinel when state is unknown so the field shape is valid
     // for the call. The bbq_state field is stripped below for the
-    // unknown-state path so MailerLite doesn't store the sentinel.
+    // unknown-state path so Sender.net doesn't store the sentinel.
     state: state ?? 'ZZ',
     // Same pattern: bbq_region key is keyed off the freshly-resolved
-    // region (not the oldRegion fallback) so the MailerLite record
+    // region (not the oldRegion fallback) so the Sender.net record
     // reflects what we observed now. When resolvedRegion is null we
-    // strip the key below — the existing MailerLite field value
+    // strip the key below — the existing Sender.net field value
     // (from a prior subscribe) is preserved by an absent key.
     region: resolvedRegion ?? ('pacific' as Region),
     cut: body.cut ?? null,
@@ -163,13 +163,13 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
       // `region` rides along on the retry payload so the drain
       // replays subscribe AND assignBbqGroups, not just the subscribe
       // POST. Without it the recovered subscriber would be active in
-      // MailerLite but not in any pitmaster_* group — excluded from
+      // Sender.net but not in any pitmaster_* group — excluded from
       // the Friday cron despite the D1 row being active.
       //
       // `oldRegion` rides along when this is a region-change
       // resubscribe so the drain can detach the stale regional group
       // AFTER it assigns the new one. Without this, a transient
-      // MailerLite outage during a zip move would leave the user in
+      // Sender.net outage during a zip move would leave the user in
       // BOTH pitmaster_<old> and pitmaster_<new> after recovery —
       // the handler's own detach logic was bypassed because we never
       // got an espId on the original call.
@@ -199,7 +199,7 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
   // (missing group, stale KV cache, bad id) used to be silently
   // swallowed while the response still said 'sent'.
   //
-  // Skipped entirely when MailerLite hasn't returned a subscriber id
+  // Skipped entirely when Sender.net hasn't returned a subscriber id
   // (the queued path). Drain will re-issue subscribe and re-attempt
   // group assignment on its next pass.
   let groupAssignSucceeded = false;

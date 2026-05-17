@@ -269,7 +269,7 @@ describe('PATCH /api/preferences', () => {
 
   it('snapshots the full preference set after UPDATE — concurrent PATCHes do not lose fields on retry', async () => {
     // Regression for [P2] pass-7 finding: two PATCHes during a
-    // MailerLite outage used to enqueue under the same idempotency
+    // Sender.net outage used to enqueue under the same idempotency
     // key with payloads carrying only their own delta. The second
     // ON CONFLICT replaced the first's payload, losing the first's
     // field. Now each PATCH queues the FULL current state.

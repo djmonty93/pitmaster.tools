@@ -98,7 +98,7 @@ export interface CachedFetchOptions<T> extends CacheOptions {
    * + message tail) — never the raw error, because origin errors can
    * embed request bodies / API tokens that the operator does not want
    * to ship to a telemetry sink. Redaction lives in lib/redact.ts so
-   * the same rule applies to MailerLite errors written into D1.
+   * the same rule applies to Sender.net errors written into D1.
    */
   onResult?: (outcome: {
     status: CacheStatus | 'origin' | 'stale-while-error';

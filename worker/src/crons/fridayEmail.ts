@@ -10,12 +10,12 @@
 // Per tick, for each region whose anchor timezone says it is now
 // Friday 06:00 local, this cron:
 //   1. Claims an idempotency slot in `friday_campaign_log (region, send_date)`
-//   2. Triggers the region's MailerLite automation via
-//      POST /api/automations/<region_automation_id>/run
+//   2. Triggers the region's Sender.net automation via its trigger URL
+//      (SENDER_DIGEST_TRIGGER_URL_<REGION> secret)
 //   3. Records a 'send' row in `events` for /api/status observability
 //   4. Updates the friday_campaign_log slot to 'sent' or 'failed'
 //
-// Audience filtering: the automation is configured in the MailerLite
+// Audience filtering: the automation is configured in the Sender.net
 // dashboard to send only to subscribers in `pitmaster_<region>`. The
 // cron has no per-subscriber loop — that's the portfolio scaling win
 // vs. the v1 per-subscriber tz-gated model.
@@ -210,7 +210,7 @@ async function processRegion(
   //     time so an honest in-flight call is never preempted.
   //
   // 'sent' and 'failed' are terminal: 'sent' because we shipped the
-  // campaign and MailerLite collapses duplicates by idempotency key,
+  // campaign and Sender.net collapses duplicates by idempotency key,
   // 'failed' because an operator must investigate non-retryable errors
   // via /api/status before any re-attempt.
   const staleCutoff = nowMs - SENDING_STALE_MS;
@@ -278,7 +278,7 @@ async function processRegion(
   // cron tick. Now: trigger errors revert/mark-failed, but a successful
   // trigger is committed to a 'sent' state with best-effort D1
   // bookkeeping. If the post-send UPDATE throws, we log and report
-  // sent — operators see the send in MailerLite + the stale 'sending'
+  // sent — operators see the send in Sender.net + the stale 'sending'
   // row in D1, and the stale-cutoff guard plus the campaign-side
   // idempotency tag prevent the re-claim path from re-triggering.
   try {
@@ -309,8 +309,8 @@ async function processRegion(
   // bookkeeping is best-effort and must not roll the outcome back to
   // 'queued' (which would re-trigger). Log on failure so an operator
   // can clean up the stale 'sending' row manually if needed; the
-  // (region, send_date) idempotency tag on triggerCampaign ensures
-  // MailerLite collapses any accidental re-fire to a no-op even if
+  // (region, send_date) idempotency tag on triggerWeeklyDigest ensures
+  // Sender.net collapses any accidental re-fire to a no-op even if
   // the row is somehow re-claimed before SENDING_STALE_MS elapses.
   await safeUpdateStatus(env.SMOKE_DB, region, sendDate, 'sent', nowMs);
   await recordEvent(env.SMOKE_DB, region, sendDate, 'sent', null, nowMs);

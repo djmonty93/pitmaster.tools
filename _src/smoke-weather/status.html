@@ -1,6 +1,6 @@
 <!-- meta:
   title="System Status — Best Smoke Days | Pitmaster Tools"
-  description="Live operational status for the Pitmaster Tools Best Smoke Days subsystem — MailerLite retry queue depth, subscriber counts, and recent error events."
+  description="Live operational status for the Pitmaster Tools Best Smoke Days subsystem — Sender.net retry queue depth, subscriber counts, and recent error events."
   robots="noindex, follow"
   canonical="https://pitmaster.tools/smoke-weather/status"
   og_title="System Status — Best Smoke Days"
@@ -24,15 +24,15 @@
 <main id="main-content">
   <section class="page-hero" aria-label="Page introduction">
     <h1>System Status</h1>
-    <p>Operational view of the Best Smoke Days backend. Refreshes on page load and includes MailerLite retry queue depth, subscriber counts, and the last ten redacted error events.</p>
+    <p>Operational view of the Best Smoke Days backend. Refreshes on page load and includes Sender.net retry queue depth, subscriber counts, and the last ten redacted error events.</p>
   </section>
 
   <section class="form-card" aria-labelledby="status-live" id="status-section">
     <h2 id="status-live">Live status</h2>
     <p id="status-meta" class="sw-disclaimer">Loading status…</p>
 
-    <h3>MailerLite retry queue</h3>
-    <ul id="status-mailerlite">
+    <h3>Sender.net retry queue</h3>
+    <ul id="status-esp-retry">
       <li>Queued rows: <span data-status-field="queuedRows">—</span></li>
       <li>Parked rows: <span data-status-field="parkedRows">—</span></li>
       <li>Next attempt at: <span data-status-field="nextAttemptAt">—</span></li>
@@ -77,9 +77,9 @@
     }
     function renderOk(body) {
       setText('#status-meta', 'Generated at ' + body.generatedAt);
-      setText('[data-status-field="queuedRows"]', String(body.mailerlite.queuedRows));
-      setText('[data-status-field="parkedRows"]', String(body.mailerlite.parkedRows));
-      setText('[data-status-field="nextAttemptAt"]', fmtEpoch(body.mailerlite.nextAttemptAt));
+      setText('[data-status-field="queuedRows"]', String(body.esp_retry.esp_retry_pending));
+      setText('[data-status-field="parkedRows"]', String(body.esp_retry.esp_retry_parked));
+      setText('[data-status-field="nextAttemptAt"]', fmtEpoch(body.esp_retry.nextAttemptAt));
       setText('[data-status-field="subscribersTotal"]', String(body.subscribers.total));
       setText('[data-status-field="subscribersActive"]', String(body.subscribers.active));
       var list = document.getElementById('status-errors');

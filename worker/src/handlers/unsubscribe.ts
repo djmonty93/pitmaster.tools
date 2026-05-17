@@ -65,7 +65,7 @@ export async function handleUnsubscribe(rc: RouteContext): Promise<Response> {
     // client.getSubscriberByEmail ALREADY swallows 404 (returns null),
     // so any SenderError that propagates here is something else:
     // 401/403 (revoked key), 5xx, timeout, etc. Treating these as
-    // "not in MailerLite" would let the handler skip group removal
+    // "not in Sender.net" would let the handler skip group removal
     // and report unsubscribe success while the user remains in
     // pitmaster_* groups. Queue the retry instead so the drain can
     // complete the cleanup once the upstream recovers (or park the

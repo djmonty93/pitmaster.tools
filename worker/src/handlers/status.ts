@@ -2,14 +2,14 @@
 //
 // Returns JSON describing:
 //   - retry queue: pending / parked counts so an operator can see the
-//     MailerLite backlog at a glance.
+//     Sender.net backlog at a glance.
 //   - recent errors: last 10 events of kind='error', minimal shape so
 //     an operator can correlate without exposing PII (events.payload
 //     is already redacted by lib/redact.ts at write time).
 //   - subscribers: total count and active count.
 //   - build: a static descriptor so dashboards know what's deployed.
 //
-// We don't include MailerLite or weather provider health checks here
+// We don't include Sender.net or weather provider health checks here
 // — those would mean live network calls on every dashboard refresh,
 // which is the wrong cost shape for a status page. Operators read
 // /api/status; Sentry surfaces the real-time failures.

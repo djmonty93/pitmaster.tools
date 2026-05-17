@@ -1,6 +1,6 @@
 // Tiny `fetch` stub that routes calls by URL substring. Handler tests
 // share a single stub across the geocoder, weather adapter, and
-// MailerLite client because all three use the workerd `fetch` global
+// Sender.net client because all three use the workerd `fetch` global
 // through the same lazy-binding pattern. Per test we just register
 // what URL substrings match which `Response` to return.
 

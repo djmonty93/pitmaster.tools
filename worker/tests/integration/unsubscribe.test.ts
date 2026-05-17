@@ -178,7 +178,7 @@ describe('POST /api/unsubscribe', () => {
       .bind('gone@example.com')
       .first<{ unsubscribed_at: number | null }>();
     expect(row?.unsubscribed_at).not.toBeNull();
-    // No DELETE calls when MailerLite doesn't know the subscriber.
+    // No DELETE calls when Sender.net doesn't know the subscriber.
     const removeCalls = stub.calls.filter((c) => c.method === 'DELETE');
     expect(removeCalls).toHaveLength(0);
   });
@@ -230,7 +230,7 @@ describe('POST /api/unsubscribe', () => {
     expect(payload.subscriberId).toBe('sub_42');
     // D1 still marked unsubscribed — the row was claimed by the
     // original handler before the queue replay finishes the
-    // MailerLite-side cleanup.
+    // Sender.net-side cleanup.
     const row = await DB.prepare(`SELECT unsubscribed_at FROM subscribers WHERE email = ?`)
       .bind('gone@example.com')
       .first<{ unsubscribed_at: number | null }>();

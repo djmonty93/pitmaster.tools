@@ -139,9 +139,9 @@ async function handlePatch(rc: RouteContext): Promise<Response> {
   }
 
   // Read the current preference snapshot AFTER our UPDATE so the
-  // MailerLite-side fields reflect the merged outcome of any
+  // Sender.net-side fields reflect the merged outcome of any
   // concurrent PATCHes, and so we can check unsubscribed_at before
-  // touching MailerLite.
+  // touching Sender.net.
   //
   // Concurrent PATCH safety: two simultaneous PATCHes (one setting
   // cut, one setting cooker) would both queue under the same
@@ -159,7 +159,7 @@ async function handlePatch(rc: RouteContext): Promise<Response> {
     .bind(email)
     .first<{ cut: string | null; cooker: string | null; unsubscribed_at: number | null }>();
 
-  // Skip MailerLite sync entirely for an unsubscribed account.
+  // Skip Sender.net sync entirely for an unsubscribed account.
   // updateSubscriberFields omits the status field (so it won't
   // reactivate), but skipping the network call also avoids leaking
   // a tombstoned email to the upstream and saves a wasted POST.
