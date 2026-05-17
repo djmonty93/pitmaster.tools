@@ -62,9 +62,10 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
   ): Promise<unknown> {
     const url = pathOrUrl.startsWith('http') ? pathOrUrl : `${baseUrl}${pathOrUrl}`;
     const controller = new AbortController();
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => {
+      timer = setTimeout(() => {
         controller.abort();
         reject(new SenderError(requestKind, 'timeout', `request timed out after ${timeoutMs}ms`));
       }, timeoutMs);
@@ -90,6 +91,8 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
       const kind = err instanceof DOMException && err.name === 'AbortError' ? 'timeout' : 'network';
       const message = err instanceof Error ? err.message : String(err);
       throw new SenderError(requestKind, kind, message);
+    } finally {
+      clearTimeout(timer);
     }
     const text = await res.text();
     let parsed: unknown = null;
