@@ -488,6 +488,14 @@
         return body;
       });
     }).then(function (forecast) {
+      // Drop superseded responses BEFORE any side effects (localStorage
+      // write, input field update, render). A late geo-IP response
+      // from a previous loadForecast() must not pollute pitmaster_zip
+      // with a stale ZIP after the user moved on to a new request.
+      // The sequence guard is the authoritative ownership check; the
+      // controller-identity check is kept as defense-in-depth on the
+      // AbortController-present path.
+      if (mySeq !== latestRequestSeq || inflightCtrl !== ctrl) return;
       if (!forecast || !Array.isArray(forecast.days) || forecast.days.length === 0) {
         throw { status: 502, body: { error: 'weather_unavailable' } };
       }
@@ -501,18 +509,10 @@
         var input = $('zipInput');
         if (input && !input.value) input.value = forecast.zip;
       }
-      // Only commit a render if this fetch is still the active one.
-      // A newer request may have already aborted us during a rapid
-      // cut/cooker change; in that case the newer call owns the DOM.
-      // The sequence guard is the authoritative ownership check; the
-      // controller-identity check is kept as a defense-in-depth signal
-      // for the supported (AbortController-present) path.
       // Pass the cut/cooker that produced this forecast so the per-hour
       // color-coding inside the day cards stays in sync with the
       // request (not with a newer pending one).
-      if (mySeq === latestRequestSeq && inflightCtrl === ctrl) {
-        renderForecast(forecast, { cut: cut, cooker: cooker });
-      }
+      renderForecast(forecast, { cut: cut, cooker: cooker });
     }).catch(function (err) {
       // Always clear the pending 12s timer on the failure path so a
       // superseded fetch doesn't leak a no-op abort up to 12 seconds
@@ -547,9 +547,14 @@
     if (zip && !isValidUSZip(zip)) {
       // Cancel any in-flight auto-load and wipe any prior render so the
       // user doesn't see the validation error stacked on top of a
-      // forecast for a different zip. Drop inflightCtrl to null AFTER
-      // aborting so the in-flight catch path also sees `inflightCtrl
-      // !== ctrl` and stays silent.
+      // forecast for a different zip.
+      //
+      // Bump latestRequestSeq before aborting so the in-flight request's
+      // .catch handler sees a stale seq and stays silent — without this
+      // bump, an abort or timeout from the cancelled request would
+      // overwrite our "Enter a valid 5-digit US ZIP code." error with
+      // its own error message a moment later.
+      latestRequestSeq++;
       if (inflightCtrl) {
         try { inflightCtrl.abort(); } catch (e) { /* already settled */ }
         inflightCtrl = null;

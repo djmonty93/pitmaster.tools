@@ -7,18 +7,19 @@
 //   • EDT (mid-Mar–early-Nov): 04:00 UTC = 00:00 EDT (today rolls in
 //     here). 05:00 UTC = 01:00 EDT (no-op — same ET day, cache fresh).
 //   • EST (early-Nov–mid-Mar): 04:00 UTC = 23:00 EST on the prior ET
-//     day (warms YESTERDAY's bucket, which has not actually rolled
-//     yet; the on-disk etDayBucket value still reads as the prior
-//     day). 05:00 UTC = 00:00 EST (today rolls in here; warms the
-//     new bucket).
-// Net effect across the year: exactly one tick per day writes the new
-// ET-day bucket. The other tick either no-ops (EDT 05:00) or writes
-// the prior day's bucket once at 23:00 ET (EST 04:00). The 23:00 ET
-// write is harmless — it refreshes that day's aggregate with the
-// latest data right before rollover, so visitors browsing in the last
-// hour of the ET day get a fresher tile than the previous morning's
-// warm. The 24h fresh window on the per-metro cache absorbs both
-// writes idempotently.
+//     day. etDayBucket still resolves to the prior date here, so the
+//     cron's per-metro fetchForecastCached calls all return cached
+//     hits (this morning's warm is still fresh inside the 24h window)
+//     and the aggregate is REWRITTEN from cached data — no upstream
+//     calls — under the prior day's KV key. 05:00 UTC = 00:00 EST
+//     (today rolls in here; warms the new bucket with upstream calls).
+// Net effect across the year: exactly one tick per day actually
+// fetches upstream and writes the new ET-day bucket. The other tick
+// is cheap — either a same-day cache hit (EDT 05:00) or a same-day
+// cache hit on yesterday's bucket (EST 04:00). Visitor traffic that
+// arrives in the last hour of the EST day still sees the latest
+// aggregate because the 04:00 UTC tick rewrites it from the same
+// data the morning warm populated.
 //
 // What it does:
 //   1. Read every row from the D1 `metros` table.

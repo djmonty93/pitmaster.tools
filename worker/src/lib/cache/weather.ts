@@ -45,8 +45,9 @@ export function cacheKey(zip: string, dayBucket: string): string {
 // full ICU tz database, so DST transitions resolve correctly:
 //   • Spring-forward (2026-03-08): wall clock jumps 02:00 EST → 03:00
 //     EDT, so 02:00-02:59 ET does not exist. The corresponding UTC
-//     window is 07:00-07:59 UTC. Any input in that window resolves to
-//     2026-03-08 in ET (the post-jump local clock).
+//     window 07:00-07:59 UTC resolves into the post-jump 03:00-03:59
+//     EDT range (which IS a valid local time) — and either way still
+//     falls on 2026-03-08 in ET, which is what the cache bucket needs.
 //   • Fall-back (2026-11-01): wall clock falls 02:00 EDT → 01:00 EST,
 //     so 01:00-01:59 ET happens twice. Both occurrences (05:00-05:59
 //     UTC pre-fallback and 06:00-06:59 UTC post-fallback) resolve to
