@@ -58,6 +58,25 @@ export function etDayBucket(now: number = Date.now()): string {
   });
 }
 
+// Return the previous-calendar-day ET bucket string given a today
+// bucket. Calendar arithmetic, NOT (Date.now() - 86_400_000): the
+// raw-millisecond approach skips the spring-forward ET day in the
+// early hours after the jump (e.g. asking for "yesterday" of
+// 2026-03-09 04:30 UTC subtracts 24h to 2026-03-08 04:30 UTC, which
+// ICU still classifies as 2026-03-07 in ET because that instant is
+// 23:30 EST on March 7 — entirely missing March 8). Parsing the
+// YYYY-MM-DD bucket as UTC midnight and subtracting one calendar day
+// avoids the local-time discontinuity.
+export function previousEtDate(etDate: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(etDate);
+  if (!m) throw new Error(`previousEtDate: expected YYYY-MM-DD, got ${JSON.stringify(etDate)}`);
+  const yesterday = new Date(Date.UTC(+m[1]!, +m[2]! - 1, +m[3]!) - 86_400_000);
+  const y = yesterday.getUTCFullYear();
+  const mo = String(yesterday.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(yesterday.getUTCDate()).padStart(2, '0');
+  return `${y}-${mo}-${d}`;
+}
+
 export async function fetchForecastCached(
   kv: KVNamespace,
   zip: string,

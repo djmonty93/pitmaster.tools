@@ -1,6 +1,6 @@
 import { env } from 'cloudflare:test';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { cacheKey, etDayBucket, fetchForecastCached } from '../../../src/lib/cache/weather';
+import { cacheKey, etDayBucket, fetchForecastCached, previousEtDate } from '../../../src/lib/cache/weather';
 import { openMeteoTwoDays } from '../weather/fixtures';
 
 interface Env {
@@ -46,12 +46,16 @@ describe('etDayBucket', () => {
   });
 
   it('handles DST fall-back (2026-11-01 02:00 EDT → 01:00 EST)', () => {
-    // 04:30 UTC = 00:30 EDT — first 00:xx on Nov 1, the 1st
+    // 04:30 UTC = 00:30 EDT — first 00:xx on Nov 1, the 1st.
     expect(etDayBucket(Date.UTC(2026, 10, 1, 4, 30))).toBe('2026-11-01');
-    // 05:30 UTC = 01:30 EDT — second occurrence of 01:30 starts after
-    // wall clock falls back; either way still the 1st in ET
+    // 05:30 UTC = 01:30 EDT — FIRST occurrence of 01:30 on Nov 1
+    // (the pre-fallback EDT window, before the wall clock falls back
+    // to EST at 02:00 EDT).
     expect(etDayBucket(Date.UTC(2026, 10, 1, 5, 30))).toBe('2026-11-01');
-    // 06:30 UTC = 01:30 EST — same wall-clock label but post-fallback
+    // 06:30 UTC = 01:30 EST — SECOND occurrence of 01:30 on Nov 1,
+    // immediately after the wall clock has fallen back. Same local
+    // label as the previous assertion but distinct UTC moment; still
+    // the 1st in ET either way, which is what the cache key needs.
     expect(etDayBucket(Date.UTC(2026, 10, 1, 6, 30))).toBe('2026-11-01');
   });
 
@@ -61,6 +65,40 @@ describe('etDayBucket', () => {
     expect(etDayBucket(Date.UTC(2026, 6, 4, 5, 0))).toBe(
       etDayBucket(Date.UTC(2026, 6, 5, 3, 59))
     );
+  });
+});
+
+describe('previousEtDate', () => {
+  it('subtracts one calendar day inside a single month', () => {
+    expect(previousEtDate('2026-05-15')).toBe('2026-05-14');
+  });
+
+  it('crosses month boundaries correctly', () => {
+    expect(previousEtDate('2026-06-01')).toBe('2026-05-31');
+    expect(previousEtDate('2026-03-01')).toBe('2026-02-28');
+    expect(previousEtDate('2024-03-01')).toBe('2024-02-29'); // leap year
+  });
+
+  it('crosses year boundaries correctly', () => {
+    expect(previousEtDate('2027-01-01')).toBe('2026-12-31');
+  });
+
+  it('returns the correct prior ET day across spring-forward', () => {
+    // Asking for "yesterday" of the day-after-spring-forward
+    // (2026-03-09) must return 2026-03-08, NOT 2026-03-07. The naive
+    // (Date.now() - 86_400_000) approach skips March 8 entirely when
+    // called from the EDT half of March 9, because 24 raw UTC hours
+    // back lands at 23:30 EST on March 7 (since EST is one hour later
+    // in UTC than EDT). previousEtDate does calendar arithmetic on
+    // the bucket string so it stays correct.
+    expect(previousEtDate('2026-03-09')).toBe('2026-03-08');
+    expect(previousEtDate('2026-03-08')).toBe('2026-03-07');
+  });
+
+  it('throws on malformed input', () => {
+    expect(() => previousEtDate('not-a-date')).toThrow(/expected YYYY-MM-DD/);
+    expect(() => previousEtDate('2026-5-15')).toThrow(/expected YYYY-MM-DD/);
+    expect(() => previousEtDate('')).toThrow(/expected YYYY-MM-DD/);
   });
 });
 

@@ -15,7 +15,7 @@
 // the per-request CPU budget for every cold-cache visitor.
 
 import { aggregateKey, type MetrosSummary } from '../crons/metrosPrewarm.js';
-import { etDayBucket } from '../lib/cache/weather.js';
+import { etDayBucket, previousEtDate } from '../lib/cache/weather.js';
 import { json, type RouteContext } from '../router.js';
 
 export async function handleMetros(rc: RouteContext): Promise<Response> {
@@ -25,8 +25,12 @@ export async function handleMetros(rc: RouteContext): Promise<Response> {
   // (e.g. the 04:00 UTC tick hasn't fired during EST months when
   // midnight ET = 05:00 UTC), serve yesterday's data so the chooser
   // shows real tiles instead of an empty skeleton.
+  // previousEtDate does ET-calendar-day arithmetic on the bucket
+  // string rather than raw (Date.now() - 86_400_000), so it correctly
+  // returns the prior ET day even across spring-forward when 24 raw
+  // UTC hours back can map to TWO ET days earlier.
   if (!summary) {
-    const yesterday = etDayBucket(Date.now() - 24 * 60 * 60 * 1000);
+    const yesterday = previousEtDate(etDate);
     summary = await rc.env.WEATHER_KV.get<MetrosSummary>(aggregateKey(yesterday), 'json');
   }
 
