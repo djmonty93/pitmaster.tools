@@ -63,6 +63,13 @@ export interface ScoreResult {
 export interface ForecastResponse {
   zip: string;
   metro?: string;
+  /**
+   * Friendly display name from the geocoder (e.g. "Atlanta, Georgia").
+   * Always set when the geocoder resolves. The client prefers this for
+   * the verdict-hero location label, falling back to `metro` (slug) and
+   * finally to the raw ZIP.
+   */
+  locationName?: string;
   source: 'open-meteo' | 'nws';
   generatedAt: string;
   days: Array<{

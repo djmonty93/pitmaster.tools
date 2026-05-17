@@ -9,8 +9,13 @@ import { vi } from 'vitest';
 export interface ScriptedHit {
   /** Substring match against the request URL. */
   match: string;
-  /** Response factory; called each time the URL matches. */
-  respond: () => Response | Promise<Response>;
+  /**
+   * Response factory; called each time the URL matches. The optional
+   * `url` arg lets a test branch on path/query when one route needs to
+   * succeed for some callers and fail for others (e.g. failing the
+   * forecast for a single metro). Existing callers ignore the param.
+   */
+  respond: (url: string) => Response | Promise<Response>;
 }
 
 export interface FetchStub {
@@ -40,7 +45,7 @@ export function installFetchStub(script: ScriptedHit[]): FetchStub {
     }
     calls.push({ url, method: (init?.method ?? 'GET') as string, body, headers });
     for (const hit of script) {
-      if (url.includes(hit.match)) return hit.respond();
+      if (url.includes(hit.match)) return hit.respond(url);
     }
     throw new Error(`fetchStub: no script matched ${url}`);
   };

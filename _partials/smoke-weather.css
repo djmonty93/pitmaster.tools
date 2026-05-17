@@ -347,6 +347,151 @@ a.affiliate-card__product:focus-visible {
   text-decoration: underline;
 }
 
+/* ----- Hourly per-row score color-coding (Task 3) -----
+   Score for each hour is computed client-side by scoreHour() in
+   weather-score-shared.js and applied as a band-* class on the <tr>.
+   Translucent backgrounds keep the table readable; the day-card's own
+   band background already conveys the daily verdict, so we don't want
+   the per-hour wash to overpower it. */
+.hourly-table tr.band-red    { background: var(--score-red-bg);    }
+.hourly-table tr.band-yellow { background: var(--score-yellow-bg); }
+.hourly-table tr.band-green  { background: var(--score-green-bg);  }
+.hourly-table tr.band-ideal  { background: var(--score-ideal-bg);  }
+
+/* /100 suffix next to the score number in day cards. Smaller and
+   muted so the number stays the visual focus. */
+.day-card__score-suffix {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-left: -.15rem;
+  margin-right: .2rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Per-forecast location line above the verdict heading (Task 2).
+   Renders "Forecast for Atlanta, Georgia · ZIP 30309". */
+.verdict-hero__location {
+  font-size: .9rem;
+  color: var(--text-muted);
+  margin: 0 0 .35rem;
+}
+.verdict-hero__location strong {
+  color: var(--charcoal);
+}
+
+/* ----- Scoring-system explainer (Task 4) -----
+   Sits beneath the affiliate card on /smoke-weather/ so the user has a
+   plain-English "what does 64/100 mean?" reference next to the verdict.
+   Reuses the band-* color tokens for the legend swatches. */
+.score-explainer {
+  margin-top: 1.25rem;
+  padding: 1rem 1.15rem;
+  background: var(--surface-strong);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+}
+.score-explainer h3 {
+  margin: 0 0 .55rem;
+  font-size: 1rem;
+}
+.score-legend {
+  list-style: none;
+  margin: 0 0 .6rem;
+  padding: 0;
+  display: grid;
+  gap: .35rem;
+}
+.score-legend li {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  font-size: .92rem;
+  line-height: 1.4;
+}
+.score-legend__swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  border: 1px solid rgba(0,0,0,.08);
+}
+.score-explainer p {
+  margin: .15rem 0 0;
+  font-size: .85rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+.score-explainer a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+/* ----- Metros chooser (Task 5) ----- */
+.metros-filter {
+  margin: .75rem 0 1rem;
+}
+.metros-filter input[type="search"] {
+  width: 100%;
+  max-width: 32rem;
+  padding: .65rem .85rem;
+  font-size: 1rem;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  color: var(--charcoal);
+}
+.metros-filter__help {
+  font-size: .82rem;
+  color: var(--text-muted);
+  margin: .4rem 0 0;
+}
+.metro-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: .75rem;
+}
+.metro-tile {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+  padding: .85rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--card-border);
+  background: var(--surface-strong);
+  color: var(--charcoal);
+  text-decoration: none;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.metro-tile:hover,
+.metro-tile:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+  outline: none;
+}
+.metro-tile__name {
+  font-weight: 700;
+  font-size: 1rem;
+}
+.metro-tile__score {
+  font-size: .92rem;
+}
+.metro-tile__score strong {
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-size: 1.1rem;
+  font-variant-numeric: tabular-nums;
+}
+.metro-tile__best {
+  font-size: .8rem;
+  color: var(--text-muted);
+}
+/* Pending state — the build-time skeleton class. Replaced by band-*
+   once /api/metros lands. Keeps the tile readable without a wash. */
+.metro-tile.band-pending {
+  background: var(--surface-strong);
+}
+
 /* ----- Disclaimer ----- */
 .sw-disclaimer {
   font-size: .8rem;

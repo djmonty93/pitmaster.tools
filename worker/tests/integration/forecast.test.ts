@@ -1,6 +1,7 @@
 import { env } from 'cloudflare:test';
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { handleForecast } from '../../src/handlers/forecast';
+import { etDayBucket } from '../../src/lib/cache/weather';
 import { applyMigrations } from '../helpers/d1';
 import { installFetchStub, jsonResponse, type FetchStub } from '../helpers/fetchStub';
 import { buildContext } from '../helpers/routeContext';
@@ -22,10 +23,11 @@ let stub: FetchStub | null = null;
 beforeEach(async () => {
   await KV.delete('geo:v3:30303');
   // Wipe today's forecast cache buckets that could carry over from
-  // earlier tests in the same file.
-  const today = new Date().toISOString().slice(0, 10);
-  await KV.delete(`weather:v1:30303:${today}`);
-  await KV.delete(`weather:v1:99999:${today}`);
+  // earlier tests in the same file. Bucket = "today in America/New_York"
+  // (see lib/cache/weather.ts:etDayBucket).
+  const today = etDayBucket();
+  await KV.delete(`weather:v2:30303:${today}`);
+  await KV.delete(`weather:v2:99999:${today}`);
 });
 afterEach(() => {
   stub?.restore();
@@ -68,11 +70,15 @@ describe('GET /api/forecast', () => {
     const body = (await res.json()) as {
       zip: string;
       metro?: string;
+      locationName?: string;
       source: string;
       days: Array<{ date: string; score: { band: string; score: number } }>;
     };
     expect(body.zip).toBe('30303');
     expect(body.metro).toBe('atlanta-ga');
+    // Geocoder fast-path (D1 metros row) returns the friendly "City, State"
+    // name; the handler surfaces it as locationName for the client header.
+    expect(body.locationName).toBe('Atlanta, GA');
     expect(body.days).toHaveLength(2);
     expect(body.days[0]!.score.band).toMatch(/red|yellow|green|ideal/);
     // Explicit zip → URL fully identifies the response → public CDN cache OK.

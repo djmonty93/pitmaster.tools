@@ -82,11 +82,22 @@
   //    full day to propagate to caches before any Friday email
   //    references it. Idempotent within an ISO week — re-runs UPDATE
   //    the existing row.
+  //
+  // 4. `0 4,5 * * *` — nightly metros pre-warm. Fires at 04:00 UTC
+  //    (= 00:00 EDT) and 05:00 UTC (= 00:00 EST) so "midnight Eastern
+  //    Time" is covered year-round on UTC-only Workers cron. Reads all
+  //    50 rows from the D1 `metros` table, refreshes each metro's
+  //    forecast cache entry, and writes a single `metros:v1:<et-date>`
+  //    aggregate that the /api/metros endpoint serves to the
+  //    /smoke-weather/metros chooser. Idempotent — the second tick on
+  //    a given day reads from the now-fresh per-metro entries and
+  //    rewrites the same aggregate.
   "triggers": {
     "crons": [
       "0 10-14 * * 5",
       "*/5 * * * *",
-      "0 12 * * 1"
+      "0 12 * * 1",
+      "0 4,5 * * *"
     ]
   }
   // SENDER_API_TOKEN — Bearer token for the Sender.net API,

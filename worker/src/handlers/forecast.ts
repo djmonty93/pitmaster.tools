@@ -132,6 +132,7 @@ export async function handleForecast(rc: RouteContext): Promise<Response> {
   const response: ForecastResponse = {
     zip,
     metro: location.metroSlug ?? undefined,
+    locationName: location.name,
     source: forecast.source,
     generatedAt: new Date().toISOString(),
     days: scored,

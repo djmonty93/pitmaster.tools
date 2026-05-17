@@ -387,8 +387,126 @@ body.embed-mode .cookie-banner,
 body.embed-mode .page-hero,
 body.embed-mode .ad-slot,
 body.embed-mode .embed-section,
-body.embed-mode .share-buttons { display: none !important; }
+body.embed-mode .share-buttons,
+body.embed-mode .embed-cta,
+body.embed-mode .related-tools,
+body.embed-mode .editorial-section,
+body.embed-mode #affiliateSlot,
+body.embed-mode .score-explainer { display: none !important; }
 body.embed-mode main { padding-top: .5rem; }
+
+/* ----- Embed-this-calculator CTA (Task 1) -----
+   Sits near the bottom of every calculator; click opens a dialog with
+   a copyable iframe snippet. The .embed-mode rule above hides this
+   block inside the iframe view, so an embedded page never shows
+   "Embed this calculator" recursively. */
+.embed-cta {
+  margin: 1.25rem 0 .5rem;
+  text-align: center;
+}
+.embed-cta__btn {
+  appearance: none;
+  background: transparent;
+  border: 1px dashed var(--card-border, #b8b29a);
+  border-radius: 999px;
+  padding: .55rem 1.1rem;
+  font: inherit;
+  font-size: .92rem;
+  color: var(--charcoal, #2a2a2a);
+  cursor: pointer;
+}
+.embed-cta__btn:hover,
+.embed-cta__btn:focus-visible {
+  background: rgba(0,0,0,.04);
+  outline: none;
+}
+.embed-cta__btn span {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  margin-right: .35rem;
+  color: var(--text-muted, #5a5a5a);
+}
+.embed-cta__dialog {
+  border: 0;
+  border-radius: 12px;
+  padding: 0;
+  width: min(560px, 92vw);
+  background: var(--surface-strong, #fff);
+  color: var(--charcoal, #2a2a2a);
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+}
+.embed-cta__dialog::backdrop {
+  background: rgba(0,0,0,.45);
+}
+.embed-cta__form {
+  padding: 1.1rem 1.25rem 1rem;
+}
+.embed-cta__title {
+  margin: 0 0 .35rem;
+  font-size: 1.1rem;
+}
+.embed-cta__desc {
+  margin: 0 0 .65rem;
+  font-size: .9rem;
+  line-height: 1.5;
+  color: var(--text-muted, #5a5a5a);
+}
+.embed-cta__snippet {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .82rem;
+  line-height: 1.45;
+  padding: .55rem .65rem;
+  border: 1px solid var(--card-border, #b8b29a);
+  border-radius: 6px;
+  background: #f8f6ee;
+  color: var(--charcoal, #2a2a2a);
+  resize: vertical;
+  min-height: 5.5em;
+}
+.embed-cta__status {
+  margin: .4rem 0 .7rem;
+  min-height: 1.2em;
+  font-size: .85rem;
+  color: var(--text-muted, #5a5a5a);
+}
+.embed-cta__status.is-error {
+  color: #b00020;
+}
+.embed-cta__actions {
+  display: flex;
+  gap: .6rem;
+  justify-content: flex-end;
+}
+.embed-cta__copy,
+.embed-cta__close {
+  appearance: none;
+  font: inherit;
+  font-size: .92rem;
+  padding: .5rem .95rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.embed-cta__copy {
+  background: var(--charcoal, #2a2a2a);
+  color: #fff;
+  border: 1px solid var(--charcoal, #2a2a2a);
+}
+.embed-cta__copy:hover,
+.embed-cta__copy:focus-visible {
+  opacity: .9;
+  outline: none;
+}
+.embed-cta__close {
+  background: transparent;
+  color: var(--charcoal, #2a2a2a);
+  border: 1px solid var(--card-border, #b8b29a);
+}
+.embed-cta__close:hover,
+.embed-cta__close:focus-visible {
+  background: rgba(0,0,0,.04);
+  outline: none;
+}
 
 /* ----- Print ----- */
 @media print {

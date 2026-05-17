@@ -1,19 +1,23 @@
 // Weather-specific cache wrapper. Composes the Step 2 adapter with the
-// generic Step 4 KV cache. Key shape per plan: `weather:v1:${zip}:${day}`
-// where day is the UTC YYYY-MM-DD bucket so subsequent requests on the
-// same calendar day in the same zip share an entry.
+// generic Step 4 KV cache. Key shape: `weather:v2:${zip}:${etDay}`
+// where etDay is the calendar date in America/New_York so the cached
+// entry rolls over at midnight ET and every visitor in a given metro
+// on a given day sees the same forecast.
 
 import { fetchForecast, type AdapterResult, type AdapterOptions } from '../weather/adapter.js';
 import { cachedFetch, type CachedFetchOptions } from './kv.js';
 
-const KEY_PREFIX = 'weather:v1';
+// v2: switched the day-bucket from UTC to America/New_York. v1 entries
+// with UTC-day suffixes are partitioned off and age out naturally via
+// their existing expirationTtl — no migration step required.
+const KEY_PREFIX = 'weather:v2';
 
-// 30 minutes fresh, 6 hours stale. Weather changes slowly compared to,
-// say, stock prices; the stale-while-error window covers a major
-// upstream outage without showing stale data to a fresh visitor on a
-// good network.
-const FRESH_SECONDS = 30 * 60;
-const STALE_SECONDS = 6 * 60 * 60;
+// 24 hours fresh, 30 hours total TTL (24h + 6h stale-while-error grace).
+// freshSeconds = full ET day so a metro's forecast is stable for the
+// whole day after the cron pre-warms at midnight ET. staleSeconds drives
+// KV expirationTtl and must be >= freshSeconds per kv.ts.
+const FRESH_SECONDS = 24 * 60 * 60;
+const STALE_SECONDS = 30 * 60 * 60;
 
 export interface CachedForecastOptions {
   adapter?: AdapterOptions;
@@ -35,9 +39,16 @@ export function cacheKey(zip: string, dayBucket: string): string {
   return `${KEY_PREFIX}:${zip}:${dayBucket}`;
 }
 
-export function utcDayBucket(now: number = Date.now()): string {
-  // ISO timestamp's leading 10 chars are YYYY-MM-DD in UTC.
-  return new Date(now).toISOString().slice(0, 10);
+// "Today in America/New_York" as a sortable YYYY-MM-DD string. en-CA's
+// locale formats dates as YYYY-MM-DD natively, which sidesteps the
+// month/day/year ordering pitfall of en-US. Cloudflare Workers ship the
+// full ICU tz database, so DST transitions resolve correctly: 2026-03-08
+// 06:30 UTC (= 02:30 EDT, one hour after spring-forward) returns
+// "2026-03-08", not "2026-03-07".
+export function etDayBucket(now: number = Date.now()): string {
+  return new Date(now).toLocaleDateString('en-CA', {
+    timeZone: 'America/New_York',
+  });
 }
 
 export async function fetchForecastCached(
@@ -49,7 +60,7 @@ export async function fetchForecastCached(
   opts: CachedForecastOptions = {}
 ): Promise<AdapterResult> {
   const now = opts.now ?? Date.now;
-  const key = cacheKey(zip, utcDayBucket(now()));
+  const key = cacheKey(zip, etDayBucket(now()));
   return cachedFetch(
     kv,
     key,
