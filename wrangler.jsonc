@@ -9,6 +9,26 @@
   "observability": {
     "enabled": true
   },
+  // Custom domain binding. The Worker takes over pitmaster.tools (apex
+  // + www) so /api/* routes dispatch through router.ts and static asset
+  // requests fall through to the ASSETS binding (./dist).
+  //
+  // Operator pre-flight before the first deploy that lands these routes:
+  //   1. Cloudflare Dashboard → Workers & Pages → "pitmaster-tools" (the
+  //      Pages project) → Custom domains → REMOVE the pitmaster.tools
+  //      and www.pitmaster.tools bindings. Workers cannot bind to a
+  //      hostname Pages still owns; the deploy fails otherwise.
+  //   2. Push (or trigger Workers Builds) — the next deploy creates the
+  //      Worker custom-domain bindings automatically from this block.
+  //   3. Verify: `curl https://pitmaster.tools/api/health` returns JSON
+  //      `{status:"ok",...}`, not the 404 page.
+  //
+  // Rollback: remove this routes block, push, then re-add the Pages
+  // domain binding in the dashboard.
+  "routes": [
+    { "pattern": "pitmaster.tools", "custom_domain": true },
+    { "pattern": "www.pitmaster.tools", "custom_domain": true }
+  ],
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
