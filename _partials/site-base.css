@@ -110,6 +110,13 @@ main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
 
 /* ----- Ad slot ----- */
 .ad-slot { text-align: center; margin: 1.5rem 0; min-height: 90px; }
+/* Hide unfilled placeholder slots whose data-ad-slot is still the
+   "XXXXXXXXXX" dummy pending real AdSense IDs from the dashboard.
+   Without this, .ad-slot reserves 90px + 3rem of vertical margin on
+   every page even though no ad ever renders, producing the big empty
+   gap between the calculator and the footer. Remove this rule once
+   real slot IDs ship. */
+.ad-slot:has(ins[data-ad-slot="XXXXXXXXXX"]) { display: none; }
 
 /* ----- Form components ----- */
 .form-card {

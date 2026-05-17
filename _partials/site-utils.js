@@ -96,6 +96,21 @@ function loadAds() {
   }
   if (adsLoaded) return;
   adsLoaded = true;
+  // Suppress placeholder ad-slot processing until real ad-slot IDs ship.
+  // Each page emits an inline script that calls adsbygoogle.push({}) after
+  // every <ins>. That runs during HTML parse, before loadAds() ever fires,
+  // so by now window.adsbygoogle is an Array with one queued {} per slot.
+  // When the AdSense library loads it intercepts the array and processes
+  // the queue: each queued push expects an unfilled <ins>, but the
+  // placeholder slots are display:none via the .ad-slot:has() CSS rule, so
+  // AdSense throws TagError "Y" (minified) for every one.
+  // Fix: wipe the queue AND remove the placeholder <ins> elements before
+  // loading the library. AdSense then initializes with an empty array and
+  // no <ins> to process. Once real slot IDs ship, none of this matches
+  // and AdSense fills normally.
+  window.adsbygoogle = [];
+  var placeholderIns = document.querySelectorAll('ins.adsbygoogle[data-ad-slot="XXXXXXXXXX"]');
+  for (var i = 0; i < placeholderIns.length; i++) placeholderIns[i].remove();
   var script = document.createElement('script');
   script.async = true;
   script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + encodeURIComponent(ADSENSE_CLIENT);
