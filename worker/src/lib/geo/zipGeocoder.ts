@@ -1,10 +1,11 @@
 // Zip → (latitude, longitude, timezone, metroSlug?) resolver.
 //
 // Open-Meteo's free geocoding API
-// (https://geocoding-api.open-meteo.com) accepts a postal code +
-// country filter and returns lat/lon/timezone. We cache results in
-// KV with a long TTL (zip→location doesn't change) so a popular zip
-// resolves once per region across all visitors.
+// (https://geocoding-api.open-meteo.com) takes the search term in
+// `name` and returns lat/lon/timezone for matching places along with
+// a `postcodes[]` array we use to confirm the requested ZIP. We cache
+// results in KV with a long TTL (zip→location doesn't change) so a
+// popular zip resolves once per region across all visitors.
 //
 // For US users this is the path to support zips outside our 50 seeded
 // metros. The 50 metros are a fast path: a zip whose 5-digit value is
@@ -198,13 +199,15 @@ async function fetchGeocode(zip: string, opts: ResolveOptions): Promise<ZipLocat
   }
   const results = parsed.data.results ?? [];
   // Prefer a result that explicitly lists the requested zip in its
-  // postcodes; fall back to the first result only when none echo it
-  // and the geocoder didn't claim multiple alternatives — that's the
-  // common case for small towns where the geocoder returns a single
-  // place without a postcodes array.
+  // postcodes. If no result echoes the zip, fall back to the first
+  // result ONLY when there is exactly one and it has no `postcodes`
+  // field at all — that's the small-town case where the geocoder
+  // omits postcodes entirely. A single result whose `postcodes` is
+  // present but does not include the requested zip is treated as a
+  // mismatch (fuzzy place-name hit), not a fallback.
   const match =
     results.find((r) => r.postcodes?.includes(zip)) ??
-    (results.length === 1 ? results[0] : undefined);
+    (results.length === 1 && results[0]!.postcodes === undefined ? results[0] : undefined);
   if (!match) {
     throw new GeocoderError('not_found', `no geocode results for ${zip}`);
   }

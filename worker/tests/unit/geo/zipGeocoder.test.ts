@@ -115,6 +115,57 @@ describe('resolveZip', () => {
     expect(loc.state).toBe('CA');
   });
 
+  it('falls back to the only result when it has no postcodes field (small-town case)', async () => {
+    stub = installFetchStub([
+      {
+        match: 'geocoding-api.open-meteo.com',
+        respond: () =>
+          jsonResponse(200, {
+            results: [
+              {
+                latitude: 35.5,
+                longitude: -119.0,
+                timezone: 'America/Los_Angeles',
+                name: 'Tiny Town',
+                admin1: 'California',
+                country_code: 'US',
+                // no postcodes field at all
+              },
+            ],
+          }),
+      },
+    ]);
+    const loc = await resolveZip(KV, DB, '99999');
+    expect(loc.name).toBe('Tiny Town, California');
+    expect(loc.state).toBe('CA');
+  });
+
+  it('rejects a single result whose postcodes is present but does not include the requested zip', async () => {
+    stub = installFetchStub([
+      {
+        match: 'geocoding-api.open-meteo.com',
+        respond: () =>
+          jsonResponse(200, {
+            results: [
+              {
+                latitude: 1,
+                longitude: 1,
+                timezone: 'America/New_York',
+                name: 'Fuzzy Single',
+                admin1: 'New York',
+                country_code: 'US',
+                postcodes: ['11111'],
+              },
+            ],
+          }),
+      },
+    ]);
+    await expect(resolveZip(KV, DB, '99999')).rejects.toMatchObject({
+      name: 'GeocoderError',
+      kind: 'not_found',
+    });
+  });
+
   it('rejects a multi-result response where none echo the requested zip', async () => {
     stub = installFetchStub([
       {
