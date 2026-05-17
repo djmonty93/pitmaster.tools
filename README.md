@@ -98,11 +98,12 @@ verified, and rolled back independently.
   (1m, 2m, 4m, … capped at 6 h), parks rows after 10 attempts, and
   writes an `events` audit row on every drop or park. `tags.ts`
   validates metro slugs and emits `metro:`/`cut:`/`cooker:`
-  segmentation as Sender.net subscriber custom fields. The campaign
-  send path is owned by Step 11 (Friday cron); Step 6 reserves the
-  `send` kind in the schema and `drain()`'s SQL filter excludes
-  `send` rows entirely, so any pre-existing rows wait untouched in
-  the queue for Step 11 to claim. `SENDER_API_TOKEN` belongs in
+  segmentation as Sender.net subscriber custom fields. The `request_kind`
+  CHECK constraint allows `'subscribe' | 'unsubscribe' | 'digest_trigger'`,
+  but in practice only `'subscribe'` and `'unsubscribe'` are enqueued
+  by their handlers on retryable Sender failures; `drain()` replays only
+  these two kinds via its `WHERE request_kind IN ('subscribe', 'unsubscribe')`
+  filter, leaving `'digest_trigger'` reserved for future use. `SENDER_API_TOKEN` belongs in
   `wrangler secret put`; `.dev.vars.example` documents the local form.
 - **Step 7.** Worker router (`worker/src/router.ts`) + handlers
   (`worker/src/handlers/`) for the public API:
