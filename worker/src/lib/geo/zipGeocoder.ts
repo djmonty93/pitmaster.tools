@@ -26,12 +26,12 @@ const GEOCODE_URL = 'https://geocoding-api.open-meteo.com/v1/search';
 const DEFAULT_TIMEOUT_MS = 3000;
 const FRESH_SECONDS = 30 * 24 * 60 * 60; // 30 days — zip→location is geographically stable
 const STALE_SECONDS = 90 * 24 * 60 * 60; // 90 days fallback if API is down
-// Bumped from v1 → v2 when ZipLocation gained the `state` field
-// (portfolio-aware region routing). v1 entries are missing `state`,
-// which would silently drop subscribers into the no-region path on
-// the slow-path resubscribe. Old keys age out naturally via TTL —
-// no purge required.
-const KEY_PREFIX = 'geo:v2';
+// Bumped from v2 → v3 when the upstream query switched from the
+// (silently broken) `postal_code` param to `name=<zip>` on Open-Meteo
+// geocoder. v2 entries never populated in practice — the API always
+// returned HTTP 400 — but the bump keeps the cache namespace honest.
+// Old keys age out naturally via TTL.
+const KEY_PREFIX = 'geo:v3';
 
 // US 5-digit zip; we don't yet support other countries.
 const US_ZIP_RE = /^\d{5}$/;
@@ -65,6 +65,7 @@ const GeocodeResponse = z.object({
         name: z.string().min(1),
         admin1: z.string().optional(),
         country_code: z.string().optional(),
+        postcodes: z.array(z.string()).optional(),
       })
     )
     .optional(),
@@ -147,9 +148,16 @@ export async function resolveZip(
 }
 
 async function fetchGeocode(zip: string, opts: ResolveOptions): Promise<ZipLocation> {
+  // Open-Meteo's geocoder takes the search term in `name` and echoes
+  // matching postal codes in the `postcodes[]` field on each result.
+  // The previously-used `postal_code` parameter is not supported and
+  // always returns HTTP 400. We ask for up to 5 results and pick the
+  // first whose `postcodes` array contains the requested zip to defend
+  // against the geocoder falling back to a fuzzy place-name match for
+  // an unrecognized zip.
   const params = new URLSearchParams({
-    postal_code: zip,
-    count: '1',
+    name: zip,
+    count: '5',
     language: 'en',
     format: 'json',
     countryCode: 'US',
@@ -188,18 +196,26 @@ async function fetchGeocode(zip: string, opts: ResolveOptions): Promise<ZipLocat
   if (!parsed.success) {
     throw new GeocoderError('malformed', parsed.error.message);
   }
-  const first = parsed.data.results?.[0];
-  if (!first) {
+  const results = parsed.data.results ?? [];
+  // Prefer a result that explicitly lists the requested zip in its
+  // postcodes; fall back to the first result only when none echo it
+  // and the geocoder didn't claim multiple alternatives — that's the
+  // common case for small towns where the geocoder returns a single
+  // place without a postcodes array.
+  const match =
+    results.find((r) => r.postcodes?.includes(zip)) ??
+    (results.length === 1 ? results[0] : undefined);
+  if (!match) {
     throw new GeocoderError('not_found', `no geocode results for ${zip}`);
   }
   return {
     zip,
-    latitude: first.latitude,
-    longitude: first.longitude,
-    timezone: first.timezone,
+    latitude: match.latitude,
+    longitude: match.longitude,
+    timezone: match.timezone,
     metroSlug: null,
-    name: first.admin1 ? `${first.name}, ${first.admin1}` : first.name,
-    state: first.admin1 ? stateNameToCode(first.admin1) : null,
+    name: match.admin1 ? `${match.name}, ${match.admin1}` : match.name,
+    state: match.admin1 ? stateNameToCode(match.admin1) : null,
   };
 }
 
