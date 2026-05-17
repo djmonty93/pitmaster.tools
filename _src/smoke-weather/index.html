@@ -177,6 +177,21 @@
        the disclosure travels with every placement. -->
   <aside id="affiliateSlot" class="affiliate-card" hidden aria-label="Recommended gear"></aside>
 
+  <!-- Score-system explainer (Task 4). Static markup so the legend is
+       visible before any forecast has loaded. Reuses the band-* color
+       tokens for the swatches so any future change to the score
+       palette propagates here automatically. -->
+  <aside class="score-explainer" aria-label="What the score means">
+    <h3>What the 0-100 score means</h3>
+    <ul class="score-legend">
+      <li><span class="score-legend__swatch band-ideal" aria-hidden="true"></span><strong>85-100 &middot; Ideal</strong> &mdash; light the fire</li>
+      <li><span class="score-legend__swatch band-green" aria-hidden="true"></span><strong>70-84 &middot; Green</strong> &mdash; solid smoke day</li>
+      <li><span class="score-legend__swatch band-yellow" aria-hidden="true"></span><strong>50-69 &middot; Yellow</strong> &mdash; workable, plan around the rough hours</li>
+      <li><span class="score-legend__swatch band-red" aria-hidden="true"></span><strong>0-49 &middot; Red</strong> &mdash; tough conditions</li>
+    </ul>
+    <p>Five weather signals subtract from a base of 100: rain probability + accumulation, wind &amp; gusts (weighted by your cooker), cold mornings, hot afternoons, and stall risk for long cuts. <a href="/smoke-weather/methodology">See full methodology &rarr;</a></p>
+  </aside>
+
   <p class="sw-disclaimer">
     Forecasts model regional weather, not your microclimate. Trees, structures, and elevation can shift wind and temperature noticeably from the airport-grade source we pull. Always step outside before lighting the fire.
   </p>
@@ -210,10 +225,12 @@
       </a>
     </div>
   </section>
+  <!-- INJECT:embed-cta.html -->
 </main>
 
 <!-- INJECT:site-footer-smoke.html -->
 <!-- INJECT:weather-score-shared.js:script -->
 <!-- INJECT:smoke-weather-app.js:script -->
+<!-- INJECT:embed-cta.js:script -->
 </body>
 </html>

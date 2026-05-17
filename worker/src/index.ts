@@ -9,9 +9,11 @@
 
 import { withSentry } from '@sentry/cloudflare';
 import { runFridayCron } from './crons/fridayEmail.js';
+import { runMetrosPrewarm } from './crons/metrosPrewarm.js';
 import { runWeeklyArticleCron } from './crons/weeklyArticle.js';
 import { handleArticles } from './handlers/articles.js';
 import { handleForecast } from './handlers/forecast.js';
+import { handleMetros } from './handlers/metros.js';
 import { handlePreferences } from './handlers/preferences.js';
 import { handleStatus } from './handlers/status.js';
 import { handleSubscribe } from './handlers/subscribe.js';
@@ -68,6 +70,7 @@ export interface Env {
 const routes = compileRoutes([
   { method: 'GET', pattern: '/api/health', handler: handleHealth },
   { method: 'GET', pattern: '/api/forecast', handler: handleForecast },
+  { method: 'GET', pattern: '/api/metros', handler: handleMetros },
   { method: 'POST', pattern: '/api/subscribe', handler: handleSubscribe },
   { method: 'POST', pattern: '/api/unsubscribe', handler: handleUnsubscribe },
   { method: 'GET', pattern: '/api/preferences', handler: handlePreferences },
@@ -151,6 +154,16 @@ const handler = {
     }
     if (controller.cron === '0 12 * * 1') {
       await runWeeklyArticleCron(env, new Date(controller.scheduledTime));
+      return;
+    }
+    //   `0 4,5 * * *` — nightly metros pre-warm. Two ticks at 04:00 UTC
+    //   (= midnight EDT) and 05:00 UTC (= midnight EST) blanket
+    //   "midnight ET" year-round on UTC-only Workers cron. The second
+    //   tick is a no-op when the first already wrote today's aggregate
+    //   — both crons are idempotent (KV put + per-metro fetchCached
+    //   that returns the fresh entry on the same ET day).
+    if (controller.cron === '0 4,5 * * *') {
+      await runMetrosPrewarm(env, new Date(controller.scheduledTime));
       return;
     }
     console.warn('scheduled: unrecognized cron expression', { cron: controller.cron });

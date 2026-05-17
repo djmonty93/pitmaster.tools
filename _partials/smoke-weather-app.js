@@ -33,6 +33,18 @@
   var DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   var MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+  // Proper-case band label for the day card. The band CSS class on the
+  // card already conveys the color verdict (red/yellow/green/ideal) —
+  // the label spells out the band name so users who can't easily
+  // perceive the color still get the categorical signal.
+  function bandLabel(b) {
+    if (b === 'ideal')  return 'Ideal';
+    if (b === 'green')  return 'Green';
+    if (b === 'yellow') return 'Yellow';
+    if (b === 'red')    return 'Red';
+    return '';
+  }
+
   function $(id) { return document.getElementById(id); }
 
   function getStored(key) {
@@ -130,19 +142,28 @@
     else if (best.score.band === 'yellow') verdict = 'Workable, plan ahead';
     else verdict = 'Tough conditions';
 
-    // `forecast.metro` and `forecast.zip` are server-derived but still
-    // funnel into innerHTML; escape both as defense-in-depth so a
-    // malformed upstream response can't inject markup. `forecast.days
-    // .length` and `best.score.score` are numeric (Number()), safe.
-    var locLabel = forecast.metro ? forecast.metro : 'ZIP ' + forecast.zip;
+    // `forecast.locationName` / `forecast.metro` / `forecast.zip` are
+    // all server-derived but still funnel into innerHTML; escape every
+    // string as defense-in-depth so a malformed upstream response can't
+    // inject markup. `forecast.days.length` and `best.score.score` are
+    // numeric (Number()), safe.
+    //
+    // locationName ("Atlanta, Georgia") is the friendly geocoder output
+    // and is preferred over the metro slug ("atlanta-ga"); both fall
+    // back to the raw ZIP when neither is available. The city name
+    // gets a dedicated line ABOVE the verdict so users read "where"
+    // before "what" (Task 2).
+    var locLabel = forecast.locationName
+      ? forecast.locationName
+      : (forecast.metro ? forecast.metro : 'ZIP ' + forecast.zip);
     var sourceLabel = forecast.source === 'nws' ? 'National Weather Service' : 'Open-Meteo';
     hero.innerHTML =
+      '<p class="verdict-hero__location">Forecast for <strong>' + escapeHtml(locLabel) + '</strong> &middot; ZIP ' + escapeHtml(String(forecast.zip)) + '</p>' +
       '<div class="verdict-hero__label">Best day in the next ' + Number(days.length) + ' days</div>' +
       '<h2 class="verdict-hero__verdict">' + escapeHtml(verdict) + ' &mdash; ' + escapeHtml(formatDateLabel(best.date)) + '</h2>' +
       '<div class="verdict-hero__meta">' +
         '<span>Score <strong>' + Number(best.score.score) + '</strong>/100</span>' +
         '<span>High ' + fmtNum(best.day.tempHighF) + '&deg;F / Low ' + fmtNum(best.day.tempLowF) + '&deg;F</span>' +
-        '<span>' + escapeHtml(locLabel) + '</span>' +
       '</div>' +
       '<div class="verdict-hero__source">Source: ' + escapeHtml(sourceLabel) + '</div>';
   }
@@ -175,17 +196,42 @@
     return h12 + ' ' + period;
   }
 
-  function renderHourlyTable(hours) {
+  function renderHourlyTable(hours, ctx) {
     if (!Array.isArray(hours) || hours.length === 0) {
       return '<p class="day-card__hourly-empty">No hourly data for this day.</p>';
     }
+    // Per-hour score color-coding (Task 3). ctx carries the cut/cooker
+    // captured by renderForecast so the per-hour band tracks the user's
+    // current selection. WeatherScore.scoreHour is the client-side
+    // mirror added in weather-score-shared.js. Wrapped in try/catch
+    // because an unknown cut/cooker throws — falling back to a colorless
+    // row keeps the table legible if the global isn't loaded yet
+    // (defensive; the script-load order in site-footer-smoke.html
+    // already guarantees it's present before this renderer runs).
+    var canScoreHours = ctx && ctx.cut && ctx.cooker &&
+      typeof globalThis !== 'undefined' && globalThis.WeatherScore &&
+      typeof globalThis.WeatherScore.scoreHour === 'function';
     // Numeric fields go through fmtNum so a null/undefined value (NWS
     // partial responses) renders as an em dash, never "NaN".
     var rows = '';
     for (var i = 0; i < hours.length; i++) {
       var h = hours[i];
+      var rowClass = '';
+      if (canScoreHours) {
+        try {
+          var hourScore = globalThis.WeatherScore.scoreHour({
+            cut: ctx.cut,
+            cooker: ctx.cooker,
+            hour: h,
+            confidence: ctx.confidence
+          });
+          rowClass = ' class="band-' + escapeHtml(hourScore.band) + '"';
+        } catch (_err) {
+          // Bad cut/cooker — drop the color wash, keep the row.
+        }
+      }
       rows +=
-        '<tr>' +
+        '<tr' + rowClass + '>' +
           '<th scope="row">' + escapeHtml(fmtHour(h.t)) + '</th>' +
           '<td>' + fmtNum(h.tempF) + '&deg;F</td>' +
           '<td>' + fmtNum(h.windMph) + '/' + fmtNum(h.gustMph) + '</td>' +
@@ -215,7 +261,7 @@
     );
   }
 
-  function renderDayCard(entry, isBest) {
+  function renderDayCard(entry, isBest, ctx) {
     var bandClass = 'band-' + entry.score.band;
     var article = document.createElement('article');
     article.className = 'day-card ' + bandClass + (isBest ? ' is-best' : '');
@@ -230,11 +276,15 @@
       reasonsHtml += '<li>' + escapeHtml(reasons[i]) + '</li>';
     }
 
+    // Score reads as "64/100 Yellow" — the /100 makes the scale
+    // explicit and the band label spells out the color verdict for
+    // users who can't easily perceive the background tint (Task 3).
     article.innerHTML =
       '<div class="day-card__date">' + escapeHtml(formatDateLabel(entry.date)) + '</div>' +
       '<div class="day-card__score">' +
         '<span class="day-card__score-num">' + Number(entry.score.score) + '</span>' +
-        '<span class="day-card__score-band">' + escapeHtml(entry.score.band) + '</span>' +
+        '<span class="day-card__score-suffix">/100</span>' +
+        '<span class="day-card__score-band">' + escapeHtml(bandLabel(entry.score.band)) + '</span>' +
       '</div>' +
       '<div class="day-card__temps">' + fmtNum(entry.day.tempHighF) + '&deg;F / ' + fmtNum(entry.day.tempLowF) + '&deg;F &middot; gust ' + fmtNum(entry.day.gustMphMax) + ' mph</div>' +
       '<ul class="day-card__reasons">' + reasonsHtml + '</ul>' +
@@ -255,20 +305,29 @@
     // forecast with 24h each would otherwise add ~170 rows up front.
     // The data-hourly-pending guard makes the fill idempotent so
     // toggling open/closed/open does no extra work.
+    //
+    // The hourly renderer needs cut/cooker to color each row by its
+    // computed score; pass the parent day's confidence so we don't
+    // over-weight a rough hour in a Day-6/low-confidence outlook.
     var details = article.querySelector('.day-card__hourly');
     var body = article.querySelector('.day-card__hourly-body');
+    var hourlyCtx = ctx ? {
+      cut: ctx.cut,
+      cooker: ctx.cooker,
+      confidence: entry.score.confidence
+    } : null;
     if (details && body) {
       details.addEventListener('toggle', function () {
         if (!details.open) return;
         if (body.getAttribute('data-hourly-pending') !== '1') return;
         body.removeAttribute('data-hourly-pending');
-        body.innerHTML = renderHourlyTable(entry.day.hourly);
+        body.innerHTML = renderHourlyTable(entry.day.hourly, hourlyCtx);
       });
     }
     return article;
   }
 
-  function renderDayCards(days) {
+  function renderDayCards(days, ctx) {
     var grid = $('dayCards');
     if (!grid) return;
     grid.innerHTML = '';
@@ -276,7 +335,7 @@
     var bestKey = bestDate ? bestDate.date : null;
     for (var j = 0; j < days.length; j++) {
       var entry = days[j];
-      grid.appendChild(renderDayCard(entry, entry.date === bestKey));
+      grid.appendChild(renderDayCard(entry, entry.date === bestKey, ctx));
     }
   }
 
@@ -340,7 +399,7 @@
       AFFILIATE_DISCLOSURE_HTML;
   }
 
-  function renderForecast(forecast) {
+  function renderForecast(forecast, ctx) {
     // Filter out malformed days (missing or bad ISO date) ONCE up
     // front, then use the filtered list for both the verdict hero
     // and the day cards. Filtering inside renderDayCards but not
@@ -352,7 +411,7 @@
     }
     setStatus('', false);
     renderVerdictHero(forecast, clean);
-    renderDayCards(clean);
+    renderDayCards(clean, ctx);
     renderAffiliateCard(forecast.recommendation);
   }
 
@@ -381,7 +440,14 @@
   // previous in-flight request before starting a new one. Without
   // this, a slow first response can land AFTER the second and
   // overwrite the DOM with stale day cards.
+  //
+  // The `inflightCtrl === ctrl` identity check doesn't work when
+  // AbortController is unavailable (both ctrl values are `null`, and
+  // null === null), so we also bump a request sequence counter and
+  // compare against `latestRequestSeq` — that's the actual ownership
+  // signal in the AbortController-missing fallback.
   var inflightCtrl = null;
+  var latestRequestSeq = 0;
 
   function loadForecast(opts) {
     var zip = opts.zip || '';
@@ -395,6 +461,7 @@
     }
     var ctrl = typeof AbortController === 'function' ? new AbortController() : null;
     inflightCtrl = ctrl;
+    var mySeq = ++latestRequestSeq;
     var timeoutId = null;
     if (ctrl) {
       timeoutId = setTimeout(function () { ctrl.abort(); }, 12000);
@@ -421,6 +488,14 @@
         return body;
       });
     }).then(function (forecast) {
+      // Drop superseded responses BEFORE any side effects (localStorage
+      // write, input field update, render). A late geo-IP response
+      // from a previous loadForecast() must not pollute pitmaster_zip
+      // with a stale ZIP after the user moved on to a new request.
+      // The sequence guard is the authoritative ownership check; the
+      // controller-identity check is kept as defense-in-depth on the
+      // AbortController-present path.
+      if (mySeq !== latestRequestSeq || inflightCtrl !== ctrl) return;
       if (!forecast || !Array.isArray(forecast.days) || forecast.days.length === 0) {
         throw { status: 502, body: { error: 'weather_unavailable' } };
       }
@@ -434,10 +509,10 @@
         var input = $('zipInput');
         if (input && !input.value) input.value = forecast.zip;
       }
-      // Only commit a render if this fetch is still the active one.
-      // A newer request may have already aborted us during a rapid
-      // cut/cooker change; in that case the newer call owns the DOM.
-      if (inflightCtrl === ctrl) renderForecast(forecast);
+      // Pass the cut/cooker that produced this forecast so the per-hour
+      // color-coding inside the day cards stays in sync with the
+      // request (not with a newer pending one).
+      renderForecast(forecast, { cut: cut, cooker: cooker });
     }).catch(function (err) {
       // Always clear the pending 12s timer on the failure path so a
       // superseded fetch doesn't leak a no-op abort up to 12 seconds
@@ -447,8 +522,9 @@
       // surfacing a stale 503 (or AbortError, or timeout) on top of a
       // newer successful render would tell the user the page failed
       // when in fact it just succeeded with newer parameters. The
-      // active request is the only one that owns #swStatus.
-      if (inflightCtrl !== ctrl) return;
+      // sequence guard distinguishes the active request from a
+      // superseded one even when AbortController is unavailable.
+      if (mySeq !== latestRequestSeq) return;
       if (err && err.name === 'AbortError') {
         setStatus('The forecast request timed out. Check your connection and try again.', true);
         return;
@@ -471,9 +547,14 @@
     if (zip && !isValidUSZip(zip)) {
       // Cancel any in-flight auto-load and wipe any prior render so the
       // user doesn't see the validation error stacked on top of a
-      // forecast for a different zip. Drop inflightCtrl to null AFTER
-      // aborting so the in-flight catch path also sees `inflightCtrl
-      // !== ctrl` and stays silent.
+      // forecast for a different zip.
+      //
+      // Bump latestRequestSeq before aborting so the in-flight request's
+      // .catch handler sees a stale seq and stays silent — without this
+      // bump, an abort or timeout from the cancelled request would
+      // overwrite our "Enter a valid 5-digit US ZIP code." error with
+      // its own error message a moment later.
+      latestRequestSeq++;
       if (inflightCtrl) {
         try { inflightCtrl.abort(); } catch (e) { /* already settled */ }
         inflightCtrl = null;

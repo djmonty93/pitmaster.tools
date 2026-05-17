@@ -1,0 +1,33 @@
+<!-- Embed-this-calculator CTA + dialog. Injected once per tool page,
+     near the bottom (before site-footer). The dialog is hidden by
+     default and the CTA itself is hidden when ?embed=1 is in the URL
+     (the existing body.embed-mode CSS covers this).
+     The iframe snippet src + title are computed at runtime from the
+     current page URL + <title>, so this one partial works for every
+     calculator without per-page edits. -->
+<section class="embed-cta" aria-label="Embed this calculator">
+  <button type="button" class="embed-cta__btn" id="embedCtaOpenBtn">
+    <span aria-hidden="true">&lt;/&gt;</span>
+    Embed this calculator on your site
+  </button>
+</section>
+<dialog id="embedCtaDialog" class="embed-cta__dialog" aria-labelledby="embedCtaDialogTitle">
+  <form method="dialog" class="embed-cta__form">
+    <h2 id="embedCtaDialogTitle" class="embed-cta__title">Embed this calculator</h2>
+    <p class="embed-cta__desc">Paste this snippet into any HTML page or CMS rich-text block. The calculator loads in an iframe and the Pitmaster Tools header, footer, and ads are hidden in embed view.</p>
+    <label for="embedCtaSnippet" class="sw-sr-only">Embed snippet</label>
+    <textarea
+      id="embedCtaSnippet"
+      class="embed-cta__snippet"
+      rows="4"
+      readonly
+      spellcheck="false"
+      aria-describedby="embedCtaCopyStatus"
+    ></textarea>
+    <p id="embedCtaCopyStatus" class="embed-cta__status" role="status" aria-live="polite"></p>
+    <div class="embed-cta__actions">
+      <button type="button" class="embed-cta__copy" id="embedCtaCopyBtn">Copy snippet</button>
+      <button type="submit" class="embed-cta__close" id="embedCtaCloseBtn" value="close">Close</button>
+    </div>
+  </form>
+</dialog>

@@ -170,8 +170,35 @@
     return days.map(function (d) { return scoreDay({ cut: cut, cooker: cooker, day: d }); });
   }
 
+  // Per-hour score (Task 3 — color-coded hour rows). The TS scorer is
+  // day-shaped (tempHighF/tempLowF/rhMean/...) but hour rows carry
+  // single-point readings (tempF/rh/windMph/...). Map the hour to a
+  // "synthetic day" envelope so the same engine produces a comparable
+  // 0-100 + band tag. The cold/hot penalties degenerate cleanly when
+  // tempLow == tempHigh — that's exactly the right shape for "score
+  // this single hour" semantics.
+  //
+  // confidence falls through from the parent day so a hot rough hour
+  // inside a low-confidence Day 6 doesn't get over-weighted in the UI.
+  function scoreHour(input) {
+    var hour = input.hour;
+    var synthDay = {
+      tempHighF:     hour.tempF,
+      tempLowF:      hour.tempF,
+      rhMean:        hour.rh,
+      windMphMean:   hour.windMph,
+      gustMphMax:    hour.gustMph,
+      precipProbPct: hour.precipProbPct,
+      precipIn:      hour.precipIn,
+      dewPointMeanF: hour.dewPointF,
+      confidence:    input.confidence || 'high'
+    };
+    return scoreDay({ cut: input.cut, cooker: input.cooker, day: synthDay });
+  }
+
   root.WeatherScore = {
     scoreDay: scoreDay,
+    scoreHour: scoreHour,
     scoreForecast: scoreForecast,
     bandFor: bandFor,
     wetBulbF: wetBulbF,
