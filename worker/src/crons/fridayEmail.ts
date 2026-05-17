@@ -403,22 +403,11 @@ async function recordMissingUrlEvent(
   now: number
 ): Promise<void> {
   try {
-    // Only write if no prior 'error' event for this (region, sendDate, reason)
-    // already exists. This guards against repeated cron invocations in the
-    // same Friday window when the trigger URL is consistently absent.
-    const existing = await db
-      .prepare(
-        `SELECT 1 FROM events
-          WHERE kind = 'error'
-            AND json_extract(payload, '$.source') = 'friday_cron'
-            AND json_extract(payload, '$.region') = ?
-            AND json_extract(payload, '$.send_date') = ?
-            AND json_extract(payload, '$.reason') = 'no-trigger-url'
-          LIMIT 1`
-      )
-      .bind(region, sendDate)
-      .first();
-    if (existing) return;
+    // Atomically insert only if no prior 'error' event for this
+    // (region, sendDate, reason) already exists. This guards against
+    // concurrent cron invocations in the same Friday window when the
+    // trigger URL is consistently absent. A single compound statement
+    // is atomic in D1's underlying SQLite serialized writes.
     const payload = JSON.stringify({
       source: 'friday_cron',
       region,
@@ -426,8 +415,19 @@ async function recordMissingUrlEvent(
       reason: 'no-trigger-url',
     });
     await db
-      .prepare(`INSERT INTO events (kind, payload, created_at) VALUES (?, ?, ?)`)
-      .bind('error', payload, now)
+      .prepare(
+        `INSERT INTO events (kind, payload, created_at)
+          SELECT ?, ?, ?
+          WHERE NOT EXISTS (
+            SELECT 1 FROM events
+            WHERE kind = 'error'
+              AND json_extract(payload, '$.source') = 'friday_cron'
+              AND json_extract(payload, '$.region') = ?
+              AND json_extract(payload, '$.send_date') = ?
+              AND json_extract(payload, '$.reason') = 'no-trigger-url'
+          )`
+      )
+      .bind('error', payload, now, region, sendDate)
       .run();
   } catch (auditErr) {
     console.warn('friday_campaign_log: missing-url event insert failed', {
