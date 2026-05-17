@@ -164,14 +164,20 @@ export async function runMetrosPrewarm(env: Env, now: Date): Promise<MetrosSumma
     metros: tiles,
   };
 
-  // Write the aggregate with a TTL that matches the per-metro weather
+  // Write the aggregate with a TTL set to the per-metro weather
   // cache's stale window (30 h = 24 h fresh + 6 h stale-while-error
-  // grace from worker/src/lib/cache/weather.ts). Keeping both windows
-  // aligned means: if both crons silently miss a day, the aggregate
-  // and the per-metro entries fall out of cache at the same time, so
-  // the /api/metros handler's "yesterday-fallback" branch and the
-  // forecast handler's stale-while-error branch surface the same
-  // outage signal rather than disagreeing about staleness.
+  // grace from worker/src/lib/cache/weather.ts).
+  //
+  // Caveat: during EST the 04:00 UTC tick rewrites the PRIOR ET day's
+  // aggregate at 23:00 EST and resets its TTL to a fresh 30 h. The
+  // per-metro weather entries that aggregate was built from are
+  // about to expire (they were written ~25 h ago at the previous
+  // EST 05:00 UTC tick), so the aggregate can outlive its source
+  // data by ~24 h. That's harmless — the /api/metros yesterday
+  // fallback would prefer today's fresh aggregate anyway, and the
+  // per-metro forecast handler still has its own stale-while-error
+  // path. The 30 h ceiling is a defense against the aggregate
+  // lingering indefinitely if BOTH crons silently miss several days.
   await env.WEATHER_KV.put(aggregateKey(etDate), JSON.stringify(summary), {
     expirationTtl: 30 * 60 * 60,
   });
