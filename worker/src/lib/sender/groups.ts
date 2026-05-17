@@ -20,6 +20,7 @@
 // single round-trip.
 
 import type { SenderClient } from './client.js';
+import { SenderError } from './errors.js';
 import { REGIONS, type Region } from '../regions/index.js';
 
 /** Group every BBQ subscriber belongs to. */
@@ -62,8 +63,10 @@ export async function resolveGroupId(
   const groups = await client.listGroups();
   const match = groups.find((g) => g.name === name);
   if (!match) {
-    throw new Error(
-      `sender group "${name}" not found — create it in the Sender.net dashboard`
+    throw new SenderError(
+      'group_list',
+      'malformed',
+      `Sender group not found: ${name}. Configure it in the Sender dashboard (see docs/sender-setup.md §3).`
     );
   }
   // Hydrate every known name in one pass so the next caller for any

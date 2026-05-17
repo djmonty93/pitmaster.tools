@@ -7,6 +7,7 @@ import {
   removeBbqGroups,
   resolveGroupId,
 } from '../../../src/lib/sender/groups';
+import { SenderError } from '../../../src/lib/sender/errors';
 import type { Region } from '../../../src/lib/regions';
 
 interface FakeKVStore {
@@ -97,15 +98,24 @@ describe('resolveGroupId', () => {
     expect(listGroups).not.toHaveBeenCalled();
   });
 
-  it('throws when the group does not exist in Sender', async () => {
+  it('throws SenderError with kind=malformed (non-retryable) when group does not exist in Sender', async () => {
     listGroups.mockResolvedValue([{ id: '1', name: 'pitmaster_all' }]);
-    await expect(
-      resolveGroupId(
+    let thrown: unknown;
+    try {
+      await resolveGroupId(
         { listGroups } as unknown as Parameters<typeof resolveGroupId>[0],
         kv as unknown as KVNamespace,
         'pitmaster_pacific'
-      )
-    ).rejects.toThrow(/pitmaster_pacific/);
+      );
+    } catch (err) {
+      thrown = err;
+    }
+    expect(thrown).toBeInstanceOf(SenderError);
+    const se = thrown as SenderError;
+    expect(se.kind).toBe('malformed');
+    expect(se.requestKind).toBe('group_list');
+    expect(se.shouldRetry).toBe(false);
+    expect(se.message).toContain('pitmaster_pacific');
   });
 
   it('returns the matched id even when KV cache writes fail (best-effort hydration)', async () => {
