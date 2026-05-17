@@ -15,9 +15,9 @@
 
 import { z } from 'zod';
 import { verifyToken } from '../lib/auth/token.js';
-import { createMailerLiteClient } from '../lib/mailerlite/client.js';
-import { MailerLiteError } from '../lib/mailerlite/errors.js';
-import { enqueue } from '../lib/mailerlite/retry.js';
+import { createSenderClient } from '../lib/sender/client.js';
+import { SenderError } from '../lib/sender/errors.js';
+import { enqueue } from '../lib/sender/retry.js';
 import { summarizeError } from '../lib/redact.js';
 import { json, jsonError, type RouteContext } from '../router.js';
 
@@ -180,7 +180,7 @@ async function handlePatch(rc: RouteContext): Promise<Response> {
   };
   let mailerliteStatus: 'sent' | 'queued' = 'sent';
   {
-    const client = createMailerLiteClient({ apiKey: rc.env.MAILERLITE_API_KEY });
+    const client = createSenderClient({ apiToken: rc.env.SENDER_API_TOKEN });
     try {
       // updateSubscriberFields POSTs without `status: 'active'`, so an
       // unsubscribed user who edits prefs via a stale link is NOT
@@ -190,7 +190,7 @@ async function handlePatch(rc: RouteContext): Promise<Response> {
       // snapshot read and this call.
       await client.updateSubscriberFields(email, mailerliteFields);
     } catch (err) {
-      if (err instanceof MailerLiteError) {
+      if (err instanceof SenderError) {
         // Both retryable and non-retryable MailerLite failures enqueue
         // a retry. Retryable will replay until success/park; non-
         // retryable (missing field, revoked key) will replay once,
