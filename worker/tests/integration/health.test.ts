@@ -43,4 +43,10 @@ describe('worker entrypoint', () => {
     const res = await SELF.fetch('https://pitmaster.tools/api/health', { redirect: 'manual' });
     expect(res.status).toBe(200);
   });
+
+  it('plain-HTTP www→apex redirect upgrades scheme to https', async () => {
+    const res = await SELF.fetch('http://www.pitmaster.tools/x', { redirect: 'manual' });
+    expect(res.status).toBe(301);
+    expect(res.headers.get('location')).toBe('https://pitmaster.tools/x');
+  });
 });

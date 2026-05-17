@@ -97,6 +97,11 @@ const handler = {
       const url = new URL(request.url);
       if (url.hostname === 'www.pitmaster.tools') {
         url.hostname = 'pitmaster.tools';
+        // Force https on the Location so a plain-HTTP request to
+        // www.pitmaster.tools (rare past Cloudflare's automatic HTTPS
+        // upgrade + HSTS, but possible from a misconfigured client)
+        // doesn't 301 to http://pitmaster.tools.
+        url.protocol = 'https:';
         return new Response(null, {
           status: 301,
           headers: {
