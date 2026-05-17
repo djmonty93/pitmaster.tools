@@ -137,11 +137,14 @@ export async function drain(
   const nowFn = opts.now ?? Date.now;
   const now = nowFn();
   const batchSize = opts.batchSize ?? 25;
-  // 'digest_trigger', 'group_assign', 'group_remove', 'group_list',
-  // and 'field_update' are reserved in the schema but owned by other
-  // steps. Leave any such rows in the queue (do not select them) so
-  // the owning cron picks them up exactly once. Only subscribe and
-  // unsubscribe are drained here.
+  // The retry queue's request_kind column accepts only the three kinds
+  // the D1 schema's CHECK constraint allows: 'subscribe', 'unsubscribe',
+  // and 'digest_trigger'. The SenderError.requestKind enum is wider (it
+  // also includes 'group_assign', 'group_remove', 'group_list', and
+  // 'field_update' for error-classification purposes), but those values
+  // are never written to the retry table — they would fail the CHECK.
+  // Only 'subscribe' and 'unsubscribe' are drained here; 'digest_trigger'
+  // is reserved in the schema for future use.
   const rowsRes = await db
     .prepare(
       `SELECT id, request_kind, request_payload, idempotency_key, attempts,
