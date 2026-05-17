@@ -247,7 +247,7 @@ verified, and rolled back independently.
 - **Step 11 (#44).** Friday cron (F14) — portfolio-aware regional digest.
   `worker/src/crons/fridayEmail.ts` triggers per-region Sender.net
   automations at Fri 06:00 local in each anchor timezone; cron schedule
-  `0 10-13 * * 5` covers ET/CT/MT/PT windows in DST and is idempotent
+  `0 10-14 * * 5` covers five UTC windows (ET/CT/MT/PT DST + PT standard time) and is idempotent
   per `(region, send_date)` via the new `friday_campaign_log` table
   (migration `0005`). Sender.net custom fields gain the `bbq_` prefix
   so this account can host sibling sites (powersizing.com,
