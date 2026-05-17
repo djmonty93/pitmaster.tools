@@ -19,7 +19,7 @@ import { handleUnsubscribe } from './handlers/unsubscribe.js';
 import { createSenderClient } from './lib/sender/client.js';
 import { drain } from './lib/sender/retry.js';
 import { buildSentryOptions } from './lib/observability/sentryOptions.js';
-import { compileRoutes, dispatch, jsonError } from './router.js';
+import { compileRoutes, dispatch, json, jsonError } from './router.js';
 
 export interface Env {
   ASSETS: Fetcher;
@@ -77,7 +77,10 @@ const routes = compileRoutes([
 ]);
 
 function handleHealth(): Response {
-  return Response.json({
+  // Use json() so SECURITY_HEADERS (no-store, no-referrer, nosniff) land
+  // on /api/health like every other API response. Bare Response.json
+  // bypasses that helper.
+  return json(200, {
     status: 'ok',
     version: 'step-7',
     time: new Date().toISOString(),
@@ -87,6 +90,21 @@ function handleHealth(): Response {
 const handler = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     try {
+      // www → apex canonicalization. With both pitmaster.tools and
+      // www.pitmaster.tools bound to this Worker (wrangler.jsonc routes),
+      // a 301 keeps a single canonical host and prevents duplicate-content
+      // SEO splits. Method and full path/query are preserved.
+      const url = new URL(request.url);
+      if (url.hostname === 'www.pitmaster.tools') {
+        url.hostname = 'pitmaster.tools';
+        return new Response(null, {
+          status: 301,
+          headers: {
+            Location: url.toString(),
+            'Cache-Control': 'public, max-age=86400',
+          },
+        });
+      }
       const matched = await dispatch(routes, request, env, ctx);
       if (matched) return matched;
       return env.ASSETS.fetch(request);

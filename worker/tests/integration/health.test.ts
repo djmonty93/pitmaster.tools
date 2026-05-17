@@ -14,6 +14,13 @@ describe('worker entrypoint', () => {
     expect(body.version).toBe('step-7');
   });
 
+  it('GET /api/health emits SECURITY_HEADERS', async () => {
+    const res = await SELF.fetch('https://example.com/api/health');
+    expect(res.headers.get('cache-control')).toBe('no-store');
+    expect(res.headers.get('referrer-policy')).toBe('no-referrer');
+    expect(res.headers.get('x-content-type-options')).toBe('nosniff');
+  });
+
   it('non-API path is not served by the /api/health handler', async () => {
     // Whatever ASSETS returns (200 with a 404 page, 404 with empty body, or
     // 404 with a 404 page depending on whether dist/404.html exists when the
@@ -22,5 +29,18 @@ describe('worker entrypoint', () => {
     const res = await SELF.fetch('https://example.com/nope.html');
     const body = await res.text();
     expect(body).not.toContain('"status":"ok"');
+  });
+
+  it('www.pitmaster.tools is 301-redirected to pitmaster.tools, path + query preserved', async () => {
+    const res = await SELF.fetch('https://www.pitmaster.tools/tools/brisket-calculator?utm=x', {
+      redirect: 'manual',
+    });
+    expect(res.status).toBe(301);
+    expect(res.headers.get('location')).toBe('https://pitmaster.tools/tools/brisket-calculator?utm=x');
+  });
+
+  it('apex pitmaster.tools is not redirected', async () => {
+    const res = await SELF.fetch('https://pitmaster.tools/api/health', { redirect: 'manual' });
+    expect(res.status).toBe(200);
   });
 });
