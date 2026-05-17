@@ -124,3 +124,30 @@ describe('SenderClient.getSubscriberByEmail', () => {
     } finally { stub.restore(); }
   });
 });
+
+describe('SenderClient.updateSubscriberFields', () => {
+  it('PATCHes /v2/subscribers/{email} with wrapped field keys', async () => {
+    const stub = installFetchStub([
+      { match: 'api.sender.net/v2/subscribers/a%40b.co', respond: () => jsonResponse(200, { data: { id: 'sub_1' } }) },
+    ]);
+    try {
+      const client = createSenderClient({ apiToken: 'tok' });
+      const res = await client.updateSubscriberFields('a@b.co', { bbq_cut_pref: 'pork-butt' });
+      expect(res).toEqual({ id: 'sub_1' });
+      const call = stub.calls[0];
+      expect(call.method).toBe('PATCH');
+      expect(call.body).toMatchObject({ fields: { '{$bbq_cut_pref}': 'pork-butt' } });
+      expect(call.body).not.toHaveProperty('status');
+    } finally { stub.restore(); }
+  });
+
+  it('returns null on 404', async () => {
+    const stub = installFetchStub([
+      { match: 'api.sender.net/v2/subscribers/missing', respond: () => jsonResponse(404, {}) },
+    ]);
+    try {
+      const client = createSenderClient({ apiToken: 'tok' });
+      expect(await client.updateSubscriberFields('missing@x.co', {})).toBeNull();
+    } finally { stub.restore(); }
+  });
+});

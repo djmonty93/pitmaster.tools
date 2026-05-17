@@ -136,7 +136,25 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
       }
       return { id: data.id, email: data.email, status: data.status };
     },
-    async updateSubscriberFields() { throw new Error('not implemented'); },
+    async updateSubscriberFields(email, fields) {
+      try {
+        const parsed = await request(
+          'field_update',
+          'PATCH',
+          `/subscribers/${encodeURIComponent(email)}`,
+          { fields: wrapFieldKeys(fields) }
+        ) as { data?: { id?: string } } | null;
+        if (!parsed?.data?.id) {
+          throw new SenderError('field_update', 'malformed', 'missing data.id');
+        }
+        return { id: parsed.data.id };
+      } catch (err) {
+        if (err instanceof SenderError && err.kind === 'http_4xx' && err.status === 404) {
+          return null;
+        }
+        throw err;
+      }
+    },
     async getSubscriberByEmail(email) {
       try {
         const parsed = await request(
