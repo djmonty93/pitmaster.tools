@@ -124,7 +124,7 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
     async subscribe(input) {
       const body = {
         email: input.email,
-        fields: wrapFieldKeys(input.fields as Record<string, unknown>),
+        fields: wrapFieldKeys(input.fields as unknown as Record<string, unknown>),
         trigger_automation: false,
       };
       const parsed = await request('subscribe', 'POST', '/subscribers', body) as

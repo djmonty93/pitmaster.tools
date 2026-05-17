@@ -23,7 +23,7 @@ describe('SenderClient.subscribe', () => {
       const res = await client.subscribe({ email: 'a@b.co', fields: baseFields });
       expect(res).toEqual({ id: 'sub_abc', email: 'a@b.co', status: 'active' });
       expect(stub.calls).toHaveLength(1);
-      const call = stub.calls[0];
+      const call = stub.calls[0]!;
       expect(call.method).toBe('POST');
       expect(call.headers['authorization']).toBe('Bearer tok_xyz');
       expect(call.headers['content-type']).toContain('application/json');
@@ -95,7 +95,7 @@ describe('SenderClient.subscribe', () => {
     try {
       const client = createSenderClient({ apiToken: 'tok' });
       await client.subscribe({ email: 'a@b.co', fields: baseFields });
-      expect(stub.calls[0].headers['idempotency-key']).toBeUndefined();
+      expect(stub.calls[0]!.headers['idempotency-key']).toBeUndefined();
     } finally {
       stub.restore();
     }
@@ -110,7 +110,7 @@ describe('SenderClient.getSubscriberByEmail', () => {
     try {
       const client = createSenderClient({ apiToken: 'tok' });
       expect(await client.getSubscriberByEmail('a@b.co')).toEqual({ id: 'sub_1' });
-      expect(stub.calls[0].method).toBe('GET');
+      expect(stub.calls[0]!.method).toBe('GET');
     } finally { stub.restore(); }
   });
 
@@ -134,7 +134,7 @@ describe('SenderClient.updateSubscriberFields', () => {
       const client = createSenderClient({ apiToken: 'tok' });
       const res = await client.updateSubscriberFields('a@b.co', { bbq_cut_pref: 'pork-butt' });
       expect(res).toEqual({ id: 'sub_1' });
-      const call = stub.calls[0];
+      const call = stub.calls[0]!;
       expect(call.method).toBe('PATCH');
       expect(call.body).toMatchObject({ fields: { '{$bbq_cut_pref}': 'pork-butt' } });
       expect(call.body).not.toHaveProperty('status');
@@ -160,7 +160,7 @@ describe('SenderClient.unsubscribe', () => {
     try {
       const client = createSenderClient({ apiToken: 'tok' });
       await client.unsubscribe({ email: 'a@b.co' });
-      const call = stub.calls[0];
+      const call = stub.calls[0]!;
       expect(call.method).toBe('PATCH');
       expect(call.body).toMatchObject({ status: 'unsubscribed' });
     } finally { stub.restore(); }
@@ -206,7 +206,7 @@ describe('SenderClient.assignGroup', () => {
     try {
       const client = createSenderClient({ apiToken: 'tok' });
       await client.assignGroup('sub_1', 'g1');
-      const call = stub.calls[0];
+      const call = stub.calls[0]!;
       expect(call.method).toBe('POST');
       expect(call.body).toEqual({ subscribers: ['sub_1'] });
     } finally { stub.restore(); }
@@ -236,7 +236,7 @@ describe('SenderClient.triggerWeeklyDigest', () => {
         triggerUrl: 'https://api.sender.net/v2/automations/trigger/se-token',
         idempotencyTag: 'southeast:2026-05-15',
       });
-      const call = stub.calls[0];
+      const call = stub.calls[0]!;
       expect(call.method).toBe('POST');
       expect(call.body).toEqual({ tag: 'southeast:2026-05-15' });
       expect(call.headers['authorization']).toBe('Bearer tok');
