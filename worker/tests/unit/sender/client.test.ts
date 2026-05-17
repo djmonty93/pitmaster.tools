@@ -101,3 +101,26 @@ describe('SenderClient.subscribe', () => {
     }
   });
 });
+
+describe('SenderClient.getSubscriberByEmail', () => {
+  it('returns { id } on 200', async () => {
+    const stub = installFetchStub([
+      { match: 'api.sender.net/v2/subscribers/a%40b.co', respond: () => jsonResponse(200, { data: { id: 'sub_1' } }) },
+    ]);
+    try {
+      const client = createSenderClient({ apiToken: 'tok' });
+      expect(await client.getSubscriberByEmail('a@b.co')).toEqual({ id: 'sub_1' });
+      expect(stub.calls[0].method).toBe('GET');
+    } finally { stub.restore(); }
+  });
+
+  it('returns null on 404', async () => {
+    const stub = installFetchStub([
+      { match: 'api.sender.net/v2/subscribers/missing', respond: () => jsonResponse(404, { message: 'not found' }) },
+    ]);
+    try {
+      const client = createSenderClient({ apiToken: 'tok' });
+      expect(await client.getSubscriberByEmail('missing@x.co')).toBeNull();
+    } finally { stub.restore(); }
+  });
+});

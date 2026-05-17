@@ -137,7 +137,24 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
       return { id: data.id, email: data.email, status: data.status };
     },
     async updateSubscriberFields() { throw new Error('not implemented'); },
-    async getSubscriberByEmail() { throw new Error('not implemented'); },
+    async getSubscriberByEmail(email) {
+      try {
+        const parsed = await request(
+          'subscribe',
+          'GET',
+          `/subscribers/${encodeURIComponent(email)}`
+        ) as { data?: { id?: string } } | null;
+        if (!parsed?.data?.id) {
+          throw new SenderError('subscribe', 'malformed', 'missing data.id');
+        }
+        return { id: parsed.data.id };
+      } catch (err) {
+        if (err instanceof SenderError && err.kind === 'http_4xx' && err.status === 404) {
+          return null;
+        }
+        throw err;
+      }
+    },
     async unsubscribe() { throw new Error('not implemented'); },
     async listGroups() { throw new Error('not implemented'); },
     async assignGroup() { throw new Error('not implemented'); },
