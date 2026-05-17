@@ -1,11 +1,13 @@
 // F14 — Friday digest cron (portfolio-aware regional version).
 //
-// Schedule: `0 10-13 * * 5` — fires hourly Friday UTC across the four
-// anchor-timezone Friday-6am windows in DST:
-//   10:00 UTC  →  06:00 America/New_York   (northeast + southeast)
-//   11:00 UTC  →  06:00 America/Chicago    (midwest + south_central)
-//   12:00 UTC  →  06:00 America/Denver     (mountain)
-//   13:00 UTC  →  06:00 America/Los_Angeles (pacific)
+// Schedule: `0 10-14 * * 5` — fires hourly Friday UTC across the five
+// anchor-timezone Friday-6am windows (covers Pacific standard time at
+// 14:00 UTC plus four DST windows):
+//   10:00 UTC  →  06:00 America/New_York   (northeast + southeast, DST)
+//   11:00 UTC  →  06:00 America/Chicago    (midwest + south_central, DST)
+//   12:00 UTC  →  06:00 America/Denver     (mountain, DST)
+//   13:00 UTC  →  06:00 America/Los_Angeles (pacific, DST)
+//   14:00 UTC  →  06:00 America/Los_Angeles (pacific, standard time)
 //
 // Per tick, for each region whose anchor timezone says it is now
 // Friday 06:00 local, this cron:
