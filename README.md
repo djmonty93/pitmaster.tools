@@ -117,9 +117,13 @@ verified, and rolled back independently.
     `subscribers`, queues onto `sender_retry` on transient
     failures (D1 row still created so the cron can resume), surfaces
     4xx for caller-side rejections.
-  - `POST /api/unsubscribe` — flips Sender.net status, sets
-    `subscribers.unsubscribed_at`. 5xx queues; 4xx treated as soft
-    success.
+  - `POST /api/unsubscribe` — removes the subscriber from
+    `pitmaster_all` and each `pitmaster_<region>` group (group-scoped;
+    account status remains `active` so portfolio sites can still email).
+    Verifies request via HMAC token. On retryable Sender.net failures
+    (5xx, timeout, network errors, 408/425/429), enqueues on `sender_retry`
+    for the drain cron to replay; response includes `status: 'queued'`.
+    Sets D1 `subscribers.unsubscribed_at` to the current epoch ms.
   - `GET /api/preferences?email=` and `PATCH /api/preferences` —
     read/update cut and cooker. GET deliberately omits `zip` so a
     leaked URL doesn't dump the subscriber's home zip; PATCH builds
