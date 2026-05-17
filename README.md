@@ -85,8 +85,7 @@ verified, and rolled back independently.
 - **Step 6.** Sender.net client + retry queue under
   `worker/src/lib/sender/`. `client.ts` calls the Sender API
   (`POST /v2/subscribers`, `PATCH /v2/subscribers/{email}`) with Bearer
-  auth, an `Idempotency-Key` whose value is a SHA-256 hash of the
-  lowercased email (PII never leaks into proxy logs or D1), and
+  auth and
   `AbortController` timeouts. Failures are mapped to `SenderError`
   with a `shouldRetry` rule (5xx, timeout, network, and 408/425/429
   retry; 400/422 + malformed body do not). Every error message is run
