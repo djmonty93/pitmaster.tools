@@ -1,6 +1,6 @@
 # Portfolio Email Architecture
 
-This document describes the multi-site MailerLite architecture used by
+This document describes the multi-site Sender.net architecture used by
 pitmaster.tools and intended to scale to additional calculator sites
 (powersizing.com, overlanding.tools, compost.tools, ...). The
 architecture is portfolio-aware from day one: pitmaster.tools is just
@@ -36,7 +36,7 @@ choice.
 ### Subscriber fields: `<site_prefix>_<field>`
 
 Custom field keys carry the same prefix to prevent collisions when
-multiple sites share a MailerLite account.
+multiple sites share a Sender.net account.
 
 | Field name           | Type   | Purpose                                          |
 | -------------------- | ------ | ------------------------------------------------ |
@@ -50,22 +50,22 @@ multiple sites share a MailerLite account.
 | `bbq_signup_date`    | date   | YYYY-MM-DD of first subscribe                    |
 
 D1 columns stay unprefixed (`region`, `cut`, `cooker`, ...). The
-MailerLite client adapter (`worker/src/lib/mailerlite/tags.ts`) maps
+Sender.net client adapter (`worker/src/lib/sender/tags.ts`) maps
 between the two shapes.
 
 ## Adding a new site to the portfolio
 
 1. Pick a `<site_prefix>` (one underscore-delimited word, e.g. `powersizing`).
-2. Create the corresponding groups in the MailerLite dashboard:
+2. Create the corresponding groups in the Sender dashboard:
    - `<site>_all`
    - One `<site>_<scope>` group per segment (region, calculator type, ...)
 3. Create the per-site custom fields prefixed `<site>_*`.
 4. Configure the per-site sending domain (see "Sending domains" below).
-5. Provision `<SITE>_AUTOMATION_<SEGMENT>_ID` env vars for the cron.
+5. Provision `<SITE>_DIGEST_TRIGGER_URL_<SEGMENT>` env vars for the cron.
 6. Add a regions/groups module in the new site's worker that mirrors
-   `worker/src/lib/regions/` and `worker/src/lib/mailerlite/groups.ts`.
-7. The MailerLite group-id KV cache key prefix is shared
-   (`mailerlite_group_id:<group_name>`) — no per-site collision because
+   `worker/src/lib/regions/` and `worker/src/lib/sender/groups.ts`.
+7. The Sender.net group-id KV cache key prefix is shared
+   (`sender_group_id:<group_name>`) — no per-site collision because
    group names already carry the site prefix.
 
 ## Per-region campaign delivery
@@ -73,8 +73,12 @@ between the two shapes.
 The Friday digest cron (`worker/src/crons/fridayEmail.ts`) fires
 hourly Fri UTC across the four anchor-timezone Friday-6am windows. For
 each region whose anchor tz says it is now Fri 06:00 local, the cron
-triggers that region's MailerLite automation via
-`POST /api/automations/<id>/run`.
+triggers that region's Sender.net automation via its per-region trigger
+URL (secret `SENDER_DIGEST_TRIGGER_URL_<REGION>`). Sender.net has no
+automation-run-by-id endpoint; instead each automation exposes an "API
+Call Is Made" trigger URL that the cron POSTs to directly. The URL is
+provisioned per region in the worker secrets and a missing secret
+dark-disables that region without erroring the cron.
 
 | Region          | Anchor timezone        | UTC trigger (DST) | UTC trigger (standard time) |
 | --------------- | ---------------------- | ----------------- | --------------------------- |
@@ -95,18 +99,18 @@ unsubscribe in a BBQ email removes the subscriber from `pitmaster_all`
 and every `pitmaster_<region>` group, but leaves any
 `powersizing_*` / `overlanding_*` memberships intact.
 
-Configuration is split between MailerLite dashboard (the campaign's
-"Unsubscribe footer" must use the per-group unsubscribe URL — see
-`docs/mailerlite-setup.md`) and our `removeBbqGroups()` helper.
+Configuration is split between the Sender dashboard (the automation's
+unsubscribe footer must use the per-group unsubscribe URL — see
+`docs/sender-setup.md`) and our `removeBbqGroups()` helper.
 
 ## Shared sender reputation
 
-A single MailerLite account holding multiple sites shares sender
+A single Sender.net account holding multiple sites shares sender
 reputation across all sites. A spammy campaign on one site can ding
 deliverability for sibling sites. Mitigations:
 
 - Each site uses its own subdomain (`mail.pitmaster.tools`,
-  `mail.powersizing.com`, ...). MailerLite signs DKIM per subdomain.
+  `mail.powersizing.com`, ...). Sender signs DKIM per subdomain.
 - Campaign cadence per site is operator-controlled (one weekly digest
   per region, no transactional spam).
 - Unsubscribe is one-click via the per-group footer.
@@ -130,9 +134,9 @@ prepare:
 Once two or more sites are live, useful queries the operator may want:
 
 - "How many subscribers overlap between pitmaster_all and
-  powersizing_all" — query MailerLite API for `subscribers?filter[groups]=A,B`.
+  powersizing_all" — query Sender API for subscribers filtered by both groups.
 - "Which region has the highest brisket preference rate" — query D1
   `SELECT region, COUNT(*) FROM subscribers WHERE cut = 'brisket-packer'
    GROUP BY region`.
 - "How many subscribers got the Friday digest in mountain last week" —
-  query MailerLite automation reports filtered by `pitmaster_mountain`.
+  query Sender automation reports filtered by `pitmaster_mountain`.
