@@ -4,7 +4,7 @@
  * _src/smoke-weather/<slug>.html before build.js runs.
  *
  * The 50 metros embedded here must stay in lockstep with
- * worker/migrations/0002_metros_seed.sql. scripts/generate-metros.test.js
+ * worker/migrations/0001_init.sql (metros table). scripts/generate-metros.test.js
  * parses both and asserts parity.
  *
  * Stale-page guard: every emitted file carries GENERATED_MARKER as the first
@@ -77,7 +77,7 @@ const METROS = [
   { slug: 'tulsa-ok',             name: 'Tulsa',             state: 'OK', zip: '74103', latitude: 36.1540, longitude: -95.9928,  timezone: 'America/Chicago',      population: 1015000 },
 ];
 
-// State -> region (must match worker/migrations/0004_add_region.sql).
+// State -> region (must match REGION_BY_STATE in worker/migrations/0001_init.sql).
 // MO sits in south_central on purpose: KC BBQ aligns with TX/OK/AR.
 const REGION_BY_STATE = {
   CT: 'northeast', MA: 'northeast', ME: 'northeast', NH: 'northeast',
