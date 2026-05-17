@@ -20,7 +20,7 @@ beforeAll(async () => {
 let stub: FetchStub | null = null;
 
 beforeEach(async () => {
-  await KV.delete('geo:v2:30303');
+  await KV.delete('geo:v3:30303');
   // Wipe today's forecast cache buckets that could carry over from
   // earlier tests in the same file.
   const today = new Date().toISOString().slice(0, 10);

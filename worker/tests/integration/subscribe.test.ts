@@ -510,7 +510,7 @@ describe('POST /api/subscribe', () => {
     stub.restore();
 
     // Now resubscribe with a non-seeded zip while the geocoder is down.
-    await KV.delete('geo:v2:99999');
+    await KV.delete('geo:v3:99999');
     stub = installFetchStub([
       { match: 'geocoding-api.open-meteo.com', respond: () => jsonResponse(503, {}) },
       { match: '/groups/', respond: groupAssignOk },
@@ -631,7 +631,7 @@ describe('POST /api/subscribe', () => {
       { match: '/groups/', respond: groupAssignOk },
       { match: 'api.sender.net', respond: senderOk },
     ]);
-    await KV.delete('geo:v2:99999');
+    await KV.delete('geo:v3:99999');
     const res = await handleSubscribe(
       buildContext(buildReq({ email: 'geo@example.com', zip: '99999', cooker: 'kettle' }))
     );

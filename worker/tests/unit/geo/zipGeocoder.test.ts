@@ -18,8 +18,8 @@ beforeAll(async () => {
 
 let stub: FetchStub | null = null;
 beforeEach(async () => {
-  await KV.delete('geo:v2:30303');
-  await KV.delete('geo:v2:99999');
+  await KV.delete('geo:v3:30303');
+  await KV.delete('geo:v3:99999');
 });
 afterEach(() => {
   stub?.restore();
@@ -61,6 +61,7 @@ describe('resolveZip', () => {
                 name: 'Bakersfield',
                 admin1: 'California',
                 country_code: 'US',
+                postcodes: ['99999'],
               },
             ],
           }),
@@ -73,6 +74,131 @@ describe('resolveZip', () => {
     // admin1 "California" → "CA" via the state-name→code map.
     expect(loc.state).toBe('CA');
     expect(stub.calls).toHaveLength(1);
+    // Verify the upstream query uses Open-Meteo's `name` param, not the
+    // unsupported `postal_code` that returned HTTP 400 before this fix.
+    const requestedUrl = String(stub.calls[0]?.url ?? '');
+    expect(requestedUrl).toContain('name=99999');
+    expect(requestedUrl).not.toContain('postal_code=');
+  });
+
+  it('prefers a result whose postcodes array contains the requested zip', async () => {
+    stub = installFetchStub([
+      {
+        match: 'geocoding-api.open-meteo.com',
+        respond: () =>
+          jsonResponse(200, {
+            results: [
+              {
+                latitude: 1,
+                longitude: 1,
+                timezone: 'America/New_York',
+                name: 'Wrong Match',
+                admin1: 'New York',
+                country_code: 'US',
+                postcodes: ['11111'],
+              },
+              {
+                latitude: 35.5,
+                longitude: -119.0,
+                timezone: 'America/Los_Angeles',
+                name: 'Bakersfield',
+                admin1: 'California',
+                country_code: 'US',
+                postcodes: ['99999'],
+              },
+            ],
+          }),
+      },
+    ]);
+    const loc = await resolveZip(KV, DB, '99999');
+    expect(loc.name).toBe('Bakersfield, California');
+    expect(loc.state).toBe('CA');
+  });
+
+  it('falls back to the only result when it has no postcodes field (small-town case)', async () => {
+    stub = installFetchStub([
+      {
+        match: 'geocoding-api.open-meteo.com',
+        respond: () =>
+          jsonResponse(200, {
+            results: [
+              {
+                latitude: 35.5,
+                longitude: -119.0,
+                timezone: 'America/Los_Angeles',
+                name: 'Tiny Town',
+                admin1: 'California',
+                country_code: 'US',
+                // no postcodes field at all
+              },
+            ],
+          }),
+      },
+    ]);
+    const loc = await resolveZip(KV, DB, '99999');
+    expect(loc.name).toBe('Tiny Town, California');
+    expect(loc.state).toBe('CA');
+  });
+
+  it('rejects a single result whose postcodes is present but does not include the requested zip', async () => {
+    stub = installFetchStub([
+      {
+        match: 'geocoding-api.open-meteo.com',
+        respond: () =>
+          jsonResponse(200, {
+            results: [
+              {
+                latitude: 1,
+                longitude: 1,
+                timezone: 'America/New_York',
+                name: 'Fuzzy Single',
+                admin1: 'New York',
+                country_code: 'US',
+                postcodes: ['11111'],
+              },
+            ],
+          }),
+      },
+    ]);
+    await expect(resolveZip(KV, DB, '99999')).rejects.toMatchObject({
+      name: 'GeocoderError',
+      kind: 'not_found',
+    });
+  });
+
+  it('rejects a multi-result response where none echo the requested zip', async () => {
+    stub = installFetchStub([
+      {
+        match: 'geocoding-api.open-meteo.com',
+        respond: () =>
+          jsonResponse(200, {
+            results: [
+              {
+                latitude: 1,
+                longitude: 1,
+                timezone: 'America/New_York',
+                name: 'Fuzzy A',
+                admin1: 'New York',
+                country_code: 'US',
+                postcodes: ['11111'],
+              },
+              {
+                latitude: 2,
+                longitude: 2,
+                timezone: 'America/New_York',
+                name: 'Fuzzy B',
+                admin1: 'New York',
+                country_code: 'US',
+                postcodes: ['22222'],
+              },
+            ],
+          }),
+      },
+    ]);
+    await expect(resolveZip(KV, DB, '99999')).rejects.toMatchObject({
+      name: 'GeocoderError',
+      kind: 'not_found',
+    });
   });
 
   it('returns state=null when admin1 is missing or unrecognized', async () => {
@@ -87,6 +213,7 @@ describe('resolveZip', () => {
                 longitude: 0,
                 timezone: 'UTC',
                 name: 'Unknown',
+                postcodes: ['99999'],
                 // No admin1
               },
             ],
@@ -111,6 +238,7 @@ describe('resolveZip', () => {
                 name: 'Bakersfield',
                 admin1: 'California',
                 country_code: 'US',
+                postcodes: ['99999'],
               },
             ],
           }),
