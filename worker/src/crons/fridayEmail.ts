@@ -154,6 +154,13 @@ export async function runFridayCron(
       };
       opts.onResult?.(o);
       outcomes.push(o);
+      // Write a warning event so operators can observe the missing-URL
+      // condition from the events table. Guarded by a friday_campaign_log
+      // check so repeated cron invocations within the same Friday window
+      // only write the event once per (region, sendDate).
+      const sendDate = slot.date;
+      const nowMs = nowFn().getTime();
+      await recordMissingUrlEvent(env.SMOKE_DB, region, sendDate, nowMs);
       continue;
     }
     const outcome = await processRegion(env, client, region, triggerUrl, slot.date, nowFn);
@@ -374,6 +381,56 @@ async function recordEvent(
       .run();
   } catch (auditErr) {
     console.warn('friday_campaign_log: events insert failed', {
+      region,
+      send_date: sendDate,
+      error: summarizeError(auditErr),
+    });
+  }
+}
+
+/**
+ * Records a warning event when a region is in-window but has no
+ * SENDER_DIGEST_TRIGGER_URL_<REGION> secret configured. Idempotent:
+ * uses INSERT OR IGNORE (via a partial unique index on kind+send_date+region
+ * encoded in the payload) — instead, checks the events table for a prior
+ * no-trigger-url event for this (region, sendDate) so repeated cron
+ * invocations within the same Friday window write at most one event row.
+ */
+async function recordMissingUrlEvent(
+  db: D1Database,
+  region: Region,
+  sendDate: string,
+  now: number
+): Promise<void> {
+  try {
+    // Only write if no prior 'error' event for this (region, sendDate, reason)
+    // already exists. This guards against repeated cron invocations in the
+    // same Friday window when the trigger URL is consistently absent.
+    const existing = await db
+      .prepare(
+        `SELECT 1 FROM events
+          WHERE kind = 'error'
+            AND json_extract(payload, '$.source') = 'friday_cron'
+            AND json_extract(payload, '$.region') = ?
+            AND json_extract(payload, '$.send_date') = ?
+            AND json_extract(payload, '$.reason') = 'no-trigger-url'
+          LIMIT 1`
+      )
+      .bind(region, sendDate)
+      .first();
+    if (existing) return;
+    const payload = JSON.stringify({
+      source: 'friday_cron',
+      region,
+      send_date: sendDate,
+      reason: 'no-trigger-url',
+    });
+    await db
+      .prepare(`INSERT INTO events (kind, payload, created_at) VALUES (?, ?, ?)`)
+      .bind('error', payload, now)
+      .run();
+  } catch (auditErr) {
+    console.warn('friday_campaign_log: missing-url event insert failed', {
       region,
       send_date: sendDate,
       error: summarizeError(auditErr),

@@ -185,6 +185,44 @@ describe('runFridayCron — region-by-region', () => {
     expect((ne as Extract<FridayCronOutcome, { status: 'skipped' }>).reason).toBe('no-trigger-url');
   });
 
+  it('writes an events row when a region is skipped for missing trigger URL', async () => {
+    await runFridayCron(
+      buildEnv({ SENDER_DIGEST_TRIGGER_URL_NORTHEAST: undefined }),
+      FRIDAY_6AM_ET,
+      { client: fakeClient() }
+    );
+    const rows = await DB.prepare(
+      `SELECT kind, payload FROM events WHERE kind = 'error'`
+    ).all<{ kind: string; payload: string }>();
+    expect(rows.results).toHaveLength(1);
+    const parsed = JSON.parse(rows.results[0]!.payload) as {
+      source: string;
+      region: string;
+      send_date: string;
+      reason: string;
+    };
+    expect(parsed.source).toBe('friday_cron');
+    expect(parsed.region).toBe('northeast');
+    expect(parsed.send_date).toBe('2026-05-15');
+    expect(parsed.reason).toBe('no-trigger-url');
+  });
+
+  it('does NOT write a second events row on a repeated cron invocation for the same missing-URL region+date', async () => {
+    const envWithoutNe = buildEnv({ SENDER_DIGEST_TRIGGER_URL_NORTHEAST: undefined });
+    // First invocation: should write one error event row for northeast.
+    await runFridayCron(envWithoutNe, FRIDAY_6AM_ET, { client: fakeClient() });
+    // Second invocation (same Friday window, northeast still missing URL).
+    // Southeast is already 'sent' so it won't fire again; northeast still
+    // has no trigger URL so the missing-url path runs again — but the
+    // idempotency check on the events table must suppress the second insert.
+    await runFridayCron(envWithoutNe, FRIDAY_6AM_ET, { client: fakeClient() });
+    const rows = await DB.prepare(
+      `SELECT kind FROM events WHERE kind = 'error'`
+    ).all<{ kind: string }>();
+    // Only ONE error event despite two invocations — idempotent write.
+    expect(rows.results).toHaveLength(1);
+  });
+
   it('records a sent event in the events table on success', async () => {
     await runFridayCron(buildEnv(), FRIDAY_6AM_ET, { client: fakeClient() });
     const rows = await DB.prepare(`SELECT kind, payload FROM events ORDER BY id`).all<{
