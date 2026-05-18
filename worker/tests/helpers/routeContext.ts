@@ -18,6 +18,12 @@ const fakeCtx = {
 export interface TestEnvOverrides {
   SENDER_API_TOKEN?: string;
   SUBSCRIBER_TOKEN_SECRET?: string;
+  /**
+   * Stub for env.ASSETS.fetch — used by the SSR handler tests so they
+   * can drive a known template HTML through HTMLRewriter without
+   * requiring the dist/ output to exist on disk inside Miniflare.
+   */
+  ASSETS?: Fetcher;
 }
 
 /** Default value used across handler tests when no override is provided. */
@@ -33,7 +39,7 @@ export function buildContext(
   // synthesize them here.
   const e = env as unknown as Partial<Env>;
   const composedEnv: Env = {
-    ASSETS: e.ASSETS as Fetcher,
+    ASSETS: overrides.ASSETS ?? (e.ASSETS as Fetcher),
     WEATHER_KV: e.WEATHER_KV as KVNamespace,
     SMOKE_DB: e.SMOKE_DB as D1Database,
     SENDER_API_TOKEN: overrides.SENDER_API_TOKEN ?? 'sender_test_token',
