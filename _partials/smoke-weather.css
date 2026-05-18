@@ -487,9 +487,13 @@ a.affiliate-card__product:focus-visible {
   color: var(--text-muted);
 }
 /* Pending state — the build-time skeleton class. Replaced by band-*
-   once /api/metros lands. Keeps the tile readable without a wash. */
+   once /api/metros lands. Keeps the tile readable without a wash.
+   Reserves the 4px left-border space (transparent) the band-* rules
+   below claim, so the tile doesn't shift sideways when the API
+   resolves and the band class swaps in. */
 .metro-tile.band-pending {
   background: var(--surface-strong);
+  border-left: 4px solid transparent;
 }
 /* Band tints for the chooser tiles, mirroring the day-card palette
    so a "yellow" tile here matches the yellow day card on the per-
