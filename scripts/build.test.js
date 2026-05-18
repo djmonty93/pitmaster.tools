@@ -432,18 +432,21 @@ test('resolvePermalink — rejects empty permalink', () => {
   );
 });
 
-// Guard against the "literal </script> in inlined script source"
-// footgun: when build.js wraps a `_partials/*.js` partial in <script>…
-// </script>, any close-script sequence inside the source terminates
-// the wrapping tag early. Browsers then drop everything after the
-// premature close into HTML parser mode and the rest of the partial
-// silently never executes. Pin the invariant here so a comment or
-// string literal containing the sequence fails CI loudly.
-test('no _partials/*.js source contains a literal close-script sequence', () => {
+// Guard against the inline-script close-tag footgun. When build.js
+// inlines a `_partials/*.js` partial inside a script wrapper, any
+// occurrence of the close-tag sequence in the source terminates the
+// wrapper early — browsers then drop everything after that point into
+// HTML parser mode and the remainder of the partial silently never
+// executes. Pin the invariant here so a stray comment or string
+// literal containing the sequence fails CI loudly.
+//
+// Every textual reference to the forbidden literal in this test
+// itself is split via concatenation so neither the comment block nor
+// the assertion strings trip the same guard if the scan ever widens
+// to cover this file.
+test('no _partials/*.js source contains a literal script-close sequence', () => {
   const fs = require('node:fs');
   const path = require('node:path');
-  // Built via concatenation so this test source itself doesn't trip
-  // the pattern it's searching for.
   const pattern = '<' + '/script>';
   const dir = '_partials';
   const files = fs
@@ -454,8 +457,8 @@ test('no _partials/*.js source contains a literal close-script sequence', () => 
     assert.equal(
       body.includes(pattern),
       false,
-      `_partials/${f} contains a literal close-script sequence — ` +
-        'when build.js wraps the file in <script> tags the sequence will ' +
+      `_partials/${f} contains a literal script-close sequence — ` +
+        'when build.js wraps the file in script tags the sequence will ' +
         'terminate the wrapper early and silently break the inlined JS. ' +
         'Rewrite the offending comment or split the literal.'
     );
