@@ -19,8 +19,8 @@
 // client script's /api/metros fetch repairs them.
 
 import { aggregateKey, type MetroTileSummary, type MetrosSummary } from '../crons/metrosPrewarm.js';
-import { etDayBucket, previousEtDate } from '../lib/cache/weather.js';
-import { escapeHtml } from '../lib/render/smokeWeather.js';
+import { etDayBucket, nextEtMidnightMs, previousEtDate } from '../lib/cache/weather.js';
+import { escapeHtml, jsonForScriptTag } from '../lib/render/smokeWeather.js';
 import { type RouteContext } from '../router.js';
 
 function bandLabel(b: MetroTileSummary['todayBand']): string {
@@ -41,10 +41,28 @@ function formatShortDate(iso: string): string {
 
 export async function handleMetrosChooser(rc: RouteContext): Promise<Response> {
   const etDate = etDayBucket();
-  let summary = await rc.env.WEATHER_KV.get<MetrosSummary>(aggregateKey(etDate), 'json');
-  if (!summary) {
-    const yesterday = previousEtDate(etDate);
-    summary = await rc.env.WEATHER_KV.get<MetrosSummary>(aggregateKey(yesterday), 'json');
+  // Track whether the data we're rendering is today's or yesterday's
+  // fallback. The two states need different cache + hydration
+  // semantics: today gets the full TTL + a hydrated marker; yesterday
+  // gets a short TTL and NO marker so the client repairs itself via
+  // /api/metros on the next visit (otherwise a CDN-cached fallback
+  // page could outlive today's cron run, locking out fresh data).
+  let summary: MetrosSummary | null = null;
+  let isFallback = false;
+  try {
+    summary = await rc.env.WEATHER_KV.get<MetrosSummary>(aggregateKey(etDate), 'json');
+    if (!summary) {
+      const yesterday = previousEtDate(etDate);
+      summary = await rc.env.WEATHER_KV.get<MetrosSummary>(aggregateKey(yesterday), 'json');
+      isFallback = summary !== null;
+    }
+  } catch (err) {
+    // KV availability blip — fall through to ASSETS and let the
+    // client's /api/metros fetch repair the skeleton. Without this
+    // try/catch the Worker would emit a 500 for an outage we can
+    // gracefully degrade through.
+    console.warn('metrosChooser: KV read failed', { err: String(err) });
+    summary = null;
   }
 
   const upstream = await rc.env.ASSETS.fetch(rc.request);
@@ -86,14 +104,18 @@ export async function handleMetrosChooser(rc: RouteContext): Promise<Response> {
         el.setInnerContent(inner, { html: true });
       },
     })
-    // A small JSON island tells the client script the page is already
-    // hydrated, so it can skip its /api/metros fetch. The filter
-    // input still works the same regardless.
+    // Drop the "hydrated" marker ONLY when serving today's data.
+    // On the yesterday-fallback path we want the client to still call
+    // /api/metros — the API endpoint may return today's data even
+    // when our KV read missed (CDN edge ↔ KV propagation timing) and
+    // a short-lived CDN entry for this fallback shouldn't outlive
+    // the gap.
     .on('main', {
       element(el) {
+        if (isFallback) return;
         el.append(
           '<script id="metros-hydrated" type="application/json">' +
-            JSON.stringify({ etDate: summary!.etDate, generatedAt: summary!.generatedAt }) +
+            jsonForScriptTag({ etDate: summary!.etDate, generatedAt: summary!.generatedAt }) +
           '</script>',
           { html: true }
         );
@@ -102,7 +124,14 @@ export async function handleMetrosChooser(rc: RouteContext): Promise<Response> {
 
   const transformed = rewriter.transform(upstream);
   const headers = new Headers(transformed.headers);
-  headers.set('Cache-Control', 'public, max-age=300, s-maxage=43200');
+  // Cap CDN TTL at the next ET midnight rollover for the happy path,
+  // and use a 60s ceiling on the yesterday-fallback path so a stale
+  // version doesn't outlive today's cron landing.
+  const nowMs = Date.now();
+  const sMaxAge = isFallback
+    ? 60
+    : Math.max(60, Math.floor((nextEtMidnightMs(nowMs) - nowMs) / 1000));
+  headers.set('Cache-Control', 'public, max-age=300, s-maxage=' + sMaxAge);
   return new Response(transformed.body, {
     status: transformed.status,
     statusText: transformed.statusText,

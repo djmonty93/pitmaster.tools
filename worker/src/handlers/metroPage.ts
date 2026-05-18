@@ -27,8 +27,9 @@
 // path under /smoke-weather/<slug>.
 
 import { recommend } from '../lib/affiliate/rules.js';
-import { fetchForecastCached } from '../lib/cache/weather.js';
+import { fetchForecastCached, nextEtMidnightMs } from '../lib/cache/weather.js';
 import {
+  jsonForScriptTag,
   renderAffiliateCardInner,
   renderDayCards,
   renderVerdictHeroInner,
@@ -127,7 +128,7 @@ export async function handleMetroPage(rc: RouteContext): Promise<Response> {
   const rec = best ? recommend({ cut: DEFAULT_CUT, cooker: DEFAULT_COOKER, band: best.score.band }) : null;
   const affHtml = rec ? renderAffiliateCardInner(rec) : null;
 
-  const ssrContext = JSON.stringify({
+  const ssrContext = jsonForScriptTag({
     cut: DEFAULT_CUT,
     cooker: DEFAULT_COOKER,
     zip: metro.zip,
@@ -181,10 +182,13 @@ export async function handleMetroPage(rc: RouteContext): Promise<Response> {
 
   const transformed = rewriter.transform(upstream);
   const headers = new Headers(transformed.headers);
-  // Pre-warmed daily data — let CDN cache aggressively. Browser
-  // revalidates more frequently so a deploy / cron rewrite propagates
-  // within minutes.
-  headers.set('Cache-Control', 'public, max-age=300, s-maxage=43200');
+  // Cap the CDN cache at the next ET midnight rollover, when the new
+  // day's KV data lands and the SSR'd forecast becomes stale. Without
+  // the cap a fixed 12h s-maxage served at 23:59 ET would keep
+  // yesterday's forecast live until ~11:59 the next day.
+  const nowMs = Date.now();
+  const sMaxAge = Math.max(60, Math.floor((nextEtMidnightMs(nowMs) - nowMs) / 1000));
+  headers.set('Cache-Control', 'public, max-age=300, s-maxage=' + sMaxAge);
   return new Response(transformed.body, {
     status: transformed.status,
     statusText: transformed.statusText,

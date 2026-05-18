@@ -99,7 +99,7 @@ describe('handleMetrosChooser', () => {
     expect(res.headers.get('Cache-Control')).toMatch(/public.*s-maxage=\d+/);
   });
 
-  it('falls back to yesterday aggregate when today is missing', async () => {
+  it('falls back to yesterday aggregate when today is missing — without the hydrated marker', async () => {
     const yesterday = previousEtDate(SAMPLE_SUMMARY.etDate);
     await KV.put(aggregateKey(yesterday), JSON.stringify({ ...SAMPLE_SUMMARY, etDate: yesterday }));
     const rc = buildContext(
@@ -109,11 +109,17 @@ describe('handleMetrosChooser', () => {
     );
     const res = await handleMetrosChooser(rc);
     const body = await res.text();
-    // Yesterday's data still hydrates the tiles.
+    // Yesterday's data still hydrates the tiles so the page shows
+    // real numbers instead of skeletons.
     expect(body).toMatch(/<strong>68\/100<\/strong>/);
-    // JSON island reports yesterday's etDate (signaling to the client
-    // that hydration happened, even though it's a day old).
-    expect(body).toMatch(new RegExp('"etDate":"' + yesterday + '"'));
+    // But the `metros-hydrated` marker is omitted so the client
+    // script still calls /api/metros — the API endpoint may have
+    // today's data even when our KV read missed (eventual-consistency
+    // gap), and the client repair is the safety net.
+    expect(body).not.toMatch(/metros-hydrated/);
+    // Short Cache-Control so the fallback doesn't outlive today's
+    // cron landing.
+    expect(res.headers.get('Cache-Control')).toBe('public, max-age=300, s-maxage=60');
   });
 
   it('passes the template through unchanged when KV is cold', async () => {

@@ -1,15 +1,25 @@
 // Server-side HTML render helpers for the smoke-weather feature.
 //
-// These functions produce the same markup the client-side renderers in
-// _partials/smoke-weather-app.js produce, so the Worker can SSR the
-// verdict hero / day cards / affiliate slot / hourly tables into the
-// metro pages and the chooser tiles, and the client can later swap in
+// These functions produce markup that visually matches the client-side
+// renderers in _partials/smoke-weather-app.js so the Worker can SSR
+// the verdict hero / day cards / affiliate slot / hourly tables into
+// the metro pages and the chooser tiles, and the client can swap in
 // fresh re-renders (on cut/cooker change) with no visual jump.
 //
-// The two implementations MUST stay byte-identical for the same input.
-// Any change here needs a matching change in _partials/smoke-weather-app.js
-// (and vice versa). The unit tests in tests/unit/render/smokeWeather.test.ts
-// pin a fixed-fixture rendering so a one-sided drift fails CI.
+// Parity scope (intentional differences):
+//   - The verdict hero, day card outer markup, affiliate card, and
+//     score/band text MUST stay byte-identical to the client's output
+//     so client re-renders match the initial paint pixel-for-pixel.
+//     The unit tests in tests/unit/render/smokeWeather.test.ts pin
+//     these against a fixed fixture so a one-sided drift fails CI.
+//   - The hourly-table shape DIFFERS by design: SSR bakes the full
+//     <table> into each day card (so JS-disabled clients see the data
+//     and the per-hour band tints are present from first paint),
+//     while the client emits `<div data-hourly-pending="1">` and
+//     lazy-loads on toggle. When the client re-renders a day card it
+//     re-emits the lazy shape, replacing the SSR'd baked table — no
+//     visual regression because the contents look the same when
+//     opened.
 
 import { scoreDay, scoreHour } from '@shared/scoring';
 import type {
@@ -50,6 +60,19 @@ const HTML_ESCAPE_MAP: Record<string, string> = {
 
 export function escapeHtml(s: string): string {
   return String(s).replace(HTML_ESCAPE_RE, (c) => HTML_ESCAPE_MAP[c]!);
+}
+
+/**
+ * Serialize a value as JSON safe for embedding inside an inline
+ * `<script type="application/json">` tag. `JSON.stringify` alone does
+ * not escape `</script>` (since `/` and `<` are valid JSON chars),
+ * which means a future field carrying that substring would close the
+ * outer script element and create an XSS surface. Replace the `<`
+ * with its Unicode escape — semantically identical JSON, but no
+ * possibility of confusing the HTML parser.
+ */
+export function jsonForScriptTag(value: unknown): string {
+  return JSON.stringify(value).replace(/</g, '\\u003c');
 }
 
 // Mirrors fmtNum() in _partials/smoke-weather-app.js: render as rounded
