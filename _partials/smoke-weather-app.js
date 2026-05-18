@@ -39,12 +39,15 @@
   // here doesn't pollute the saved value the generic tool reads.
   var isMetroPage = false;
 
-  // Read the SSR context the Worker injects (`<script id="ssr-context"
-  // type="application/json">{cut,cooker,zip,...}</script>`) on
-  // server-rendered metro pages. When present and its cut/cooker
-  // match the user's current selects, the DOM is already populated
-  // with that exact forecast and init() can skip the redundant
-  // /api/forecast call.
+  // Read the SSR context the Worker injects on server-rendered
+  // metro pages — a hidden JSON island the metroPage handler appends
+  // to <main> with shape {cut, cooker, zip, slug, source,
+  // generatedAt}. When present and its cut/cooker match the user's
+  // current selects, the DOM is already populated with that exact
+  // forecast and init() can skip the redundant /api/forecast call.
+  // (Comment intentionally avoids writing the literal close-script
+  // sequence here — including one in an inlined script source
+  // closes the wrapping tag prematurely at build time.)
   function readSsrContext() {
     try {
       var el = document.getElementById('ssr-context');

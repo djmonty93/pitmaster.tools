@@ -431,3 +431,33 @@ test('resolvePermalink — rejects empty permalink', () => {
     /must not be empty/
   );
 });
+
+// Guard against the "literal </script> in inlined script source"
+// footgun: when build.js wraps a `_partials/*.js` partial in <script>…
+// </script>, any close-script sequence inside the source terminates
+// the wrapping tag early. Browsers then drop everything after the
+// premature close into HTML parser mode and the rest of the partial
+// silently never executes. Pin the invariant here so a comment or
+// string literal containing the sequence fails CI loudly.
+test('no _partials/*.js source contains a literal close-script sequence', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  // Built via concatenation so this test source itself doesn't trip
+  // the pattern it's searching for.
+  const pattern = '<' + '/script>';
+  const dir = '_partials';
+  const files = fs
+    .readdirSync(dir)
+    .filter((f) => f.endsWith('.js'));
+  for (const f of files) {
+    const body = fs.readFileSync(path.join(dir, f), 'utf8');
+    assert.equal(
+      body.includes(pattern),
+      false,
+      `_partials/${f} contains a literal close-script sequence — ` +
+        'when build.js wraps the file in <script> tags the sequence will ' +
+        'terminate the wrapper early and silently break the inlined JS. ' +
+        'Rewrite the offending comment or split the literal.'
+    );
+  }
+});
