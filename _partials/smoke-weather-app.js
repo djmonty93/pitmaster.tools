@@ -30,6 +30,32 @@
   var COOKER_KEY = 'pitmaster_cooker';
   var CUT_KEY    = 'pitmaster_cut';
 
+  // Set in init() based on whether the page HTML shipped with a
+  // pre-filled ZIP value. The per-metro page templates emit
+  // `value="<zip>"`; the generic /smoke-weather/ tool ships an empty
+  // input. On metro pages we (a) don't let pitmaster_zip from
+  // localStorage override the page's metro and (b) don't write
+  // pitmaster_zip on submit so a curiosity-lookup with a foreign zip
+  // here doesn't pollute the saved value the generic tool reads.
+  var isMetroPage = false;
+
+  // Read the SSR context the Worker injects on server-rendered
+  // metro pages — a hidden JSON island the metroPage handler appends
+  // to <main> with shape {cut, cooker, zip, slug, source,
+  // generatedAt}. When present and its cut/cooker match the user's
+  // current selects, the DOM is already populated with that exact
+  // forecast and init() can skip the redundant /api/forecast call.
+  // (Comment intentionally avoids writing the literal close-script
+  // sequence here — including one in an inlined script source
+  // closes the wrapping tag prematurely at build time.)
+  function readSsrContext() {
+    try {
+      var el = document.getElementById('ssr-context');
+      if (!el) return null;
+      return JSON.parse(el.textContent || 'null');
+    } catch (_e) { return null; }
+  }
+
   var DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   var MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -454,7 +480,14 @@
     var cut = opts.cut;
     var cooker = opts.cooker;
     setStatus('Loading forecast…', false);
-    clearResults();
+    // opts.clearFirst defaults true. The SSR-aware init path passes
+    // false so a fresh fetch doesn't first wipe the server-rendered
+    // day cards and leave the user staring at an empty grid until the
+    // request resolves; the renderer overwrites them atomically on
+    // success, and on failure the SSR'd content stays visible above
+    // the error status — both correct outcomes. User-triggered
+    // submits keep the default so the loading state is unambiguous.
+    if (opts.clearFirst !== false) clearResults();
 
     if (inflightCtrl) {
       try { inflightCtrl.abort(); } catch (e) { /* already settled */ }
@@ -563,7 +596,11 @@
       setStatus('Enter a valid 5-digit US ZIP code.', true);
       return;
     }
-    if (zip) setStored(ZIP_KEY, zip);
+    // Save ZIP on the generic /smoke-weather/ tool only. On a metro
+    // page (where the user typed a different ZIP to peek at another
+    // location's weather), don't pollute the saved value the generic
+    // tool reads next visit.
+    if (zip && !isMetroPage) setStored(ZIP_KEY, zip);
     if (cut) setStored(CUT_KEY, cut);
     if (cooker) setStored(COOKER_KEY, cooker);
     loadForecast({ zip: zip, cut: cut, cooker: cooker });
@@ -576,12 +613,24 @@
     var cutEl = $('cutSelect');
     var cookerEl = $('cookerSelect');
 
-    var savedZip    = getStored(ZIP_KEY);
+    // Read the HTML-shipped ZIP value BEFORE doing anything else so a
+    // later localStorage override doesn't trick the metro-page check.
+    var pageDefaultZip = zipEl ? zipEl.value.trim() : '';
+    isMetroPage = pageDefaultZip.length > 0;
+
     var savedCut    = getStored(CUT_KEY);
     var savedCooker = getStored(COOKER_KEY);
-    if (zipEl    && savedZip    && isValidUSZip(savedZip)) zipEl.value = savedZip;
     if (cutEl    && savedCut)                              cutEl.value = savedCut;
     if (cookerEl && savedCooker)                           cookerEl.value = savedCooker;
+
+    // Only apply the saved ZIP on the generic /smoke-weather/ tool —
+    // the per-metro pages have their ZIP baked into the HTML and the
+    // user's last-typed value would override it incorrectly (clicking
+    // an NYC tile while having 29910 saved would show Bluffton).
+    if (!isMetroPage) {
+      var savedZip = getStored(ZIP_KEY);
+      if (zipEl && savedZip && isValidUSZip(savedZip)) zipEl.value = savedZip;
+    }
 
     form.addEventListener('submit', handleSubmit);
 
@@ -592,14 +641,28 @@
       el.addEventListener('change', function () { handleSubmit(); });
     });
 
+    var initialZip = zipEl && zipEl.value.trim();
+    var initialCut = cutEl ? cutEl.value : '';
+    var initialCooker = cookerEl ? cookerEl.value : '';
+
+    // SSR fast path: if the Worker server-rendered this page at the
+    // user's current cut/cooker, skip the redundant initial fetch.
+    // The DOM is already populated and the daily-baked KV data is
+    // identical to what /api/forecast would return for the same
+    // (zip, cut, cooker, ET date) tuple.
+    var ssr = readSsrContext();
+    if (ssr && ssr.cut === initialCut && ssr.cooker === initialCooker && ssr.zip === initialZip) {
+      return;
+    }
+
     // Auto-load on first paint:
     //   - If we have a stored or pre-filled valid zip, fetch with it.
     //   - If we don't, send the request without a zip and let the
     //     worker fill from request.cf.postalCode (geo-IP, F10).
-    var initialZip = zipEl && zipEl.value.trim();
-    var initialCut = cutEl ? cutEl.value : '';
-    var initialCooker = cookerEl ? cookerEl.value : '';
-    loadForecast({ zip: initialZip, cut: initialCut, cooker: initialCooker });
+    // Don't clearResults first — any SSR'd day cards stay visible
+    // until the fetch resolves, then get replaced atomically by
+    // renderForecast (no flash of empty grid).
+    loadForecast({ zip: initialZip, cut: initialCut, cooker: initialCooker, clearFirst: false });
   }
 
   if (document.readyState === 'loading') {

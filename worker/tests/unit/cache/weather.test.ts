@@ -1,6 +1,6 @@
 import { env } from 'cloudflare:test';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { cacheKey, etDayBucket, fetchForecastCached, previousEtDate } from '../../../src/lib/cache/weather';
+import { cacheKey, etDayBucket, fetchForecastCached, nextEtMidnightMs, previousEtDate } from '../../../src/lib/cache/weather';
 import { openMeteoTwoDays } from '../weather/fixtures';
 
 interface Env {
@@ -99,6 +99,50 @@ describe('previousEtDate', () => {
     expect(() => previousEtDate('not-a-date')).toThrow(/expected YYYY-MM-DD/);
     expect(() => previousEtDate('2026-5-15')).toThrow(/expected YYYY-MM-DD/);
     expect(() => previousEtDate('')).toThrow(/expected YYYY-MM-DD/);
+  });
+});
+
+describe('nextEtMidnightMs', () => {
+  it('returns the next midnight ET when called during EDT', () => {
+    // 2026-05-15 18:00 UTC = 14:00 EDT. Next midnight ET = 2026-05-16
+    // 00:00 EDT = 2026-05-16 04:00 UTC.
+    const now = Date.UTC(2026, 4, 15, 18, 0);
+    expect(nextEtMidnightMs(now)).toBe(Date.UTC(2026, 4, 16, 4, 0));
+  });
+
+  it('returns the next midnight ET when called during EST', () => {
+    // 2026-12-15 18:00 UTC = 13:00 EST. Next midnight ET = 2026-12-16
+    // 00:00 EST = 2026-12-16 05:00 UTC.
+    const now = Date.UTC(2026, 11, 15, 18, 0);
+    expect(nextEtMidnightMs(now)).toBe(Date.UTC(2026, 11, 16, 5, 0));
+  });
+
+  it('rolls to the next day when called just before midnight ET', () => {
+    // 2026-05-16 03:55 UTC = 23:55 EDT on the 15th. Next ET midnight
+    // is 2026-05-16 04:00 UTC (5 minutes ahead).
+    const now = Date.UTC(2026, 4, 16, 3, 55);
+    expect(nextEtMidnightMs(now)).toBe(Date.UTC(2026, 4, 16, 4, 0));
+  });
+
+  it('rolls again immediately after the ET midnight tick', () => {
+    // 2026-05-16 04:00 UTC = 00:00 EDT on the 16th. Next ET midnight
+    // is 2026-05-17 04:00 UTC.
+    const now = Date.UTC(2026, 4, 16, 4, 0);
+    expect(nextEtMidnightMs(now)).toBe(Date.UTC(2026, 4, 17, 4, 0));
+  });
+
+  it('handles the spring-forward day correctly', () => {
+    // 2026-03-08 06:30 UTC = 01:30 EST on the 8th (pre-jump). The next
+    // ET midnight is 2026-03-09 00:00 EDT = 04:00 UTC on the 9th.
+    const now = Date.UTC(2026, 2, 8, 6, 30);
+    expect(nextEtMidnightMs(now)).toBe(Date.UTC(2026, 2, 9, 4, 0));
+  });
+
+  it('handles the fall-back day correctly', () => {
+    // 2026-11-01 12:00 UTC = 07:00 EST. The next ET midnight is
+    // 2026-11-02 00:00 EST = 05:00 UTC on the 2nd.
+    const now = Date.UTC(2026, 10, 1, 12, 0);
+    expect(nextEtMidnightMs(now)).toBe(Date.UTC(2026, 10, 2, 5, 0));
   });
 });
 

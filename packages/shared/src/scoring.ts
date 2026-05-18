@@ -18,6 +18,7 @@ import type {
   ScoreInput,
   ScoreResult,
   WeatherDay,
+  WeatherHour,
 } from './types.js';
 
 // Cookers vary in wind sensitivity: an offset's fire box gets blown out
@@ -166,6 +167,45 @@ export function scoreForecast(
   days: readonly WeatherDay[]
 ): ScoreResult[] {
   return days.map((day) => scoreDay({ cut, cooker, day }));
+}
+
+/**
+ * Per-hour score (used by the SSR renderer in worker/src/lib/render/
+ * and the client mirror in _partials/weather-score-shared.js for the
+ * hour-by-hour color-coding).
+ *
+ * The scoring engine is day-shaped (tempHighF/tempLowF/rhMean/...) but
+ * hour rows carry single-point readings (tempF/rh/windMph/...). Map
+ * the hour to a "synthetic day" envelope so the same engine produces
+ * a comparable 0-100 + band tag. The cold/hot penalties degenerate
+ * cleanly when tempLow == tempHigh — that's exactly the right shape
+ * for "score this single hour" semantics.
+ */
+export interface ScoreHourInput {
+  cut: Cut;
+  cooker: Cooker;
+  hour: WeatherHour;
+  /** Confidence inherited from the parent day. */
+  confidence?: ScoreResult['confidence'];
+}
+
+export function scoreHour(input: ScoreHourInput): ScoreResult {
+  const { cut, cooker, hour } = input;
+  const synthDay: WeatherDay = {
+    date: typeof hour.t === 'string' ? hour.t.slice(0, 10) : '',
+    tempHighF:     hour.tempF,
+    tempLowF:      hour.tempF,
+    rhMean:        hour.rh,
+    windMphMean:   hour.windMph,
+    gustMphMax:    hour.gustMph,
+    precipProbPct: hour.precipProbPct,
+    precipIn:      hour.precipIn,
+    dewPointMeanF: hour.dewPointF,
+    hourly:        [],
+    source:        'open-meteo',
+    confidence:    input.confidence ?? 'high',
+  };
+  return scoreDay({ cut, cooker, day: synthDay });
 }
 
 function bandFor(score: number): ScoreResult['band'] {

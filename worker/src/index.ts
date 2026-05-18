@@ -14,6 +14,8 @@ import { runWeeklyArticleCron } from './crons/weeklyArticle.js';
 import { handleArticles } from './handlers/articles.js';
 import { handleForecast } from './handlers/forecast.js';
 import { handleMetros } from './handlers/metros.js';
+import { handleMetroPage } from './handlers/metroPage.js';
+import { handleMetrosChooser } from './handlers/metrosChooser.js';
 import { handlePreferences } from './handlers/preferences.js';
 import { handleStatus } from './handlers/status.js';
 import { handleSubscribe } from './handlers/subscribe.js';
@@ -77,6 +79,14 @@ const routes = compileRoutes([
   { method: 'PATCH', pattern: '/api/preferences', handler: handlePreferences },
   { method: 'GET', pattern: '/api/status', handler: handleStatus },
   { method: 'GET', pattern: '/articles/:slug', handler: handleArticles },
+  // SSR routes: per-metro forecast page + 50-metros chooser. The
+  // /metros/ route is the chooser; everything else under
+  // /smoke-weather/<slug> hits handleMetroPage, which either renders
+  // the metro's pre-warmed forecast or falls through to ASSETS for
+  // hand-authored pages (methodology, faq, disclosures, status) and
+  // unknown slugs.
+  { method: 'GET', pattern: '/smoke-weather/metros/', handler: handleMetrosChooser },
+  { method: 'GET', pattern: '/smoke-weather/:slug', handler: handleMetroPage },
 ]);
 
 function handleHealth(): Response {

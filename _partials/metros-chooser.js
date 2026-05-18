@@ -129,6 +129,13 @@
 
   function init() {
     initFilter();
+    // SSR fast path: when the Worker handler `handleMetrosChooser` has
+    // already filled in every tile's score + best day from the daily
+    // KV aggregate, it drops a `<script id="metros-hydrated">` marker
+    // into <main>. Skip the redundant /api/metros fetch in that case
+    // (the response data would match the SSR exactly), but keep the
+    // filter input wired up.
+    if (document.getElementById('metros-hydrated')) return;
     loadAndPopulate();
   }
 

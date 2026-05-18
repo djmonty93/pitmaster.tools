@@ -67,6 +67,35 @@ export function etDayBucket(now: number = Date.now()): string {
 // 23:30 EST on March 7 — entirely missing March 8). Parsing the
 // YYYY-MM-DD bucket as UTC midnight and subtracting one calendar day
 // avoids the local-time discontinuity.
+// Return the millisecond UTC instant when the *next* ET calendar day
+// rolls over (i.e., the moment `etDayBucket()` will return a new
+// value). Used by SSR cache-headers so the CDN s-maxage caps at the
+// next rollover instead of stranding stale forecasts across midnight
+// ET. Computes by checking the candidate UTC instants where midnight
+// ET can land — 04:00 UTC during EDT and 05:00 UTC during EST — for
+// today and tomorrow's UTC dates, then picks the earliest one that
+// resolves to a different ET day. O(4) and pure.
+export function nextEtMidnightMs(nowMs: number = Date.now()): number {
+  const today = etDayBucket(nowMs);
+  const nowD = new Date(nowMs);
+  const candidates: number[] = [];
+  for (const offsetDays of [0, 1]) {
+    for (const utcHour of [4, 5]) {
+      candidates.push(
+        Date.UTC(nowD.getUTCFullYear(), nowD.getUTCMonth(), nowD.getUTCDate() + offsetDays, utcHour, 0, 0)
+      );
+    }
+  }
+  candidates.sort((a, b) => a - b);
+  for (const c of candidates) {
+    if (c <= nowMs) continue;
+    if (etDayBucket(c) !== today) return c;
+  }
+  // Defensive: should be unreachable. 24h fallback so cron timing
+  // doesn't break catastrophically if ICU returns something weird.
+  return nowMs + 24 * 60 * 60 * 1000;
+}
+
 export function previousEtDate(etDate: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(etDate);
   if (!m) throw new Error(`previousEtDate: expected YYYY-MM-DD, got ${JSON.stringify(etDate)}`);
