@@ -491,6 +491,30 @@ a.affiliate-card__product:focus-visible {
 .metro-tile.band-pending {
   background: var(--surface-strong);
 }
+/* Band tints for the chooser tiles, mirroring the day-card palette
+   so a "yellow" tile here matches the yellow day card on the per-
+   metro page after click-through. These rules need to win against
+   the unscoped `.metro-tile { background: var(--surface-strong) }`
+   above — the compound-selector specificity (2 classes, 0,2,0)
+   beats the single-class default (0,1,0) regardless of source
+   order. The left border doubles the band signal for accessibility
+   so the color is not the only cue. */
+.metro-tile.band-red {
+  background: var(--score-red-bg);
+  border-left: 4px solid var(--score-red);
+}
+.metro-tile.band-yellow {
+  background: var(--score-yellow-bg);
+  border-left: 4px solid var(--score-yellow);
+}
+.metro-tile.band-green {
+  background: var(--score-green-bg);
+  border-left: 4px solid var(--score-green);
+}
+.metro-tile.band-ideal {
+  background: var(--score-ideal-bg);
+  border-left: 4px solid var(--score-ideal);
+}
 
 /* ----- Disclaimer ----- */
 .sw-disclaimer {
