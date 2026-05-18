@@ -259,9 +259,9 @@ function renderMetro(metro) {
   const slug     = metro.slug;
   const zip      = metro.zip;
 
-  const pageTitle = name + ', ' + metro.state + ' BBQ Forecast — Best Smoke Days | Pitmaster Tools';
+  const pageTitle = name + ', ' + metro.state + ' BBQ Forecast | Pitmaster Tools';
   const ogTitle   = name + ', ' + metro.state + ' BBQ Forecast — Best Smoke Days';
-  const desc      = 'Free 7-day weather-aware smoke forecast for ' + name + ', ' + metro.state + '. Day-by-day scores for brisket, ribs, pork, and chicken on offset, pellet, kamado, kettle, or electric cookers.';
+  const desc      = 'Free 7-day smoke forecast for ' + name + ', ' + metro.state + '. Scores for brisket, ribs, pork, and chicken across all cooker types.';
   const canonical = 'https://pitmaster.tools/smoke-weather/' + slug;
 
   const note      = METRO_NOTE[slug];
