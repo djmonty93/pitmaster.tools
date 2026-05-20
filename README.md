@@ -452,6 +452,24 @@ address per send. See `docs/sender-setup.md` for the operator
 checklist and `docs/portfolio-email-architecture.md` for why this
 matters at portfolio scale.
 
+## SEO maintenance
+
+Audit + fix loop for SEO/GEO/AEO: `/claude-rank:rank-audit` (scans titles,
+descs, schema, robots.txt, sitemap, AI bot coverage, citability, etc).
+Conventions enforced by the audit live in `CLAUDE.md` § "SEO conventions":
+
+- Titles ≤60 rendered chars, descriptions ≤160 rendered chars — entity-decoded
+  (`&amp;` counts as 1 char, not 5).
+- `robots.txt` carries explicit allow lines for the 13 major AI/SEO crawlers
+  (GPTBot, ClaudeBot, PerplexityBot, Google-Extended, Bytespider, Applebot-Extended,
+  Amazonbot, cohere-ai, Diffbot, FacebookBot, meta-externalagent, CCBot, anthropic-ai).
+- `sitemap.xml` lists only indexable URLs — `noindex` pages (privacy, terms,
+  disclosures, status, 404) are excluded.
+- Metro page titles/descs are templated in `scripts/generate-metros.js`. Edit
+  the template, then `npm run build` regenerates all 50.
+- `llms.txt` is the canonical machine-readable tool index — keep it in sync
+  with new tools and any load-bearing fact in the calculators.
+
 ## Tooling rules
 
 - Never commit directly to `main`; everything goes through a feature branch + PR.
@@ -460,5 +478,5 @@ matters at portfolio scale.
   `docs/best-smoke-days-plan.md` § "PR review discipline".
 - Before merging changes that touch HTML, `sitemap.xml`, `wrangler.jsonc`, or
   local asset links: run `.\validate.ps1` (Windows PowerShell).
-- See `CLAUDE.md` for required `<head>` elements, analytics IDs, and Schema
-  rules on tool pages.
+- See `CLAUDE.md` for required `<head>` elements, analytics IDs, SEO
+  conventions, and Schema rules on tool pages.
