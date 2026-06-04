@@ -79,6 +79,14 @@ function deleteCookie(name) {
   document.cookie = name + '=' + past;
   document.cookie = name + '=' + past + '; domain=' + location.hostname;
   document.cookie = name + '=' + past + '; domain=.' + location.hostname;
+  // Also clear cookies scoped to the registrable apex (GA's default cookie
+  // domain), e.g. '.pitmaster.tools' when the page is on 'www.pitmaster.tools'.
+  // On the apex host this adds no new candidate.
+  var apex = location.hostname.replace(/^www\./, '');
+  if (apex !== location.hostname) {
+    document.cookie = name + '=' + past + '; domain=' + apex;
+    document.cookie = name + '=' + past + '; domain=.' + apex;
+  }
 }
 function deleteAnalyticsCookies() {
   var parts = document.cookie ? document.cookie.split(';') : [];
@@ -137,6 +145,10 @@ function loadAnalytics() {
   document.head.appendChild(script);
 }
 function loadAds() {
+  // Defense-in-depth: ads load only after explicit accept, in every region.
+  // Callers already gate this, but a local guard guarantees the invariant even
+  // if loadAds() is ever called directly.
+  if (getCookie(CONSENT_COOKIE_NAME) !== 'accepted') return;
   if (document.querySelector('script[src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + encodeURIComponent(ADSENSE_CLIENT) + '"]')) {
     adsLoaded = true;
     return;
