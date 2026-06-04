@@ -196,6 +196,25 @@ test('accepted consent loads each third-party script once', async ({ browser }) 
   await context.close();
 });
 
+test('no-consent visitor loads analytics by default but not ads', async ({ browser }) => {
+  // Region-scoped Consent Mode v2: gtag.js loads on every non-rejected page view
+  // (cookieless inside the EEA/UK/CH, full measurement elsewhere) to close the
+  // GSC→GA4 gap; AdSense stays withheld until explicit accept. The banner is
+  // still shown so the visitor can accept/reject.
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  const errors = [];
+  trackPageErrors(page, errors);
+
+  await page.goto('/');
+  await expect(page.locator('#cookieBanner.visible')).toBeVisible();
+  await expect.poll(async () => (await getThirdPartyScriptCounts(page)).ga).toBe(1);
+  expect((await getThirdPartyScriptCounts(page)).ads).toBe(0);
+  expect(errors).toEqual([]);
+
+  await context.close();
+});
+
 test('embed mode never loads third-party scripts even with accepted consent', async ({ browser }) => {
   const context = await newAcceptedConsentContext(browser);
   const page = await context.newPage();

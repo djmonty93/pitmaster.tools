@@ -21,27 +21,34 @@ Every HTML file must include **all** of the following in `<head>`, in this order
 <meta name="twitter:description" content="…">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,…">  <!-- same SVG favicon fallback on every page -->
-<script>  <!-- Google Consent Mode v2 default -->
+<script>  <!-- Google Consent Mode v2 default — region-scoped (INJECT:consent-init.html) -->
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
+  // EEA/UK/CH: deny everything until explicit consent (GDPR).
   gtag('consent', 'default', {
-    'ad_storage': 'denied',
-    'analytics_storage': 'denied',
-    'ad_user_data': 'denied',
-    'ad_personalization': 'denied',
+    'ad_storage': 'denied', 'analytics_storage': 'denied',
+    'ad_user_data': 'denied', 'ad_personalization': 'denied',
+    'region': ['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE','IS','LI','NO','GB','CH'],
     'wait_for_update': 500
   });
+  // Rest of world: analytics granted by default; ads denied until accept.
+  gtag('consent', 'default', {
+    'analytics_storage': 'granted', 'ad_storage': 'denied',
+    'ad_user_data': 'denied', 'ad_personalization': 'denied'
+  });
 </script>
-<!-- Load gtag.js only after consent is accepted or an existing accepted consent cookie is detected -->
+<!-- gtag.js loads on every non-rejected page view (see _partials/site-utils.js); cookieless inside the EEA/UK/CH, full measurement elsewhere. A stored reject suppresses gtag.js entirely. -->
 <!-- Schema ld+json (tool pages only — WebApplication + FAQPage) -->
 <style>…</style>
 ```
 
+**Analytics/consent model:** region-scoped Consent Mode v2 (advanced mode), per `docs/analytics-consent-playbook.md`. The whole engine lives in `_partials/consent-init.html` (the two `consent default` calls above) + `_partials/site-utils.js` (`loadAnalytics`/`loadAds`/`initConsentBanner`). Goal: measure the bulk of (non-EEA) traffic to close the GSC→GA4 gap while staying GDPR-defensible.
+
 **Rules:**
-- The consent-default `<script>` block must appear before any consent-gated analytics loader.
-- Do not include a static `<script async src="https://www.googletagmanager.com/gtag/js?...">` tag in HTML. Load GA dynamically only after consent is accepted, or when an existing `pitmaster_consent=accepted` cookie is detected.
-- Do not load AdSense before consent for the same reason.
-- Keep any consent-gated analytics loader before the main `<style>` block only if it does not fetch external resources until consent has been granted.
+- The consent-default `<script>` block (`INJECT:consent-init.html`) must appear before any analytics loader. Both `consent default` calls are required: the region-scoped EEA/UK/CH deny, then the worldwide analytics-granted fallback.
+- Do not include a static `<script async src="https://www.googletagmanager.com/gtag/js?...">` tag in HTML. GA loads dynamically via `loadAnalytics()` on every page view **except** when the visitor has a stored `pitmaster_consent=rejected` cookie (then gtag.js never loads and `_ga*` cookies are purged). Region scoping (cookieless vs full) is handled by Consent Mode, not by withholding the script.
+- Do not load AdSense before explicit accept, in any region.
+- Keep the analytics loader logic in `site-utils.js`; it must not fetch ad origins before consent (ad-domain preconnect is gated inside `loadAds`).
 - `og:image` always points to `/og-image.png` — do not vary per page.
 - Schema (`WebApplication` + `FAQPage`) is required on tool pages; omit on legal pages.
 - Never omit OG or Twitter tags even on `noindex` pages.
