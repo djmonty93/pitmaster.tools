@@ -149,6 +149,19 @@ function loadAds() {
   // Callers already gate this, but a local guard guarantees the invariant even
   // if loadAds() is ever called directly.
   if (getCookie(CONSENT_COOKIE_NAME) !== 'accepted') return;
+  // Grant the ad signals before injecting AdSense so it never runs under a
+  // denied ad-consent state. Idempotent with the caller's updateConsentGranted.
+  // NOTE: analytics_storage is intentionally NOT forced here — it is managed by
+  // the region-scoped Consent Mode defaults (granted outside the EEA/UK/CH,
+  // cookieless-until-accept inside), and forcing it would set cookies for EEA
+  // visitors before consent.
+  if (typeof gtag === 'function') {
+    gtag('consent', 'update', {
+      'ad_storage': 'granted',
+      'ad_user_data': 'granted',
+      'ad_personalization': 'granted'
+    });
+  }
   if (document.querySelector('script[src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + encodeURIComponent(ADSENSE_CLIENT) + '"]')) {
     adsLoaded = true;
     return;
