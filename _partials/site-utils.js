@@ -15,6 +15,8 @@ var ADSENSE_CLIENT = 'ca-pub-4265262608577453';
 /* ----- State flags ----- */
 var analyticsLoaded = false;
 var adsLoaded = false;
+var consentInitialized = false;
+var analyticsScriptEl = null;
 var copyLinkResetTimer = null;
 var copyEmbedResetTimer = null;
 var _modalPrevFocus = null;
@@ -57,6 +59,13 @@ function getCookie(name) {
 }
 
 /* ----- Google services ----- */
+// Region-scoped Consent Mode v2 (advanced mode). The consent defaults in
+// consent-init.html grant analytics worldwide EXCEPT in the EEA/UK/CH, where it
+// stays denied until accept. So gtag.js loads on every non-rejected page view:
+// outside the EEA it measures full users; inside, it sends only cookieless
+// Consent Mode pings until the visitor accepts. Ads stay denied everywhere
+// until explicit accept. This closes the GSC↔GA4 gap while staying
+// GDPR-defensible. See docs/analytics-consent-playbook.md.
 function updateConsentGranted() {
   gtag('consent', 'update', {
     'ad_storage': 'granted',
@@ -65,14 +74,50 @@ function updateConsentGranted() {
     'ad_personalization': 'granted'
   });
 }
-function ensureThirdPartyHints() {
-  ['https://www.googletagmanager.com', 'https://pagead2.googlesyndication.com'].forEach(function(url) {
-    if (document.querySelector('link[rel="preconnect"][href="' + url + '"]')) return;
-    var link = document.createElement('link');
-    link.rel = 'preconnect';
-    link.href = url;
-    document.head.appendChild(link);
-  });
+function deleteCookie(name) {
+  var past = '; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+  document.cookie = name + '=' + past;
+  document.cookie = name + '=' + past + '; domain=' + location.hostname;
+  document.cookie = name + '=' + past + '; domain=.' + location.hostname;
+}
+function deleteAnalyticsCookies() {
+  var parts = document.cookie ? document.cookie.split(';') : [];
+  for (var i = 0; i < parts.length; i++) {
+    var name = parts[i].split('=')[0].trim();
+    if (name === '_ga' || name === '_gid' || name.indexOf('_ga_') === 0 || name.indexOf('_gat') === 0) {
+      deleteCookie(name);
+    }
+  }
+}
+function purgeAnalyticsCookies() {
+  // Delete now; delete again once gtag.js loads (fast-reject race where the
+  // queued config writes _ga AFTER this pass); plus a timed fallback. The
+  // load-event binding lives ONLY on the reject path — binding it inside
+  // loadAnalytics would purge cookies for accepted users too.
+  deleteAnalyticsCookies();
+  if (analyticsScriptEl && !analyticsScriptEl.__purgeBound) {
+    analyticsScriptEl.__purgeBound = true;
+    analyticsScriptEl.addEventListener('load', deleteAnalyticsCookies);
+  }
+  if (typeof setTimeout === 'function') setTimeout(deleteAnalyticsCookies, 1500);
+}
+function updateConsentDenied() {
+  if (typeof gtag === 'function') {
+    gtag('consent', 'update', {
+      'ad_storage': 'denied',
+      'analytics_storage': 'denied',
+      'ad_user_data': 'denied',
+      'ad_personalization': 'denied'
+    });
+  }
+  purgeAnalyticsCookies();
+}
+function addPreconnect(url) {
+  if (document.querySelector('link[rel="preconnect"][href="' + url + '"]')) return;
+  var link = document.createElement('link');
+  link.rel = 'preconnect';
+  link.href = url;
+  document.head.appendChild(link);
 }
 function loadAnalytics() {
   if (GA_MEASUREMENT_ID === 'GA_MEASUREMENT_ID') return;
@@ -82,12 +127,14 @@ function loadAnalytics() {
   }
   if (analyticsLoaded) return;
   analyticsLoaded = true;
+  addPreconnect('https://www.googletagmanager.com');
+  gtag('js', new Date());
+  gtag('config', GA_MEASUREMENT_ID);
   var script = document.createElement('script');
   script.async = true;
   script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(GA_MEASUREMENT_ID);
+  analyticsScriptEl = script;
   document.head.appendChild(script);
-  gtag('js', new Date());
-  gtag('config', GA_MEASUREMENT_ID);
 }
 function loadAds() {
   if (document.querySelector('script[src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + encodeURIComponent(ADSENSE_CLIENT) + '"]')) {
@@ -96,6 +143,9 @@ function loadAds() {
   }
   if (adsLoaded) return;
   adsLoaded = true;
+  // Ad-domain preconnect is consent-gated here so we never touch an advertising
+  // origin before the visitor explicitly accepts ads.
+  addPreconnect('https://pagead2.googlesyndication.com');
   // Suppress placeholder ad-slot processing until real ad-slot IDs ship.
   // Each page emits an inline script that calls adsbygoogle.push({}) after
   // every <ins>. That runs during HTML parse, before loadAds() ever fires,
@@ -119,7 +169,6 @@ function loadAds() {
 }
 function loadGoogleServices() {
   if (isEmbedMode()) return;
-  ensureThirdPartyHints();
   loadAnalytics();
   loadAds();
 }
@@ -130,6 +179,10 @@ function setConsentState(value) {
   if (value === 'accepted') {
     updateConsentGranted();
     loadGoogleServices();
+  } else if (value === 'rejected') {
+    // Fully honor reject: deny consent and purge any GA cookies already set
+    // (e.g. for a non-EEA visitor who was measured by default before clicking).
+    updateConsentDenied();
   }
   hideCookieBanner();
 }
@@ -142,9 +195,12 @@ function hideCookieBanner() {
   if (banner) banner.classList.remove('visible');
 }
 function initConsentBanner() {
-  if (!document.getElementById('cookieBanner')) return;
-  var storedConsent = getCookie(CONSENT_COOKIE_NAME);
+  // Idempotent: footer partials call this, and some pages also call it directly.
+  if (consentInitialized) return;
+  consentInitialized = true;
+  // 3rd-party iframes (?embed=1): no analytics, no ads, no consent UI.
   if (isEmbedMode()) { hideCookieBanner(); return; }
+
   var acceptBtn = document.getElementById('acceptCookies') || document.getElementById('cookieAccept');
   var rejectBtn = document.getElementById('rejectCookies') || document.getElementById('cookieReject');
   if (acceptBtn) acceptBtn.addEventListener('click', function() {
@@ -153,8 +209,17 @@ function initConsentBanner() {
   if (rejectBtn) rejectBtn.addEventListener('click', function() {
     setConsentState('rejected');
   });
-  if (storedConsent === 'accepted') { updateConsentGranted(); loadGoogleServices(); hideCookieBanner(); return; }
-  if (storedConsent === 'rejected') { hideCookieBanner(); return; }
+
+  var storedConsent = getCookie(CONSENT_COOKIE_NAME);
+  // Fully honor a prior reject: deny + purge + do NOT load gtag.js at all.
+  if (storedConsent === 'rejected') { updateConsentDenied(); hideCookieBanner(); return; }
+  if (storedConsent === 'accepted') updateConsentGranted();
+
+  // Every non-rejected page view loads analytics. Region-scoped consent defaults
+  // decide cookies vs cookieless pings (see loadAnalytics comment).
+  loadAnalytics();
+
+  if (storedConsent === 'accepted') { loadAds(); hideCookieBanner(); return; }
   showCookieBanner();
 }
 /* Alias for rib-calculator.html which uses the old name */
