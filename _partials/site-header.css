@@ -119,6 +119,24 @@
 
 .nav-dropdown__menu li { display: block; }
 
+/* Non-interactive group headings inside the tools dropdown. Never focusable
+   or clickable — keyboard Tab order walks straight past them to the links. */
+.nav-dropdown__group-label {
+  padding: .55rem 1rem .2rem;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #888;
+  cursor: default;
+  user-select: none;
+}
+
+.nav-dropdown__group-label:not(:first-child) {
+  margin-top: .25rem;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
 .nav-dropdown__menu a {
   display: block;
   padding: .4rem 1rem;
