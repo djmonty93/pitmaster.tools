@@ -605,8 +605,14 @@ function calculate() {
       return;
     }
 
-    var wLbs = state.wu === 'kg' ? rawW / 0.453592 : rawW;
     var cut = D[cutKey];
+    if (!cut) {
+      vmsg.textContent = 'Meat #' + (idx + 1) + ': please choose a cut.';
+      vmsg.classList.add('visible');
+      hasError = true;
+      return;
+    }
+    var wLbs = state.wu === 'kg' ? rawW / 0.453592 : rawW;
     var hrs = cookHrs(cut, wLbs, temp, wrap);
     var restMs = cut.restMinutes * 60000;
     var cookMs = hrs * 3600000;
@@ -838,9 +844,16 @@ document.getElementById('editBtn').addEventListener('click', closeResultsModal);
   if(plan.wu){ state.wu=plan.wu; document.querySelectorAll('#weightToggle button').forEach(function(b){ b.classList.toggle('active', b.dataset.unit===plan.wu); }); }
   if(plan.serve) document.getElementById('serveTime').value=plan.serve;
 
-  if(hasPlanMeats){
+  // Only meats whose cut exists in D become rows. decodeCookPlan accepts any
+  // slug-shaped cut (it can't know this page's list), so a hand-edited/stale
+  // URL could carry an unknown cut — dropping it here prevents addRow from
+  // creating an empty-select row that would crash calculate()'s D[cutKey].
+  var validMeats = hasPlanMeats
+    ? plan.meats.filter(function(m){ return Object.prototype.hasOwnProperty.call(D, m.cut); })
+    : [];
+  if(validMeats.length){
     // addRow() takes weight in lbs; decoded meat wt is canonical lbs.
-    plan.meats.forEach(function(m){ addRow({ cut:m.cut, weight:m.wt, temp:m.temp, wrap:m.wrap }); });
+    validMeats.forEach(function(m){ addRow({ cut:m.cut, weight:m.wt, temp:m.temp, wrap:m.wrap }); });
   } else {
     DEFAULT_ROWS.forEach(function(d) { addRow(d); });
   }
@@ -866,7 +879,7 @@ document.getElementById('editBtn').addEventListener('click', closeResultsModal);
     });
   })();
 
-  if(hasPlanMeats) calculate();
+  if(validMeats.length) calculate();
 })();
 </script>
 <!-- INJECT:site-header.js:script -->

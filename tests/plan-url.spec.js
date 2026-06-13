@@ -146,3 +146,31 @@ test('coordinator: generating a schedule writes the meat list to the URL', async
   expect(params.get('m')).toBeTruthy();
   expect(params.get('m')).toContain('~');
 });
+
+test('coordinator: a slug-valid but unknown cut is dropped, valid meats survive', async ({ page }) => {
+  // decodeCookPlan accepts any slug; the page must drop cuts not in D so a bad
+  // URL can't create an empty-select row that crashes the auto-calc.
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto('/cook-time-coordinator?serve=14:00&m=brisket-sliced~12~250~paper;phantom-cut~5~250~foil');
+
+  const rows = page.locator('.meat-row');
+  await expect(rows).toHaveCount(1);
+  await expect(rows.nth(0).locator('.cut-sel')).toHaveValue('brisket-sliced');
+  await expect(page.locator('#results')).toHaveClass(/visible/);
+  expect(errors).toEqual([]);
+});
+
+test('coordinator: an all-unknown-cut URL falls back to default rows, no crash', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto('/cook-time-coordinator?serve=14:00&m=phantom-cut~5~250~foil');
+
+  // No valid meats → default rows render, each with a real (non-empty) cut.
+  const rows = page.locator('.meat-row');
+  expect(await rows.count()).toBeGreaterThan(0);
+  await expect(rows.first().locator('.cut-sel')).not.toHaveValue('');
+  // No auto-calc (no valid hydrated meats), and nothing threw.
+  await expect(page.locator('#results')).not.toHaveClass(/visible/);
+  expect(errors).toEqual([]);
+});
