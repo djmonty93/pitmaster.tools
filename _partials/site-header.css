@@ -119,6 +119,33 @@
 
 .nav-dropdown__menu li { display: block; }
 
+/* Grouped sections inside the tools dropdown. Each group is a nested list
+   labelled via aria-labelledby on its <ul>; the label itself is a plain
+   <span> — never focusable or clickable, so keyboard Tab order walks
+   straight past it to the links. */
+.nav-dropdown__group {
+  margin-top: .25rem;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+.nav-dropdown__group ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-dropdown__group-label {
+  display: block;
+  padding: .55rem 1rem .2rem;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #888;
+  cursor: default;
+  user-select: none;
+}
+
 .nav-dropdown__menu a {
   display: block;
   padding: .4rem 1rem;

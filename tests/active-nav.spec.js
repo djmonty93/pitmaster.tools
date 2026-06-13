@@ -71,3 +71,84 @@ test('header logo link to "/" stays unmarked because it is outside <nav>', async
   await page.goto('/');
   await expect(page.locator('header a.logo')).not.toHaveAttribute('aria-current', 'page');
 });
+
+// ── Grouped tools dropdown ──────────────────────────────────────────────────
+// The tools menu groups its links under non-interactive section labels that
+// mirror the section-title categories on /tools. Labels must never be
+// focusable or clickable; every tool link must stay reachable both by
+// pointer and by Tab order (the menu stays open via :focus-within).
+
+const MENU_LINKS = [
+  ['/tools', 'All Tools'],
+  ['/brisket-calculator', 'Brisket Calculator'],
+  ['/pork-shoulder-calculator', 'Pork Shoulder Calculator'],
+  ['/rib-calculator', 'Rib Calculator'],
+  ['/turkey-smoking-calculator', 'Turkey Calculator'],
+  ['/', 'Meat Smoking Calculator'],
+  ['/cook-time-coordinator', 'Cook Time Coordinator'],
+  ['/meat-per-person', 'Meat Per Person'],
+  ['/catering-calculator', 'Catering Calculator'],
+  ['/brine-calculator', 'Brine Calculator'],
+  ['/dry-rub-calculator', 'Dry Rub Calculator'],
+  ['/charcoal-calculator', 'Charcoal Calculator'],
+  ['/bbq-cost-calculator', 'BBQ Cost Calculator'],
+  ['/brisket-yield-calculator', 'Brisket Yield Calculator'],
+  ['/smoke-weather/', 'Best Smoke Days'],
+];
+
+const GROUP_LABELS = [
+  'Cut Calculators',
+  'Planning & Timing',
+  'Ingredient Calculators',
+  'Cost & Yield',
+  'Smoke Forecast',
+];
+
+// /smoke-weather/disclosures previously hand-coded a stale flat copy of the
+// menu instead of injecting the partial — assert a page from each header
+// variant so a hard-coded menu can't silently drift again.
+for (const path of ['/about', '/smoke-weather/disclosures']) {
+  test(`tools dropdown on ${path} shows 5 group labels and all 15 links`, async ({ page }) => {
+    await page.goto(path);
+    await page.locator('header .nav-dropdown__trigger').click();
+
+    const labels = page.locator('header .nav-dropdown__menu .nav-dropdown__group-label');
+    await expect(labels).toHaveText(GROUP_LABELS);
+
+    const links = page.locator('header .nav-dropdown__menu a');
+    await expect(links).toHaveCount(MENU_LINKS.length);
+    for (const [href, text] of MENU_LINKS) {
+      await expect(
+        page.locator(`header .nav-dropdown__menu a[href="${href}"]`),
+        `menu link ${href}`
+      ).toHaveText(text);
+    }
+  });
+}
+
+test('every tools-menu link is reachable by keyboard; group labels are skipped', async ({ page }) => {
+  await page.goto('/about');
+
+  // Focusing the trigger opens the menu via the CSS :focus-within rule, and
+  // Tab then walks straight into the menu links in DOM order.
+  await page.locator('header .nav-dropdown__trigger').focus();
+
+  const visited = [];
+  for (let i = 0; i < MENU_LINKS.length; i++) {
+    await page.keyboard.press('Tab');
+    visited.push(await page.evaluate(() => {
+      const el = document.activeElement;
+      return {
+        href: el.getAttribute('href'),
+        inMenu: !!el.closest('.nav-dropdown__menu'),
+        isLabel: el.classList.contains('nav-dropdown__group-label'),
+      };
+    }));
+  }
+
+  for (const stop of visited) {
+    expect(stop.inMenu, 'Tab stop should be inside the dropdown menu').toBe(true);
+    expect(stop.isLabel, 'group labels must not receive focus').toBe(false);
+  }
+  expect(visited.map((s) => s.href)).toEqual(MENU_LINKS.map(([href]) => href));
+});
