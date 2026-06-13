@@ -91,6 +91,9 @@
   font-weight: 600;
   color: #1B7A43;
 }
+/* Empty on load: stays in the a11y tree as a registered live region but
+   takes up no visual space until the success text is injected. */
+.subscribe-form__success:empty { margin: 0; }
 
 .subscribe-form__privacy {
   margin: .85rem 0 0;

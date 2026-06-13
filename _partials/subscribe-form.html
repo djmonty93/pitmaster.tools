@@ -34,10 +34,11 @@
 
     <p id="subStatus" class="subscribe-form__status" role="status" aria-live="polite"></p>
 
-    <!-- Live region for the success confirmation. subscribe-form.js sets
-         the text AFTER unhiding so screen readers reliably announce it
-         (the visual #subStatus line is hidden on success by the CSS). -->
-    <p id="subSuccess" class="subscribe-form__success" role="status" aria-live="polite" hidden></p>
+    <!-- Live region for the success confirmation. Always present in the
+         a11y tree (empty on load, collapsed to zero space via :empty in
+         CSS) so the text subscribe-form.js injects on success is announced
+         reliably — no unhide/populate timing race. -->
+    <p id="subSuccess" class="subscribe-form__success" role="status" aria-live="polite"></p>
 
     <p class="subscribe-form__privacy">
       We use your email only for the weekly forecast. See our <a href="/privacy-policy">Privacy Policy</a>.

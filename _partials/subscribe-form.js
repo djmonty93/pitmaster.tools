@@ -65,10 +65,10 @@
       setStatus('');
       form.classList.add('is-success');
       if (success) {
-        // Unhide first, THEN set the text, so the now-visible live region
-        // announces the confirmation to screen readers (the #subStatus line
-        // is hidden on success by the CSS).
-        success.hidden = false;
+        // #subSuccess is always present in the a11y tree (empty, collapsed
+        // via :empty in CSS), so injecting the text here is a content
+        // mutation inside an already-registered aria-live region — reliably
+        // announced, with no unhide/populate timing race.
         success.textContent = "You're in. Watch for your first Best Smoke Days email this Friday.";
       }
     }
