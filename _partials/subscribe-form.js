@@ -46,7 +46,7 @@
 
     var emailEl = document.getElementById('subEmail');
     var zipEl = document.getElementById('subZip');
-    var hpEl = document.getElementById('subCompany');
+    var hpEl = document.getElementById('subHp');
     var btn = form.querySelector('.subscribe-form__btn');
     var status = document.getElementById('subStatus');
     var success = document.getElementById('subSuccess');

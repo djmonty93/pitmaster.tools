@@ -25,10 +25,14 @@
       <button type="submit" class="subscribe-form__btn" disabled>Send me Fridays</button>
 
       <!-- Honeypot: real users never see or fill this. A non-empty value
-           means a bot, and the handler swallows the submit silently. -->
-      <div class="subscribe-form__hp" aria-hidden="true">
-        <label for="subCompany">Company (leave blank)</label>
-        <input type="text" id="subCompany" name="company" tabindex="-1" autocomplete="off">
+           means a bot, and the handler swallows the submit silently.
+           `inert` (plus tabindex=-1 for older browsers) keeps real-user
+           autofill out; the name is deliberately NOT a recognized profile
+           field (company/organization/etc.) so password managers and
+           browser autofill won't populate it and trip a genuine visitor. -->
+      <div class="subscribe-form__hp" aria-hidden="true" inert>
+        <label for="subHp">Leave this field empty</label>
+        <input type="text" id="subHp" name="subscribe_hp" tabindex="-1" autocomplete="off">
       </div>
     </div>
 

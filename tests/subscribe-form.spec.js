@@ -126,7 +126,7 @@ test('honeypot submission is swallowed: no request, no error', async ({ page }) 
   // visually hidden / not user-fillable.
   await page.fill('#subEmail', 'bot@example.com');
   await page.fill('#subZip', '64108');
-  await page.evaluate(() => { document.querySelector('#subCompany').value = 'Acme Bots Inc'; });
+  await page.evaluate(() => { document.querySelector('#subHp').value = 'Acme Bots Inc'; });
   await page.locator('#subscribeForm button[type="submit"]').click();
 
   await page.waitForTimeout(150);
