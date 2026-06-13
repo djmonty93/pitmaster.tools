@@ -285,6 +285,10 @@ test('renderMetro references all build-time INJECT directives', () => {
   // Per-page smoke-weather scripts (still inline alongside the footer partial).
   assert.ok(html.includes('<!-- INJECT:smoke-weather-app.js:script -->'));
   assert.ok(html.includes('<!-- INJECT:weather-score-shared.js:script -->'));
+  // Weekly-forecast email capture (Milestone 2): markup, styles, behavior.
+  assert.ok(html.includes('<!-- INJECT:subscribe-form.html -->'));
+  assert.ok(html.includes('<!-- INJECT:subscribe-form.css -->'));
+  assert.ok(html.includes('<!-- INJECT:subscribe-form.js:script -->'));
 });
 
 test('renderMetro feeds parseFrontmatter + injectPartials into a valid final <head>', () => {

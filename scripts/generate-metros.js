@@ -230,7 +230,7 @@ const METRO_NOTE = {
 
 // Last-modified date emitted in og/twitter/json-ld. Bump when the template
 // changes materially; metro-list changes alone don't require it.
-const LAST_MODIFIED = '2026-05-15';
+const LAST_MODIFIED = '2026-06-12';
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, function (ch) {
@@ -369,6 +369,7 @@ function renderMetro(metro) {
     '<!-- INJECT:site-header.css -->',
     '<!-- INJECT:site-base.css -->',
     '<!-- INJECT:smoke-weather.css -->',
+    '<!-- INJECT:subscribe-form.css -->',
     '</head>',
     '<body>',
     '',
@@ -451,6 +452,8 @@ function renderMetro(metro) {
     '    <p>Five weather signals subtract from a base of 100: rain probability + accumulation, wind &amp; gusts (weighted by your cooker), cold mornings, hot afternoons, and stall risk for long cuts. <a href="/smoke-weather/methodology">See full methodology &rarr;</a></p>',
     '  </aside>',
     '',
+    '  <!-- INJECT:subscribe-form.html -->',
+    '',
     '  <section class="editorial-section" aria-label="' + escapeHtml(name) + ' BBQ context">',
     '    <h2>Barbecue heritage</h2>',
     '    <p>' + escapeHtml(heritage) + '</p>',
@@ -499,6 +502,7 @@ function renderMetro(metro) {
     '<!-- INJECT:site-footer-smoke.html -->',
     '<!-- INJECT:weather-score-shared.js:script -->',
     '<!-- INJECT:smoke-weather-app.js:script -->',
+    '<!-- INJECT:subscribe-form.js:script -->',
     '</body>',
     '</html>',
     '',

@@ -1,0 +1,51 @@
+<!-- Weekly-forecast email capture (Milestone 2). Progressive enhancement
+     over POST /api/subscribe: subscribe-form.js wires the fetch handler
+     and enables the (initially disabled) submit button, so without JS the
+     form cannot submit at all — acceptable for an optional newsletter.
+     Hidden inside embeds via the body.embed-mode rule in
+     subscribe-form.css. IDs are unique per page (one form per page). -->
+<section class="subscribe-cta" aria-labelledby="subscribe-heading">
+  <!-- method/action are belt-and-braces: the submit button ships disabled
+       and subscribe-form.js enables it on init, so no-JS pages can't submit
+       (no email/ZIP ever leaks into a URL). If a submit somehow fires, it
+       POSTs to the API rather than GET-reloading the current page. -->
+  <form id="subscribeForm" class="subscribe-form" method="post" action="/api/subscribe" novalidate>
+    <h2 id="subscribe-heading" class="subscribe-form__title">Get this forecast in your inbox every Friday</h2>
+    <p class="subscribe-form__lede">One email a week with the best smoke days for your ZIP. No spam, unsubscribe anytime.</p>
+
+    <div class="subscribe-form__fields">
+      <div class="subscribe-form__field">
+        <label for="subEmail" class="visually-hidden">Email address</label>
+        <input type="email" id="subEmail" name="email" autocomplete="email" placeholder="you@example.com" required>
+      </div>
+      <div class="subscribe-form__field subscribe-form__field--zip">
+        <label for="subZip" class="visually-hidden">ZIP code</label>
+        <input type="text" id="subZip" name="zip" inputmode="numeric" autocomplete="postal-code" maxlength="5" placeholder="ZIP" required>
+      </div>
+      <button type="submit" class="subscribe-form__btn" disabled>Send me Fridays</button>
+
+      <!-- Honeypot: real users never see or fill this. A non-empty value
+           means a bot, and the handler swallows the submit silently.
+           `inert` (plus tabindex=-1 for older browsers) keeps real-user
+           autofill out; the name is deliberately NOT a recognized profile
+           field (company/organization/etc.) so password managers and
+           browser autofill won't populate it and trip a genuine visitor. -->
+      <div class="subscribe-form__hp" aria-hidden="true" inert>
+        <label for="subHp">Leave this field empty</label>
+        <input type="text" id="subHp" name="subscribe_hp" tabindex="-1" autocomplete="off">
+      </div>
+    </div>
+
+    <p id="subStatus" class="subscribe-form__status" role="status" aria-live="polite"></p>
+
+    <!-- Live region for the success confirmation. Always present in the
+         a11y tree (empty on load, collapsed to zero space via :empty in
+         CSS) so the text subscribe-form.js injects on success is announced
+         reliably — no unhide/populate timing race. -->
+    <p id="subSuccess" class="subscribe-form__success" role="status" aria-live="polite"></p>
+
+    <p class="subscribe-form__privacy">
+      We use your email only for the weekly forecast. See our <a href="/privacy-policy">Privacy Policy</a>.
+    </p>
+  </form>
+</section>
