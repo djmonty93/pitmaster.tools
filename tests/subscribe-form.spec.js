@@ -8,12 +8,14 @@ const { test, expect } = require('@playwright/test');
 // and the no-request cases assert the stub was never invoked.
 //
 // DOM contract (must stay in sync with _partials/subscribe-form.html):
-//   form#subscribeForm.subscribe-form
+//   form#subscribeForm.subscribe-form[method=post][action="/api/subscribe"]
 //     input#subEmail[name=email][type=email]
 //     input#subZip[name=zip][inputmode=numeric][maxlength=5]
-//     input#subCompany[name=company]            (honeypot, hidden)
-//     button.subscribe-form__btn[type=submit]
+//     button.subscribe-form__btn[type=submit]   (ships disabled; JS enables)
+//     div.subscribe-form__hp[inert]             (honeypot wrapper)
+//       input#subHp[name=subscribe_hp][tabindex=-1][autocomplete=off]
 //     p#subStatus[role=status][aria-live=polite]
+//     p#subSuccess[role=status][aria-live=polite] (empty until success)
 //     a[href="/privacy-policy"]                  (privacy note)
 //   On success the form gains .is-success and #subSuccess becomes visible.
 
@@ -97,11 +99,35 @@ for (const path of ['/', '/smoke-weather/']) {
   });
 }
 
-test('submit button is enabled by JS (disabled without it for no-JS safety)', async ({ page }) => {
+test('submit button is enabled by JS after enhancement', async ({ page }) => {
   await page.goto('/smoke-weather/');
-  // After enhancement the button is interactive; the static HTML ships it
-  // disabled so a no-JS submit can never leak email/ZIP into a URL.
   await expect(page.locator('#subscribeForm button[type="submit"]')).toBeEnabled();
+});
+
+// No-JS safety: with scripts disabled the form must NOT be able to GET-leak
+// email/ZIP into a URL. The submit button ships disabled and the form posts
+// to the API as a fallback. Locks the static attributes against regression
+// (the JS-enabled test above would still pass if `disabled` were removed).
+test.describe('without JavaScript', () => {
+  test.use({ javaScriptEnabled: false });
+
+  test('submit button stays disabled and the form posts to the API', async ({ page }) => {
+    await page.goto('/smoke-weather/');
+    await expect(page.locator('#subscribeForm button[type="submit"]')).toBeDisabled();
+    await expect(page.locator('#subscribeForm')).toHaveAttribute('method', /^post$/i);
+    await expect(page.locator('#subscribeForm')).toHaveAttribute('action', '/api/subscribe');
+  });
+});
+
+test('honeypot is autofill-safe: non-profile name, inert, off the tab order', async ({ page }) => {
+  await page.goto('/smoke-weather/');
+  const hp = page.locator('#subHp');
+  await expect(hp).toHaveAttribute('name', 'subscribe_hp'); // not a profile field
+  await expect(hp).toHaveAttribute('autocomplete', 'off');
+  await expect(hp).toHaveAttribute('tabindex', '-1');
+  // Wrapper is inert so browser/password-manager autofill never targets it.
+  const wrapperInert = await page.locator('.subscribe-form__hp').evaluate((el) => el.hasAttribute('inert'));
+  expect(wrapperInert).toBe(true);
 });
 
 test('server rejection surfaces a friendly error, no success state', async ({ page }) => {
