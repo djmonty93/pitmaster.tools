@@ -104,22 +104,27 @@ const GROUP_LABELS = [
   'Smoke Forecast',
 ];
 
-test('tools dropdown shows 5 group labels and all 15 links', async ({ page }) => {
-  await page.goto('/about');
-  await page.locator('header .nav-dropdown__trigger').click();
+// /smoke-weather/disclosures previously hand-coded a stale flat copy of the
+// menu instead of injecting the partial — assert a page from each header
+// variant so a hard-coded menu can't silently drift again.
+for (const path of ['/about', '/smoke-weather/disclosures']) {
+  test(`tools dropdown on ${path} shows 5 group labels and all 15 links`, async ({ page }) => {
+    await page.goto(path);
+    await page.locator('header .nav-dropdown__trigger').click();
 
-  const labels = page.locator('header .nav-dropdown__menu .nav-dropdown__group-label');
-  await expect(labels).toHaveText(GROUP_LABELS);
+    const labels = page.locator('header .nav-dropdown__menu .nav-dropdown__group-label');
+    await expect(labels).toHaveText(GROUP_LABELS);
 
-  const links = page.locator('header .nav-dropdown__menu a');
-  await expect(links).toHaveCount(MENU_LINKS.length);
-  for (const [href, text] of MENU_LINKS) {
-    await expect(
-      page.locator(`header .nav-dropdown__menu a[href="${href}"]`),
-      `menu link ${href}`
-    ).toHaveText(text);
-  }
-});
+    const links = page.locator('header .nav-dropdown__menu a');
+    await expect(links).toHaveCount(MENU_LINKS.length);
+    for (const [href, text] of MENU_LINKS) {
+      await expect(
+        page.locator(`header .nav-dropdown__menu a[href="${href}"]`),
+        `menu link ${href}`
+      ).toHaveText(text);
+    }
+  });
+}
 
 test('every tools-menu link is reachable by keyboard; group labels are skipped', async ({ page }) => {
   await page.goto('/about');
