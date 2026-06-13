@@ -144,6 +144,22 @@ test('server rejection surfaces a friendly error, no success state', async ({ pa
   await expect(page.locator('#subscribeForm button[type="submit"]')).toBeEnabled();
 });
 
+test('network failure re-enables the button with a retry message', async ({ page }) => {
+  // route.abort() makes fetch reject — the same .catch path the 15s abort
+  // timeout uses. The user must get a message and a usable button, never a
+  // stuck "Signing you up…" spinner.
+  await page.route('**/api/subscribe', (route) => route.abort());
+  await page.goto('/smoke-weather/');
+
+  await page.fill('#subEmail', 'pit@example.com');
+  await page.fill('#subZip', '64108');
+  await page.locator('#subscribeForm button[type="submit"]').click();
+
+  await expect(page.locator('#subStatus')).not.toBeEmpty();
+  await expect(page.locator('#subscribeForm')).not.toHaveClass(/is-success/);
+  await expect(page.locator('#subscribeForm button[type="submit"]')).toBeEnabled();
+});
+
 test('honeypot submission is swallowed: no request, no error', async ({ page }) => {
   const calls = await stubSubscribe(page);
   await page.goto('/smoke-weather/');

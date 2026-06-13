@@ -100,10 +100,17 @@
       btn.disabled = true;
       setStatus('Signing you up…', false);
 
+      // Abort after 15s so a hung connection (server accepts but never
+      // responds) can't leave the button stuck disabled on the spinner
+      // forever — the abort rejects the fetch and flows through .catch.
+      var controller = typeof AbortController === 'function' ? new AbortController() : null;
+      var timer = controller ? setTimeout(function () { controller.abort(); }, 15000) : null;
+
       fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, zip: zip, timezone: timezone() })
+        body: JSON.stringify({ email: email, zip: zip, timezone: timezone() }),
+        signal: controller ? controller.signal : undefined
       })
         .then(function (res) {
           if (res.ok) {
@@ -121,7 +128,8 @@
         .catch(function () {
           setStatus(messageForError(null), true);
           btn.disabled = false;
-        });
+        })
+        .then(function () { if (timer) clearTimeout(timer); });
     });
   }
 
