@@ -276,6 +276,7 @@
 
       <div style="text-align:center;margin-top:.75rem">
         <button class="calc-btn" id="editBtn" type="button" style="max-width:300px">Edit Inputs</button>
+        <button class="calc-btn" id="copyPlanBtn" type="button" style="max-width:300px;margin-top:.5rem">Copy plan link</button>
       </div>
     </div>
   </div>
@@ -399,6 +400,7 @@
 
 <!-- Cookie consent banner -->
 <!-- INJECT:site-footer-tool.html -->
+<!-- INJECT:plan-url.js:script -->
 <script>
 
 // ── Cut data (low-slow cuts from index.html) ──────────────────────────────────
@@ -537,6 +539,33 @@ function updateRowCount() {
   var note = document.getElementById('meatCountNote');
   btn.disabled = rowCount >= MAX_ROWS;
   note.textContent = rowCount + ' of ' + MAX_ROWS + ' meats';
+}
+
+// ── Shareable-plan URL sync (Milestone 3) ─────────────────────────────────────
+// The plan is the whole meat list plus serve time and unit prefs. Weights are
+// encoded as canonical pounds (addRow() takes lbs and redisplays per unit).
+function planState() {
+  var meats = [];
+  document.querySelectorAll('.meat-row').forEach(function(row) {
+    var rawW = parseFloat(row.querySelector('.weight-inp').value);
+    if (isNaN(rawW)) return;
+    var wLbs = state.wu === 'kg' ? rawW / 0.453592 : rawW;
+    meats.push({
+      cut: row.querySelector('.cut-sel').value,
+      wt: Math.round(wLbs * 10) / 10,
+      temp: parseInt(row.querySelector('.temp-sel').value, 10),
+      wrap: row.querySelector('.wrap-sel').value
+    });
+  });
+  return { serve: document.getElementById('serveTime').value, wu: state.wu, tu: state.tu, meats: meats };
+}
+function syncUrl() {
+  if (typeof PlanUrl === 'undefined' || !window.history || !window.history.replaceState) return;
+  try {
+    var qs = PlanUrl.encodeCookPlan(planState(), window.location.search);
+    var url = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
+    window.history.replaceState(null, '', url);
+  } catch (e) {}
 }
 
 // ── Calculate ─────────────────────────────────────────────────────────────────
@@ -725,6 +754,7 @@ function calculate() {
   });
 
   openResultsModal();
+  syncUrl();
 }
 
 function schedRow(dotClass, label, time, serveRef) {
@@ -799,12 +829,44 @@ document.getElementById('editBtn').addEventListener('click', closeResultsModal);
     }
   } catch(e) {}
 
-  // Add default rows
-  DEFAULT_ROWS.forEach(function(d) { addRow(d); });
+  // Shareable-plan hydration (Milestone 3): a decoded plan's meat list
+  // replaces the default rows; serve time + units come from the URL too.
+  var plan = (typeof PlanUrl !== 'undefined') ? PlanUrl.decodeCookPlan(window.location.search) : {};
+  var hasPlanMeats = plan && Array.isArray(plan.meats) && plan.meats.length > 0;
+
+  if(plan.tu){ state.tu=plan.tu; document.querySelectorAll('#tempToggle button').forEach(function(b){ b.classList.toggle('active', b.dataset.unit===plan.tu); }); }
+  if(plan.wu){ state.wu=plan.wu; document.querySelectorAll('#weightToggle button').forEach(function(b){ b.classList.toggle('active', b.dataset.unit===plan.wu); }); }
+  if(plan.serve) document.getElementById('serveTime').value=plan.serve;
+
+  if(hasPlanMeats){
+    // addRow() takes weight in lbs; decoded meat wt is canonical lbs.
+    plan.meats.forEach(function(m){ addRow({ cut:m.cut, weight:m.wt, temp:m.temp, wrap:m.wrap }); });
+  } else {
+    DEFAULT_ROWS.forEach(function(d) { addRow(d); });
+  }
 
   initEmbedMode();
   initConsentBanner();
   initResultsModal();
+
+  (function(){
+    var btn=document.getElementById('copyPlanBtn');
+    if(!btn) return;
+    var resetTimer=null;
+    btn.addEventListener('click',function(){
+      syncUrl();
+      var done=function(ok){
+        btn.textContent=ok?'Copied!':'Copy failed';
+        clearTimeout(resetTimer);
+        resetTimer=setTimeout(function(){ btn.textContent='Copy plan link'; },2000);
+      };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(window.location.href).then(function(){done(true);},function(){done(false);});
+      } else { done(false); }
+    });
+  })();
+
+  if(hasPlanMeats) calculate();
 })();
 </script>
 <!-- INJECT:site-header.js:script -->

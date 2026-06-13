@@ -318,6 +318,7 @@
           </svg>
           Print Timeline
         </button>
+        <button class="print-btn" id="copyPlanBtn" type="button">Copy plan link</button>
       </div>
     </div>
   </div>
@@ -492,6 +493,7 @@
 <!-- Cookie consent banner -->
 <!-- INJECT:site-footer-tool.html -->
 <!-- INJECT:smoke-physics.js:script -->
+<!-- INJECT:plan-url.js:script -->
 <script>
 
 var CUTS = {
@@ -532,6 +534,32 @@ function fmtSmokerTemp(f) {
 }
 
 // ── Calculate ─────────────────────────────────────────────────────────────────
+/* Shareable-plan URL helpers (Milestone 3). */
+function setSelectIfOption(id, value){
+  var el=document.getElementById(id);
+  if(!el) return;
+  if([].some.call(el.options,function(o){return o.value===value;})) el.value=value;
+}
+function planState(){
+  return {
+    style: state.style,
+    wt: parseFloat(document.getElementById('weight').value),
+    wu: state.wu,
+    temp: parseInt(document.getElementById('smokerTemp').value,10),
+    ck: document.getElementById('cookerType').value,
+    wrap: state.wrap,
+    serve: document.getElementById('serveTime').value,
+    thick: parseFloat(document.getElementById('meatThickness').value)
+  };
+}
+function syncUrl(){
+  if(typeof PlanUrl==='undefined' || !window.history || !window.history.replaceState) return;
+  try{
+    var qs=PlanUrl.encodePlanParams(planState(), window.location.search);
+    var url=window.location.pathname + (qs ? '?'+qs : '') + window.location.hash;
+    window.history.replaceState(null,'',url);
+  }catch(e){}
+}
 function calculate() {
   var vmsg = document.getElementById('vmsg');
   vmsg.className = 'vmsg';
@@ -688,6 +716,7 @@ function calculate() {
   document.getElementById('pmeta').textContent = weightLbs.toFixed(1) + ' lbs \u2014 ' + temp + '\u00B0F \u2014 serve ' + fmtTime(serve);
 
   openResultsModal();
+  syncUrl();
 }
 
 // ── Live re-solve ─────────────────────────────────────────────────────────────
@@ -799,9 +828,43 @@ document.getElementById('printBtn').addEventListener('click', function() { windo
     }
   } catch(err){}
 
+  // Shareable-plan hydration (Milestone 3): a decoded plan overrides
+  // locale/localStorage for the keys it carries, then auto-renders.
+  var plan = (typeof PlanUrl !== 'undefined') ? PlanUrl.decodePlanParams(window.location.search) : {};
+  var hasPlan = plan && Object.keys(plan).length > 0;
+
+  if(plan.tu){ state.tu=plan.tu; document.querySelectorAll('#tempToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.unit===plan.tu);}); }
+  if(plan.wu){ state.wu=plan.wu; document.getElementById('weightUnitLbl').textContent=plan.wu; document.querySelectorAll('#weightToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.unit===plan.wu);}); }
+  if(plan.style){ state.style=plan.style; document.querySelectorAll('.style-btn').forEach(function(b){ var on=b.dataset.style===plan.style; b.classList.toggle('active',on); b.setAttribute('aria-pressed',on?'true':'false'); }); }
+  if(plan.wrap){ state.wrap=plan.wrap; document.querySelectorAll('.wrap-toggle button').forEach(function(b){ var on=b.dataset.wrap===plan.wrap; b.classList.toggle('active',on); b.setAttribute('aria-pressed',on?'true':'false'); }); }
+  if(plan.wt!=null) document.getElementById('weight').value=plan.wt;
+  if(plan.temp!=null) setSelectIfOption('smokerTemp', String(plan.temp));
+  if(plan.ck) setSelectIfOption('cookerType', plan.ck);
+  if(plan.serve) document.getElementById('serveTime').value=plan.serve;
+  if(plan.thick!=null) document.getElementById('meatThickness').value=plan.thick;
+
   initEmbedMode();
   initConsentBanner();
   initResultsModal();
+
+  (function(){
+    var btn=document.getElementById('copyPlanBtn');
+    if(!btn) return;
+    var resetTimer=null;
+    btn.addEventListener('click',function(){
+      syncUrl();
+      var done=function(ok){
+        btn.textContent=ok?'Copied!':'Copy failed';
+        clearTimeout(resetTimer);
+        resetTimer=setTimeout(function(){ btn.textContent='Copy plan link'; },2000);
+      };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(window.location.href).then(function(){done(true);},function(){done(false);});
+      } else { done(false); }
+    });
+  })();
+
+  if(hasPlan) calculate();
 })();
 </script>
 <!-- INJECT:site-header.js:script -->
