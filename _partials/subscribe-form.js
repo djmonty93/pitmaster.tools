@@ -52,6 +52,10 @@
     var success = document.getElementById('subSuccess');
     if (!emailEl || !zipEl || !btn || !status) return;
 
+    // The button ships disabled so a no-JS page can never submit (and leak
+    // email/ZIP into a URL). Now that JS owns the submit, enable it.
+    btn.disabled = false;
+
     function setStatus(msg, isError) {
       status.textContent = msg || '';
       status.classList.toggle('is-error', !!isError);
@@ -60,7 +64,13 @@
     function showSuccess() {
       setStatus('');
       form.classList.add('is-success');
-      if (success) success.hidden = false;
+      if (success) {
+        // Unhide first, THEN set the text, so the now-visible live region
+        // announces the confirmation to screen readers (the #subStatus line
+        // is hidden on success by the CSS).
+        success.hidden = false;
+        success.textContent = "You're in. Watch for your first Best Smoke Days email this Friday.";
+      }
     }
 
     form.addEventListener('submit', function (e) {

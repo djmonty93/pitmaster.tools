@@ -17,7 +17,9 @@ const { test, expect } = require('@playwright/test');
 //     a[href="/privacy-policy"]                  (privacy note)
 //   On success the form gains .is-success and #subSuccess becomes visible.
 
-const PAGES = ['/smoke-weather/', '/smoke-weather/kansas-city-mo'];
+// One page per wired surface: homepage (largest inline-script payload,
+// distinct injection order), the smoke-weather landing, and a metro page.
+const PAGES = ['/', '/smoke-weather/', '/smoke-weather/kansas-city-mo'];
 
 // Stub /api/subscribe and record every request that reaches it so the
 // "no request on invalid input" cases can assert zero calls.
@@ -69,24 +71,37 @@ test('invalid email/zip shows inline error and fires no request', async ({ page 
   expect(calls).toHaveLength(0);
 });
 
-test('valid submit POSTs normalized JSON and shows success state', async ({ page }) => {
-  const calls = await stubSubscribe(page, { status: 202 });
+// Runs on the homepage AND the smoke-weather landing: the two surfaces
+// inject subscribe-form.js in a different order relative to other scripts,
+// so exercising the full submit path on both catches injection-order or
+// ID-collision regressions the render check alone would miss.
+for (const path of ['/', '/smoke-weather/']) {
+  test(`valid submit on ${path} POSTs normalized JSON and shows success state`, async ({ page }) => {
+    const calls = await stubSubscribe(page, { status: 202 });
+    await page.goto(path);
+
+    // Mixed-case + surrounding space must be normalized client-side to match
+    // the server's zod preprocess (trim + lowercase).
+    await page.fill('#subEmail', '  Pit@Example.COM  ');
+    await page.fill('#subZip', '64108');
+    await page.locator('#subscribeForm button[type="submit"]').click();
+
+    await expect(page.locator('#subscribeForm')).toHaveClass(/is-success/);
+    await expect(page.locator('#subSuccess')).toBeVisible();
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0].email).toBe('pit@example.com');
+    expect(calls[0].zip).toBe('64108');
+    expect(typeof calls[0].timezone).toBe('string');
+    expect(calls[0].timezone.length).toBeGreaterThan(0);
+  });
+}
+
+test('submit button is enabled by JS (disabled without it for no-JS safety)', async ({ page }) => {
   await page.goto('/smoke-weather/');
-
-  // Mixed-case + surrounding space must be normalized client-side to match
-  // the server's zod preprocess (trim + lowercase).
-  await page.fill('#subEmail', '  Pit@Example.COM  ');
-  await page.fill('#subZip', '64108');
-  await page.locator('#subscribeForm button[type="submit"]').click();
-
-  await expect(page.locator('#subscribeForm')).toHaveClass(/is-success/);
-  await expect(page.locator('#subSuccess')).toBeVisible();
-
-  expect(calls).toHaveLength(1);
-  expect(calls[0].email).toBe('pit@example.com');
-  expect(calls[0].zip).toBe('64108');
-  expect(typeof calls[0].timezone).toBe('string');
-  expect(calls[0].timezone.length).toBeGreaterThan(0);
+  // After enhancement the button is interactive; the static HTML ships it
+  // disabled so a no-JS submit can never leak email/ZIP into a URL.
+  await expect(page.locator('#subscribeForm button[type="submit"]')).toBeEnabled();
 });
 
 test('server rejection surfaces a friendly error, no success state', async ({ page }) => {
