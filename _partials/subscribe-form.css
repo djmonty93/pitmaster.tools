@@ -1,0 +1,138 @@
+/* subscribe-form.css — weekly-forecast email capture (Milestone 2).
+   Injected only on pages that include subscribe-form.html (homepage,
+   /smoke-weather/, and every metro page). Styled to echo the
+   hero-forecast-card on the homepage: amber-tinted panel, amber accent.
+   Depends on the --amber / --card-border / --charcoal / --text-muted
+   custom properties defined in site-base.css :root. */
+
+.subscribe-cta {
+  margin: 2rem 0;
+}
+
+.subscribe-form {
+  padding: 1.5rem 1.5rem 1.25rem;
+  background: rgba(255, 180, 80, .08);
+  border: 1px solid var(--amber);
+  border-radius: var(--radius, 14px);
+}
+
+.subscribe-form__title {
+  font-family: Georgia, serif;
+  font-size: 1.3rem;
+  margin: 0 0 .35rem;
+  color: var(--amber-dark, #C97F10);
+}
+
+.subscribe-form__lede {
+  margin: 0 0 1rem;
+  font-size: .95rem;
+  line-height: 1.5;
+  color: var(--charcoal, #1a1a1a);
+}
+
+.subscribe-form__fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  align-items: stretch;
+}
+
+.subscribe-form__field { flex: 1 1 220px; min-width: 0; }
+.subscribe-form__field--zip { flex: 0 1 130px; }
+
+.subscribe-form__field input {
+  width: 100%;
+  padding: .6rem .8rem;
+  border: 1.5px solid var(--card-border, #E8E0D0);
+  border-radius: 6px;
+  font: inherit;
+  color: var(--charcoal, #1a1a1a);
+  background: #fff;
+  transition: border-color .15s;
+}
+
+.subscribe-form__field input:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+  border-color: var(--amber);
+}
+
+.subscribe-form__btn {
+  flex: 0 0 auto;
+  padding: .6rem 1.25rem;
+  background: var(--amber);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: .95rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s;
+}
+
+.subscribe-form__btn:hover,
+.subscribe-form__btn:focus-visible { background: var(--amber-dark, #C97F10); outline: none; }
+.subscribe-form__btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.subscribe-form__btn:disabled { opacity: .6; cursor: progress; }
+
+.subscribe-form__status {
+  margin: .75rem 0 0;
+  font-size: .9rem;
+  min-height: 1.2em;
+  color: var(--text-muted, #6B6560);
+}
+.subscribe-form__status.is-error { color: #B3261E; font-weight: 600; }
+
+.subscribe-form__success {
+  margin: .75rem 0 0;
+  font-size: .98rem;
+  font-weight: 600;
+  color: #1B7A43;
+}
+
+.subscribe-form__privacy {
+  margin: .85rem 0 0;
+  font-size: .8rem;
+  color: var(--text-muted, #6B6560);
+}
+.subscribe-form__privacy a { color: var(--amber-dark, #C97F10); }
+
+/* On success the input row collapses so the confirmation stands alone. */
+.subscribe-form.is-success .subscribe-form__fields,
+.subscribe-form.is-success .subscribe-form__lede,
+.subscribe-form.is-success .subscribe-form__status { display: none; }
+
+/* Honeypot: removed from layout and the a11y tree, but NOT display:none —
+   some bots skip display:none fields. Keep it off-screen instead. */
+.subscribe-form__hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Scoped visually-hidden (site-base.css doesn't define a global one). */
+.subscribe-form .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Belt-and-braces: hidden inside embeds even though subscribe-form.js
+   also bails out in embed mode. */
+body.embed-mode .subscribe-cta { display: none !important; }
+
+@media (max-width: 480px) {
+  .subscribe-form__field,
+  .subscribe-form__field--zip,
+  .subscribe-form__btn { flex: 1 1 100%; }
+}

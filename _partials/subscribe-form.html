@@ -1,0 +1,41 @@
+<!-- Weekly-forecast email capture (Milestone 2). Progressive enhancement
+     over POST /api/subscribe: works as a plain form only after
+     subscribe-form.js wires the fetch handler (no-JS users see the form
+     but submit is a no-op until enhanced — acceptable for an optional
+     newsletter). Hidden inside embeds via the body.embed-mode rule in
+     subscribe-form.css. IDs are unique per page (one form per page). -->
+<section class="subscribe-cta" aria-labelledby="subscribe-heading">
+  <form id="subscribeForm" class="subscribe-form" novalidate>
+    <h2 id="subscribe-heading" class="subscribe-form__title">Get this forecast in your inbox every Friday</h2>
+    <p class="subscribe-form__lede">One email a week with the best smoke days for your ZIP. No spam, unsubscribe anytime.</p>
+
+    <div class="subscribe-form__fields">
+      <div class="subscribe-form__field">
+        <label for="subEmail" class="visually-hidden">Email address</label>
+        <input type="email" id="subEmail" name="email" autocomplete="email" placeholder="you@example.com" required>
+      </div>
+      <div class="subscribe-form__field subscribe-form__field--zip">
+        <label for="subZip" class="visually-hidden">ZIP code</label>
+        <input type="text" id="subZip" name="zip" inputmode="numeric" autocomplete="postal-code" maxlength="5" placeholder="ZIP" required>
+      </div>
+      <button type="submit" class="subscribe-form__btn">Send me Fridays</button>
+
+      <!-- Honeypot: real users never see or fill this. A non-empty value
+           means a bot, and the handler swallows the submit silently. -->
+      <div class="subscribe-form__hp" aria-hidden="true">
+        <label for="subCompany">Company (leave blank)</label>
+        <input type="text" id="subCompany" name="company" tabindex="-1" autocomplete="off">
+      </div>
+    </div>
+
+    <p id="subStatus" class="subscribe-form__status" role="status" aria-live="polite"></p>
+
+    <p id="subSuccess" class="subscribe-form__success" hidden>
+      You're in. Watch for your first Best Smoke Days email this Friday.
+    </p>
+
+    <p class="subscribe-form__privacy">
+      We use your email only for the weekly forecast. See our <a href="/privacy-policy">Privacy Policy</a>.
+    </p>
+  </form>
+</section>

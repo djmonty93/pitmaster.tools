@@ -116,6 +116,7 @@
 </script>
 <!-- INJECT:site-header.css -->
 <!-- INJECT:site-base.css -->
+<!-- INJECT:subscribe-form.css -->
 <style>
 @media (max-width:600px) { .form-grid { grid-template-columns: 1fr; } }
 .serving-toggle { display: flex; border: 1.5px solid var(--card-border); border-radius: 6px; overflow: hidden; }
@@ -795,6 +796,8 @@
       <p>This tool is updated periodically as new data becomes available.</p>
     </div>
   </details>
+
+  <!-- INJECT:subscribe-form.html -->
 </main>
 
 <!-- INJECT:site-footer-tool.html -->
@@ -1623,6 +1626,7 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
   });
 })();
 </script>
+<!-- INJECT:subscribe-form.js:script -->
 </body>
 </html>
 
