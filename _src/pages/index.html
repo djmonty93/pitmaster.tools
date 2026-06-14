@@ -360,7 +360,7 @@
       <div class="form-group">
         <label for="weight">Weight</label>
         <div class="input-with-unit">
-          <input type="number" id="weight" min="0.1" step="0.1" value="10">
+          <input type="number" id="weight" min="0.1" max="999" step="0.1" value="10">
           <span class="input-unit-label" id="weightUnit">lbs</span>
         </div>
       </div>
@@ -533,6 +533,7 @@
         </svg>
         Print Timeline
       </button>
+      <button class="print-btn no-print" id="copyPlanBtn" type="button">Copy plan link</button>
     </div>
     <div class="share-buttons no-print" aria-label="Share Pitmaster Tools">
       <a class="share-btn" href="https://pinterest.com/pin/create/button/?url=https://pitmaster.tools&amp;description=Free+meat+smoking+calculator" target="_blank" rel="noopener noreferrer">Share on Pinterest</a>
@@ -802,6 +803,7 @@
 
 <!-- INJECT:site-footer-tool.html -->
 <!-- INJECT:smoke-physics.js:script -->
+<!-- INJECT:plan-url.js:script -->
 <script>
 (function () {
 'use strict';
@@ -1306,8 +1308,12 @@ function buildTL(cut, serve, hrs, wrap, grill, physicsResult){
     var pfs  = new Date(sOn.getTime()+phMs);
     var sc   = new Date(pfs.getTime()+stMs);
     var gLbl = {charcoal:'Charcoal grill',gas:'Gas grill',castIron:'Cast iron skillet'}[grill]||'Grill';
-    var srV  = parseInt(document.getElementById('searTemp').value)||cut.searTempF;
-    var sTD  = state.tu==='C' ? Math.round((srV-32)*5/9)+'\xB0C' : srV+'\xB0F';
+    var srD  = parseInt(document.getElementById('searTemp').value);
+    // searTemp input is in DISPLAY units; normalize to canonical Fahrenheit
+    // (the cut.searTempF fallback is already °F) so the sear temp shows
+    // correctly in both unit modes.
+    var srVF = isNaN(srD) ? cut.searTempF : (state.tu==='C' ? Math.round(srD*9/5+32) : srD);
+    var sTD  = state.tu==='C' ? Math.round((srVF-32)*5/9)+'\xB0C' : srVF+'\xB0F';
     ev.push({t:ls2, l:'Light smoker / preheat',         s:'Target: '+dT(stv), c:'blue'});
     ev.push({t:sOn, l:'Meat goes on (smoke phase)',      s:cut.sPhaseTemp?'Smoke to '+dT(cut.sPhaseTemp)+' internal':'', c:'amber'});
     ev.push({t:pfs, l:'Pull from smoker \u2014 begin sear', s:'Internal ~'+dT(cut.sPhaseTemp||cut.pullTemp-15)+' \u2014 '+gLbl+' at '+sTD+', '+Math.round(sds)+'s per side', c:'red'});
@@ -1488,10 +1494,61 @@ function onMeatChange(){
   var k=document.getElementById('meatType').value, c=D[k];
   updTempOpts(c); updTP(c); updBI(k); updWrap(k);
 }
+/* Set a <select> only if the value matches an existing <option> (defensive:
+   decoded plan values are already enum-validated, but a removed option must
+   never leave the select on a phantom value). */
+function setSelectIfOption(id, value){
+  var el=document.getElementById(id);
+  if(!el) return;
+  if([].some.call(el.options,function(o){return o.value===value;})) el.value=value;
+}
+/* Shareable-plan URL sync (Milestone 3). planState() reads the same inputs
+   calc() uses; syncUrl() mirrors them into the query string via
+   history.replaceState so the plan survives a reload and "Copy plan link"
+   captures it. PlanUrl.encodePlanParams preserves foreign params (embed,
+   utm_*) and validates, so nothing invalid is written. */
+// searTemp is shown in display units but stored canonically (°F) in the URL
+// so a shared plan is unit-independent.
+function searF(){
+  var v=parseInt(document.getElementById('searTemp').value,10);
+  if(isNaN(v)) return NaN;
+  return state.tu==='C' ? Math.round(v*9/5+32) : v;
+}
+function planState(){
+  // grill/sear only matter for two-phase cuts; omit them otherwise so a
+  // non-two-phase plan URL isn't polluted with an inapplicable (and, in °C
+  // mode, clamped) sear value.
+  var twoPhase=document.getElementById('two-phase-section').classList.contains('visible');
+  return {
+    cut: document.getElementById('meatType').value,
+    wt: parseFloat(document.getElementById('weight').value),
+    wu: state.wu,
+    ppl: parseInt(document.getElementById('numPeople').value,10),
+    temp: parseInt(document.getElementById('smokerTemp').value,10),
+    ck: document.getElementById('cookerType').value,
+    serve: document.getElementById('serveTime').value,
+    wrap: document.getElementById('wrapMethod').value,
+    bone: document.getElementById('boneIn').value==='yes' ? 1 : 0,
+    inj: document.getElementById('injected').value==='yes' ? 1 : 0,
+    sz: state.sz,
+    tu: state.tu,
+    grill: twoPhase ? document.getElementById('grillType').value : undefined,
+    sear: twoPhase ? searF() : undefined
+  };
+}
+function syncUrl(){
+  if(typeof PlanUrl==='undefined' || !window.history || !window.history.replaceState) return;
+  try{
+    var qs=PlanUrl.encodePlanParams(planState(), window.location.search);
+    var url=window.location.pathname + (qs ? '?'+qs : '') + window.location.hash;
+    window.history.replaceState(null,'',url);
+  }catch(e){}
+}
 function calc(){
   var k=document.getElementById('meatType').value, c=D[k];
   var w=wLbs(), np=parseInt(document.getElementById('numPeople').value);
   if(!w||w<=0){ setMsg('Please enter a weight greater than 0.','error'); return; }
+  if(parseFloat(document.getElementById('weight').value)>999){ setMsg('Please enter a weight of 999 or less.','error'); return; }
   if(!np||np<1){ setMsg('Please enter at least 1 person.','error'); return; }
   if(w>30)        setMsg('Check your entry: '+dW(w)+' is very large.','warn');
   else if(np>100) setMsg('Large crowd notice: '+np+' people will likely require multiple cuts or smokers.','warn');
@@ -1506,6 +1563,7 @@ function calc(){
     inj:document.getElementById('injected').value==='yes',
     np:np, grill:document.getElementById('grillType').value
   });
+  syncUrl();
 }
 
 /* ============================================================
@@ -1599,12 +1657,67 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
       updSzLabels();
     }
   }catch(e){}
+
+  // Shareable-plan hydration (Milestone 3): a decoded plan overrides
+  // locale/localStorage for the keys it carries. Units + cut are applied
+  // before onMeatChange() so dependent UI (two-phase, bone-in, temp options)
+  // builds for the hydrated cut; the remaining fields are applied AFTER so
+  // onMeatChange() can't reset them.
+  var plan = (typeof PlanUrl !== 'undefined') ? PlanUrl.decodePlanParams(window.location.search) : {};
+  var hasPlan = plan && Object.keys(plan).length > 0;
+
+  if(plan.tu){ state.tu=plan.tu; document.querySelectorAll('#tempToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.unit===plan.tu);}); document.getElementById('searTempUnit').textContent=plan.tu==='C'?'\xB0C':'\xB0F'; }
+  if(plan.wu){ state.wu=plan.wu; document.querySelectorAll('#weightToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.unit===plan.wu);}); document.getElementById('weightUnit').textContent=plan.wu==='kg'?'kg':'lbs'; updSzLabels(); }
+  if(plan.sz){ state.sz=plan.sz; document.querySelectorAll('#servingToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.size===plan.sz);}); }
+  if(plan.cut) setSelectIfOption('meatType', plan.cut);
+
   onMeatChange();
+
+  if(plan.wt!=null) document.getElementById('weight').value=plan.wt;
+  if(plan.ppl!=null) document.getElementById('numPeople').value=plan.ppl;
+  if(plan.temp!=null) setSelectIfOption('smokerTemp', String(plan.temp));
+  if(plan.ck) setSelectIfOption('cookerType', plan.ck);
+  if(plan.serve) document.getElementById('serveTime').value=plan.serve;
+  if(plan.inj!=null) document.getElementById('injected').value=(plan.inj===1?'yes':'no');
+  // Cut-dependent controls: onMeatChange() hides wrap (and resets it to none)
+  // for no-stall cuts, hides bone-in for cuts where it's irrelevant, and shows
+  // the sear phase only for two-phase cuts. Apply a URL value ONLY when the
+  // control is still exposed for the hydrated cut, so a shared link can't set
+  // a hidden field that silently changes the result.
+  if(plan.wrap && document.getElementById('wrapMethod').closest('.form-group').style.display!=='none') setSelectIfOption('wrapMethod', plan.wrap);
+  if(plan.bone!=null && document.getElementById('boneInGroup').style.display!=='none') document.getElementById('boneIn').value=(plan.bone===1?'yes':'no');
+  var twoPhaseShown=document.getElementById('two-phase-section').classList.contains('visible');
+  if(plan.grill && twoPhaseShown) setSelectIfOption('grillType', plan.grill);
+  // sear is canonical °F in the URL — convert back to the active display unit.
+  if(plan.sear!=null && twoPhaseShown) document.getElementById('searTemp').value=(state.tu==='C'?Math.round((plan.sear-32)*5/9):plan.sear);
+
   initEmbedMode();
   initConsentBanner();
   initResultsModal();
   initShareButtons();
   initEmbedSection();
+
+  // Copy-plan-link: re-syncs the URL then copies it (clipboard pattern from
+  // embed-cta.js, with a graceful "Copy failed" fallback).
+  (function(){
+    var btn=document.getElementById('copyPlanBtn');
+    if(!btn) return;
+    var resetTimer=null;
+    btn.addEventListener('click',function(){
+      syncUrl();
+      var done=function(ok){
+        btn.textContent=ok?'Copied!':'Copy failed';
+        clearTimeout(resetTimer);
+        resetTimer=setTimeout(function(){ btn.textContent='Copy plan link'; },2000);
+      };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(window.location.href).then(function(){done(true);},function(){done(false);});
+      } else { done(false); }
+    });
+  })();
+
+  // A shared or bookmarked plan renders its timeline immediately on load.
+  if(hasPlan) calc();
 })();
 })();
 </script>
