@@ -102,6 +102,16 @@ test('homepage: an over-ceiling weight is rejected, not silently clamped into th
   expect(new URL(page.url()).search).toBe(''); // nothing written
 });
 
+test('homepage: a URL wrap for a no-stall cut is ignored (control is hidden)', async ({ page }) => {
+  // pork-loin has hasStall:false, so onMeatChange() hides the wrap control and
+  // forces "none". A URL wrap=paper must not set a hidden field that would
+  // silently change the cook time.
+  await page.goto('/?cut=pork-loin&wrap=paper');
+  await expect(page.locator('#meatType')).toHaveValue('pork-loin');
+  await expect(page.locator('#wrapMethod').locator('xpath=ancestor::*[contains(@class,"form-group")]')).toBeHidden();
+  await expect(page.locator('#wrapMethod')).toHaveValue('none');
+});
+
 // ── brisket-calculator (flat schema + style/thick) ──────────────────────────
 
 test('brisket: a shared plan URL hydrates inputs and renders the timeline', async ({ page }) => {

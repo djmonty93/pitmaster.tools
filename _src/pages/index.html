@@ -1663,11 +1663,17 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
   if(plan.temp!=null) setSelectIfOption('smokerTemp', String(plan.temp));
   if(plan.ck) setSelectIfOption('cookerType', plan.ck);
   if(plan.serve) document.getElementById('serveTime').value=plan.serve;
-  if(plan.wrap) setSelectIfOption('wrapMethod', plan.wrap);
-  if(plan.bone!=null) document.getElementById('boneIn').value=(plan.bone===1?'yes':'no');
   if(plan.inj!=null) document.getElementById('injected').value=(plan.inj===1?'yes':'no');
-  if(plan.grill) setSelectIfOption('grillType', plan.grill);
-  if(plan.sear!=null) document.getElementById('searTemp').value=plan.sear;
+  // Cut-dependent controls: onMeatChange() hides wrap (and resets it to none)
+  // for no-stall cuts, hides bone-in for cuts where it's irrelevant, and shows
+  // the sear phase only for two-phase cuts. Apply a URL value ONLY when the
+  // control is still exposed for the hydrated cut, so a shared link can't set
+  // a hidden field that silently changes the result.
+  if(plan.wrap && document.getElementById('wrapMethod').closest('.form-group').style.display!=='none') setSelectIfOption('wrapMethod', plan.wrap);
+  if(plan.bone!=null && document.getElementById('boneInGroup').style.display!=='none') document.getElementById('boneIn').value=(plan.bone===1?'yes':'no');
+  var twoPhaseShown=document.getElementById('two-phase-section').classList.contains('visible');
+  if(plan.grill && twoPhaseShown) setSelectIfOption('grillType', plan.grill);
+  if(plan.sear!=null && twoPhaseShown) document.getElementById('searTemp').value=plan.sear;
 
   initEmbedMode();
   initConsentBanner();
