@@ -324,6 +324,19 @@ function isEmbedMode() {
 function initEmbedMode() {
   if (!isEmbedMode()) return;
   document.body.classList.add('embed-mode');
+  // Attribution link back to the full tool, shown only inside embeds. Built
+  // via DOM properties (href/textContent) rather than an HTML string, so the
+  // path can't break out of the markup — no manual escaping needed. utm tag
+  // lets us see embed-driven traffic; target=_blank escapes the iframe.
+  if (!document.querySelector('.embed-attribution')) {
+    var credit = document.createElement('a');
+    credit.className = 'embed-attribution';
+    credit.href = SITE_URL + window.location.pathname + '?utm_source=embed';
+    credit.target = '_blank';
+    credit.rel = 'noopener';
+    credit.textContent = 'Powered by pitmaster.tools';
+    document.body.appendChild(credit);
+  }
 }
 function initEmbedSection() {
   var copyBtn = document.getElementById('copyEmbedBtn');

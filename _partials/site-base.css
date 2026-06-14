@@ -391,9 +391,46 @@ body.embed-mode .share-buttons,
 body.embed-mode .embed-cta,
 body.embed-mode .related-tools,
 body.embed-mode .editorial-section,
+body.embed-mode .breadcrumb,
 body.embed-mode #affiliateSlot,
 body.embed-mode .score-explainer { display: none !important; }
 body.embed-mode main { padding-top: .5rem; }
+
+/* Attribution badge injected into embeds by site-utils.js initEmbedMode(). */
+.embed-attribution {
+  position: fixed;
+  right: 10px;
+  bottom: 8px;
+  z-index: 2147483647;
+  padding: .2rem .55rem;
+  font-size: .72rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--amber-dark, #C97F10);
+  background: rgba(255, 255, 255, .92);
+  border: 1px solid var(--card-border, #E8E0D0);
+  border-radius: 999px;
+  text-decoration: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .15);
+}
+.embed-attribution:hover,
+.embed-attribution:focus-visible { color: #fff; background: var(--amber, #EF9F27); outline: none; }
+
+/* ----- Breadcrumb (tool pages) ----- */
+.breadcrumb { margin: 0 0 1rem; font-size: .85rem; }
+.breadcrumb ol {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  margin: 0;
+  padding: 0;
+}
+.breadcrumb li { display: flex; align-items: center; gap: .35rem; color: var(--text-muted, #6B6560); }
+.breadcrumb li + li::before { content: "\203A"; color: var(--text-muted, #6B6560); }
+.breadcrumb a { color: var(--amber-dark, #C97F10); text-decoration: none; }
+.breadcrumb a:hover, .breadcrumb a:focus-visible { text-decoration: underline; }
+.breadcrumb [aria-current="page"] { color: var(--text-muted, #6B6560); }
 
 /* ----- Embed-this-calculator CTA (Task 1) -----
    Sits near the bottom of every calculator; click opens a dialog with
