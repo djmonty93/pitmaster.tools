@@ -572,6 +572,12 @@ function calculate() {
     document.getElementById('weight').focus();
     return;
   }
+  if (rawWeight > 999) {
+    vmsg.textContent = 'Please enter a weight of 999 or less.';
+    vmsg.classList.add('error');
+    document.getElementById('weight').focus();
+    return;
+  }
 
   var weightLbs = state.wu === 'kg' ? rawWeight / 0.453592 : rawWeight;
   var temp = parseInt(document.getElementById('smokerTemp').value, 10);

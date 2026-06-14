@@ -91,6 +91,17 @@ test('homepage: a garbage plan URL is ignored, not applied', async ({ page }) =>
   await expect(page.locator('#meatType')).toHaveValue('brisket-sliced'); // default
 });
 
+test('homepage: an over-ceiling weight is rejected, not silently clamped into the URL', async ({ page }) => {
+  // The calculator must refuse weights above the shareable schema max (999) so
+  // a copied plan can never differ from the displayed calculation.
+  await page.goto('/');
+  await page.fill('#weight', '1500');
+  await page.locator('#calcBtn').click();
+  await expect(page.locator('#vmsg')).toContainText(/999/);
+  await expect(page.locator('#results')).not.toHaveClass(/visible/);
+  expect(new URL(page.url()).search).toBe(''); // nothing written
+});
+
 // ── brisket-calculator (flat schema + style/thick) ──────────────────────────
 
 test('brisket: a shared plan URL hydrates inputs and renders the timeline', async ({ page }) => {

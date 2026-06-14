@@ -613,6 +613,12 @@ function calculate() {
       return;
     }
     var wLbs = state.wu === 'kg' ? rawW / 0.453592 : rawW;
+    if (wLbs > 999) {
+      vmsg.textContent = 'Meat #' + (idx + 1) + ': weight is too large (max 999 lbs).';
+      vmsg.classList.add('visible');
+      hasError = true;
+      return;
+    }
     var hrs = cookHrs(cut, wLbs, temp, wrap);
     var restMs = cut.restMinutes * 60000;
     var cookMs = hrs * 3600000;
