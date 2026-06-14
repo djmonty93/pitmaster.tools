@@ -1308,8 +1308,12 @@ function buildTL(cut, serve, hrs, wrap, grill, physicsResult){
     var pfs  = new Date(sOn.getTime()+phMs);
     var sc   = new Date(pfs.getTime()+stMs);
     var gLbl = {charcoal:'Charcoal grill',gas:'Gas grill',castIron:'Cast iron skillet'}[grill]||'Grill';
-    var srV  = parseInt(document.getElementById('searTemp').value)||cut.searTempF;
-    var sTD  = state.tu==='C' ? Math.round((srV-32)*5/9)+'\xB0C' : srV+'\xB0F';
+    var srD  = parseInt(document.getElementById('searTemp').value);
+    // searTemp input is in DISPLAY units; normalize to canonical Fahrenheit
+    // (the cut.searTempF fallback is already °F) so the sear temp shows
+    // correctly in both unit modes.
+    var srVF = isNaN(srD) ? cut.searTempF : (state.tu==='C' ? Math.round(srD*9/5+32) : srD);
+    var sTD  = state.tu==='C' ? Math.round((srVF-32)*5/9)+'\xB0C' : srVF+'\xB0F';
     ev.push({t:ls2, l:'Light smoker / preheat',         s:'Target: '+dT(stv), c:'blue'});
     ev.push({t:sOn, l:'Meat goes on (smoke phase)',      s:cut.sPhaseTemp?'Smoke to '+dT(cut.sPhaseTemp)+' internal':'', c:'amber'});
     ev.push({t:pfs, l:'Pull from smoker \u2014 begin sear', s:'Internal ~'+dT(cut.sPhaseTemp||cut.pullTemp-15)+' \u2014 '+gLbl+' at '+sTD+', '+Math.round(sds)+'s per side', c:'red'});
@@ -1503,6 +1507,13 @@ function setSelectIfOption(id, value){
    history.replaceState so the plan survives a reload and "Copy plan link"
    captures it. PlanUrl.encodePlanParams preserves foreign params (embed,
    utm_*) and validates, so nothing invalid is written. */
+// searTemp is shown in display units but stored canonically (°F) in the URL
+// so a shared plan is unit-independent.
+function searF(){
+  var v=parseInt(document.getElementById('searTemp').value,10);
+  if(isNaN(v)) return NaN;
+  return state.tu==='C' ? Math.round(v*9/5+32) : v;
+}
 function planState(){
   return {
     cut: document.getElementById('meatType').value,
@@ -1518,7 +1529,7 @@ function planState(){
     sz: state.sz,
     tu: state.tu,
     grill: document.getElementById('grillType').value,
-    sear: parseInt(document.getElementById('searTemp').value,10)
+    sear: searF()
   };
 }
 function syncUrl(){
@@ -1673,7 +1684,8 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
   if(plan.bone!=null && document.getElementById('boneInGroup').style.display!=='none') document.getElementById('boneIn').value=(plan.bone===1?'yes':'no');
   var twoPhaseShown=document.getElementById('two-phase-section').classList.contains('visible');
   if(plan.grill && twoPhaseShown) setSelectIfOption('grillType', plan.grill);
-  if(plan.sear!=null && twoPhaseShown) document.getElementById('searTemp').value=plan.sear;
+  // sear is canonical °F in the URL — convert back to the active display unit.
+  if(plan.sear!=null && twoPhaseShown) document.getElementById('searTemp').value=(state.tu==='C'?Math.round((plan.sear-32)*5/9):plan.sear);
 
   initEmbedMode();
   initConsentBanner();

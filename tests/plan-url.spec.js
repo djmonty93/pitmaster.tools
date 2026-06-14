@@ -112,6 +112,25 @@ test('homepage: a URL wrap for a no-stall cut is ignored (control is hidden)', a
   await expect(page.locator('#wrapMethod')).toHaveValue('none');
 });
 
+test('homepage: a two-phase sear temp round-trips in metric (canonical F in URL)', async ({ page, context }) => {
+  await page.goto('/');
+  await page.locator('#tempToggle button[data-unit="C"]').click();
+  await page.selectOption('#meatType', 'tri-tip'); // two-phase cut → sear shown
+  const cVal = await page.locator('#searTemp').inputValue(); // Celsius display
+  await page.locator('#calcBtn').click();
+
+  const params = new URLSearchParams(new URL(page.url()).search);
+  expect(params.get('tu')).toBe('C');
+  // The URL stores canonical Fahrenheit (~500), not the ~260 Celsius display.
+  expect(Number(params.get('sear'))).toBeGreaterThan(400);
+
+  const page2 = await context.newPage();
+  await page2.goto(page.url());
+  await expect(page2.locator('#meatType')).toHaveValue('tri-tip');
+  await expect(page2.locator('#searTemp')).toHaveValue(cVal); // same Celsius value back
+  await page2.close();
+});
+
 // ── brisket-calculator (flat schema + style/thick) ──────────────────────────
 
 test('brisket: a shared plan URL hydrates inputs and renders the timeline', async ({ page }) => {
