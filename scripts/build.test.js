@@ -3,7 +3,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {
-  parseFrontmatter, substituteVars, injectPartials, resolvePermalink
+  parseFrontmatter, substituteVars, injectPartials, resolvePermalink, minifyAsset
 } = require('../build.js');
 
 test('parseFrontmatter — extracts simple key/value pairs', () => {
@@ -429,6 +429,50 @@ test('resolvePermalink — rejects empty permalink', () => {
   assert.throws(
     () => resolvePermalink('x.html', { permalink: '   ' }, 'x.html'),
     /must not be empty/
+  );
+});
+
+// ── minifyAsset (terser for .js, csso for .css) ─────────────────────────────
+
+test('minifyAsset — minifies a .js partial and preserves top-level names', async () => {
+  const src = 'function escapeHtml(str) {\n  var unusedLocal = 1;\n  return String(str);\n}';
+  const out = await minifyAsset('site-utils.js', src);
+  assert.ok(out.length < src.length, 'minified JS should be smaller');
+  // Top-level name must survive (pages call it by name); mangle is locals-only.
+  assert.ok(out.includes('escapeHtml'), 'top-level function name must be preserved');
+  // The unused local should be mangled/dropped, not kept verbatim.
+  assert.ok(!out.includes('unusedLocal'), 'local names should be mangled away');
+});
+
+test('minifyAsset — minifies a .css partial with csso', async () => {
+  const src = 'body {\n  color:  red;\n  margin: 0  0  0  0;\n}';
+  const out = await minifyAsset('site-base.css', src);
+  assert.ok(out.length < src.length, 'minified CSS should be smaller');
+  assert.ok(out.includes('body{'), 'csso should collapse whitespace');
+});
+
+test('minifyAsset — passes .html partials through untouched', async () => {
+  const src = '<header>\n  <a href="/">Home</a>\n</header>';
+  assert.equal(await minifyAsset('site-header.html', src), src);
+});
+
+test('minifyAsset — MINIFY=0 returns content verbatim for js and css', async () => {
+  const prev = process.env.MINIFY;
+  process.env.MINIFY = '0';
+  try {
+    const js = 'function f() {  return 1;  }';
+    const css = 'body {  color: red;  }';
+    assert.equal(await minifyAsset('x.js', js), js);
+    assert.equal(await minifyAsset('x.css', css), css);
+  } finally {
+    if (prev === undefined) delete process.env.MINIFY; else process.env.MINIFY = prev;
+  }
+});
+
+test('minifyAsset — fails loudly on a syntactically broken .js partial', async () => {
+  await assert.rejects(
+    () => minifyAsset('broken.js', 'function ( { return'),
+    /terser failed to minify broken\.js/
   );
 });
 

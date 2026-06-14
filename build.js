@@ -39,8 +39,9 @@
  * without touching the filesystem. The script body at the bottom runs only
  * when this file is invoked directly.
  *
- * Usage: node build.js
- * No npm dependencies required.
+ * Usage: node build.js   (set MINIFY=0 to skip JS/CSS minification)
+ * Dependencies: terser + csso (devDependencies) minify each _partials/*.js
+ * and *.css once at load time. Everything else is Node built-ins.
  */
 
 'use strict';
@@ -262,18 +263,59 @@ function listHtml(dir) {
   return out;
 }
 
+// ── Partial minification ────────────────────────────────────────────────────
+// Each _partials/*.js is minified with terser and each *.css with csso ONCE at
+// load time (then injected into every page that references it), shrinking the
+// inline JS/CSS shipped on every request. terser's default mangle keeps
+// top-level names intact (mangle.toplevel = false), which is required: the
+// global helpers in site-utils.js (escapeHtml, isEmbedMode, initEmbedMode, …)
+// and window.PlanUrl's method names are referenced by name from un-minified
+// page-inline scripts, so they must survive. .html partials pass through
+// untouched. Set MINIFY=0 to skip minification for readable debug output
+// (read per call so the escape hatch is testable). A minify error fails the
+// build loudly rather than shipping a broken asset.
+async function minifyAsset(name, content) {
+  if (process.env.MINIFY === '0') return content;
+  if (name.endsWith('.js')) {
+    const { minify } = require('terser');
+    let result;
+    try {
+      result = await minify(content, {
+        compress: { defaults: true, unsafe: false },
+        mangle: true,                 // locals only — toplevel defaults to false
+        format: { comments: false }
+      });
+    } catch (err) {
+      throw new Error('terser failed to minify ' + name + ': ' + (err && err.message || err));
+    }
+    if (!result || typeof result.code !== 'string') {
+      throw new Error('terser produced no output for ' + name);
+    }
+    return result.code;
+  }
+  if (name.endsWith('.css')) {
+    const csso = require('csso');
+    return csso.minify(content).css;
+  }
+  return content;
+}
+
 // ── Exports for unit tests ──────────────────────────────────────────────────
 module.exports = {
-  parseFrontmatter, substituteVars, injectPartials, listHtml, resolvePermalink
+  parseFrontmatter, substituteVars, injectPartials, listHtml, resolvePermalink,
+  minifyAsset
 };
 
 // ── Script entry point (skipped when imported as a module) ──────────────────
-function runBuild() {
-  // Load partials from _partials/
+async function runBuild() {
+  // Load partials from _partials/, minifying each .js/.css once at load time.
   var partials = {};
-  fs.readdirSync(PARTIALS).forEach(function(file) {
-    partials[file] = fs.readFileSync(path.join(PARTIALS, file), 'utf8').trimEnd();
-  });
+  var partialFiles = fs.readdirSync(PARTIALS);
+  for (var pi = 0; pi < partialFiles.length; pi++) {
+    var file = partialFiles[pi];
+    var raw = fs.readFileSync(path.join(PARTIALS, file), 'utf8').trimEnd();
+    partials[file] = await minifyAsset(file, raw);
+  }
 
   // Recreate dist/ from a clean slate
   fs.rmSync(DIST, { recursive: true, force: true });
@@ -329,4 +371,9 @@ function runBuild() {
   console.log('Build complete.');
 }
 
-if (require.main === module) runBuild();
+if (require.main === module) {
+  runBuild().catch(function(err) {
+    console.error(err && err.stack ? err.stack : err);
+    process.exit(1);
+  });
+}
