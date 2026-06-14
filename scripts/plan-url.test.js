@@ -92,6 +92,13 @@ test('decode rejects a non-member smoker temp (select has fixed options)', () =>
   assert.equal(decodePlanParams('temp=275').temp, 275);
 });
 
+test('decode rejects a fractional smoker temp instead of truncating it', () => {
+  assert.equal(decodePlanParams('temp=225.9').temp, undefined);
+  assert.equal(decodePlanParams('temp=250.0').temp, undefined);
+  assert.equal(decodeCookPlan('m=spare-ribs~10~250.9~foil').meats, undefined);
+  assert.equal(decodeCookPlan('m=spare-ribs~10~250~foil').meats.length, 1);
+});
+
 test('decode rejects malformed serve times, accepts valid HH:MM', () => {
   assert.equal(decodePlanParams('serve=99:99').serve, undefined);
   assert.equal(decodePlanParams('serve=7:5').serve, undefined); // not zero-padded

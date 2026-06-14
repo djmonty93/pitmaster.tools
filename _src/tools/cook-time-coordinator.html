@@ -506,7 +506,7 @@ function addRow(defaults) {
   div.setAttribute('role', 'listitem');
   div.innerHTML =
     '<select aria-label="Cut" class="cut-sel">' + buildCutOptions() + '</select>' +
-    '<input type="number" aria-label="Weight" class="weight-inp" value="' + weightVal + '" min="0.5" max="200" step="0.5">' +
+    '<input type="number" aria-label="Weight" class="weight-inp" value="' + weightVal + '" min="0.5" max="999" step="0.5">' +
     '<select aria-label="Smoker temperature" class="temp-sel">' +
       '<option value="225">' + tempLabel(225) + '</option>' +
       '<option value="250" ' + ((!d.temp || d.temp === 250) ? 'selected' : '') + '>' + tempLabel(250) + '</option>' +

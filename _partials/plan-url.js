@@ -85,7 +85,11 @@
     wu: function (v) { return inEnum(v, ENUMS.wu); },
     ppl: function (v) { return clampNum(v, 1, 999, true); },
     temp: function (v) {
-      var n = clampNum(v, -Infinity, Infinity, true);
+      // Fixed-option select: require an exact integer (no truncation) that is
+      // one of the offered temps, so 225.9 / 240 / "225foo" are all rejected.
+      var s = (typeof v === 'number') ? String(v) : String(v).trim();
+      if (!/^\d+$/.test(s)) return undefined;
+      var n = parseInt(s, 10);
       return TEMPS.indexOf(n) !== -1 ? n : undefined;
     },
     ck: function (v) { return inEnum(v, ENUMS.ck); },

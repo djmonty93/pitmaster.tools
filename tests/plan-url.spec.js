@@ -147,6 +147,15 @@ test('coordinator: generating a schedule writes the meat list to the URL', async
   expect(params.get('m')).toContain('~');
 });
 
+test('coordinator: a 250 lb shared meat hydrates within the input constraints', async ({ page }) => {
+  // The URL schema accepts up to 999 lbs; the row input must agree so a valid
+  // shared weight isn't flagged :invalid by its own max attribute.
+  await page.goto('/cook-time-coordinator?serve=14:00&m=spare-ribs~250~250~foil');
+  const wt = page.locator('.meat-row').first().locator('.weight-inp');
+  await expect(wt).toHaveValue('250');
+  expect(await wt.evaluate((el) => el.checkValidity())).toBe(true);
+});
+
 test('coordinator: a slug-valid but unknown cut is dropped, valid meats survive', async ({ page }) => {
   // decodeCookPlan accepts any slug; the page must drop cuts not in D so a bad
   // URL can't create an empty-select row that crashes the auto-calc.
