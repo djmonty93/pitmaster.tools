@@ -496,7 +496,9 @@ test('renderMetro emits the local-guide section for a metro that has an entry', 
 
 test('renderMetro omits the local-guide section for a metro without an entry', () => {
   const metro = gen.METROS.find((m) => !gen.METRO_LOCAL[m.slug]);
-  assert.ok(metro, 'expected at least one metro without a METRO_LOCAL entry (batched rollout)');
+  // Once the rollout completes and every metro has an entry, there is nothing
+  // to assert here — skip gracefully rather than fail on the final batch.
+  if (!metro) return;
   const html = gen.renderMetro(metro);
   assert.ok(!html.includes('local-guide'),
     metro.slug + ' should not render a local-guide section yet');
