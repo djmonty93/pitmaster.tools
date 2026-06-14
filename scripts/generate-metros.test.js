@@ -503,3 +503,10 @@ test('renderMetro omits the local-guide section for a metro without an entry', (
   assert.ok(!html.includes('local-guide'),
     metro.slug + ' should not render a local-guide section yet');
 });
+
+test('every metro has a METRO_LOCAL entry (rollout complete)', () => {
+  // The batched rollout is finished: all 50 metros carry a local guide, and
+  // any metro added later must ship with one too.
+  const missing = gen.METROS.filter((m) => !gen.METRO_LOCAL[m.slug]).map((m) => m.slug);
+  assert.deepEqual(missing, [], 'metros missing a local guide: ' + missing.join(', '));
+});
