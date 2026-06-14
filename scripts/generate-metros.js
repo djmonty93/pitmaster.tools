@@ -228,9 +228,87 @@ const METRO_NOTE = {
   'tulsa-ok':             'Tulsa’s pit scene shares Oklahoma City’s Texas-brisket-and-smoked-bologna playbook — the Arkansas River corridor and northeast Oklahoma woods give the regional cook a distinct hickory-and-pecan flavor.',
 };
 
+// Per-metro local guide (Milestone 6). A 150-200 word, metro-SPECIFIC section
+// (distinct climate calendar + practical home-pitmaster advice) that gives each
+// page genuine unique content beyond the region-shared heritage/climate
+// editorial above. Stored as an array of plain-text paragraphs; renderMetro
+// escapes and wraps each in <p>. Rolled out in batches — a metro renders the
+// local-guide section only once it has an entry here, and the test enforces a
+// 150-word floor plus cross-metro uniqueness on the entries that exist.
+const METRO_LOCAL = {
+  'new-york-ny': [
+    'New York City’s smoke calendar is a four-season negotiation. The strongest backyard windows are late spring and early fall — May, June, September, and October — when daytime highs sit in the 60s and 70s and dew points drop off the muggy July-and-August peak. Midsummer cooks are doable, but the humidity stretches the stall and pop-up thunderstorms roll through often enough that you should check the radar before committing a 12-hour brisket. Winter is the real constraint: December through February bring cold, snow, and gusty winter wind that can shut an open offset down for weeks.',
+    'If you’re cooking on a Brooklyn rooftop or a Queens backyard, wind is the quiet enemy — gradient flow between buildings can swing an offset’s pit temperature 30 degrees. An insulated kamado or pellet cooker buys back most winter and shoulder-season Saturdays, holding temperature when an open firebox would fight you. Save the stick-burner brisket cooks for the calm, dry days the score flags green, build a wind break if your space allows, and start any long cook before dawn so the stall lands in daylight while you can still manage the fire.',
+  ],
+  'los-angeles-ca': [
+    'Los Angeles has some of the friendliest smoking weather in the country, and the calendar barely closes. Coastal and basin neighborhoods stay mild most of the year — dew points are low, rain is rare outside the winter wet spells, and even January often delivers cookable Saturdays. The main seasonal variable is heat: the inland San Fernando and San Gabriel valleys push into the 90s and beyond from July through September, and a Santa Ana wind event can spike both temperature and fire risk, so check conditions before lighting on a red-flag day.',
+    'The low humidity is a gift and a tax. Stalls run shorter here than in the humid Southeast, so a packer brisket moves faster — but the dry air also pulls moisture out of the cook, so lean toward butcher paper over foil to protect the bark and keep a water pan in the offset. LA’s mild marine layer lets an open stick burner run comfortably most weekends; the day to watch is a gusty, bone-dry Santa Ana afternoon, when wind drags pit temperature and the fire wants to run hot. Pick a low-wind day off the score and you can cook almost any weekend.',
+  ],
+  'chicago-il': [
+    'Chicago’s smoke season swings as hard as any city on this list. The best backyard windows are late spring and early fall — May into June, then September into October — when highs settle in the 60s and 70s and the lake breeze stays mild. Summer brings heat, humidity, and severe afternoon storm cells that can erase a planned Saturday with little warning, so watch the radar in July and August. Winter is the wall: December through February deliver brutal cold and persistent wind off the lake, closing an open-firebox cook down for weeks at a stretch.',
+    'Wind is the year-round variable here, and an offset in an exposed yard pays for it in fuel and temperature swings. An insulated kamado or pellet cooker is the practical choice for shoulder-season and winter Saturdays — both hold their cook when a stick burner would be chasing the gauge. If you run an offset, build a wind break, save the long brisket cooks for the calm green days the score flags, and start before dawn so the stall clears while you still have daylight to work the fire.',
+  ],
+  'dallas-fort-worth-tx': [
+    'Dallas–Fort Worth gives a long smoke season bracketed by two hazards: spring storms and summer heat. The strongest windows are the shoulder months — March into May before the worst storms, then October and November once the heat breaks. Late spring brings the Metroplex’s signature severe weather, with frontal lines that drop wind, hail, and rain fast, so a long weekend cook in April or May needs a close read on the gust and storm forecast. July through September runs hot and humid, which is workable but asks a lot of an exposed pit.',
+    'Wind is the constant on the North Texas prairie, and the region’s offset-stick-burner tradition lives by the gust forecast. Build a wind break, run heavier woods like post oak that hold smoke through a long stall, and watch pit temperature closely when a front is moving through. Summer’s lower humidity shortens the stall compared with the Gulf Coast, but the dry heat pulls moisture, so favor butcher paper on the wrap. For the windiest Saturdays, an insulated kamado or pellet cooker is the reliable backup when an open firebox would spend the day fighting gusts.',
+  ],
+  'houston-tx': [
+    'Houston’s defining smoke variable is Gulf humidity. Dew points climb into the 70s through the long summer, which drives a high wet-bulb temperature and the long, stubborn stalls that define a Houston brisket cook. The most comfortable windows are late fall through early spring — November into March — when the air dries out and cools off. Summer is hot, sticky, and storm-prone, and Gulf hurricane season runs June through November with peak risk from late summer into early fall, so any long-range weekend plan in that stretch should carry a weather contingency.',
+    'This humidity is exactly the condition the score’s wet-bulb weighting was built for, and it is why an attentive fire matters here. An insulated kamado runs efficient stalls and sips fuel through the muggy months; a pellet cooker handles the same conditions cleanly. The city’s Central Texas brisket and Gulf Coast barbacoa traditions both reward patience — give a packer brisket more time than you would budget in a dry climate, and do not panic when the stall holds flat for hours. Start before dawn so the long stall lands in daylight, and keep the wrap handy to push through it.',
+  ],
+  'washington-dc': [
+    'Washington’s smoke calendar runs warm and humid in summer and mild but damp in winter. The strongest backyard windows are spring and fall — April into June, then September into October — when highs sit in the 60s and 70s and the worst of the Mid-Atlantic humidity backs off. July and August are hot and sticky, with afternoon thunderstorms common enough that a long Saturday cook needs a radar check. Winter rarely shuts the season down entirely, but the damp cold and gusty days between December and February favor an insulated cooker over an open firebox.',
+    'DC’s blend of Carolina pulled pork and Texas brisket both reward planning around the humidity. Summer dew points push the wet-bulb temperature up and stretch the stall, so budget extra time for long cuts from June through September. A pellet cooker or insulated kamado handles the muggy stretch comfortably and keeps shoulder-season and winter Saturdays in play; an offset is rewarding on the calm, dry days the score flags green. Watch for pop-up storms on summer afternoons, and start early so the stall clears before evening.',
+  ],
+  'miami-fl': [
+    'Miami runs on a two-season calendar that shapes every cook. The dry season — roughly November through April — is the prime smoking window: warm, breezy, lower humidity, and reliably cookable weekends. The wet season flips that from May through October, with near-daily afternoon downpours, oppressive dew points, and the peak of hurricane season layered on top. A long weekend cook in summer is doable, but you are cooking around the three-to-five p.m. storm clock, so start early and keep the radar open.',
+    'The subtropical humidity drives a high wet-bulb temperature, which means long, slow stalls on brisket and pork butt for much of the year. An insulated kamado is ideal here — it runs efficient stalls and conserves fuel through the muggy stretch — and a pellet cooker handles the same conditions cleanly. Miami’s Caribbean and Cuban smoke traditions lean on citrus marinades and tropical fruit woods that pair well with pork and poultry. Give long cuts more time than a drier climate would need, keep a wrap ready to push through the stall, and treat the afternoon sea-breeze storms as the variable that decides most summer Saturdays.',
+  ],
+  'philadelphia-pa': [
+    'Philadelphia’s smoke season tracks the classic Northeast pattern: strong spring and fall, hot-and-humid summer, cold winter. The best backyard windows are May into June and September into October, when highs sit in the comfortable 60s and 70s and dew points ease off the midsummer peak. July and August bring heat, humidity, and afternoon storms; winter brings cold and gusty days from December through February that close an open offset for stretches at a time.',
+    'Gusty winters and big seasonal swings make an insulated kamado or pellet cooker the practical year-round choice — both hold their cook through cold and gusts that would have a stick burner chasing the gauge. The city’s Texas-leaning pit scene still treats the offset as the brisket benchmark; save those cooks for the calm, dry green-flagged Saturdays and build a wind break if your row-home yard is exposed. Summer humidity stretches the stall, so budget extra time for long cuts and start any brisket before dawn to keep the fire-tending in daylight.',
+  ],
+  'atlanta-ga': [
+    'Atlanta’s smoke calendar is generous on the shoulders and humid in the middle. Spring and fall — March into May, then September into November — are the prime windows, with mild highs and lower dew points than the swampy summer peak. June through August is hot and humid, with afternoon thunderstorms a near-daily feature, so summer weekend cooks live by the radar. The metro’s higher elevation in the north Georgia piedmont takes a little edge off the heat compared with the coastal Southeast, but humidity is still the dominant variable.',
+    'Those summer dew points push the wet-bulb temperature up and stretch the stall, exactly the condition the score weights heavily. An insulated kamado runs efficient stalls through the humid months and a pellet cooker handles them cleanly; an offset rewards an attentive fire-tender on the calm, dry days. Atlanta’s pits run both Carolina-style chopped pork and Texas brisket, and both long cuts want patience in this climate — give them more time than you would budget out West, keep a wrap ready, and start early so the stall clears before the afternoon storm cells build.',
+  ],
+  'boston-ma': [
+    'Boston has one of the shorter smoke seasons on this list, bracketed by hard New England winters. The reliable backyard window runs May through October; inside that, late spring and early fall are the sweet spots, with mild highs, lower humidity, and steadier air than the gusty cold months. Summer is pleasant, but coastal storms and humid stretches show up, and nor’easters and raw, windy days from November through March close an open offset for long runs.',
+    'Coastal wind is the variable to plan around — an exposed yard near the harbor sees gusts that drag an offset’s pit temperature, and gradient flow can swing 20-plus mph through a single afternoon. An insulated kamado or pellet cooker extends the season at both ends and holds temperature through the wind far better than an open firebox. Save the stick-burner brisket cooks for the calm, dry days the score flags green, build a wind break if you can, and treat the May-to-October stretch as your real cooking calendar — the rest of the year belongs to the insulated rigs.',
+  ],
+  'phoenix-az': [
+    'Phoenix smoking is all about the heat and the monsoon. From late spring through early fall the desert runs brutally hot, with highs well into the 100s in June and July that are hard on both the cook and the pitmaster. The strongest windows are the long, mild shoulder seasons and winter: October through April delivers comfortable, dry, reliably cookable Saturdays. The summer monsoon, roughly July through September, layers sudden dust storms and downpours on top of the heat, so a long weekend cook in that stretch needs a close eye on the afternoon.',
+    'The desert’s low dew points are the technical gift: stalls are short and bark forms fast because there is little evaporative cooling to hold the meat flat. The trade is moisture — the dry air pulls it out of the cook quickly, so favor butcher paper over foil to protect the bark, keep a water pan in the offset, and lean toward shorter rest windows. An insulated kamado handles the summer heat best; an open stick burner is most comfortable in the October-to-April window, when the temperature is not already doing half the cooking for you.',
+  ],
+  'san-francisco-ca': [
+    'San Francisco has the mildest, most stable smoking weather of any major US city, and the season essentially never closes. The marine climate keeps highs moderate year-round — rarely hot, rarely freezing — with moderate dew points and a mostly rain-free stretch from spring through fall. The wettest months are November through March, but even then cookable weekends are common. The one constant is the afternoon wind and fog off the Pacific, which is the real variable a Bay Area pitmaster plans around rather than heat or storms.',
+    'That marine wind drags an open offset’s pit temperature and can swing 15-to-20 mph as the fog rolls in, so a wind break earns its keep here. An inland yard a few miles back from the water — in the East Bay or South Bay — sees less of it and runs an offset comfortably most of the year. The moderate dew points mean shorter stalls than the humid East, so a brisket moves a touch faster, but the breezy marine air still pulls moisture, so favor butcher paper on the wrap. Pick a low-wind day off the score and the Bay Area calendar will give you a cook nearly any weekend.',
+  ],
+  'riverside-ca': [
+    'Riverside and the Inland Empire sit far enough back from the coast to trade San Francisco’s fog for real desert heat. Summers are hot and dry, with highs in the 90s and 100s from June through September, while the coastal marine layer that cools Los Angeles mostly burns off before it reaches the valley. The strongest smoking windows are the long, mild shoulder seasons and winter: October through May delivers comfortable, dry, reliably cookable Saturdays, and rain is scarce outside a few winter weeks.',
+    'The dry inland air behaves more like the Mountain region than the coast: low dew points mean short stalls and fast bark, but moisture loss is the variable to manage. Favor butcher paper over foil to protect the bark, keep a water pan in the offset, and lean toward shorter rest windows on a long cook. Santa Ana wind events are the other thing to watch — a gusty, bone-dry afternoon both drags pit temperature and raises fire risk, so check conditions before lighting on a red-flag day. Outside those, the Inland Empire’s backyard-heavy pit scene gets one of the longest cook calendars in the state.',
+  ],
+  'detroit-mi': [
+    'Detroit sits in the heart of the Great Lakes, and the lakes drive its smoke calendar. The dependable windows are May into June and the September-into-October stretch, with highs in the 60s and 70s and humidity that has not yet peaked. July and August turn warm and sticky, with lake moisture feeding the occasional severe afternoon storm. From late November through February the cold sets in hard, snow piles up, and wind funneling off Lake Erie and Lake St. Clair makes an uncovered cook a battle.',
+    'Because the lakes keep the air moving most of the year, a backyard pit in an open Detroit lot fights more temperature drift than the inland average. Cooks here lean on insulated kamados and pellet rigs to hold a steady fire through the windy shoulder weeks and the deep cold; a stick burner shines on the settled, low-wind afternoons the score marks green. The Motor City’s pits favor Memphis ribs and Carolina-style pulled pork, both forgiving cuts that suit a climate where the weather can turn on you. Lay in extra fuel for winter sessions, shelter the cooker from the lake wind, and let the fall window carry your longest brisket cooks.',
+  ],
+  'seattle-wa': [
+    'Seattle’s smoke calendar is shaped by the wet season and the dry one. The reliable window is summer — roughly July through September — when the Pacific Northwest finally dries out and delivers mild, rain-free weekends that are some of the most pleasant cooking weather anywhere. The rest of the year is the famous damp: cool, gray, and persistently wet from October into June, with rain more often a drizzle than a downpour. It rarely gets cold enough to freeze out a cook, but the moisture is constant.',
+    'The marine climate’s mild temperatures favor longer, cooler cooks, and the low summer humidity keeps stalls manageable. The variable to plan around is rain rather than heat or wind — an insulated kamado or pellet cooker shrugs off a drizzle and holds its cook through the damp shoulder seasons, while an open offset is happiest in the dry July-to-September stretch. Seattle’s pits run alder-smoked salmon alongside a growing brisket scene, and the regional woods suit the mild climate. Pick a dry day off the score, keep the cooker under cover if you can, and the summer window will reward you.',
+  ],
+  'minneapolis-mn': [
+    'Minneapolis–St. Paul has the most extreme smoke calendar on this list. Summers are warm and humid with severe afternoon storms; winters are genuinely brutal, with subzero stretches and wind that closes any open-firebox cook down for months. The reliable backyard window is roughly May through October, and inside that, late spring and early fall are the sweet spots — mild highs, lower humidity, and steadier air than the storm-prone heart of summer.',
+    'This is insulated-cooker country by necessity. From November through March, a kamado or pellet rig is the only practical way to keep cooking — both hold their temperature when the air alone would fight a stick burner all day. Even in summer, Upper Midwest wind is the variable to track; gust spikes punish offsets and reward the insulated rigs. The Twin Cities pit scene is winter-tested for exactly this reason. Save the open offset brisket cooks for the calm, dry green-flagged days from May to October, start before dawn so the stall clears in daylight, and let the insulated cookers carry the cold half of the year.',
+  ],
+  'san-diego-ca': [
+    'San Diego has, by most measures, the easiest smoking weather in the contiguous United States. The coastal climate is mild and remarkably stable — highs rarely climb out of the 70s and 80s, lows rarely approach freezing, humidity stays moderate, and rain is scarce outside a few winter weeks. The practical result is a cook calendar that genuinely stays open year-round: there is almost always a cookable Saturday on the board, in January as much as July.',
+    'With heat, cold, and storms mostly off the table, the main variable is the afternoon sea breeze, which can drag an open offset’s pit temperature as it picks up off the water. A wind break helps near the coast, and an inland yard a few miles back sees less of it. The mild marine air and moderate humidity keep stalls shorter than the humid East without the harsh moisture loss of the desert, so an offset runs comfortably most weekends and the wrap choice is forgiving. Pick a low-wind day off the score and San Diego will hand you a clean cook just about any time of year.',
+  ],
+};
+
 // Last-modified date emitted in og/twitter/json-ld. Bump when the template
 // changes materially; metro-list changes alone don't require it.
-const LAST_MODIFIED = '2026-06-12';
+const LAST_MODIFIED = '2026-06-14';
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, function (ch) {
@@ -268,6 +346,17 @@ function renderMetro(metro) {
   if (!note) throw new Error('generate-metros: missing METRO_NOTE for ' + slug);
   const intro     = name + ', ' + stateNm + ' sits in the ' + regLbl + ' barbecue region. ' + note + ' This page scores the next seven days for low-and-slow cooks in the ' + name + ' metro, weighing rain probability, sustained wind and gusts, daytime temperature, and the wet-bulb humidity that drives the stall — then weights the result for your cut and cooker so you can pick the day with the highest odds of a clean cook.';
   const closing   = 'Pick a day with a strong score, light the fire, and stop guessing whether Saturday in ' + name + ' will hold. The form lets you swap cut and cooker without leaving the page — your selection persists across visits via local storage. ZIP defaults to ' + zip + ' for the ' + name + ' metro; change it any time to score a different yard.';
+
+  // Metro-specific local guide (Milestone 6), rendered only once a metro has a
+  // METRO_LOCAL entry so the section can roll out in batches. Reuses the
+  // editorial-section class for styling + embed-mode hiding.
+  const localParas = METRO_LOCAL[slug] || null;
+  const localGuideLines = localParas
+    ? ['  <section class="editorial-section local-guide" aria-label="Smoking in ' + escapeHtml(name) + '">',
+       '    <h2>Planning a weekend smoke in ' + escapeHtml(name) + '</h2>']
+        .concat(localParas.map(function (p) { return '    <p>' + escapeHtml(p) + '</p>'; }))
+        .concat(['  </section>', ''])
+    : [];
 
   const faqJson = {
     '@context': 'https://schema.org',
@@ -454,6 +543,7 @@ function renderMetro(metro) {
     '',
     '  <!-- INJECT:subscribe-form.html -->',
     '',
+    ...localGuideLines,
     '  <section class="editorial-section" aria-label="' + escapeHtml(name) + ' BBQ context">',
     '    <h2>Barbecue heritage</h2>',
     '    <p>' + escapeHtml(heritage) + '</p>',
@@ -608,6 +698,7 @@ module.exports = {
   REGION_CLIMATE,
   REGION_COOKER_TIP,
   METRO_NOTE,
+  METRO_LOCAL,
   GENERATED_MARKER,
   LAST_MODIFIED,
   renderMetro,
