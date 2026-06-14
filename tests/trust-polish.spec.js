@@ -33,11 +33,14 @@ for (const [path, name] of TOOL_BREADCRUMBS) {
     const bc = page.locator('nav.breadcrumb');
     await expect(bc).toBeVisible();
     // It must be the first element inside <main>, not buried elsewhere.
-    const firstChildClass = await page.evaluate(() => {
+    // matches('nav.breadcrumb') is token-precise — 'not-breadcrumb' or
+    // 'breadcrumb-wrapper' would NOT satisfy the .breadcrumb class selector.
+    const firstChildIsBreadcrumb = await page.evaluate(() => {
       const main = document.querySelector('main#main-content');
-      return main && main.firstElementChild ? main.firstElementChild.className : null;
+      const first = main && main.firstElementChild;
+      return !!first && first.matches('nav.breadcrumb');
     });
-    expect(firstChildClass).toContain('breadcrumb');
+    expect(firstChildIsBreadcrumb).toBe(true);
     await expect(bc.locator('a[href="/"]')).toHaveText('Home');
     await expect(bc.locator('a[href="/tools"]')).toHaveText('All Tools');
     await expect(bc.locator('[aria-current="page"]')).toHaveText(name);
