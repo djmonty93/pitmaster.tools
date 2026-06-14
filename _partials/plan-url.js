@@ -39,13 +39,23 @@
   };
   var TEMPS = [225, 250, 275, 300];
   var SERVE_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+  // A whole string that is a number — so "12abc"/"6x"/"225foo" are rejected
+  // outright rather than parsed to their numeric prefix.
+  var NUMERIC_RE = /^[+-]?(?:\d+\.?\d*|\.\d+)$/;
   // Cut keys vary per tool (the homepage 28, the coordinator's own list), so
   // the coordinator validates cut structurally and the page applies it
   // defensively (setSelectIfOption) — only an existing <option> takes effect.
   var CUT_SLUG_RE = /^[a-z0-9-]{1,40}$/;
 
   function clampNum(raw, min, max, integer) {
-    var n = typeof raw === 'number' ? raw : parseFloat(String(raw));
+    var n;
+    if (typeof raw === 'number') {
+      n = raw;
+    } else {
+      var s = String(raw).trim();
+      if (!NUMERIC_RE.test(s)) return undefined;
+      n = parseFloat(s);
+    }
     if (!isFinite(n)) return undefined;
     if (integer) n = Math.trunc(n);
     if (n < min) n = min;
@@ -147,9 +157,8 @@
     var f = String(token).split('~');
     if (f.length < 4) return undefined;
     var cut = CUT_SLUG_RE.test(f[0]) ? f[0] : undefined;
-    var wt = clampNum(f[1], 0.5, 200, false);
-    var n = parseInt(f[2], 10);
-    var temp = TEMPS.indexOf(n) !== -1 ? n : undefined;
+    var wt = clampNum(f[1], 0.5, 999, false);
+    var temp = VALIDATORS.temp(f[2]);
     var wrap = inEnum(f[3], ENUMS.wrap);
     if (cut === undefined || wt === undefined || temp === undefined || wrap === undefined) {
       return undefined;
@@ -194,9 +203,8 @@
         for (var j = 0; j < state.meats.length; j++) {
           var m = state.meats[j] || {};
           var cut = CUT_SLUG_RE.test(String(m.cut)) ? String(m.cut) : undefined;
-          var wt = clampNum(m.wt, 0.5, 200, false);
-          var n = parseInt(m.temp, 10);
-          var temp = TEMPS.indexOf(n) !== -1 ? n : undefined;
+          var wt = clampNum(m.wt, 0.5, 999, false);
+          var temp = VALIDATORS.temp(m.temp);
           var wrap = inEnum(m.wrap, ENUMS.wrap);
           if (cut !== undefined && wt !== undefined && temp !== undefined && wrap !== undefined) {
             toks.push([cut, wt, temp, wrap].join('~'));

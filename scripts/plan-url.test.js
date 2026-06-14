@@ -76,6 +76,17 @@ test('decode coerces ppl to an integer', () => {
   assert.equal(decodePlanParams('ppl=6.9').ppl, 6);
 });
 
+test('decode rejects suffix-garbage numerics (full numeric match required)', () => {
+  assert.equal(decodePlanParams('wt=12abc').wt, undefined);
+  assert.equal(decodePlanParams('ppl=6x').ppl, undefined);
+  assert.equal(decodePlanParams('temp=225foo').temp, undefined);
+  assert.equal(decodePlanParams('sear=500!').sear, undefined);
+  assert.equal(decodePlanParams('thick=2in').thick, undefined);
+  // Clean values (including a fractional ppl that truncates) still parse.
+  assert.equal(decodePlanParams('wt=12.5').wt, 12.5);
+  assert.equal(decodePlanParams('ppl=6.9').ppl, 6);
+});
+
 test('decode rejects a non-member smoker temp (select has fixed options)', () => {
   assert.equal(decodePlanParams('temp=240').temp, undefined);
   assert.equal(decodePlanParams('temp=275').temp, 275);
@@ -179,10 +190,23 @@ test('cook plan drops malformed meat tokens but keeps valid ones', () => {
 });
 
 test('cook plan clamps meat weights and rejects bad wrap/cut', () => {
-  const decoded = decodeCookPlan('m=spare-ribs~999~275~none;BAD CUT~5~250~foil;ribs~5~250~cling');
-  // first: weight clamped to 200; second: cut has a space (invalid slug); third: bad wrap
+  const decoded = decodeCookPlan('m=spare-ribs~99999~275~none;BAD CUT~5~250~foil;ribs~5~250~cling');
+  // first: weight clamped to the 999 ceiling; second: cut has a space (invalid
+  // slug); third: bad wrap
   assert.equal(decoded.meats.length, 1);
-  assert.deepEqual(decoded.meats[0], { cut: 'spare-ribs', wt: 200, temp: 275, wrap: 'none' });
+  assert.deepEqual(decoded.meats[0], { cut: 'spare-ribs', wt: 999, temp: 275, wrap: 'none' });
+});
+
+test('cook plan preserves a 250 lb meat (no premature clamp)', () => {
+  // Regression: the coordinator accepts weights above the old 200 ceiling, so
+  // a generated schedule must round-trip the real weight, not a clamped one.
+  const decoded = decodeCookPlan('m=spare-ribs~250~250~foil');
+  assert.equal(decoded.meats[0].wt, 250);
+});
+
+test('cook plan rejects a meat token with suffix-garbage weight or temp', () => {
+  const decoded = decodeCookPlan('m=spare-ribs~12abc~250~foil;pork-butt~8~250foo~foil');
+  assert.equal('meats' in decoded, false); // both tokens invalid
 });
 
 test('cook plan with no valid meats omits the meats key', () => {
