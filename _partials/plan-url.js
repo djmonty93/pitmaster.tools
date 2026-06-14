@@ -105,6 +105,11 @@
     thick: function (v) { return clampNum(v, 0, 6, false); }    // brisket flat thickness (in)
   };
   var KEYS = Object.keys(VALIDATORS);
+  // Every key the plan family owns across both encoders (flat schema + the
+  // coordinator's `m` meat list). Both encoders purge this whole set before
+  // writing their own keys, so neither can leave the other's stale params in
+  // a shared URL while still preserving foreign params (embed, utm_*).
+  var ALL_PLAN_KEYS = KEYS.concat(['m']);
 
   function stripQ(search) {
     var s = search == null ? '' : String(search);
@@ -136,7 +141,7 @@
     var params;
     try { params = new URLSearchParams(stripQ(existingSearch || '')); }
     catch (e) { params = new URLSearchParams(); }
-    for (var i = 0; i < KEYS.length; i++) params.delete(KEYS[i]);
+    for (var i = 0; i < ALL_PLAN_KEYS.length; i++) params.delete(ALL_PLAN_KEYS[i]);
     if (state) {
       for (var j = 0; j < KEYS.length; j++) {
         var key = KEYS[j];
@@ -155,7 +160,6 @@
   // param: items joined by ';', fields by '~' (cut~wtLbs~temp~wrap). Weights
   // are canonical pounds so the param is unit-independent. Foreign params
   // (embed, utm_*) are preserved by encodeCookPlan just like encodePlanParams.
-  var COOK_KEYS = ['serve', 'wu', 'tu', 'm'];
 
   function decodeMeat(token) {
     var f = String(token).split('~');
@@ -197,7 +201,7 @@
     var params;
     try { params = new URLSearchParams(stripQ(existingSearch || '')); }
     catch (e) { params = new URLSearchParams(); }
-    for (var i = 0; i < COOK_KEYS.length; i++) params.delete(COOK_KEYS[i]);
+    for (var i = 0; i < ALL_PLAN_KEYS.length; i++) params.delete(ALL_PLAN_KEYS[i]);
     if (state) {
       if (state.serve != null) { var s = VALIDATORS.serve(state.serve); if (s !== undefined) params.set('serve', s); }
       if (state.wu != null) { var wu = VALIDATORS.wu(state.wu); if (wu !== undefined) params.set('wu', wu); }

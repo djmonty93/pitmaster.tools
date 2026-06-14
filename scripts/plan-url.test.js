@@ -222,6 +222,31 @@ test('cook plan with no valid meats omits the meats key', () => {
   assert.equal('meats' in decoded, false);
 });
 
+test('encodePlanParams strips a stale coordinator meat list (m) it does not own', () => {
+  // A flat-plan encode must not leave a foreign `m` param behind, or the plan
+  // URL would carry a phantom meat list that a coordinator page would ingest.
+  const qs = encodePlanParams({ cut: 'tri-tip', ppl: 2 }, '?m=brisket-sliced~12~250~foil&embed=1');
+  const params = new URLSearchParams(qs);
+  assert.equal(params.get('m'), null);     // stale meat list removed
+  assert.equal(params.get('embed'), '1');  // foreign param preserved
+  assert.equal(params.get('cut'), 'tri-tip');
+});
+
+test('encodeCookPlan strips stale flat plan keys it does not own', () => {
+  const qs = encodeCookPlan(
+    { serve: '15:00', meats: [{ cut: 'tri-tip', wt: 3, temp: 300, wrap: 'none' }] },
+    '?cut=brisket-pulled&wt=12&ppl=6&sear=500&utm_source=fb'
+  );
+  const params = new URLSearchParams(qs);
+  assert.equal(params.get('cut'), null);   // stale flat keys removed
+  assert.equal(params.get('wt'), null);
+  assert.equal(params.get('ppl'), null);
+  assert.equal(params.get('sear'), null);
+  assert.equal(params.get('utm_source'), 'fb'); // foreign param preserved
+  assert.equal(params.get('serve'), '15:00');
+  assert.equal(params.get('m'), 'tri-tip~3~300~none');
+});
+
 test('encodeCookPlan preserves foreign params and overwrites stale meat list', () => {
   const qs = encodeCookPlan(
     { serve: '15:00', meats: [{ cut: 'tri-tip', wt: 3, temp: 300, wrap: 'none' }] },

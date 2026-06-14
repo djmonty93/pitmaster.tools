@@ -22,6 +22,9 @@ test('homepage: calculating writes the plan to the URL', async ({ page }) => {
   expect(params.get('temp')).toBe('250');
   expect(params.get('serve')).toBe('17:30');
   expect(params.get('wu')).toBeTruthy();
+  // pork-butt-pulled is not two-phase, so no inapplicable sear/grill noise.
+  expect(params.get('sear')).toBeNull();
+  expect(params.get('grill')).toBeNull();
 });
 
 test('homepage: Copy plan link copies the current plan URL', async ({ page, context }) => {

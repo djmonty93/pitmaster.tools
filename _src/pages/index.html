@@ -1515,6 +1515,10 @@ function searF(){
   return state.tu==='C' ? Math.round(v*9/5+32) : v;
 }
 function planState(){
+  // grill/sear only matter for two-phase cuts; omit them otherwise so a
+  // non-two-phase plan URL isn't polluted with an inapplicable (and, in °C
+  // mode, clamped) sear value.
+  var twoPhase=document.getElementById('two-phase-section').classList.contains('visible');
   return {
     cut: document.getElementById('meatType').value,
     wt: parseFloat(document.getElementById('weight').value),
@@ -1528,8 +1532,8 @@ function planState(){
     inj: document.getElementById('injected').value==='yes' ? 1 : 0,
     sz: state.sz,
     tu: state.tu,
-    grill: document.getElementById('grillType').value,
-    sear: searF()
+    grill: twoPhase ? document.getElementById('grillType').value : undefined,
+    sear: twoPhase ? searF() : undefined
   };
 }
 function syncUrl(){
