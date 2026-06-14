@@ -9,7 +9,7 @@ served by a Cloudflare Worker over the existing static-site bundle.
 pitmaster.tools/
   _src/                  HTML pages (recursed into subdirs at build time)
   _partials/             CSS/JS partials injected by build.js
-  build.js               static-site builder (CommonJS, no deps)
+  build.js               static-site builder (CommonJS; terser + csso minify partials, MINIFY=0 to skip)
   scripts/
     generate-metros.js   emits Best Smoke Days metro pages before build.js
   worker/                Cloudflare Worker — TypeScript, tested with Vitest + Miniflare
