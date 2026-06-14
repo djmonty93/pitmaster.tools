@@ -436,6 +436,9 @@ function shingles(text) {
   for (let i = 0; i + 5 <= words.length; i++) set.add(words.slice(i, i + 5).join(' '));
   return set;
 }
+// Overlap coefficient (shared / smaller set), NOT Jaccard — deliberately
+// stricter for unequal-length entries, since it flags when one entry's prose
+// is largely a subset of another's even if the other is much longer.
 function shingleOverlap(a, b) {
   if (!a.size || !b.size) return 0;
   let shared = 0;
@@ -456,8 +459,10 @@ test('every METRO_LOCAL entry is a paragraph array of at least 150 words', () =>
     assert.ok(paras.every((p) => typeof p === 'string' && p.trim().length > 0),
       slug + ' paragraphs must be non-empty strings');
     const count = wordCount(paras.join(' '));
+    // Spec: a 150-200 word section. 205 is a small counting-quirk margin over
+    // the 200 target, not license to write long.
     assert.ok(count >= 150, slug + ' local guide has only ' + count + ' words (needs ≥150)');
-    assert.ok(count <= 260, slug + ' local guide has ' + count + ' words (keep it ≤260)');
+    assert.ok(count <= 205, slug + ' local guide has ' + count + ' words (target 150-200)');
   }
 });
 
