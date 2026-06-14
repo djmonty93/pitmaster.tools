@@ -423,3 +423,76 @@ test('sitemap.xml lists every metro page exactly once', () => {
       'sitemap.xml should contain ' + url + ' exactly once (saw ' + occurrences + ')');
   }
 });
+
+// ── Metro local guide (Milestone 6, batched rollout) ────────────────────────
+
+function wordCount(text) {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+// 5-word shingles, used to detect near-duplicate prose between metros.
+function shingles(text) {
+  const words = text.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
+  const set = new Set();
+  for (let i = 0; i + 5 <= words.length; i++) set.add(words.slice(i, i + 5).join(' '));
+  return set;
+}
+function shingleOverlap(a, b) {
+  if (!a.size || !b.size) return 0;
+  let shared = 0;
+  for (const s of a) if (b.has(s)) shared++;
+  return shared / Math.min(a.size, b.size);
+}
+
+test('every METRO_LOCAL key is a real metro slug', () => {
+  const slugs = new Set(gen.METROS.map((m) => m.slug));
+  for (const slug of Object.keys(gen.METRO_LOCAL)) {
+    assert.ok(slugs.has(slug), 'METRO_LOCAL has unknown slug: ' + slug);
+  }
+});
+
+test('every METRO_LOCAL entry is a paragraph array of at least 150 words', () => {
+  for (const [slug, paras] of Object.entries(gen.METRO_LOCAL)) {
+    assert.ok(Array.isArray(paras) && paras.length >= 1, slug + ' must be a non-empty array');
+    assert.ok(paras.every((p) => typeof p === 'string' && p.trim().length > 0),
+      slug + ' paragraphs must be non-empty strings');
+    const count = wordCount(paras.join(' '));
+    assert.ok(count >= 150, slug + ' local guide has only ' + count + ' words (needs ≥150)');
+    assert.ok(count <= 260, slug + ' local guide has ' + count + ' words (keep it ≤260)');
+  }
+});
+
+test('METRO_LOCAL entries are not near-duplicates of one another', () => {
+  const entries = Object.entries(gen.METRO_LOCAL).map(([slug, paras]) => ({
+    slug, sh: shingles(paras.join(' ')),
+  }));
+  for (let i = 0; i < entries.length; i++) {
+    for (let j = i + 1; j < entries.length; j++) {
+      const ov = shingleOverlap(entries[i].sh, entries[j].sh);
+      assert.ok(ov < 0.2,
+        'near-duplicate local content: ' + entries[i].slug + ' vs ' + entries[j].slug +
+        ' (5-gram overlap ' + ov.toFixed(2) + ')');
+    }
+  }
+});
+
+test('renderMetro emits the local-guide section for a metro that has an entry', () => {
+  const metro = gen.METROS.find((m) => gen.METRO_LOCAL[m.slug]);
+  assert.ok(metro, 'expected at least one metro with a METRO_LOCAL entry');
+  const html = gen.renderMetro(metro);
+  assert.ok(html.includes('class="editorial-section local-guide"'),
+    'local-guide section missing for ' + metro.slug);
+  assert.ok(html.includes('Planning a weekend smoke in ' + metro.name),
+    'local-guide heading missing for ' + metro.slug);
+  // Every paragraph’s text must appear in the rendered HTML.
+  for (const p of gen.METRO_LOCAL[metro.slug]) {
+    assert.ok(html.includes(gen.escapeHtml(p)), metro.slug + ' missing a local paragraph');
+  }
+});
+
+test('renderMetro omits the local-guide section for a metro without an entry', () => {
+  const metro = gen.METROS.find((m) => !gen.METRO_LOCAL[m.slug]);
+  assert.ok(metro, 'expected at least one metro without a METRO_LOCAL entry (batched rollout)');
+  const html = gen.renderMetro(metro);
+  assert.ok(!html.includes('local-guide'),
+    metro.slug + ' should not render a local-guide section yet');
+});
