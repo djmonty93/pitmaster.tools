@@ -197,6 +197,34 @@ test('every state in METROS has a region, state-name, and either state or region
   }
 });
 
+test('cookerTipFor returns a per-metro override for inland Pacific metros, falls back otherwise', () => {
+  // Inland Pacific metros carry a climate override; their cooker tip must
+  // match so the same page can't say "inland/desert" in one paragraph and
+  // "coastal wind" in the next.
+  for (const slug of ['sacramento-ca', 'riverside-ca', 'portland-or']) {
+    const metro = gen.METROS.find((m) => m.slug === slug);
+    assert.ok(metro, slug + ' not found in METROS');
+    const tip = gen.cookerTipFor(metro);
+    assert.equal(tip, gen.COOKER_TIP_BY_METRO[slug], slug + ' should use its cooker-tip override');
+    assert.notEqual(tip, gen.REGION_COOKER_TIP.pacific, slug + ' must not fall back to the coastal Pacific tip');
+  }
+  // A metro without an override falls back to its region tip.
+  const coastal = gen.METROS.find((m) => m.slug === 'san-diego-ca');
+  assert.ok(coastal, 'san-diego-ca not found in METROS');
+  assert.equal(gen.cookerTipFor(coastal), gen.REGION_COOKER_TIP.pacific,
+    'san-diego-ca should fall back to the region cooker tip');
+});
+
+test('every overridden metro renders its cooker-tip override in the page body', () => {
+  for (const slug of Object.keys(gen.COOKER_TIP_BY_METRO)) {
+    const metro = gen.METROS.find((m) => m.slug === slug);
+    assert.ok(metro, slug + ' not found in METROS');
+    const html = gen.renderMetro(metro);
+    assert.ok(html.includes(gen.escapeHtml(gen.COOKER_TIP_BY_METRO[slug])),
+      slug + ' page body missing its cooker-tip override');
+  }
+});
+
 test('renderMetro emits the marker as the first line', () => {
   const html = gen.renderMetro(gen.METROS[0]);
   assert.equal(html.startsWith(gen.GENERATED_MARKER), true);
