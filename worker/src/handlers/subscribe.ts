@@ -181,6 +181,15 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
       });
       espStatus = 'queued';
     } else if (err instanceof SenderError) {
+      // Surface the real cause for observability — this path was silent, so
+      // a misconfigured/missing SENDER_API_TOKEN (401), a request-shape
+      // mismatch (422), or a malformed Sender response all looked identical
+      // to a genuine rejection. summarizeError redacts secrets/PII.
+      console.warn('subscribe: Sender rejected (non-retryable)', {
+        status: err.status,
+        kind: err.kind,
+        error: summarizeError(err),
+      });
       return jsonError(
         err.status === 422 ? 422 : 400,
         'sender_rejected',

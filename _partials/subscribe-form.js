@@ -30,14 +30,15 @@
   }
 
   // Map a server error code (or absence of one) to a user-facing line.
+  // Note: `sender_rejected` is NOT "already subscribed" — Sender's
+  // /subscribers is an upsert, so a genuine duplicate succeeds. It's a
+  // server-side failure (e.g. a misconfigured token), so it falls through
+  // to the generic try-again message rather than blaming the user's email.
   function messageForError(code) {
     if (code === 'invalid_body' || code === 'invalid_json') {
       return 'Please enter a valid email and 5-digit ZIP code.';
     }
-    if (code === 'sender_rejected') {
-      return "We couldn't add that email — it may already be subscribed. Try another?";
-    }
-    return 'Something went wrong. Please try again in a moment.';
+    return 'Something went wrong on our end. Please try again in a moment.';
   }
 
   function init() {
