@@ -230,12 +230,16 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
       const out: SenderGroup[] = [];
       let url: string | null = '/groups?limit=100';
       while (url !== null) {
+        // Sender.net's /v2/groups returns the group name under `title`
+        // (NOT `name`); `id` is a short alphanumeric string. Reading the
+        // wrong key silently filtered out every group, so resolveGroupId
+        // reported "group not found" for groups that actually existed.
         const parsed = await request('group_list', 'GET', url) as
-          | { data?: Array<{ id?: string; name?: string }>; links?: { next?: string | null } }
+          | { data?: Array<{ id?: string; title?: string }>; links?: { next?: string | null } }
           | null;
         for (const row of parsed?.data ?? []) {
-          if (typeof row.id === 'string' && typeof row.name === 'string') {
-            out.push({ id: row.id, name: row.name });
+          if (typeof row.id === 'string' && typeof row.title === 'string') {
+            out.push({ id: row.id, name: row.title });
           }
         }
         url = parsed?.links?.next ?? null;

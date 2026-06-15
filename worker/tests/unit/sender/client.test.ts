@@ -263,7 +263,9 @@ describe('SenderClient.unsubscribe', () => {
 });
 
 describe('SenderClient.listGroups', () => {
-  it('paginates via links.next', async () => {
+  it('paginates via links.next and reads the group name from `title`', async () => {
+    // Real Sender.net /v2/groups shape: the group name is under `title`
+    // (NOT `name`), id is a short alphanumeric string, plus count fields.
     let call = 0;
     const stub = installFetchStub([
       {
@@ -271,11 +273,11 @@ describe('SenderClient.listGroups', () => {
         respond: () => {
           call++;
           if (call === 1) return jsonResponse(200, {
-            data: [{ id: 'g1', name: 'pitmaster_all' }],
+            data: [{ id: 'e5MpBZ', title: 'pitmaster_all', recipient_count: 0, active_subscribers: 0 }],
             links: { next: 'https://api.sender.net/v2/groups?page=2' },
           });
           return jsonResponse(200, {
-            data: [{ id: 'g2', name: 'pitmaster_northeast' }],
+            data: [{ id: 'b8gvG5', title: 'pitmaster_northeast', recipient_count: 0, active_subscribers: 0 }],
             links: { next: null },
           });
         },
@@ -285,8 +287,8 @@ describe('SenderClient.listGroups', () => {
       const client = createSenderClient({ apiToken: 'tok' });
       const groups = await client.listGroups();
       expect(groups).toEqual([
-        { id: 'g1', name: 'pitmaster_all' },
-        { id: 'g2', name: 'pitmaster_northeast' },
+        { id: 'e5MpBZ', name: 'pitmaster_all' },
+        { id: 'b8gvG5', name: 'pitmaster_northeast' },
       ]);
       expect(stub.calls).toHaveLength(2);
     } finally { stub.restore(); }
