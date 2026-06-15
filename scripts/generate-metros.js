@@ -161,6 +161,26 @@ const REGION_CLIMATE = {
   pacific:       'The Pacific climate is mild and marine-influenced. Summer along the coast rarely climbs above 80 °F, dew points stay moderate, and the only persistent variable is afternoon wind off the water. Inland from the coast — eastern Oregon, central California — the picture shifts toward the dry, hot pattern of the Mountain region. Winters are wet, especially north of San Francisco, but rarely cold enough to shut down a well-insulated cooker. The cook calendar is the longest of any region; weekend windows survive year-round.',
 };
 
+// Per-metro climate override. Metros without an entry fall back to
+// REGION_CLIMATE[region]. Exists because the generic regional climate text
+// misfits several metros that sit in a region whose typical pattern isn't
+// theirs: inland Pacific valleys (coastal lead is wrong), low-elevation
+// Mountain desert cities (the altitude/boiling caveat is negligible), and
+// mid-Atlantic/Piedmont Southeast (dew points run cooler than the Gulf/FL
+// "70s" claim). Mirrors the BBQ_HERITAGE_BY_STATE override pattern, but keyed
+// by slug rather than state because siblings in one state differ — coastal
+// California (LA/SF/SD) keeps the marine regional text while inland California
+// (Sacramento, Riverside) needs the dry-hot override.
+const CLIMATE_BY_METRO = {
+  'sacramento-ca': 'Sacramento’s summers are inland-hot and dry, nothing like the coast. July and August highs average in the mid-90s and push past 100 °F in heat waves, while dew points stay low — short stalls and fast bark, with moisture loss the variable to manage on a long cook. The relief is the evening Delta Breeze, marine air drawn up from San Francisco Bay that drops overnight temperatures sharply and helps overnight cooks. Winters are cool, wet, and foggy but rarely cold enough to shut a cooker down, and the smoke calendar stays open most of the year.',
+  'portland-or': 'Portland sits in the Willamette Valley, roughly 75 miles inland, so the marine coolness is muted. Summer highs average around 80–82 °F with low humidity, and the dry window from July into September is the strongest smoke season of the year. Heat domes can push the valley into the 90s and well past 100 °F for short stretches — June 2021 is the extreme case — so a hot-afternoon plan matters more than the mild averages suggest. Winters are cool, gray, and persistently wet but seldom cold enough to stop an insulated kamado or pellet cooker, and wind is rarely the deciding variable here.',
+  'riverside-ca': 'Riverside’s climate is desert-dry and hot, not the marine pattern of coastal California. Summer highs average in the mid-90s with low dew points, which means very short stalls and aggressive bark formation — moisture loss across the cook is the variable to manage, not humidity. Days swing 30 °F or more into cool nights, a help on overnight cooks. Autumn brings Santa Ana winds that can punish an open offset, so watch the gust forecast in fall. Winters are mild and mostly dry, and the cook calendar runs year-round.',
+  'las-vegas-nv': 'Las Vegas weather is hot, dry, and high-contrast. Summer highs average above 100 °F with dew points often in the teens, so stalls are short and bark forms fast — the cook fights moisture loss, not humidity. Days cool 25 to 35 °F into the night, which helps overnight cooks. At roughly 2,000 feet the elevation is low enough that boiling point and wrap-and-rest timing behave essentially as they do near sea level, so plan the cook around the dry air rather than altitude. Winters are mild and sunny; insulated kamados and pellet rigs hold temp best, and the calendar stays open year-round.',
+  'phoenix-az': 'Phoenix weather is desert-hot for much of the year. Late-spring and early-summer highs average above 105 °F with very low dew points — short stalls, fast bark, and moisture loss as the variable to manage. From July into September the monsoon raises humidity and brings sudden afternoon thunderstorms and dust storms that can erase a planned Saturday, so the storm forecast matters in late summer the way it does in the Southeast. At around 1,100 feet the low elevation leaves boiling point and wrap-and-rest timing close to sea-level behavior. Winters are warm and dry, and the cook calendar runs all year.',
+  'baltimore-md': 'Baltimore has a four-season, humid-subtropical climate without the deep-South extremes. Summer highs average in the upper 80s and dew points usually sit in the mid-to-upper 60s, climbing into the 70s only at the peak of a heat wave — stalls are real but milder than on the Gulf or the Florida peninsula. Afternoon thunderstorms and Chesapeake humidity are the summer variables to watch. Winters are genuinely cold, with stretches that close down an uninsulated offset; spring and fall offer the most comfortable long-cook windows, and an insulated kamado or pellet rig extends the season at both ends.',
+  'charlotte-nc': 'Charlotte’s humid-subtropical climate runs milder than the Gulf Coast. Summer highs average around 90 °F and dew points typically run in the mid-to-upper 60s, reaching the 70s only at the height of summer — stalls are a real factor but shorter than Florida’s. Pop-up afternoon thunderstorms are the warm-season variable to plan around. Winters are mild, with only brief cold snaps that rarely shut a cooker down, so the cook calendar is long. Spring and fall are excellent offset windows, and an insulated kamado or pellet cooker handles the humid stretch of summer cleanly.',
+};
+
 const REGION_COOKER_TIP = {
   northeast:     'For Northeast backyards, a pellet cooker or insulated kamado gives the widest weekend window — both shrug off the gradient winds that hit between November and April, and both hold steady temps when an open offset would fight back. An offset stick burner is still the standard for serious brisket cooks here, but plan it for May-October Saturdays and watch the gust forecast on the day.',
   southeast:     'For Southeast cooks, the priority is humidity tolerance. A well-insulated kamado runs efficient stalls and conserves fuel through the long, hot summer. Pellet cookers handle the same conditions cleanly. An offset is rewarding when the weather behaves but the regional climate stacks the deck against it — high dew points and pop-up storms are constant variables.',
@@ -168,6 +188,18 @@ const REGION_COOKER_TIP = {
   south_central: 'South-Central pitmasters live with wind, and the offset stick burner remains the regional standard despite it. Build a wind break, watch the gust forecast, and lean toward heavier woods (post oak, hickory) that can hold smoke through long stalls. A pellet or kamado is a practical second cooker for the windiest weekends.',
   mountain:      'Mountain cooks benefit from cooker choices that hold moisture. Butcher paper over foil for the wrap, water pans for offsets, and shorter rest windows reduce the dry-out risk that comes with low dew points. Insulated kamados perform best in this climate; an offset works well if you build the cook around the moisture loss the dry air imposes.',
   pacific:       'Pacific cooks have the easiest climate in the country and the widest cooker latitude. Offsets, pellets, kamados, kettles and electrics all work well most of the year. The variable to plan around is coastal wind in the afternoons; an inland yard a few miles back from the water sees less of it.',
+};
+
+// Per-metro cooker-tip override. Same rationale as CLIMATE_BY_METRO: the
+// generic regional cooker tip misfits the inland Pacific metros whose climate
+// is overridden above. Without this, an overridden page would describe inland
+// or desert heat in the climate paragraph and then talk about coastal wind in
+// the very next cooker paragraph. Metros without an entry fall back to
+// REGION_COOKER_TIP[region].
+const COOKER_TIP_BY_METRO = {
+  'sacramento-ca': 'Sacramento keeps the wide Pacific cooker latitude — offsets, pellets, kamados and kettles all work through the long, dry season. The variable here isn’t coastal wind but summer heat and moisture loss on long cooks: lean on a butcher-paper wrap and a water pan, and time the longest cooks to finish before the afternoon peak. An insulated kamado or pellet rig is the easy call through the hottest stretch.',
+  'riverside-ca': 'Riverside’s dry heat rewards cookers that hold moisture — butcher paper over foil, a water pan on the offset, and shorter rest windows fight the dry-out the low dew points impose. The planning variable is autumn Santa Ana wind, not a coastal breeze: build a wind break and watch the gust forecast in fall, when an insulated kamado or pellet rig keeps a steady cook an open offset would struggle to hold.',
+  'portland-or': 'Portland keeps a wide cooker latitude through the mild valley climate, and wind is rarely the deciding variable. The dry July-to-September window is offset season; the rest of the year a sealed kamado or pellet cooker shrugs off the persistent gray drizzle and holds its cook through the wet shoulder months. Keep the cooker under cover and the calendar stays open nearly year-round.',
 };
 
 // Per-metro 1-2 sentence note woven into the intro paragraph. Keeps every
@@ -458,13 +490,21 @@ function heritageFor(state) {
   return BBQ_HERITAGE_BY_STATE[state] || BBQ_HERITAGE_BY_REGION[regionOf(state)];
 }
 
+function climateFor(metro) {
+  return CLIMATE_BY_METRO[metro.slug] || REGION_CLIMATE[regionOf(metro.state)];
+}
+
+function cookerTipFor(metro) {
+  return COOKER_TIP_BY_METRO[metro.slug] || REGION_COOKER_TIP[regionOf(metro.state)];
+}
+
 function renderMetro(metro) {
   const region   = regionOf(metro.state);
   const stateNm  = STATE_NAME[metro.state] || metro.state;
   const regLbl   = REGION_LABEL[region];
   const heritage = heritageFor(metro.state);
-  const climate  = REGION_CLIMATE[region];
-  const cooker   = REGION_COOKER_TIP[region];
+  const climate  = climateFor(metro);
+  const cooker   = cookerTipFor(metro);
   const name     = metro.name;
   const slug     = metro.slug;
   const zip      = metro.zip;
@@ -828,7 +868,9 @@ module.exports = {
   BBQ_HERITAGE_BY_STATE,
   BBQ_HERITAGE_BY_REGION,
   REGION_CLIMATE,
+  CLIMATE_BY_METRO,
   REGION_COOKER_TIP,
+  COOKER_TIP_BY_METRO,
   METRO_NOTE,
   METRO_LOCAL,
   GENERATED_MARKER,
@@ -837,6 +879,8 @@ module.exports = {
   renderMetrosListPartial,
   regionOf,
   heritageFor,
+  climateFor,
+  cookerTipFor,
   escapeHtml,
   sweepGenerated,
   run,
