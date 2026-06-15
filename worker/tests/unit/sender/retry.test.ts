@@ -393,17 +393,41 @@ describe('sender retry — drain — subscribe', () => {
       kind: 'subscribe',
       payload: {
         stage: 'group_assign',
-        subscriberId: 'sub_same',
+        email: 'same@example.com',
         region: 'south_central',
         oldRegion: 'south_central',
       },
-      idempotencyKey: 'group_assign:sub_same',
+      idempotencyKey: 'group_assign:same@example.com',
       firstAttemptAtMs: t0,
       cause: new SenderError('group_assign', 'http_5xx', 'x', 503),
     });
     const client = fakeClient();
     await drain(DB, client, KV, { now: () => t0 + backoffMs(1) + 1 });
     expect((client.removeGroup as ReturnType<typeof vi.fn>).mock.calls).toEqual([]);
+  });
+
+  it('drops a legacy group_assign row that carries subscriberId but no email (pre-email-fix)', async () => {
+    // Sender's group endpoints identify by email; a pre-fix row has only a
+    // subscriberId with no way to recover the email, so it can't be
+    // replayed and is dropped as non-retryable (the owner re-subscribes).
+    const t0 = 1_700_000_000_000;
+    await enqueue(DB, {
+      kind: 'subscribe',
+      payload: { stage: 'group_assign', subscriberId: 'D8qG1Lx', region: 'southeast' },
+      idempotencyKey: 'group_assign:D8qG1Lx',
+      firstAttemptAtMs: t0,
+      cause: new SenderError('group_assign', 'http_4xx', 'x', 400),
+    });
+    const client = fakeClient();
+    await drain(DB, client, KV, { now: () => t0 + backoffMs(1) + 1 });
+    expect((client.assignGroup as ReturnType<typeof vi.fn>).mock.calls).toEqual([]);
+    // Non-retryable → row removed from the queue.
+    const remaining = await DB.prepare(
+      `SELECT COUNT(*) AS c FROM sender_retry WHERE idempotency_key = ?`
+    )
+      .bind('group_assign:D8qG1Lx')
+      .first<{ c: number }>();
+    expect(remaining?.c).toBe(0);
   });
 
   it('replays a staged preferences payload via updateSubscriberFields (no status:active, no group ops)', async () => {
