@@ -80,12 +80,13 @@ Every HTML file must include **all** of the following in `<head>`, in this order
 
 ## Validation
 
-- Run `powershell -ExecutionPolicy Bypass -File .\validate.ps1` before merging changes that touch HTML, `sitemap.xml`, `wrangler.jsonc`, or local asset links.
-- `validate.ps1` is the repo-standard check for:
+- Run `npm run validate` before merging changes that touch HTML, `sitemap.xml`, `wrangler.jsonc`, or local asset links. This is the authoritative check (`npm run build` + `node scripts/validate.mjs`) and is what CI enforces.
+- `npm run validate` checks:
   - `favicon.ico` presence
   - `sitemap.xml` XML validity
   - `wrangler.jsonc` JSON validity
-  - local `href` and `src` target resolution across the main HTML pages
+  - local `href` and `src` target resolution, head-meta tokens, INJECT directives, and per-page `<head>` requirements across all built pages
+- Note: the older `validate.ps1` scanner is **not** authoritative — it false-positives on JS-constructed `href`s inside `<script>` blocks (e.g. the affiliate-link renderer in `_partials/smoke-weather-app.js`, which trips it on every metro page). Prefer `npm run validate`.
 - Do not ship links to planned tools or placeholder local pages. Any internal `href` added to production HTML must resolve to a file that already exists in the branch being merged.
 
 ## Policy consistency

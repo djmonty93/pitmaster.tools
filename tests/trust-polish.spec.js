@@ -79,6 +79,23 @@ test('breadcrumb on a metro page leads <main> and mirrors the smoke-weather trai
   await expect(bc.locator('[aria-current="page"]')).toHaveText('New York, NY');
 });
 
+// The /smoke-weather/ hub is the breadcrumb root for every metro page, so it
+// carries its own 2-level trail (Home → Best Smoke Days) with the hub as the
+// current page rather than a link.
+test('breadcrumb on /smoke-weather/ leads <main> and marks the hub as current', async ({ page }) => {
+  await page.goto('/smoke-weather/');
+  const bc = page.locator('nav.breadcrumb');
+  await expect(bc).toBeVisible();
+  const firstChildIsBreadcrumb = await page.evaluate(() => {
+    const main = document.querySelector('main#main-content');
+    const first = main && main.firstElementChild;
+    return !!first && first.matches('nav.breadcrumb');
+  });
+  expect(firstChildIsBreadcrumb).toBe(true);
+  await expect(bc.locator('a[href="/"]')).toHaveText('Home');
+  await expect(bc.locator('[aria-current="page"]')).toHaveText('Best Smoke Days');
+});
+
 test('breadcrumb is hidden inside embeds', async ({ page }) => {
   await page.goto('/brine-calculator?embed=1');
   await expect(page.locator('nav.breadcrumb')).toBeHidden();
