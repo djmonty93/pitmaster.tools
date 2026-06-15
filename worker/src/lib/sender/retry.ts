@@ -495,7 +495,10 @@ async function dispatchSubscribe(
   // (rather than the generic "invalid email/fields" below) — the queue is
   // transient, the owner re-subscribes to re-create the assignment, and
   // current producers always emit `email`, so no migration is warranted.
-  const legacyStage = (payload as { stage?: unknown }).stage;
+  const legacyStage =
+    payload && typeof payload === 'object'
+      ? (payload as { stage?: unknown }).stage
+      : undefined;
   if (legacyStage === 'group_assign' || legacyStage === 'group_remove') {
     throw new SenderError(
       'subscribe',
