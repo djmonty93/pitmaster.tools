@@ -215,15 +215,15 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
   if (espId) {
     try {
       if (region) {
-        await assignBbqGroups(client, rc.env.WEATHER_KV, espId, region);
+        await assignBbqGroups(client, rc.env.WEATHER_KV, body.email, region);
       } else {
         const allGroupId = await resolveGroupId(client, rc.env.WEATHER_KV, ALL_GROUP_NAME);
-        await client.assignGroup(espId, allGroupId);
+        await client.assignGroup(body.email, allGroupId);
       }
       groupAssignSucceeded = true;
     } catch (err) {
       const cause = err instanceof SenderError ? err : undefined;
-      const idempotencyKey = `group_assign:${espId}`;
+      const idempotencyKey = `group_assign:${body.email}`;
       // oldRegion rides along so the drain can detach pitmaster_<oldRegion>
       // after it assigns the new group. Without it, a region-change
       // resubscribe whose group_assign step failed retryably would
@@ -233,7 +233,7 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
         kind: 'subscribe',
         payload: {
           stage: 'group_assign',
-          subscriberId: espId,
+          email: body.email,
           region,
           oldRegion,
         },
@@ -265,7 +265,7 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
           rc.env.WEATHER_KV,
           staleGroupName
         );
-        await client.removeGroup(espId!, staleGroupId);
+        await client.removeGroup(body.email, staleGroupId);
       } catch (err) {
         // Original [P2] pass-7: a transient failure here used to be
         // logged and dropped, leaving the subscriber in BOTH regional
@@ -278,10 +278,10 @@ export async function handleSubscribe(rc: RouteContext): Promise<Response> {
           kind: 'subscribe',
           payload: {
             stage: 'group_remove',
-            subscriberId: espId,
+            email: body.email,
             groupName: staleGroupName,
           },
-          idempotencyKey: `group_remove:${espId}:${oldRegion}`,
+          idempotencyKey: `group_remove:${body.email}:${oldRegion}`,
           cause,
         });
         console.warn(

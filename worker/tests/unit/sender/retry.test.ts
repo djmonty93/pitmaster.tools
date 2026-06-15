@@ -237,8 +237,8 @@ describe('sender retry — drain — subscribe', () => {
     const assignCalls = (client.assignGroup as ReturnType<typeof vi.fn>).mock.calls;
     expect(assignCalls).toHaveLength(2);
     expect(assignCalls).toEqual([
-      ['sub_42', '1'],
-      ['sub_42', '5'],
+      ['a@b.com', '1'],
+      ['a@b.com', '5'],
     ]);
     const remaining = await DB.prepare(
       `SELECT COUNT(*) AS c FROM sender_retry WHERE idempotency_key = ?`
@@ -277,12 +277,12 @@ describe('sender retry — drain — subscribe', () => {
     // Assigned to pitmaster_all (id=1) + pitmaster_south_central (id=5).
     const assignCalls = (client.assignGroup as ReturnType<typeof vi.fn>).mock.calls;
     expect(assignCalls).toEqual([
-      ['sub_move', '1'],
-      ['sub_move', '5'],
+      ['mover@example.com', '1'],
+      ['mover@example.com', '5'],
     ]);
     // Stale northeast group (id=2) MUST be detached.
     const removeCalls = (client.removeGroup as ReturnType<typeof vi.fn>).mock.calls;
-    expect(removeCalls).toEqual([['sub_move', '2']]);
+    expect(removeCalls).toEqual([['mover@example.com', '2']]);
     // Row cleaned up.
     const remaining = await DB.prepare(
       `SELECT COUNT(*) AS c FROM sender_retry WHERE idempotency_key = ?`
@@ -329,7 +329,7 @@ describe('sender retry — drain — subscribe', () => {
     });
     await drain(DB, client, KV, { now: () => t0 + backoffMs(1) + 1 });
     const assignCalls = (client.assignGroup as ReturnType<typeof vi.fn>).mock.calls;
-    expect(assignCalls).toEqual([['sub_x', '1']]);
+    expect(assignCalls).toEqual([['a@b.com', '1']]);
   });
 
   it('replays a staged group_assign payload — no subscribe call, just groups', async () => {
@@ -338,10 +338,10 @@ describe('sender retry — drain — subscribe', () => {
       kind: 'subscribe',
       payload: {
         stage: 'group_assign',
-        subscriberId: 'sub_99',
+        email: 'staged@example.com',
         region: 'northeast',
       },
-      idempotencyKey: 'group_assign:sub_99',
+      idempotencyKey: 'group_assign:staged@example.com',
       firstAttemptAtMs: t0,
       cause: new SenderError('group_assign', 'http_5xx', 'x', 503),
     });
@@ -350,8 +350,8 @@ describe('sender retry — drain — subscribe', () => {
     expect(client.subscribe).not.toHaveBeenCalled();
     const assignCalls = (client.assignGroup as ReturnType<typeof vi.fn>).mock.calls;
     expect(assignCalls).toEqual([
-      ['sub_99', '1'],
-      ['sub_99', '2'],
+      ['staged@example.com', '1'],
+      ['staged@example.com', '2'],
     ]);
   });
 
@@ -366,11 +366,11 @@ describe('sender retry — drain — subscribe', () => {
       kind: 'subscribe',
       payload: {
         stage: 'group_assign',
-        subscriberId: 'sub_move',
+        email: 'mover@example.com',
         region: 'south_central',
         oldRegion: 'northeast',
       },
-      idempotencyKey: 'group_assign:sub_move',
+      idempotencyKey: 'group_assign:mover@example.com',
       firstAttemptAtMs: t0,
       cause: new SenderError('group_assign', 'http_5xx', 'x', 503),
     });
@@ -379,12 +379,12 @@ describe('sender retry — drain — subscribe', () => {
     // Assigned to pitmaster_all (id=1) + pitmaster_south_central (id=5).
     const assignCalls = (client.assignGroup as ReturnType<typeof vi.fn>).mock.calls;
     expect(assignCalls).toEqual([
-      ['sub_move', '1'],
-      ['sub_move', '5'],
+      ['mover@example.com', '1'],
+      ['mover@example.com', '5'],
     ]);
     // Stale northeast group (id=2) detached.
     const removeCalls = (client.removeGroup as ReturnType<typeof vi.fn>).mock.calls;
-    expect(removeCalls).toEqual([['sub_move', '2']]);
+    expect(removeCalls).toEqual([['mover@example.com', '2']]);
   });
 
   it('does NOT detach when group_assign stage oldRegion matches region', async () => {
@@ -647,7 +647,7 @@ describe('sender retry — drain — unsubscribe', () => {
     expect(client.getSubscriberByEmail).not.toHaveBeenCalled();
     expect(client.unsubscribe).not.toHaveBeenCalled();
     const removeCalls = (client.removeGroup as ReturnType<typeof vi.fn>).mock.calls;
-    expect(removeCalls.every((c) => c[0] === 'sub_88')).toBe(true);
+    expect(removeCalls.every((c) => c[0] === 'gone@example.com')).toBe(true);
     expect(removeCalls).toHaveLength(7);
   });
 
