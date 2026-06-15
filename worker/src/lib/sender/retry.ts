@@ -145,11 +145,13 @@ export async function drain(
   // The retry queue's request_kind column accepts only the three kinds
   // the D1 schema's CHECK constraint allows: 'subscribe', 'unsubscribe',
   // and 'digest_trigger'. The SenderError.requestKind enum is wider (it
-  // also includes 'group_assign', 'group_remove', 'group_list', and
-  // 'field_update' for error-classification purposes), but those values
-  // are never written to the retry table — they would fail the CHECK.
-  // Only 'subscribe' and 'unsubscribe' are drained here; 'digest_trigger'
-  // is reserved in the schema for future use.
+  // also includes 'group_assign', 'group_remove', 'group_list',
+  // 'field_update', 'campaign_create', and 'campaign_send' for
+  // error-classification purposes), but those values are never written to
+  // the retry table — they would fail the CHECK. Only 'subscribe' and
+  // 'unsubscribe' are drained here; the Friday digest's campaign sends use
+  // friday_campaign_log + Cloudflare scheduled-handler auto-retry instead,
+  // and 'digest_trigger' is reserved in the schema for future use.
   const rowsRes = await db
     .prepare(
       `SELECT id, request_kind, request_payload, idempotency_key, attempts,

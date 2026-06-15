@@ -88,8 +88,8 @@ describe('handleMetrosChooser', () => {
     expect(body).toMatch(/class="metro-tile band-green"[^>]*data-slug="new-york-ny"/);
 
     // Tile inner content includes the score and the proper-case band.
-    expect(body).toMatch(/<strong>68\/100<\/strong> &middot; Yellow/);
-    expect(body).toMatch(/<strong>84\/100<\/strong> &middot; Green/);
+    expect(body).toMatch(/<strong>68\/100<\/strong> &middot; Average/);
+    expect(body).toMatch(/<strong>84\/100<\/strong> &middot; Good/);
     expect(body).toMatch(/Best: .+ &mdash; 88\/100/);
     expect(body).toMatch(/Best: .+ &mdash; 91\/100/);
 

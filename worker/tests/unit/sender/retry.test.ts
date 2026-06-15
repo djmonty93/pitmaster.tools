@@ -49,7 +49,8 @@ function fakeClient(overrides: Partial<SenderClient> = {}): SenderClient {
     listGroups: vi.fn().mockResolvedValue([]),
     assignGroup: vi.fn().mockResolvedValue(undefined),
     removeGroup: vi.fn().mockResolvedValue(undefined),
-    triggerWeeklyDigest: vi.fn().mockResolvedValue(undefined),
+    createCampaign: vi.fn().mockResolvedValue({ campaignId: 'camp_ok' }),
+    sendCampaign: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   } as SenderClient;
 }

@@ -27,11 +27,25 @@ export interface UnsubscribeInput { email: string }
 
 export interface SenderGroup { id: string; name: string }
 
-export interface TriggerDigestInput {
-  /** Per-region "API Call Is Made" trigger URL configured in Sender dashboard. */
-  triggerUrl: string;
-  /** Stable per-week tag, e.g. "southeast:2026-05-15". Body-only. */
-  idempotencyTag: string;
+export interface CreateCampaignInput {
+  /** Internal campaign name (not shown to recipients), e.g. "pitmaster southeast 2026-05-15". */
+  name: string;
+  subject: string;
+  fromName: string;
+  fromEmail: string;
+  replyTo?: string;
+  /** Full HTML body of the email. */
+  html: string;
+  /** Sender.net group id to send to (audience = everyone in the group). */
+  groupId: string;
+}
+
+export interface CreateCampaignResult {
+  campaignId: string;
+}
+
+export interface SendCampaignInput {
+  campaignId: string;
 }
 
 export interface SenderClient {
@@ -42,7 +56,14 @@ export interface SenderClient {
   listGroups(): Promise<SenderGroup[]>;
   assignGroup(subscriberId: string, groupId: string): Promise<void>;
   removeGroup(subscriberId: string, groupId: string): Promise<void>;
-  triggerWeeklyDigest(input: TriggerDigestInput): Promise<void>;
+  /**
+   * Create a one-off HTML campaign targeting a single group, then return
+   * its id. Pair with sendCampaign to broadcast. Used by the Friday
+   * digest cron (worker builds the HTML, Sender broadcasts to the group).
+   */
+  createCampaign(input: CreateCampaignInput): Promise<CreateCampaignResult>;
+  /** Send (broadcast now) a previously created campaign by id. */
+  sendCampaign(input: SendCampaignInput): Promise<void>;
 }
 
 const DEFAULT_BASE_URL = 'https://api.sender.net/v2';
@@ -231,9 +252,49 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
         throw err;
       }
     },
-    async triggerWeeklyDigest(input) {
-      await request('digest_trigger', 'POST', input.triggerUrl, { tag: input.idempotencyTag });
+    async createCampaign(input) {
+      const parsed = await request(
+        'campaign_create',
+        'POST',
+        '/campaigns',
+        campaignCreateBody(input)
+      ) as { data?: { id?: string } } | null;
+      const id = parsed?.data?.id;
+      if (typeof id !== 'string' || id.length === 0) {
+        throw new SenderError('campaign_create', 'malformed', 'missing data.id in create-campaign response');
+      }
+      return { campaignId: id };
     },
+    async sendCampaign(input) {
+      await request(
+        'campaign_send',
+        'POST',
+        `/campaigns/${encodeURIComponent(input.campaignId)}/send`
+      );
+    },
+  };
+}
+
+/**
+ * Build the create-campaign request body.
+ *
+ * ⚠️ UNVERIFIED CONTRACT. The exact field names and the create/send
+ * endpoint paths for Sender.net's Campaigns API were not confirmable
+ * against the live docs (they render client-side). This is the single
+ * place that encodes the wire shape — confirm it against the live API
+ * before enabling real sends (see docs/sender-setup.md §4) and adjust
+ * here only. The Campaigns API is also typically a paid-tier feature.
+ */
+function campaignCreateBody(input: CreateCampaignInput): Record<string, unknown> {
+  return {
+    title: input.name,
+    subject: input.subject,
+    from: input.fromName,
+    from_email: input.fromEmail,
+    reply_to: input.replyTo ?? input.fromEmail,
+    content_type: 'html',
+    content: input.html,
+    groups: [input.groupId],
   };
 }
 

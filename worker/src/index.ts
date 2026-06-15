@@ -32,29 +32,17 @@ export interface Env {
   SENDER_API_TOKEN: string;
   SUBSCRIBER_TOKEN_SECRET: string;
   /**
-   * From-address / from-name configured on the Sender.net sending
-   * domain (mail.pitmaster.tools). See README "DNS setup" for the
-   * CNAME + SPF/DKIM/DMARC records the operator must add on Cloudflare.
-   * Surfaced into Env so a per-environment override (staging vs prod)
-   * is a wrangler-vars change rather than a code change.
+   * From-address / from-name / reply-to configured on the Sender.net
+   * sending domain. See docs/sender-setup.md §5 for the DKIM/SPF/DMARC
+   * records the operator must add. The Friday digest cron uses these on
+   * createCampaign; an unset SENDER_FROM_EMAIL dark-disables the digest
+   * (the global "not configured yet" / kill-switch state). Surfaced into
+   * Env so a per-environment override (staging vs prod) is a wrangler-vars
+   * change rather than a code change.
    */
   SENDER_FROM_EMAIL?: string;
   SENDER_FROM_NAME?: string;
   SENDER_REPLY_TO?: string;
-  /**
-   * Per-region Sender.net "API Call Is Made" automation trigger URLs.
-   * Each automation has its audience filtered to `pitmaster_<region>`
-   * in the Sender.net dashboard; the Friday cron POSTs to the trigger
-   * URL at 6am local in each region's anchor tz.
-   * Optional — a missing URL means that region is dark for this
-   * environment (useful while staging onboarding for one region first).
-   */
-  SENDER_DIGEST_TRIGGER_URL_NORTHEAST?: string;
-  SENDER_DIGEST_TRIGGER_URL_SOUTHEAST?: string;
-  SENDER_DIGEST_TRIGGER_URL_MIDWEST?: string;
-  SENDER_DIGEST_TRIGGER_URL_SOUTH_CENTRAL?: string;
-  SENDER_DIGEST_TRIGGER_URL_MOUNTAIN?: string;
-  SENDER_DIGEST_TRIGGER_URL_PACIFIC?: string;
   /**
    * Sentry DSN (https://o<…>.ingest.sentry.io/<…>). Provisioned with
    * `wrangler secret put SENTRY_DSN`. Empty / unset → SDK runs in

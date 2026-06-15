@@ -61,7 +61,8 @@ between the two shapes.
    - One `<site>_<scope>` group per segment (region, calculator type, ...)
 3. Create the per-site custom fields prefixed `<site>_*`.
 4. Configure the per-site sending domain (see "Sending domains" below).
-5. Provision `<SITE>_DIGEST_TRIGGER_URL_<SEGMENT>` env vars for the cron.
+5. Set the per-site `SENDER_FROM_EMAIL` / `SENDER_FROM_NAME` (the cron
+   builds + sends campaigns; an unset from-email dark-disables the digest).
 6. Add a regions/groups module in the new site's worker that mirrors
    `worker/src/lib/regions/` and `worker/src/lib/sender/groups.ts`.
 7. The Sender.net group-id KV cache key prefix is shared
@@ -71,25 +72,35 @@ between the two shapes.
 ## Per-region campaign delivery
 
 The Friday digest cron (`worker/src/crons/fridayEmail.ts`) fires
-hourly Fri UTC across the four anchor-timezone Friday-6am windows. For
-each region whose anchor tz says it is now Fri 06:00 local, the cron
-triggers that region's Sender.net automation via its per-region trigger
-URL (secret `SENDER_DIGEST_TRIGGER_URL_<REGION>`). The cron POSTs a
-**parameterless** body (`{"tag":"<region>:<send_date>"}`, no subscriber
-email) and assumes one call broadcasts to the whole `pitmaster_<region>`
-group via the automation's audience filter. The URL is provisioned per
-region in the worker secrets and a missing secret dark-disables that
-region without erroring the cron.
+hourly Fri UTC across the anchor-timezone Friday-6am windows. For each
+region whose anchor tz says it is now Fri 06:00 local, the cron
+**builds the HTML digest itself** (the region's metros with Sat/Sun/Mon
+smoke scores — see `worker/src/lib/digest/buildRegionDigest.ts` and
+`worker/src/lib/render/digestEmail.ts`), then **creates and sends a
+Sender.net campaign** targeting the `pitmaster_<region>` group by id:
 
-> ⚠️ **Unverified assumption.** sender.net's "API Call Is Made" trigger is
-> normally a *per-subscriber* enrolment (the call identifies one contact),
-> and the broadcast-to-a-group behavior this design relies on is not
-> confirmed against sender.net's docs. The worker also hard-requires the
-> trigger URL to be on `api.sender.net` (host-allowlisted in
-> `client.ts`, with `Authorization: Bearer`). Before building all six
-> automations, verify both in the dashboard and pick Path A (API-triggered
-> automations) or Path B (native scheduled campaigns, cron left dark) —
-> see `docs/sender-setup.md` §4 for the decision tree.
+1. `resolveGroupId(...)` → the `pitmaster_<region>` group id (KV-cached).
+2. `client.createCampaign(...)` → `POST /v2/campaigns` with the HTML,
+   subject, from-address, and `groups: [<region group id>]`.
+3. `client.sendCampaign(...)` → `POST /v2/campaigns/<id>/send`.
+
+One campaign send broadcasts to everyone in the group — there is no
+per-subscriber loop (the portfolio scaling win). Because the group can't
+be personalised per subscriber, every score uses a single default profile
+(**pork butt on an offset**), disclosed in the email footer.
+
+**Dark-disable / kill switch:** an unset `SENDER_FROM_EMAIL` skips the
+whole digest (the "not configured yet" state) and writes one
+`not-configured` warning event per (region, send_date).
+
+> ⚠️ **Unverified API contract.** The exact Sender.net Campaigns API
+> payload field names and endpoint paths were not confirmable against the
+> live docs (they render client-side) and the Campaigns API is typically a
+> paid-tier feature. The wire shape is centralized in
+> `worker/src/lib/sender/client.ts` (`campaignCreateBody`) so confirming it
+> against the live API is a one-file change. Verify the account tier, the
+> authenticated sending domain, and the payload shape before enabling real
+> sends — see `docs/sender-setup.md` §4.
 
 | Region          | Anchor timezone        | UTC trigger (DST) | UTC trigger (standard time) |
 | --------------- | ---------------------- | ----------------- | --------------------------- |
@@ -110,9 +121,11 @@ unsubscribe in a BBQ email removes the subscriber from `pitmaster_all`
 and every `pitmaster_<region>` group, but leaves any
 `powersizing_*` / `overlanding_*` memberships intact.
 
-Configuration is split between the Sender dashboard (the automation's
-unsubscribe footer must use the per-group unsubscribe URL — see
-`docs/sender-setup.md`) and our `removeBbqGroups()` helper.
+The digest email footer carries the per-group unsubscribe link via
+Sender's `{$unsubscribe}` merge tag (rendered in
+`worker/src/lib/render/digestEmail.ts`); the in-app unsubscribe path uses
+our `removeBbqGroups()` helper. Both must resolve to group-scoped removal,
+not account-scoped — confirm the merge tag's behavior in the dashboard.
 
 ## Shared sender reputation
 

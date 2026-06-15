@@ -320,68 +320,89 @@ describe('SenderClient.removeGroup', () => {
   });
 });
 
-describe('SenderClient.triggerWeeklyDigest', () => {
-  it('POSTs to the per-region trigger URL with tag body', async () => {
+describe('SenderClient.createCampaign + sendCampaign', () => {
+  it('createCampaign POSTs the HTML campaign to /v2/campaigns and returns the id', async () => {
     const stub = installFetchStub([
-      { match: 'api.sender.net/v2/automations/trigger/se-token', respond: () => jsonResponse(200, {}) },
+      { match: 'api.sender.net/v2/campaigns', respond: () => jsonResponse(200, { data: { id: 'camp_123' } }) },
     ]);
     try {
       const client = createSenderClient({ apiToken: 'tok' });
-      await client.triggerWeeklyDigest({
-        triggerUrl: 'https://api.sender.net/v2/automations/trigger/se-token',
-        idempotencyTag: 'southeast:2026-05-15',
+      const result = await client.createCampaign({
+        name: 'pitmaster southeast 2026-05-15',
+        subject: 'This weekend',
+        fromName: 'Pitmaster Tools',
+        fromEmail: 'forecast@pitmaster.tools',
+        html: '<html>hi</html>',
+        groupId: 'g_se',
       });
+      expect(result).toEqual({ campaignId: 'camp_123' });
       const call = stub.calls[0]!;
       expect(call.method).toBe('POST');
-      expect(call.body).toEqual({ tag: 'southeast:2026-05-15' });
+      expect(call.headers['authorization']).toBe('Bearer tok');
+      // Assert the load-bearing fields; the full wire shape is centralized
+      // in client.ts (campaignCreateBody) and unverified against the live API.
+      expect(call.body).toMatchObject({
+        subject: 'This weekend',
+        content: '<html>hi</html>',
+        groups: ['g_se'],
+      });
+    } finally { stub.restore(); }
+  });
+
+  it('createCampaign throws SenderError(campaign_create, malformed) when the response has no id', async () => {
+    const stub = installFetchStub([
+      { match: 'api.sender.net/v2/campaigns', respond: () => jsonResponse(200, { data: {} }) },
+    ]);
+    try {
+      const client = createSenderClient({ apiToken: 'tok' });
+      const err = await client.createCampaign({
+        name: 'n', subject: 's', fromName: 'f', fromEmail: 'e@x.com', html: '<p>x</p>', groupId: 'g',
+      }).catch((e) => e);
+      expect(err).toBeInstanceOf(SenderError);
+      expect((err as SenderError).requestKind).toBe('campaign_create');
+      expect((err as SenderError).kind).toBe('malformed');
+    } finally { stub.restore(); }
+  });
+
+  it('createCampaign throws SenderError(campaign_create) on non-2xx', async () => {
+    const stub = installFetchStub([
+      { match: 'api.sender.net/v2/campaigns', respond: () => jsonResponse(500, { message: 'boom' }) },
+    ]);
+    try {
+      const client = createSenderClient({ apiToken: 'tok' });
+      const err = await client.createCampaign({
+        name: 'n', subject: 's', fromName: 'f', fromEmail: 'e@x.com', html: '<p>x</p>', groupId: 'g',
+      }).catch((e) => e);
+      expect(err).toBeInstanceOf(SenderError);
+      expect((err as SenderError).requestKind).toBe('campaign_create');
+      expect((err as SenderError).kind).toBe('http_5xx');
+      expect((err as SenderError).shouldRetry).toBe(true);
+    } finally { stub.restore(); }
+  });
+
+  it('sendCampaign POSTs to /v2/campaigns/{id}/send', async () => {
+    const stub = installFetchStub([
+      { match: 'api.sender.net/v2/campaigns/camp_123/send', respond: () => jsonResponse(200, {}) },
+    ]);
+    try {
+      const client = createSenderClient({ apiToken: 'tok' });
+      await client.sendCampaign({ campaignId: 'camp_123' });
+      const call = stub.calls[0]!;
+      expect(call.method).toBe('POST');
+      expect(call.url).toContain('/v2/campaigns/camp_123/send');
       expect(call.headers['authorization']).toBe('Bearer tok');
     } finally { stub.restore(); }
   });
 
-  it('throws SenderError(digest_trigger) on non-2xx', async () => {
+  it('sendCampaign throws SenderError(campaign_send) on non-2xx', async () => {
     const stub = installFetchStub([
-      { match: 'api.sender.net/v2/automations/trigger/se-token', respond: () => jsonResponse(500, { message: 'boom' }) },
+      { match: 'api.sender.net/v2/campaigns/camp_123/send', respond: () => jsonResponse(500, { message: 'boom' }) },
     ]);
     try {
       const client = createSenderClient({ apiToken: 'tok' });
-      const err = await client.triggerWeeklyDigest({
-        triggerUrl: 'https://api.sender.net/v2/automations/trigger/se-token',
-        idempotencyTag: 'x:1',
-      }).catch((e) => e);
+      const err = await client.sendCampaign({ campaignId: 'camp_123' }).catch((e) => e);
       expect(err).toBeInstanceOf(SenderError);
-      expect((err as SenderError).requestKind).toBe('digest_trigger');
-    } finally { stub.restore(); }
-  });
-
-  it('refuses to call triggerWeeklyDigest URL on a non-Sender host (security: prevents auth leak)', async () => {
-    const stub = installFetchStub([]);
-    try {
-      const client = createSenderClient({ apiToken: 'tok' });
-      const err = await client.triggerWeeklyDigest({
-        triggerUrl: 'https://evil.example.com/trigger/abc',
-        idempotencyTag: 'x:1',
-      }).catch((e) => e);
-      expect(err).toBeInstanceOf(SenderError);
-      expect((err as SenderError).requestKind).toBe('digest_trigger');
-      expect((err as SenderError).kind).toBe('malformed');
-      expect((err as SenderError).shouldRetry).toBe(false);
-      expect(stub.calls).toHaveLength(0); // critical: fetch was NEVER called
-    } finally { stub.restore(); }
-  });
-
-  it('refuses to call triggerWeeklyDigest URL with downgraded protocol (security: prevents bearer-over-plaintext)', async () => {
-    const stub = installFetchStub([]);
-    try {
-      const client = createSenderClient({ apiToken: 'tok' });
-      const err = await client.triggerWeeklyDigest({
-        triggerUrl: 'http://api.sender.net/v2/automations/trigger/abc',
-        idempotencyTag: 'x:1',
-      }).catch((e) => e);
-      expect(err).toBeInstanceOf(SenderError);
-      expect((err as SenderError).requestKind).toBe('digest_trigger');
-      expect((err as SenderError).kind).toBe('malformed');
-      expect((err as SenderError).shouldRetry).toBe(false);
-      expect(stub.calls).toHaveLength(0); // critical: fetch was NEVER called
+      expect((err as SenderError).requestKind).toBe('campaign_send');
     } finally { stub.restore(); }
   });
 });

@@ -59,15 +59,17 @@
   var DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   var MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  // Proper-case band label for the day card. The band CSS class on the
-  // card already conveys the color verdict (red/yellow/green/ideal) —
-  // the label spells out the band name so users who can't easily
-  // perceive the color still get the categorical signal.
+  // Quality label for the day card. The band CSS class on the card
+  // already conveys the color verdict (red/yellow/green/ideal) — the
+  // label spells out a quality word (Good/Average/Poor) so users who
+  // can't easily perceive the color still get the categorical signal.
+  // MUST stay byte-identical to the server bandLabel in
+  // worker/src/lib/render/smokeWeather.ts and handlers/metrosChooser.ts.
   function bandLabel(b) {
     if (b === 'ideal')  return 'Ideal';
-    if (b === 'green')  return 'Green';
-    if (b === 'yellow') return 'Yellow';
-    if (b === 'red')    return 'Red';
+    if (b === 'green')  return 'Good';
+    if (b === 'yellow') return 'Average';
+    if (b === 'red')    return 'Poor';
     return '';
   }
 

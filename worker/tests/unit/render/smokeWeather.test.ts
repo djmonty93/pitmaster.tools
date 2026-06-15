@@ -75,9 +75,9 @@ describe('helpers', () => {
 
   it('bandLabel proper-cases the four bands', () => {
     expect(bandLabel('ideal')).toBe('Ideal');
-    expect(bandLabel('green')).toBe('Green');
-    expect(bandLabel('yellow')).toBe('Yellow');
-    expect(bandLabel('red')).toBe('Red');
+    expect(bandLabel('green')).toBe('Good');
+    expect(bandLabel('yellow')).toBe('Average');
+    expect(bandLabel('red')).toBe('Poor');
   });
 
   it('pickBestDay returns the highest score with earliest tiebreak', () => {
@@ -173,7 +173,7 @@ describe('renderDayCard + renderDayCards', () => {
     expect(html).toMatch(/class="day-card band-(red|yellow|green|ideal) is-best"/);
     expect(html).toMatch(/<span class="day-card__score-num">\d+<\/span>/);
     expect(html).toMatch(/<span class="day-card__score-suffix">\/100<\/span>/);
-    expect(html).toMatch(/<span class="day-card__score-band">(Red|Yellow|Green|Ideal)<\/span>/);
+    expect(html).toMatch(/<span class="day-card__score-band">(Poor|Average|Good|Ideal)<\/span>/);
     expect(html).toMatch(/Fri, May 15/);
   });
 
