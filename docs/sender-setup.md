@@ -74,6 +74,13 @@ scheduled-handler auto-retry on transient failures (5xx / 429 Retry-After honore
    centralized in `worker/src/lib/sender/client.ts` (`campaignCreateBody` + the
    `createCampaign`/`sendCampaign` paths) so confirming it against the live API — and the
    unsubscribe merge tag (`{$unsubscribe}`) used in `digestEmail.ts` — is a one-file change.
+4. **Re-send idempotency.** The cron persists the created `campaign_id` on the
+   `friday_campaign_log` row and reuses it on any reclaim/retry, so at most **one campaign
+   is ever created** per (region, send_date) — a lost send response or a failed post-send
+   write can never create a *second distinct* campaign. The residual is that a retry calls
+   `sendCampaign` on the **same** campaign again: confirm Sender either rejects re-sending an
+   already-sent campaign or is otherwise safe, so a retry can't double-broadcast the same
+   campaign.
 
 No per-region trigger URLs or dashboard automations are involved any more; the worker owns
 the content, scheduling (per-region tz), and idempotency.

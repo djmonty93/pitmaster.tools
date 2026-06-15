@@ -364,7 +364,11 @@ describe('runFridayCron — region-by-region', () => {
       SMOKE_DB: {
         prepare(sql: string) {
           const stmt = realEnv.SMOKE_DB.prepare(sql);
-          if (sql.includes('UPDATE friday_campaign_log') && sendCalled > 0) {
+          // Sabotage ONLY the post-send status UPDATE (updateStatus), not
+          // the claim (INSERT...ON CONFLICT) or the pre-send campaign_id
+          // persist (SET campaign_id) — those must succeed for the flow to
+          // reach the send.
+          if (sql.trimStart().startsWith('UPDATE friday_campaign_log') && sql.includes('SET status') && sendCalled > 0) {
             return {
               bind: () => ({
                 run: async () => {
@@ -418,6 +422,78 @@ describe('runFridayCron — region-by-region', () => {
     const ne = outcomes.find((o) => o.region === 'northeast')!;
     expect(ne.status).toBe('sent');
     expect(send).toHaveBeenCalledTimes(2);
+  });
+
+  it('persists the created campaign_id on the log row after a successful send', async () => {
+    const send = vi.fn().mockResolvedValue(undefined);
+    await runFridayCron(buildEnv(), FRIDAY_6AM_ET, opts(send));
+    const rows = await DB.prepare(
+      `SELECT region, campaign_id FROM friday_campaign_log ORDER BY region`
+    ).all<{ region: string; campaign_id: string | null }>();
+    expect(rows.results).toHaveLength(2);
+    expect(rows.results.every((r) => r.campaign_id === 'camp_1')).toBe(true);
+  });
+
+  it('reuses a persisted campaign_id on reclaim — does NOT create a second campaign (idempotency)', async () => {
+    // Regression for the Codex idempotency finding: a stale 'sending' row
+    // that already carries a campaign_id (a prior attempt created it then
+    // lost the send response) must re-SEND the same campaign, never create
+    // a new one — otherwise a second distinct campaign broadcasts to the
+    // whole region.
+    const fixedNow = FRIDAY_6AM_ET;
+    await DB.prepare(
+      `INSERT INTO friday_campaign_log (region, send_date, status, attempted_at, campaign_id)
+         VALUES ('northeast', '2026-05-15', 'sending', ?, 'camp_seeded')`
+    )
+      .bind(fixedNow.getTime() - 10 * 60 * 1000) // stale → re-claimable
+      .run();
+    const send = vi.fn().mockResolvedValue(undefined);
+    const client = fakeClient(send);
+    const outcomes = await runFridayCron(buildEnv(), FRIDAY_6AM_ET, {
+      client,
+      buildDigest: DIGEST_STUB,
+      now: () => fixedNow,
+    });
+    const ne = outcomes.find((o) => o.region === 'northeast')!;
+    expect(ne.status).toBe('sent');
+    // northeast reused the seeded campaign — no create for it.
+    expect(client.createCampaign).not.toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'pitmaster northeast 2026-05-15' })
+    );
+    expect(send).toHaveBeenCalledWith({ campaignId: 'camp_seeded' });
+    // southeast (no seeded row) still creates + sends normally.
+    expect(client.createCampaign).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'pitmaster southeast 2026-05-15' })
+    );
+  });
+
+  it('aborts the send and retries if campaign_id cannot be persisted (no un-deduplicatable broadcast)', async () => {
+    // If the pre-send campaign_id UPDATE fails, we must NOT send — revert to
+    // 'queued' and retry. The just-created campaign is a harmless unsent draft.
+    const fixedNow = FRIDAY_6AM_ET;
+    const realEnv = buildEnv();
+    const failEnv = {
+      ...realEnv,
+      SMOKE_DB: {
+        prepare(sql: string) {
+          if (sql.trimStart().startsWith('UPDATE friday_campaign_log') && sql.includes('SET campaign_id')) {
+            return { bind: () => ({ run: async () => { throw new Error('d1 persist failure'); } }) };
+          }
+          return realEnv.SMOKE_DB.prepare(sql);
+        },
+      } as unknown as D1Database,
+    } as typeof realEnv;
+    const send = vi.fn().mockResolvedValue(undefined);
+    const outcomes = await runFridayCron(failEnv, FRIDAY_6AM_ET, {
+      client: fakeClient(send),
+      buildDigest: DIGEST_STUB,
+      now: () => fixedNow,
+      swallowRetryableThrow: true,
+    });
+    expect(send).not.toHaveBeenCalled(); // never sent without a persisted id
+    const failed = outcomes.filter((o) => o.status === 'failed');
+    expect(failed).toHaveLength(2);
+    expect(failed.every((o) => (o as Extract<FridayCronOutcome, { status: 'failed' }>).retryable)).toBe(true);
   });
 
   it('builds no campaign and reports retryable when the digest has no content', async () => {

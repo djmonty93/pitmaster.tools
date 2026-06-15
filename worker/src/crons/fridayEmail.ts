@@ -303,43 +303,58 @@ async function processRegion(
     };
   }
 
-  // Narrow the try/catch to ONLY the build + create + send. A D1 failure
-  // on the post-send UPDATE used to be treated as a campaign failure and
-  // reverted the row to 'queued' — which made the row eligible for
-  // re-claim and would fire a duplicate send on the next cron tick. Now:
-  // send errors revert/mark-failed, but a successful send is committed to
-  // a 'sent' state with best-effort D1 bookkeeping. If the post-send
-  // UPDATE throws, we log and report sent — operators see the campaign in
-  // Sender.net + the stale 'sending' row in D1, and the stale-cutoff guard
-  // keeps the re-claim path from re-sending within the window.
+  // Idempotency across reclaim/retry (Codex review): createCampaign and
+  // sendCampaign are two calls, and a 'sending'/'queued' row can be
+  // re-claimed (stale lock) or reverted-and-retried. To guarantee at most
+  // ONE campaign is ever created per (region, send_date) — so a lost send
+  // response, a worker death, or a failed post-send bookkeeping UPDATE can
+  // never broadcast a *second distinct* campaign — we persist the created
+  // campaign's id BEFORE sending and reuse it on any re-attempt (skip
+  // createCampaign, re-send the same campaign). Residual: re-sending the
+  // same campaign id is a duplicate only if Sender re-broadcasts an
+  // already-sent campaign — verify that before enabling sends
+  // (docs/sender-setup.md §4).
   //
-  // Two-call caveat: createCampaign then sendCampaign are separate calls.
-  // If createCampaign succeeds but sendCampaign fails retryably, a retry
-  // re-creates a campaign (an orphan draft in Sender.net). Acceptable for
-  // v1; the deterministic campaign name (`pitmaster <region> <date>`)
-  // makes duplicates identifiable. Hardening (store campaign_id on the
-  // log row, skip re-create) is a future follow-up.
+  // The try/catch wraps ONLY build + create + send. A successful send is
+  // committed to 'sent' with best-effort D1 bookkeeping below; if that
+  // UPDATE throws we log and still report sent (the stale-cutoff guard
+  // keeps the row from re-sending within the window).
+  const priorCampaignId = await readCampaignId(env.SMOKE_DB, region, sendDate);
   try {
-    const digest = await buildDigest(region, sendDate);
-    if (!digest) {
-      // No metro in this region produced any weekend forecast (e.g. a
-      // total upstream outage). Transient — revert to 'queued' and
-      // report retryable so the scheduled-handler auto-retry re-attempts
-      // on a later hourly tick once forecasts recover.
-      await safeUpdateStatus(env.SMOKE_DB, region, sendDate, 'queued', nowMs);
-      await recordEvent(env.SMOKE_DB, region, sendDate, 'failed', 'no digest content (forecast unavailable)', nowMs);
-      return { region, status: 'failed', sendDate, error: 'no digest content', retryable: true };
+    let campaignId = priorCampaignId;
+    if (!campaignId) {
+      const digest = await buildDigest(region, sendDate);
+      if (!digest) {
+        // No metro in this region produced any weekend forecast (e.g. a
+        // total upstream outage). Transient — revert to 'queued' and
+        // report retryable so the scheduled-handler auto-retry re-attempts
+        // on a later hourly tick once forecasts recover.
+        await safeUpdateStatus(env.SMOKE_DB, region, sendDate, 'queued', nowMs);
+        await recordEvent(env.SMOKE_DB, region, sendDate, 'failed', 'no digest content (forecast unavailable)', nowMs);
+        return { region, status: 'failed', sendDate, error: 'no digest content', retryable: true };
+      }
+      const groupId = await resolveGroupId(client, env.WEATHER_KV, regionToGroupName(region));
+      const created = await client.createCampaign({
+        name: `pitmaster ${region} ${sendDate}`,
+        subject: digest.subject,
+        fromName: env.SENDER_FROM_NAME ?? 'Pitmaster Tools',
+        fromEmail,
+        replyTo: env.SENDER_REPLY_TO,
+        html: digest.html,
+        groupId,
+      });
+      campaignId = created.campaignId;
+      // Persist the id BEFORE sending. If this fails we must NOT send — a
+      // send now could not be deduped by a later reclaim, risking a
+      // duplicate broadcast. Revert to 'queued' and retry; the just-created
+      // campaign is a harmless unsent draft, never a duplicate email.
+      const persisted = await tryUpdateCampaignId(env.SMOKE_DB, region, sendDate, campaignId, nowMs);
+      if (!persisted) {
+        await safeUpdateStatus(env.SMOKE_DB, region, sendDate, 'queued', nowMs);
+        await recordEvent(env.SMOKE_DB, region, sendDate, 'failed', 'campaign_id persist failed (will retry)', nowMs);
+        return { region, status: 'failed', sendDate, error: 'campaign_id persist failed', retryable: true };
+      }
     }
-    const groupId = await resolveGroupId(client, env.WEATHER_KV, regionToGroupName(region));
-    const { campaignId } = await client.createCampaign({
-      name: `pitmaster ${region} ${sendDate}`,
-      subject: digest.subject,
-      fromName: env.SENDER_FROM_NAME ?? 'Pitmaster Tools',
-      fromEmail,
-      replyTo: env.SENDER_REPLY_TO,
-      html: digest.html,
-      groupId,
-    });
     await client.sendCampaign({ campaignId });
   } catch (err) {
     const reason = err instanceof SenderError ? summarizeError(err) : 'campaign send failed';
@@ -416,6 +431,59 @@ async function updateStatus(
     )
     .bind(status, now, region, sendDate)
     .run();
+}
+
+/**
+ * Read the campaign id persisted by a prior attempt for this
+ * (region, send_date), or null if none. Reused so a reclaim/retry never
+ * creates a second campaign — see processRegion's idempotency comment.
+ */
+async function readCampaignId(
+  db: D1Database,
+  region: Region,
+  sendDate: string
+): Promise<string | null> {
+  const row = await db
+    .prepare(
+      `SELECT campaign_id FROM friday_campaign_log
+        WHERE region = ? AND send_date = ?`
+    )
+    .bind(region, sendDate)
+    .first<{ campaign_id: string | null }>();
+  return row?.campaign_id ?? null;
+}
+
+/**
+ * Persist the created campaign id on the (region, send_date) row. Returns
+ * true on success; on a D1 error returns false (logged) so the caller can
+ * abort the send and retry rather than broadcasting an un-deduplicatable
+ * campaign.
+ */
+async function tryUpdateCampaignId(
+  db: D1Database,
+  region: Region,
+  sendDate: string,
+  campaignId: string,
+  now: number
+): Promise<boolean> {
+  try {
+    await db
+      .prepare(
+        `UPDATE friday_campaign_log
+            SET campaign_id = ?, attempted_at = ?
+          WHERE region = ? AND send_date = ?`
+      )
+      .bind(campaignId, now, region, sendDate)
+      .run();
+    return true;
+  } catch (err) {
+    console.warn('friday_campaign_log: campaign_id persist failed', {
+      region,
+      send_date: sendDate,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return false;
+  }
 }
 
 /**
