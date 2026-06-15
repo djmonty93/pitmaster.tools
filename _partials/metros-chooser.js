@@ -28,11 +28,14 @@
     });
   }
 
+  // Quality labels — byte-identical to the server chooser bandLabel in
+  // worker/src/handlers/metrosChooser.ts (and the shared/client copies).
+  // This client path renders when SSR hydration is absent (KV-degraded).
   function bandLabel(b) {
     if (b === 'ideal')  return 'Ideal';
-    if (b === 'green')  return 'Green';
-    if (b === 'yellow') return 'Yellow';
-    if (b === 'red')    return 'Red';
+    if (b === 'green')  return 'Good';
+    if (b === 'yellow') return 'Average';
+    if (b === 'red')    return 'Poor';
     return '';
   }
 

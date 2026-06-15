@@ -244,12 +244,23 @@ verified, and rolled back independently.
   `tests/smoke-weather-verdict.spec.js` (3 e2e specs — card render with
   disclosure, hidden-slot when no recommendation, `javascript:` URI
   neutralized). `validate.ps1` now checks `smoke-weather/disclosures.html`.
-- **Step 11 (#44).** Friday cron (F14) — portfolio-aware regional digest.
-  `worker/src/crons/fridayEmail.ts` triggers per-region Sender.net
-  automations at Fri 06:00 local in each anchor timezone; cron schedule
-  `0 10-14 * * 5` covers five UTC windows (ET/CT/MT/PT DST + PT standard time) and is idempotent
-  per `(region, send_date)` via the new `friday_campaign_log` table
-  (migration `0005`). Sender.net custom fields gain the `bbq_` prefix
+- **Step 11 (#44, updated #90).** Friday cron (F14) — portfolio-aware
+  regional digest. `worker/src/crons/fridayEmail.ts` **builds each
+  region's HTML email itself** (the region's metros with Sat/Sun/Mon
+  smoke scores, default pork-butt + offset profile — see
+  `worker/src/lib/digest/buildRegionDigest.ts` and
+  `worker/src/lib/render/digestEmail.ts`) and **sends it as a Sender.net
+  campaign** to the `pitmaster_<region>` group (`createCampaign` →
+  `sendCampaign`, no per-subscriber loop). Cron schedule `0 10-14 * * 5`
+  covers five UTC windows (ET/CT/MT/PT DST + PT standard time) and is
+  idempotent per `(region, send_date)` via the `friday_campaign_log`
+  table — the created `campaign_id` is persisted (migration
+  `0002_friday_campaign_id.sql`) and reused on retry/reclaim so at most
+  one campaign is ever created. **`SENDER_FROM_EMAIL` unset dark-disables
+  the whole digest** (global kill switch); the old per-region
+  `SENDER_DIGEST_TRIGGER_URL_*` secrets are gone. See
+  `docs/sender-setup.md` §4 for the paid-tier / from-domain / API-shape
+  preconditions before enabling real sends. Sender.net custom fields gain the `bbq_` prefix
   so this account can host sibling sites (powersizing.com,
   overlanding.tools); D1 columns stay unprefixed. `worker/src/lib/regions/`
   maps state → region (six regions, 50 states + DC; MO sits in
@@ -416,8 +427,10 @@ verified, and rolled back independently.
       `/articles/:slug` article.
     - Sentry DSN provisioned via `wrangler secret put SENTRY_DSN`
       before deploy.
-    - Sender.net secrets (`SENDER_API_TOKEN` + token-secret + region
-      trigger URLs) provisioned via `wrangler secret put`.
+    - Sender.net secrets (`SENDER_API_TOKEN`, `SUBSCRIBER_TOKEN_SECRET`,
+      and `SENDER_FROM_EMAIL`/`SENDER_FROM_NAME`/`SENDER_REPLY_TO` on an
+      authenticated sending domain) provisioned via `wrangler secret put`.
+      An unset `SENDER_FROM_EMAIL` dark-disables the Friday digest.
 
 ## DNS setup — Sender.net sending domain
 
@@ -434,11 +447,12 @@ gives you to Cloudflare DNS for `pitmaster.tools`:
 | `_dmarc.pitmaster.tools`              | TXT    | `v=DMARC1; p=quarantine; rua=mailto:dmarc@pitmaster.tools` |
 
 After Cloudflare propagation (usually < 5 min), click "Verify" in the
-Sender.net domain UI. Once verified, every regional automation can
-send from this domain.
+Sender.net domain UI. Once verified, the Friday digest campaigns send
+from this domain.
 
-Code-side, set the from-address envs (optional; only consumed if
-`POST /v2/message/send` is wired in a handler):
+Code-side, set the from-address envs — the Friday digest cron uses them
+on `createCampaign`, and an unset `SENDER_FROM_EMAIL` dark-disables the
+digest:
 
 ```bash
 wrangler secret put SENDER_FROM_EMAIL    # pete@mail.pitmaster.tools
@@ -446,11 +460,10 @@ wrangler secret put SENDER_FROM_NAME     # Pitmaster Tools
 wrangler secret put SENDER_REPLY_TO      # pete@mail.pitmaster.tools
 ```
 
-The envs are surfaced into `Env` for future use — the regional
-automation templates are still the canonical place to set the from
-address per send. See `docs/sender-setup.md` for the operator
-checklist and `docs/portfolio-email-architecture.md` for why this
-matters at portfolio scale.
+See `docs/sender-setup.md` for the operator checklist (including the
+paid-tier / API-shape preconditions) and
+`docs/portfolio-email-architecture.md` for why this matters at
+portfolio scale.
 
 ## SEO maintenance
 

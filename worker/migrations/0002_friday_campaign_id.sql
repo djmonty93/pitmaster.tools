@@ -1,0 +1,12 @@
+-- Friday digest idempotency hardening.
+--
+-- The cron creates a Sender.net campaign then sends it (two API calls).
+-- Without persisting the created campaign's id, a reclaim or retry after a
+-- successful-but-unconfirmed send (lost response, worker death, or a failed
+-- post-send bookkeeping UPDATE) would CREATE and broadcast a *second*
+-- campaign — a duplicate email to the whole region.
+--
+-- campaign_id lets processRegion persist the id right after createCampaign
+-- and, on any re-attempt, reuse it (skip create) so at most one campaign is
+-- ever created per (region, send_date). See worker/src/crons/fridayEmail.ts.
+ALTER TABLE friday_campaign_log ADD COLUMN campaign_id TEXT;

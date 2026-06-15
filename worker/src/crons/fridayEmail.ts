@@ -12,32 +12,39 @@
 // Per tick, for each region whose anchor timezone says it is now
 // Friday 06:00 local, this cron:
 //   1. Claims an idempotency slot in `friday_campaign_log (region, send_date)`
-//   2. Triggers the region's Sender.net automation via its trigger URL
-//      (SENDER_DIGEST_TRIGGER_URL_<REGION> secret)
-//   3. Records a 'send' row in `events` for /api/status observability
-//   4. Updates the friday_campaign_log slot to 'sent' or 'failed'
+//   2. Builds the region's HTML digest (its metros + Sat/Sun/Mon scores)
+//   3. Creates a Sender.net campaign targeting `pitmaster_<region>` and
+//      broadcasts it (one createCampaign + one sendCampaign call)
+//   4. Records a 'send' row in `events` for /api/status observability
+//   5. Updates the friday_campaign_log slot to 'sent' or 'failed'
 //
-// Audience filtering: the automation is configured in the Sender.net
-// dashboard to send only to subscribers in `pitmaster_<region>`. The
-// cron has no per-subscriber loop — that's the portfolio scaling win
-// vs. the v1 per-subscriber tz-gated model.
+// Audience filtering: the campaign targets the `pitmaster_<region>` group
+// by id, so one send broadcasts to everyone in the region — the cron has
+// no per-subscriber loop (the portfolio scaling win). Because the group
+// can't be personalised per subscriber, scores use a single default
+// profile (pork butt + offset), disclosed in the email footer.
 //
-// Forecast injection (Sat/Sun score grid) is NOT in this cron in v1.
-// The per-region automation's email template is static across weeks
-// and uses {$if:bbq_cut_pref="..."} conditional merge tags to vary
-// content by stored subscriber preference. A future enhancement could
-// PATCH per-region forecast fields before the trigger to inject
-// dynamic content — see docs/portfolio-email-architecture.md.
+// Dark-disable: an unset SENDER_FROM_EMAIL skips the whole digest (the
+// global "not configured yet" / kill-switch state).
 
 import type { Env } from '../index.js';
 import { createSenderClient, type SenderClient } from '../lib/sender/client.js';
 import { SenderError } from '../lib/sender/errors.js';
+import { regionToGroupName, resolveGroupId } from '../lib/sender/groups.js';
+import { buildRegionDigest, type RegionDigest } from '../lib/digest/buildRegionDigest.js';
 import { REGIONS, type Region } from '../lib/regions/index.js';
 import { summarizeError } from '../lib/redact.js';
 
 export interface FridayCronOptions {
   now?: () => Date;
   client?: SenderClient;
+  /**
+   * Builds a region's digest (subject + HTML). Injectable so cron
+   * state-machine tests don't need real metros/forecasts. Defaults to
+   * the real buildRegionDigest. Returns null when the region produced no
+   * forecast content (treated as a transient, retryable condition).
+   */
+  buildDigest?: (region: Region, sendDate: string) => Promise<RegionDigest | null>;
   /** Per-region telemetry — invoked once per processed region. */
   onResult?: (outcome: FridayCronOutcome) => void;
   /**
@@ -50,7 +57,7 @@ export interface FridayCronOptions {
 }
 
 export type FridayCronOutcome =
-  | { region: Region; status: 'skipped'; reason: 'already-sent' | 'previously-failed' | 'no-trigger-url' | 'not-local-friday-6' | 'retry-after-pending' }
+  | { region: Region; status: 'skipped'; reason: 'already-sent' | 'previously-failed' | 'not-configured' | 'not-local-friday-6' | 'retry-after-pending' }
   | { region: Region; status: 'sent'; sendDate: string }
   | { region: Region; status: 'failed'; sendDate: string; error: string; retryable: boolean };
 
@@ -77,16 +84,6 @@ const REGION_ANCHOR_TZ: Readonly<Record<Region, string>> = {
   south_central: 'America/Chicago',
   mountain: 'America/Denver',
   pacific: 'America/Los_Angeles',
-};
-
-/** Env var name carrying the per-region Sender trigger URL. */
-const REGION_TO_TRIGGER_URL_ENV: Readonly<Record<Region, keyof Env>> = {
-  northeast:     'SENDER_DIGEST_TRIGGER_URL_NORTHEAST',
-  southeast:     'SENDER_DIGEST_TRIGGER_URL_SOUTHEAST',
-  midwest:       'SENDER_DIGEST_TRIGGER_URL_MIDWEST',
-  south_central: 'SENDER_DIGEST_TRIGGER_URL_SOUTH_CENTRAL',
-  mountain:      'SENDER_DIGEST_TRIGGER_URL_MOUNTAIN',
-  pacific:       'SENDER_DIGEST_TRIGGER_URL_PACIFIC',
 };
 
 /**
@@ -134,6 +131,16 @@ export async function runFridayCron(
     opts.client ?? createSenderClient({ apiToken: env.SENDER_API_TOKEN });
   const outcomes: FridayCronOutcome[] = [];
   const nowFn = opts.now ?? (() => new Date());
+  const buildDigest =
+    opts.buildDigest ??
+    ((region: Region, sendDate: string) =>
+      buildRegionDigest(env, region, sendDate, { now: nowFn }));
+
+  // Sending a campaign requires a from-address (campaign create needs it).
+  // An unset SENDER_FROM_EMAIL dark-disables the whole digest — the
+  // global kill switch / "not configured yet" state. Mirrors the previous
+  // missing-secret-disables philosophy, now configuration-wide.
+  const fromEmail = env.SENDER_FROM_EMAIL;
 
   for (const region of REGIONS) {
     const slot = regionLocalFridaySlot(scheduledTime, region);
@@ -147,25 +154,21 @@ export async function runFridayCron(
       outcomes.push(o);
       continue;
     }
-    const triggerUrl = env[REGION_TO_TRIGGER_URL_ENV[region]] as string | undefined;
-    if (!triggerUrl) {
+    if (!fromEmail) {
       const o: FridayCronOutcome = {
         region,
         status: 'skipped',
-        reason: 'no-trigger-url',
+        reason: 'not-configured',
       };
       opts.onResult?.(o);
       outcomes.push(o);
-      // Write a warning event so operators can observe the missing-URL
-      // condition from the events table. Guarded by a friday_campaign_log
-      // check so repeated cron invocations within the same Friday window
-      // only write the event once per (region, sendDate).
-      const sendDate = slot.date;
-      const nowMs = nowFn().getTime();
-      await recordMissingUrlEvent(env.SMOKE_DB, region, sendDate, nowMs);
+      // Record one warning event per (region, sendDate) so operators can
+      // see the dark-disabled condition in /api/status without spamming
+      // the events table across the hourly Friday window.
+      await recordSkipEvent(env.SMOKE_DB, region, slot.date, 'not-configured', nowFn().getTime());
       continue;
     }
-    const outcome = await processRegion(env, client, region, triggerUrl, slot.date, nowFn);
+    const outcome = await processRegion(env, client, region, fromEmail, slot.date, nowFn, buildDigest);
     opts.onResult?.(outcome);
     outcomes.push(outcome);
   }
@@ -183,7 +186,7 @@ export async function runFridayCron(
   // re-fires the same event ~5-30 min later with the SAME scheduledTime
   // (still passes the per-region local-Friday-6am gate). When next_attempt_at
   // has expired by the time the auto-retry runs, the cron attempts the
-  // digest_trigger normally. For Retry-After values that exceed Cloudflare's
+  // campaign send normally. For Retry-After values that exceed Cloudflare's
   // auto-retry budget (~30-60 min), the region is silently skipped until next
   // Friday's send_date — acceptable degradation under sustained rate limiting.
   if (!opts.swallowRetryableThrow) {
@@ -206,9 +209,10 @@ async function processRegion(
   env: Env,
   client: SenderClient,
   region: Region,
-  triggerUrl: string,
+  fromEmail: string,
   sendDate: string,
-  nowFn: () => Date
+  nowFn: () => Date,
+  buildDigest: (region: Region, sendDate: string) => Promise<RegionDigest | null>
 ): Promise<FridayCronOutcome> {
   const nowMs = nowFn().getTime();
   // Claim the (region, send_date) slot atomically. The INSERT lands at
@@ -251,7 +255,7 @@ async function processRegion(
     //   (c) status='sending' AND attempted_at > staleCutoff — fresh lock
     //       from a sibling invocation that just claimed it (e.g. the
     //       scheduled-handler retry firing again within the stale
-    //       window after a prior crash before triggerCampaign).
+    //       window after a prior crash before the campaign send).
     //
     // Case (c) is the dangerous one: returning 'already-sent' here lets
     // Cloudflare consider the retry successful, no further retries fire,
@@ -299,24 +303,72 @@ async function processRegion(
     };
   }
 
-  // Narrow the try/catch to ONLY the trigger call. A D1 failure on the
-  // post-send UPDATE used to be treated as a campaign failure and
-  // reverted the row to 'queued' — which made the row eligible for
-  // re-claim and would fire a duplicate automation run on the next
-  // cron tick. Now: trigger errors revert/mark-failed, but a successful
-  // trigger is committed to a 'sent' state with best-effort D1
-  // bookkeeping. If the post-send UPDATE throws, we log and report
-  // sent — operators see the send in Sender.net + the stale 'sending'
-  // row in D1, and the stale-cutoff guard plus the campaign-side
-  // idempotency tag prevent the re-claim path from re-triggering.
+  // Idempotency across reclaim/retry (Codex review): createCampaign and
+  // sendCampaign are two calls, and a 'sending'/'queued' row can be
+  // re-claimed (stale lock) or reverted-and-retried. To guarantee at most
+  // ONE campaign is ever created per (region, send_date) — so a lost send
+  // response, a worker death, or a failed post-send bookkeeping UPDATE can
+  // never broadcast a *second distinct* campaign — we persist the created
+  // campaign's id BEFORE sending and reuse it on any re-attempt (skip
+  // createCampaign, re-send the same campaign). We also send a
+  // deterministic `${region}:${sendDate}` Idempotency-Key on both calls so
+  // a retry is collapsed server-side IF Sender honors it. Residual: a
+  // same-campaign re-send is a duplicate only if Sender both ignores the
+  // idempotency key AND re-broadcasts an already-sent campaign — verify
+  // before enabling sends (docs/sender-setup.md §4).
+  //
+  // The try/catch wraps ONLY build + create + send. A successful send is
+  // committed to 'sent' with best-effort D1 bookkeeping below; if that
+  // UPDATE throws we log and still report sent (the stale-cutoff guard
+  // keeps the row from re-sending within the window).
+  const priorCampaignId = await readCampaignId(env.SMOKE_DB, region, sendDate);
   try {
-    await client.triggerWeeklyDigest({
-      triggerUrl,
-      idempotencyTag: `${region}:${sendDate}`,
-    });
+    let campaignId = priorCampaignId;
+    if (!campaignId) {
+      const digest = await buildDigest(region, sendDate);
+      if (!digest) {
+        // No metro in this region produced any weekend forecast (e.g. a
+        // total upstream outage). Transient — revert to 'queued' and
+        // report retryable so the scheduled-handler auto-retry re-attempts
+        // on a later hourly tick once forecasts recover.
+        await safeUpdateStatus(env.SMOKE_DB, region, sendDate, 'queued', nowMs);
+        await recordEvent(env.SMOKE_DB, region, sendDate, 'failed', 'no digest content (forecast unavailable)', nowMs);
+        return { region, status: 'failed', sendDate, error: 'no digest content', retryable: true };
+      }
+      const groupId = await resolveGroupId(client, env.WEATHER_KV, regionToGroupName(region));
+      const created = await client.createCampaign({
+        name: `pitmaster ${region} ${sendDate}`,
+        subject: digest.subject,
+        fromName: env.SENDER_FROM_NAME ?? 'Pitmaster Tools',
+        fromEmail,
+        replyTo: env.SENDER_REPLY_TO,
+        html: digest.html,
+        groupId,
+        idempotencyKey: `${region}:${sendDate}`,
+      });
+      campaignId = created.campaignId;
+      // Persist the id BEFORE sending. If this fails we must NOT send — a
+      // send now could not be deduped by a later reclaim, risking a
+      // duplicate broadcast. Revert to 'queued' and retry; the just-created
+      // campaign is a harmless unsent draft, never a duplicate email.
+      const persisted = await tryUpdateCampaignId(env.SMOKE_DB, region, sendDate, campaignId, nowMs);
+      if (!persisted) {
+        await safeUpdateStatus(env.SMOKE_DB, region, sendDate, 'queued', nowMs);
+        await recordEvent(env.SMOKE_DB, region, sendDate, 'failed', 'campaign_id persist failed (will retry)', nowMs);
+        return { region, status: 'failed', sendDate, error: 'campaign_id persist failed', retryable: true };
+      }
+    }
+    await client.sendCampaign({ campaignId, idempotencyKey: `${region}:${sendDate}` });
   } catch (err) {
-    const reason = err instanceof SenderError ? summarizeError(err) : 'trigger failed';
-    const retryable = err instanceof SenderError && err.shouldRetry;
+    const reason = summarizeError(err);
+    // A SenderError uses its own retry taxonomy (5xx/timeout/network/429
+    // retryable; most 4xx — e.g. a missing group — terminal). Any OTHER
+    // error here is an unexpected internal/transient failure (e.g. a D1
+    // hiccup in buildRegionDigest before any campaign was created); treat
+    // it as retryable so a blip doesn't permanently dark the region for the
+    // week. At worst CF burns its retry budget on a persistent bug, then
+    // the row stays 'queued' and next week's send_date starts fresh.
+    const retryable = err instanceof SenderError ? err.shouldRetry : true;
     if (retryable) {
       const retryAfterMs = err instanceof SenderError ? err.retryAfterMs : undefined;
       if (retryAfterMs !== undefined) {
@@ -340,13 +392,11 @@ async function processRegion(
     return { region, status: 'failed', sendDate, error: reason, retryable: false };
   }
 
-  // Trigger succeeded. From here on, the campaign IS sent — D1
-  // bookkeeping is best-effort and must not roll the outcome back to
-  // 'queued' (which would re-trigger). Log on failure so an operator
-  // can clean up the stale 'sending' row manually if needed; the
-  // (region, send_date) idempotency tag on triggerWeeklyDigest ensures
-  // Sender.net collapses any accidental re-fire to a no-op even if
-  // the row is somehow re-claimed before SENDING_STALE_MS elapses.
+  // Send succeeded. From here on, the campaign IS sent — D1 bookkeeping
+  // is best-effort and must not roll the outcome back to 'queued' (which
+  // would re-send). Log on failure so an operator can clean up the stale
+  // 'sending' row manually if needed; the stale-cutoff guard keeps the
+  // row from being re-claimed before SENDING_STALE_MS elapses.
   await safeUpdateStatus(env.SMOKE_DB, region, sendDate, 'sent', nowMs);
   await recordEvent(env.SMOKE_DB, region, sendDate, 'sent', null, nowMs);
   return { region, status: 'sent', sendDate };
@@ -354,8 +404,8 @@ async function processRegion(
 
 /**
  * Best-effort wrapper around updateStatus. A D1 hiccup after a
- * successful triggerCampaign must NOT cascade to a re-trigger — see
- * processRegion's post-trigger comment.
+ * successful campaign send must NOT cascade to a re-send — see
+ * processRegion's post-send comment.
  */
 async function safeUpdateStatus(
   db: D1Database,
@@ -391,6 +441,59 @@ async function updateStatus(
     )
     .bind(status, now, region, sendDate)
     .run();
+}
+
+/**
+ * Read the campaign id persisted by a prior attempt for this
+ * (region, send_date), or null if none. Reused so a reclaim/retry never
+ * creates a second campaign — see processRegion's idempotency comment.
+ */
+async function readCampaignId(
+  db: D1Database,
+  region: Region,
+  sendDate: string
+): Promise<string | null> {
+  const row = await db
+    .prepare(
+      `SELECT campaign_id FROM friday_campaign_log
+        WHERE region = ? AND send_date = ?`
+    )
+    .bind(region, sendDate)
+    .first<{ campaign_id: string | null }>();
+  return row?.campaign_id ?? null;
+}
+
+/**
+ * Persist the created campaign id on the (region, send_date) row. Returns
+ * true on success; on a D1 error returns false (logged) so the caller can
+ * abort the send and retry rather than broadcasting an un-deduplicatable
+ * campaign.
+ */
+async function tryUpdateCampaignId(
+  db: D1Database,
+  region: Region,
+  sendDate: string,
+  campaignId: string,
+  now: number
+): Promise<boolean> {
+  try {
+    await db
+      .prepare(
+        `UPDATE friday_campaign_log
+            SET campaign_id = ?, attempted_at = ?
+          WHERE region = ? AND send_date = ?`
+      )
+      .bind(campaignId, now, region, sendDate)
+      .run();
+    return true;
+  } catch (err) {
+    console.warn('friday_campaign_log: campaign_id persist failed', {
+      region,
+      send_date: sendDate,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return false;
+  }
 }
 
 /**
@@ -448,30 +551,30 @@ async function recordEvent(
 }
 
 /**
- * Records a warning event when a region is in-window but has no
- * SENDER_DIGEST_TRIGGER_URL_<REGION> secret configured. Idempotent:
- * uses INSERT OR IGNORE (via a partial unique index on kind+send_date+region
- * encoded in the payload) — instead, checks the events table for a prior
- * no-trigger-url event for this (region, sendDate) so repeated cron
- * invocations within the same Friday window write at most one event row.
+ * Records a warning event when a region is in-window but the digest is
+ * dark-disabled (e.g. SENDER_FROM_EMAIL unset). Idempotent: checks the
+ * events table for a prior event with the same (region, sendDate, reason)
+ * so repeated cron invocations within the same Friday window write at
+ * most one event row per reason.
  */
-async function recordMissingUrlEvent(
+async function recordSkipEvent(
   db: D1Database,
   region: Region,
   sendDate: string,
+  reason: string,
   now: number
 ): Promise<void> {
   try {
     // Atomically insert only if no prior 'error' event for this
     // (region, sendDate, reason) already exists. This guards against
     // concurrent cron invocations in the same Friday window when the
-    // trigger URL is consistently absent. A single compound statement
-    // is atomic in D1's underlying SQLite serialized writes.
+    // dark-disable condition is consistently present. A single compound
+    // statement is atomic in D1's underlying SQLite serialized writes.
     const payload = JSON.stringify({
       source: 'friday_cron',
       region,
       send_date: sendDate,
-      reason: 'no-trigger-url',
+      reason,
     });
     await db
       .prepare(
@@ -483,15 +586,16 @@ async function recordMissingUrlEvent(
               AND json_extract(payload, '$.source') = 'friday_cron'
               AND json_extract(payload, '$.region') = ?
               AND json_extract(payload, '$.send_date') = ?
-              AND json_extract(payload, '$.reason') = 'no-trigger-url'
+              AND json_extract(payload, '$.reason') = ?
           )`
       )
-      .bind('error', payload, now, region, sendDate)
+      .bind('error', payload, now, region, sendDate, reason)
       .run();
   } catch (auditErr) {
-    console.warn('friday_campaign_log: missing-url event insert failed', {
+    console.warn('friday_campaign_log: skip event insert failed', {
       region,
       send_date: sendDate,
+      reason,
       error: summarizeError(auditErr),
     });
   }

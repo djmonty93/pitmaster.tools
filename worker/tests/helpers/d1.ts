@@ -4,6 +4,7 @@
 // real schema without going through wrangler.
 
 import init from '../../migrations/0001_init.sql?raw';
+import migFridayCampaignId from '../../migrations/0002_friday_campaign_id.sql?raw';
 
 /**
  * Strip SQL line comments and split into statements on `;`. Quote-aware
@@ -55,8 +56,8 @@ export function splitStatements(sql: string): string[] {
 }
 
 export async function applyMigrations(db: D1Database): Promise<void> {
-  // Order matters: schema first, then any future additions.
-  const files = [init];
+  // Order matters: schema first, then migrations in numeric order.
+  const files = [init, migFridayCampaignId];
   for (const file of files) {
     for (const stmt of splitStatements(file)) {
       await db.prepare(stmt).run();

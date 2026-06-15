@@ -111,11 +111,17 @@ export function fmtHour(t: string): string {
   return h12 + ' ' + period;
 }
 
+// Quality labels for the four score bands. The underlying band keys
+// (ideal/green/yellow/red) and their CSS color classes are unchanged;
+// only the human-facing text is a quality word rather than a color
+// name, so "Good/Average/Poor" reads as a verdict. MUST stay
+// byte-identical to the client bandLabel in _partials/smoke-weather-app.js
+// and the chooser-tile bandLabel in handlers/metrosChooser.ts.
 export function bandLabel(b: ScoreResult['band']): string {
   if (b === 'ideal') return 'Ideal';
-  if (b === 'green') return 'Green';
-  if (b === 'yellow') return 'Yellow';
-  return 'Red';
+  if (b === 'green') return 'Good';
+  if (b === 'yellow') return 'Average';
+  return 'Poor';
 }
 
 // Tie-break: strict `>` keeps the EARLIEST day on a tie so the verdict

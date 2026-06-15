@@ -23,11 +23,15 @@ import { etDayBucket, nextEtMidnightMs, previousEtDate } from '../lib/cache/weat
 import { escapeHtml, jsonForScriptTag } from '../lib/render/smokeWeather.js';
 import { type RouteContext } from '../router.js';
 
+// Quality labels for the chooser tiles. Kept byte-identical to the
+// shared bandLabel in lib/render/smokeWeather.ts and the client copy in
+// _partials/smoke-weather-app.js — only the human text is a quality
+// word; the band keys + CSS color classes are unchanged.
 function bandLabel(b: MetroTileSummary['todayBand']): string {
   if (b === 'ideal') return 'Ideal';
-  if (b === 'green') return 'Green';
-  if (b === 'yellow') return 'Yellow';
-  return 'Red';
+  if (b === 'green') return 'Good';
+  if (b === 'yellow') return 'Average';
+  return 'Poor';
 }
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

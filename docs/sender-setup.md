@@ -41,61 +41,49 @@ If a group is renamed or deleted/recreated, invalidate the KV cache:
 wrangler kv:key delete --binding WEATHER_KV "sender_group_id:<old-name>"
 ```
 
-## 4. Per-region weekly digest
+## 4. Per-region weekly digest (worker-built campaigns)
 
 The Friday cron (`worker/src/crons/fridayEmail.ts`) fires hourly Fri UTC and, for each
-region whose anchor tz is now Fri 06:00 local, POSTs to that region's
-`SENDER_DIGEST_TRIGGER_URL_<REGION>` secret. A missing secret dark-disables that region
-(useful for staging one region first).
+region whose anchor tz is now Fri 06:00 local, **builds the HTML digest in the worker**
+(the region's metros with Sat/Sun/Mon smoke scores) and **sends it as a Sender.net
+campaign** to the `pitmaster_<region>` group:
 
-### ⚠️ Verify the trigger model in your dashboard BEFORE building all six
+1. Resolve the `pitmaster_<region>` group id (`resolveGroupId`, KV-cached).
+2. `createCampaign` → `POST /v2/campaigns` with subject, from-address, HTML, and
+   `groups: [<region group id>]`.
+3. `sendCampaign` → `POST /v2/campaigns/<id>/send`.
 
-What the worker actually sends (`client.ts` `triggerWeeklyDigest` + `request`):
+One send broadcasts to the whole group — no per-subscriber loop. Scores assume a single
+default profile (pork butt on an offset), disclosed in the email footer. The digest is
+idempotent per (region, send_date) via the `friday_campaign_log` claim, with Cloudflare
+scheduled-handler auto-retry on transient failures (5xx / 429 Retry-After honored).
 
-- **One parameterless call per region** — body is `{"tag":"<region>:<YYYY-MM-DD>"}`, with
-  **no subscriber email**. The design assumes one call broadcasts to the whole
-  `pitmaster_<region>` group (audience filter). *This assumption is unverified against
-  sender.net's docs — confirm it before relying on it.*
-- **The trigger URL must be on `api.sender.net`.** The client host-validates every request and
-  throws `malformed` for any other host, and always attaches `Authorization: Bearer <token>`
-  and `Content-Type: application/json`.
+### ⚠️ Preconditions — verify BEFORE enabling real sends
 
-In the dashboard, create one "API Call Is Made" automation and check:
+1. **Account tier.** The Sender.net Campaigns API (`/v2/campaigns/*`) is typically a
+   **paid-tier** feature. Confirm the account can create and send campaigns via API, or
+   the cron will fail every region.
+2. **Authenticated sending domain.** Set `SENDER_FROM_EMAIL` (and `SENDER_FROM_NAME`,
+   `SENDER_REPLY_TO`) to an address on your authenticated domain (§5). An **unset
+   `SENDER_FROM_EMAIL` dark-disables the whole digest** — the global "not configured yet"
+   / kill-switch state — and writes one `not-configured` warning event per (region, date).
+   There is no per-region toggle in this model (a future enabled-regions list could add
+   one for staging).
+3. **API contract.** The exact create/send payload field names and paths were not
+   confirmable against the live docs (they render client-side). The wire shape is
+   centralized in `worker/src/lib/sender/client.ts` (`campaignCreateBody` + the
+   `createCampaign`/`sendCampaign` paths) so confirming it against the live API — and the
+   unsubscribe merge tag (`{$unsubscribe}`) used in `digestEmail.ts` — is a one-file change.
+4. **Re-send idempotency.** The cron persists the created `campaign_id` on the
+   `friday_campaign_log` row and reuses it on any reclaim/retry, so at most **one campaign
+   is ever created** per (region, send_date) — a lost send response or a failed post-send
+   write can never create a *second distinct* campaign. The residual is that a retry calls
+   `sendCampaign` on the **same** campaign again: confirm Sender either rejects re-sending an
+   already-sent campaign or is otherwise safe, so a retry can't double-broadcast the same
+   campaign.
 
-- **(a)** Is the generated trigger URL's host `api.sender.net`? (required by the worker)
-- **(b)** Does hitting that URL **send to everyone in the audience filter**, or does it require a
-  subscriber **email** in the body to enroll one contact? (sender.net automations are normally
-  per-subscriber workflows.)
-
-### Path A — API-triggered automations (only if (a) = api.sender.net AND (b) = broadcasts to audience)
-
-Six automations, one per region:
-
-1. **Start trigger:** "API Call Is Made".
-2. **Audience filter:** subscriber is in group `pitmaster_<region>`.
-3. **Content:** the weekly digest template.
-4. Copy the trigger URL into the matching secret:
-
-| Region | Secret name |
-|---|---|
-| northeast | `SENDER_DIGEST_TRIGGER_URL_NORTHEAST` |
-| southeast | `SENDER_DIGEST_TRIGGER_URL_SOUTHEAST` |
-| midwest | `SENDER_DIGEST_TRIGGER_URL_MIDWEST` |
-| south_central | `SENDER_DIGEST_TRIGGER_URL_SOUTH_CENTRAL` |
-| mountain | `SENDER_DIGEST_TRIGGER_URL_MOUNTAIN` |
-| pacific | `SENDER_DIGEST_TRIGGER_URL_PACIFIC` |
-
-### Path B — native scheduled campaigns (if (b) = per-subscriber, or the API-trigger broadcast isn't supported)
-
-If a single API call can't broadcast to a group, the cron's model doesn't fit. Instead, skip
-the automations and create **six recurring weekly campaigns** in the dashboard — one per
-`pitmaster_<region>` group, each scheduled to the region's local Friday-morning send time.
-Leave the `SENDER_DIGEST_TRIGGER_URL_*` secrets unset (every region dark-disables, so the cron
-is a no-op) and sender.net owns scheduling. Trade-off: send times are set in the dashboard, not
-driven by the worker's per-region tz logic, and there's no per-(region,send_date) idempotency
-ledger — but it requires no code change. (Making the cron loop per-subscriber against a
-per-subscriber trigger is the other option, but it's a code change and gives up the
-"no per-subscriber loop" scaling win.)
+No per-region trigger URLs or dashboard automations are involved any more; the worker owns
+the content, scheduling (per-region tz), and idempotency.
 
 ## 5. Sending domain
 

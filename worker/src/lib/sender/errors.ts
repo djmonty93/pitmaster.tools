@@ -8,6 +8,8 @@ export type SenderRequestKind =
   | 'subscribe'
   | 'unsubscribe'
   | 'digest_trigger'
+  | 'campaign_create'
+  | 'campaign_send'
   | 'group_assign'
   | 'group_remove'
   | 'group_list'
