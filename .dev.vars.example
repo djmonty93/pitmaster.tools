@@ -2,21 +2,13 @@
 # Dashboard: Settings -> API access tokens -> Create.
 # SENDER_API_TOKEN=your_token_here
 
-# Sending identity (optional; only consumed if POST /v2/message/send is wired).
+# Sending identity for the Friday digest campaigns. The cron uses these on
+# createCampaign. UNSET SENDER_FROM_EMAIL dark-disables the whole digest
+# (the global "not configured yet" / kill switch). Must be on an
+# authenticated sending domain — see docs/sender-setup.md §5.
 # SENDER_FROM_EMAIL=hello@mail.pitmaster.tools
 # SENDER_FROM_NAME=Pitmaster.tools
 # SENDER_REPLY_TO=hello@mail.pitmaster.tools
-
-# Per-region "API Call Is Made" automation trigger URLs.
-# Configure one automation per region in Sender (audience filter = pitmaster_<region> group),
-# copy each automation's trigger URL into the matching var below.
-# A missing var dark-disables that region in the Friday cron.
-# SENDER_DIGEST_TRIGGER_URL_NORTHEAST=
-# SENDER_DIGEST_TRIGGER_URL_SOUTHEAST=
-# SENDER_DIGEST_TRIGGER_URL_MIDWEST=
-# SENDER_DIGEST_TRIGGER_URL_SOUTH_CENTRAL=
-# SENDER_DIGEST_TRIGGER_URL_MOUNTAIN=
-# SENDER_DIGEST_TRIGGER_URL_PACIFIC=
 
 # Subscriber token HMAC secret (used for unsubscribe + preferences links).
 # Generate with: openssl rand -hex 32
