@@ -47,6 +47,38 @@ for (const [path, name] of TOOL_BREADCRUMBS) {
   });
 }
 
+// The "All Tools" hub is the breadcrumb root for every calculator, so it
+// carries its own 2-level trail (Home → All Tools) with the hub as the
+// current page rather than a link.
+test('breadcrumb on /tools leads <main> and marks the hub as current', async ({ page }) => {
+  await page.goto('/tools');
+  const bc = page.locator('nav.breadcrumb');
+  await expect(bc).toBeVisible();
+  const firstChildIsBreadcrumb = await page.evaluate(() => {
+    const main = document.querySelector('main#main-content');
+    const first = main && main.firstElementChild;
+    return !!first && first.matches('nav.breadcrumb');
+  });
+  expect(firstChildIsBreadcrumb).toBe(true);
+  await expect(bc.locator('a[href="/"]')).toHaveText('Home');
+  await expect(bc.locator('[aria-current="page"]')).toHaveText('All Tools');
+});
+
+test('breadcrumb on a metro page leads <main> and mirrors the smoke-weather trail', async ({ page }) => {
+  await page.goto('/smoke-weather/new-york-ny');
+  const bc = page.locator('nav.breadcrumb');
+  await expect(bc).toBeVisible();
+  const firstChildIsBreadcrumb = await page.evaluate(() => {
+    const main = document.querySelector('main#main-content');
+    const first = main && main.firstElementChild;
+    return !!first && first.matches('nav.breadcrumb');
+  });
+  expect(firstChildIsBreadcrumb).toBe(true);
+  await expect(bc.locator('a[href="/"]')).toHaveText('Home');
+  await expect(bc.locator('a[href="/smoke-weather/"]')).toHaveText('Best Smoke Days');
+  await expect(bc.locator('[aria-current="page"]')).toHaveText('New York, NY');
+});
+
 test('breadcrumb is hidden inside embeds', async ({ page }) => {
   await page.goto('/brine-calculator?embed=1');
   await expect(page.locator('nav.breadcrumb')).toBeHidden();
