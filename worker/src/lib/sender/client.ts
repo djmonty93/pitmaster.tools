@@ -58,8 +58,10 @@ export interface SenderClient {
   getSubscriberByEmail(email: string): Promise<{ id: string } | null>;
   unsubscribe(input: UnsubscribeInput): Promise<void>;
   listGroups(): Promise<SenderGroup[]>;
-  assignGroup(subscriberId: string, groupId: string): Promise<void>;
-  removeGroup(subscriberId: string, groupId: string): Promise<void>;
+  // Sender's add/remove-to-group endpoints identify the subscriber by
+  // EMAIL (the `subscribers` array holds email addresses, not ids).
+  assignGroup(email: string, groupId: string): Promise<void>;
+  removeGroup(email: string, groupId: string): Promise<void>;
   /**
    * Create a one-off HTML campaign targeting a single group, then return
    * its id. Pair with sendCampaign to broadcast. Used by the Friday
@@ -246,21 +248,21 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
       }
       return out;
     },
-    async assignGroup(subscriberId, groupId) {
+    async assignGroup(email, groupId) {
       await request(
         'group_assign',
         'POST',
         `/subscribers/groups/${encodeURIComponent(groupId)}`,
-        { subscribers: [subscriberId] }
+        { subscribers: [email] }
       );
     },
-    async removeGroup(subscriberId, groupId) {
+    async removeGroup(email, groupId) {
       try {
         await request(
           'group_remove',
           'DELETE',
           `/subscribers/groups/${encodeURIComponent(groupId)}`,
-          { subscribers: [subscriberId] }
+          { subscribers: [email] }
         );
       } catch (err) {
         if (err instanceof SenderError && err.kind === 'http_4xx' && err.status === 404) return;

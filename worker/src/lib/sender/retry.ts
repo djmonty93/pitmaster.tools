@@ -329,7 +329,8 @@ interface SubscribeRetryPayload extends SubscribeInput {
 
 interface GroupAssignStagePayload {
   stage: 'group_assign';
-  subscriberId: string;
+  /** Subscriber email — Sender's group endpoints identify by email. */
+  email: string;
   region: Region | null;
   /**
    * Region the subscriber WAS in before this resubscribe. Symmetric
@@ -344,7 +345,8 @@ interface GroupAssignStagePayload {
 
 interface GroupRemoveStagePayload {
   stage: 'group_remove';
-  subscriberId: string;
+  /** Subscriber email — Sender's group endpoints identify by email. */
+  email: string;
   /** Group name like `pitmaster_southeast`; resolved at replay time. */
   groupName: string;
 }
@@ -368,16 +370,16 @@ function isSubscribePayload(payload: unknown): payload is SubscribeRetryPayload 
 
 function isGroupAssignStage(payload: unknown): payload is GroupAssignStagePayload {
   if (!payload || typeof payload !== 'object') return false;
-  const p = payload as { stage?: unknown; subscriberId?: unknown };
-  return p.stage === 'group_assign' && typeof p.subscriberId === 'string';
+  const p = payload as { stage?: unknown; email?: unknown };
+  return p.stage === 'group_assign' && typeof p.email === 'string';
 }
 
 function isGroupRemoveStage(payload: unknown): payload is GroupRemoveStagePayload {
   if (!payload || typeof payload !== 'object') return false;
-  const p = payload as { stage?: unknown; subscriberId?: unknown; groupName?: unknown };
+  const p = payload as { stage?: unknown; email?: unknown; groupName?: unknown };
   return (
     p.stage === 'group_remove' &&
-    typeof p.subscriberId === 'string' &&
+    typeof p.email === 'string' &&
     typeof p.groupName === 'string'
   );
 }
@@ -459,10 +461,10 @@ async function dispatchSubscribe(
   }
   if (isGroupAssignStage(payload)) {
     if (payload.region) {
-      await assignBbqGroups(client, kv, payload.subscriberId, payload.region);
+      await assignBbqGroups(client, kv, payload.email, payload.region);
     } else {
       const allGroupId = await resolveGroupId(client, kv, ALL_GROUP_NAME);
-      await client.assignGroup(payload.subscriberId, allGroupId);
+      await client.assignGroup(payload.email, allGroupId);
     }
     // Stale-region cleanup mirroring the full-replay path. The
     // subscribe handler's own inline detach was skipped because the
@@ -473,7 +475,7 @@ async function dispatchSubscribe(
         kv,
         regionToGroupName(payload.oldRegion)
       );
-      await client.removeGroup(payload.subscriberId, staleGroupId);
+      await client.removeGroup(payload.email, staleGroupId);
     }
     return;
   }
@@ -483,19 +485,37 @@ async function dispatchSubscribe(
     // unsubscribe's removeBbqGroups which removes from ALL pitmaster_*
     // groups; here we only detach the one stale regional group.
     const groupId = await resolveGroupId(client, kv, payload.groupName);
-    await client.removeGroup(payload.subscriberId, groupId);
+    await client.removeGroup(payload.email, groupId);
     return;
+  }
+  // Legacy group-stage rows enqueued BEFORE the email-based group fix
+  // carried { stage, subscriberId } with no email. Sender's group
+  // endpoints need an email and there is no id→email lookup to recover
+  // one, so these cannot be replayed. Drop them with an explicit reason
+  // (rather than the generic "invalid email/fields" below) — the queue is
+  // transient, the owner re-subscribes to re-create the assignment, and
+  // current producers always emit `email`, so no migration is warranted.
+  const legacyStage =
+    payload && typeof payload === 'object'
+      ? (payload as { stage?: unknown }).stage
+      : undefined;
+  if (legacyStage === 'group_assign' || legacyStage === 'group_remove') {
+    throw new SenderError(
+      'subscribe',
+      'malformed',
+      'legacy group-stage retry row without email (pre-email-fix) — dropping; owner will re-subscribe'
+    );
   }
   if (!isSubscribePayload(payload)) {
     throw new SenderError('subscribe', 'malformed', 'missing or invalid email/fields');
   }
   const { region: _region, oldRegion: _oldRegion, ...subscribeInput } = payload;
-  const result = await client.subscribe(subscribeInput);
+  await client.subscribe(subscribeInput);
   if (payload.region) {
-    await assignBbqGroups(client, kv, result.id, payload.region);
+    await assignBbqGroups(client, kv, subscribeInput.email, payload.region);
   } else {
     const allGroupId = await resolveGroupId(client, kv, ALL_GROUP_NAME);
-    await client.assignGroup(result.id, allGroupId);
+    await client.assignGroup(subscribeInput.email, allGroupId);
   }
   // Stale-region cleanup: if this was a region-change resubscribe
   // captured at enqueue time, detach the prior regional group AFTER
@@ -508,7 +528,7 @@ async function dispatchSubscribe(
   // user in neither regional audience.
   if (payload.oldRegion && payload.oldRegion !== payload.region) {
     const staleGroupId = await resolveGroupId(client, kv, regionToGroupName(payload.oldRegion));
-    await client.removeGroup(result.id, staleGroupId);
+    await client.removeGroup(subscribeInput.email, staleGroupId);
   }
 }
 
@@ -541,5 +561,7 @@ async function dispatchUnsubscribe(
     subscriberId = found?.id ?? null;
   }
   if (!subscriberId) return;
-  await removeBbqGroups(client, kv, subscriberId);
+  // Existence confirmed via the id lookup, but Sender's group endpoints
+  // remove by email.
+  await removeBbqGroups(client, kv, payload.email);
 }

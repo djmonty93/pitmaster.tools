@@ -81,7 +81,9 @@ export async function handleUnsubscribe(rc: RouteContext): Promise<Response> {
 
   if (subscriberId) {
     try {
-      await removeBbqGroups(client, rc.env.WEATHER_KV, subscriberId);
+      // Existence confirmed via the id lookup above; Sender's group
+      // endpoints remove by email.
+      await removeBbqGroups(client, rc.env.WEATHER_KV, email);
     } catch (err) {
       // Any failure here (retryable or not) potentially leaves the
       // subscriber in one or more pitmaster_* groups — removeBbqGroups

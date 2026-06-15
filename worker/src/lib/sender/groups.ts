@@ -114,13 +114,13 @@ export async function resolveGroupId(
 export async function assignBbqGroups(
   client: Pick<SenderClient, 'listGroups' | 'assignGroup'>,
   kv: KVNamespace,
-  subscriberId: string,
+  email: string,
   region: Region
 ): Promise<void> {
   const names = bbqGroupNamesForSubscriber(region);
   for (const name of names) {
     const id = await resolveGroupId(client, kv, name);
-    await client.assignGroup(subscriberId, id);
+    await client.assignGroup(email, id);
   }
 }
 
@@ -138,10 +138,10 @@ export async function assignBbqGroups(
 export async function removeBbqGroups(
   client: Pick<SenderClient, 'listGroups' | 'removeGroup'>,
   kv: KVNamespace,
-  subscriberId: string
+  email: string
 ): Promise<void> {
   for (const name of allBbqGroupNames()) {
     const id = await resolveGroupId(client, kv, name);
-    await client.removeGroup(subscriberId, id);
+    await client.removeGroup(email, id);
   }
 }

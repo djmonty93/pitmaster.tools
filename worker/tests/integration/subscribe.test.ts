@@ -577,16 +577,16 @@ describe('POST /api/subscribe', () => {
     const retryRow = await DB.prepare(
       `SELECT request_kind, request_payload FROM sender_retry WHERE idempotency_key = ?`
     )
-      .bind('group_assign:sub_123')
+      .bind('group_assign:p2@example.com')
       .first<{ request_kind: string; request_payload: string }>();
     expect(retryRow?.request_kind).toBe('subscribe');
     const payload = JSON.parse(retryRow!.request_payload) as {
       stage: string;
-      subscriberId: string;
+      email: string;
       region: string;
     };
     expect(payload.stage).toBe('group_assign');
-    expect(payload.subscriberId).toBe('sub_123');
+    expect(payload.email).toBe('p2@example.com');
     expect(payload.region).toBe('southeast');
   });
 
@@ -603,7 +603,7 @@ describe('POST /api/subscribe', () => {
         match: '/v2/groups',
         respond: () =>
           jsonResponse(200, {
-            data: [{ id: '1', name: 'pitmaster_all' }],
+            data: [{ id: '1', title: 'pitmaster_all' }],
             links: { next: null },
             meta: {},
           }),
@@ -620,7 +620,7 @@ describe('POST /api/subscribe', () => {
     const retryRow = await DB.prepare(
       `SELECT COUNT(*) AS c FROM sender_retry WHERE idempotency_key = ?`
     )
-      .bind('group_assign:sub_123')
+      .bind('group_assign:missing@example.com')
       .first<{ c: number }>();
     expect(retryRow?.c).toBe(1);
   });
