@@ -424,8 +424,8 @@
       <div class="form-group full-width">
         <label>Serving Size</label>
         <div class="serving-toggle" id="servingToggle">
-          <button data-size="light" class="active">Light <span class="sz" id="szLight">4 oz</span></button>
-          <button data-size="normal">Normal <span class="sz" id="szNormal">6 oz</span></button>
+          <button data-size="light">Light <span class="sz" id="szLight">4 oz</span></button>
+          <button data-size="normal" class="active">Normal <span class="sz" id="szNormal">6 oz</span></button>
           <button data-size="hungry">Hungry <span class="sz" id="szHungry">8 oz</span></button>
         </div>
       </div>
@@ -1209,7 +1209,7 @@ var _lastPhysicsParams = null;
 /* ============================================================
    STATE
    ============================================================ */
-var state = {tu:'F', wu:'lbs', sz:'light'};
+var state = {tu:'F', wu:'lbs', sz:'normal'};
 
 /* ============================================================
    HELPERS
