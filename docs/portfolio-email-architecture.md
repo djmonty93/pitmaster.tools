@@ -74,11 +74,22 @@ The Friday digest cron (`worker/src/crons/fridayEmail.ts`) fires
 hourly Fri UTC across the four anchor-timezone Friday-6am windows. For
 each region whose anchor tz says it is now Fri 06:00 local, the cron
 triggers that region's Sender.net automation via its per-region trigger
-URL (secret `SENDER_DIGEST_TRIGGER_URL_<REGION>`). Sender.net has no
-automation-run-by-id endpoint; instead each automation exposes an "API
-Call Is Made" trigger URL that the cron POSTs to directly. The URL is
-provisioned per region in the worker secrets and a missing secret
-dark-disables that region without erroring the cron.
+URL (secret `SENDER_DIGEST_TRIGGER_URL_<REGION>`). The cron POSTs a
+**parameterless** body (`{"tag":"<region>:<send_date>"}`, no subscriber
+email) and assumes one call broadcasts to the whole `pitmaster_<region>`
+group via the automation's audience filter. The URL is provisioned per
+region in the worker secrets and a missing secret dark-disables that
+region without erroring the cron.
+
+> ⚠️ **Unverified assumption.** sender.net's "API Call Is Made" trigger is
+> normally a *per-subscriber* enrolment (the call identifies one contact),
+> and the broadcast-to-a-group behavior this design relies on is not
+> confirmed against sender.net's docs. The worker also hard-requires the
+> trigger URL to be on `api.sender.net` (host-allowlisted in
+> `client.ts`, with `Authorization: Bearer`). Before building all six
+> automations, verify both in the dashboard and pick Path A (API-triggered
+> automations) or Path B (native scheduled campaigns, cron left dark) —
+> see `docs/sender-setup.md` §4 for the decision tree.
 
 | Region          | Anchor timezone        | UTC trigger (DST) | UTC trigger (standard time) |
 | --------------- | ---------------------- | ----------------- | --------------------------- |
@@ -109,8 +120,12 @@ A single Sender.net account holding multiple sites shares sender
 reputation across all sites. A spammy campaign on one site can ding
 deliverability for sibling sites. Mitigations:
 
-- Each site uses its own subdomain (`mail.pitmaster.tools`,
-  `mail.powersizing.com`, ...). Sender signs DKIM per subdomain.
+- **Optional, recommended at multi-site scale:** give each site its own
+  sending subdomain (`mail.pitmaster.tools`, `mail.powersizing.com`, ...) so
+  Sender signs DKIM per subdomain and one site's reputation can't drag down
+  siblings. This is *not* required — a single site can authenticate and send
+  from its apex (`pitmaster.tools`); the worker has no dependency on the
+  sending domain either way (see `docs/sender-setup.md` §5).
 - Campaign cadence per site is operator-controlled (one weekly digest
   per region, no transactional spam).
 - Unsubscribe is one-click via the per-group footer.
