@@ -295,6 +295,27 @@ test('every metro emits a 3-level BreadcrumbList (Home → Best Smoke Days → m
   }
 });
 
+test('every metro renders a visible breadcrumb that leads <main> and mirrors the trail', () => {
+  for (const metro of gen.METROS) {
+    const html = gen.renderMetro(metro);
+    // Must be the FIRST element inside <main id="main-content">, matching the
+    // tool-page convention enforced by tests/trust-polish.spec.js. The regex
+    // allows whitespace/newlines between the opening <main> tag and the nav.
+    const leads = new RegExp(
+      '<main id="main-content">\\s*<nav class="breadcrumb" aria-label="Breadcrumb">'
+    );
+    assert.ok(leads.test(html), metro.slug + ' breadcrumb is not the first child of <main>');
+    // Trail mirrors the BreadcrumbList: Home → Best Smoke Days → this metro.
+    assert.ok(html.includes('<li><a href="/">Home</a></li>'),
+      metro.slug + ' breadcrumb missing Home link');
+    assert.ok(html.includes('<li><a href="/smoke-weather/">Best Smoke Days</a></li>'),
+      metro.slug + ' breadcrumb missing Best Smoke Days link');
+    const leaf = '<li><span aria-current="page">' +
+      gen.escapeHtml(metro.name + ', ' + metro.state) + '</span></li>';
+    assert.ok(html.includes(leaf), metro.slug + ' breadcrumb missing current-page leaf');
+  }
+});
+
 test('renderMetro references all build-time INJECT directives', () => {
   const html = gen.renderMetro(gen.METROS[0]);
   // Head partials (meta/og/favicons/consent now come from shared HTML partials).
