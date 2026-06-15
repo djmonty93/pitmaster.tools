@@ -513,6 +513,28 @@ describe('runFridayCron — region-by-region', () => {
     expect(log.results.every((r) => r.status === 'queued')).toBe(true);
   });
 
+  it('treats a transient pre-send (buildDigest) failure as retryable, not terminal', async () => {
+    // Regression: a D1/internal hiccup in buildRegionDigest before any
+    // campaign is created used to fall into the generic catch as a
+    // non-retryable terminal failure — darking the region for the week.
+    // Now non-SenderError failures revert to 'queued' and retry.
+    const send = vi.fn().mockResolvedValue(undefined);
+    const throwingDigest: FridayCronOptions['buildDigest'] = async () => {
+      throw new Error('transient d1 read failure');
+    };
+    const outcomes = await runFridayCron(buildEnv(), FRIDAY_6AM_ET, {
+      client: fakeClient(send),
+      buildDigest: throwingDigest,
+      swallowRetryableThrow: true,
+    });
+    expect(send).not.toHaveBeenCalled();
+    const failed = outcomes.filter((o) => o.status === 'failed');
+    expect(failed).toHaveLength(2);
+    expect(failed.every((o) => (o as Extract<FridayCronOutcome, { status: 'failed' }>).retryable)).toBe(true);
+    const log = await DB.prepare(`SELECT status FROM friday_campaign_log ORDER BY region`).all<{ status: string }>();
+    expect(log.results.every((r) => r.status === 'queued')).toBe(true);
+  });
+
   it("marks the row failed on a non-retryable send error — subsequent run skips as previously-failed", async () => {
     const send = vi.fn().mockRejectedValue(
       new SenderError('campaign_send', 'http_4xx', 'status 400', 400)

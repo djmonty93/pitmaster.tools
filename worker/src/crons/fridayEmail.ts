@@ -360,8 +360,15 @@ async function processRegion(
     }
     await client.sendCampaign({ campaignId, idempotencyKey: `${region}:${sendDate}` });
   } catch (err) {
-    const reason = err instanceof SenderError ? summarizeError(err) : 'campaign send failed';
-    const retryable = err instanceof SenderError && err.shouldRetry;
+    const reason = summarizeError(err);
+    // A SenderError uses its own retry taxonomy (5xx/timeout/network/429
+    // retryable; most 4xx — e.g. a missing group — terminal). Any OTHER
+    // error here is an unexpected internal/transient failure (e.g. a D1
+    // hiccup in buildRegionDigest before any campaign was created); treat
+    // it as retryable so a blip doesn't permanently dark the region for the
+    // week. At worst CF burns its retry budget on a persistent bug, then
+    // the row stays 'queued' and next week's send_date starts fresh.
+    const retryable = err instanceof SenderError ? err.shouldRetry : true;
     if (retryable) {
       const retryAfterMs = err instanceof SenderError ? err.retryAfterMs : undefined;
       if (retryAfterMs !== undefined) {
