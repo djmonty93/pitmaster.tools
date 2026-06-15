@@ -310,10 +310,12 @@ async function processRegion(
   // response, a worker death, or a failed post-send bookkeeping UPDATE can
   // never broadcast a *second distinct* campaign — we persist the created
   // campaign's id BEFORE sending and reuse it on any re-attempt (skip
-  // createCampaign, re-send the same campaign). Residual: re-sending the
-  // same campaign id is a duplicate only if Sender re-broadcasts an
-  // already-sent campaign — verify that before enabling sends
-  // (docs/sender-setup.md §4).
+  // createCampaign, re-send the same campaign). We also send a
+  // deterministic `${region}:${sendDate}` Idempotency-Key on both calls so
+  // a retry is collapsed server-side IF Sender honors it. Residual: a
+  // same-campaign re-send is a duplicate only if Sender both ignores the
+  // idempotency key AND re-broadcasts an already-sent campaign — verify
+  // before enabling sends (docs/sender-setup.md §4).
   //
   // The try/catch wraps ONLY build + create + send. A successful send is
   // committed to 'sent' with best-effort D1 bookkeeping below; if that
@@ -342,6 +344,7 @@ async function processRegion(
         replyTo: env.SENDER_REPLY_TO,
         html: digest.html,
         groupId,
+        idempotencyKey: `${region}:${sendDate}`,
       });
       campaignId = created.campaignId;
       // Persist the id BEFORE sending. If this fails we must NOT send — a
@@ -355,7 +358,7 @@ async function processRegion(
         return { region, status: 'failed', sendDate, error: 'campaign_id persist failed', retryable: true };
       }
     }
-    await client.sendCampaign({ campaignId });
+    await client.sendCampaign({ campaignId, idempotencyKey: `${region}:${sendDate}` });
   } catch (err) {
     const reason = err instanceof SenderError ? summarizeError(err) : 'campaign send failed';
     const retryable = err instanceof SenderError && err.shouldRetry;

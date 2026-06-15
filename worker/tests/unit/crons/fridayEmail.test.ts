@@ -460,7 +460,7 @@ describe('runFridayCron — region-by-region', () => {
     expect(client.createCampaign).not.toHaveBeenCalledWith(
       expect.objectContaining({ name: 'pitmaster northeast 2026-05-15' })
     );
-    expect(send).toHaveBeenCalledWith({ campaignId: 'camp_seeded' });
+    expect(send).toHaveBeenCalledWith(expect.objectContaining({ campaignId: 'camp_seeded' }));
     // southeast (no seeded row) still creates + sends normally.
     expect(client.createCampaign).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'pitmaster southeast 2026-05-15' })

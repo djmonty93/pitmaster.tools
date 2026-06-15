@@ -38,6 +38,8 @@ export interface CreateCampaignInput {
   html: string;
   /** Sender.net group id to send to (audience = everyone in the group). */
   groupId: string;
+  /** Optional deterministic idempotency key (best-effort server-side dedup). */
+  idempotencyKey?: string;
 }
 
 export interface CreateCampaignResult {
@@ -46,6 +48,8 @@ export interface CreateCampaignResult {
 
 export interface SendCampaignInput {
   campaignId: string;
+  /** Optional deterministic idempotency key (best-effort server-side dedup). */
+  idempotencyKey?: string;
 }
 
 export interface SenderClient {
@@ -83,7 +87,8 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
     requestKind: SenderRequestKind,
     method: string,
     pathOrUrl: string,
-    body?: unknown
+    body?: unknown,
+    idempotencyKey?: string
   ): Promise<unknown> {
     const url = pathOrUrl.startsWith('http') ? pathOrUrl : `${baseUrl}${pathOrUrl}`;
     const targetUrl = new URL(url);
@@ -113,6 +118,12 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
             authorization: auth,
             'content-type': 'application/json',
             accept: 'application/json',
+            // Defensive at-most-once: a deterministic idempotency key so a
+            // retry of the same logical request is collapsed server-side IF
+            // Sender honors it (standard convention; harmless if ignored —
+            // unknown headers are dropped). Best-effort, not relied upon —
+            // see docs/sender-setup.md §4 precondition 4.
+            ...(idempotencyKey ? { 'idempotency-key': idempotencyKey } : {}),
           },
           body: body === undefined ? undefined : JSON.stringify(body),
           signal: controller.signal,
@@ -257,7 +268,8 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
         'campaign_create',
         'POST',
         '/campaigns',
-        campaignCreateBody(input)
+        campaignCreateBody(input),
+        input.idempotencyKey
       ) as { data?: { id?: string } } | null;
       const id = parsed?.data?.id;
       if (typeof id !== 'string' || id.length === 0) {
@@ -269,7 +281,9 @@ export function createSenderClient(opts: SenderClientOptions): SenderClient {
       await request(
         'campaign_send',
         'POST',
-        `/campaigns/${encodeURIComponent(input.campaignId)}/send`
+        `/campaigns/${encodeURIComponent(input.campaignId)}/send`,
+        undefined,
+        input.idempotencyKey
       );
     },
   };

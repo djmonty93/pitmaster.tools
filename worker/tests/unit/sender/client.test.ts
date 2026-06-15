@@ -394,6 +394,17 @@ describe('SenderClient.createCampaign + sendCampaign', () => {
     } finally { stub.restore(); }
   });
 
+  it('attaches the Idempotency-Key header when an idempotencyKey is given', async () => {
+    const stub = installFetchStub([
+      { match: 'api.sender.net/v2/campaigns/camp_123/send', respond: () => jsonResponse(200, {}) },
+    ]);
+    try {
+      const client = createSenderClient({ apiToken: 'tok' });
+      await client.sendCampaign({ campaignId: 'camp_123', idempotencyKey: 'southeast:2026-05-15' });
+      expect(stub.calls[0]!.headers['idempotency-key']).toBe('southeast:2026-05-15');
+    } finally { stub.restore(); }
+  });
+
   it('sendCampaign throws SenderError(campaign_send) on non-2xx', async () => {
     const stub = installFetchStub([
       { match: 'api.sender.net/v2/campaigns/camp_123/send', respond: () => jsonResponse(500, { message: 'boom' }) },
