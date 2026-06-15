@@ -190,6 +190,18 @@ const REGION_COOKER_TIP = {
   pacific:       'Pacific cooks have the easiest climate in the country and the widest cooker latitude. Offsets, pellets, kamados, kettles and electrics all work well most of the year. The variable to plan around is coastal wind in the afternoons; an inland yard a few miles back from the water sees less of it.',
 };
 
+// Per-metro cooker-tip override. Same rationale as CLIMATE_BY_METRO: the
+// generic regional cooker tip misfits the inland Pacific metros whose climate
+// is overridden above. Without this, an overridden page would describe inland
+// or desert heat in the climate paragraph and then talk about coastal wind in
+// the very next cooker paragraph. Metros without an entry fall back to
+// REGION_COOKER_TIP[region].
+const COOKER_TIP_BY_METRO = {
+  'sacramento-ca': 'Sacramento keeps the wide Pacific cooker latitude — offsets, pellets, kamados and kettles all work through the long, dry season. The variable here isn’t coastal wind but summer heat and moisture loss on long cooks: lean on a butcher-paper wrap and a water pan, and let the evening Delta Breeze ease overnight sessions. An insulated kamado or pellet rig is the easy call through the hottest stretch.',
+  'riverside-ca': 'Riverside’s dry heat rewards cookers that hold moisture — butcher paper over foil, a water pan on the offset, and shorter rest windows fight the dry-out the low dew points impose. The planning variable is autumn Santa Ana wind, not a coastal breeze: build a wind break and watch the gust forecast in fall, when an insulated kamado or pellet rig keeps a steady cook an open offset would struggle to hold.',
+  'portland-or': 'Portland keeps a wide cooker latitude through the mild valley climate, and wind is rarely the deciding variable. The dry July-to-September window is offset season; the rest of the year a sealed kamado or pellet cooker shrugs off the persistent gray drizzle and holds its cook through the wet shoulder months. Keep the cooker under cover and the calendar stays open nearly year-round.',
+};
+
 // Per-metro 1-2 sentence note woven into the intro paragraph. Keeps every
 // page editorially distinct from its same-state siblings (TX has 4 metros,
 // FL has 4, OH has 3, NC/CA/TN/VA/OK/PA/MO/NY all have 2+) so Google
@@ -482,13 +494,17 @@ function climateFor(metro) {
   return CLIMATE_BY_METRO[metro.slug] || REGION_CLIMATE[regionOf(metro.state)];
 }
 
+function cookerTipFor(metro) {
+  return COOKER_TIP_BY_METRO[metro.slug] || REGION_COOKER_TIP[regionOf(metro.state)];
+}
+
 function renderMetro(metro) {
   const region   = regionOf(metro.state);
   const stateNm  = STATE_NAME[metro.state] || metro.state;
   const regLbl   = REGION_LABEL[region];
   const heritage = heritageFor(metro.state);
   const climate  = climateFor(metro);
-  const cooker   = REGION_COOKER_TIP[region];
+  const cooker   = cookerTipFor(metro);
   const name     = metro.name;
   const slug     = metro.slug;
   const zip      = metro.zip;
@@ -854,6 +870,7 @@ module.exports = {
   REGION_CLIMATE,
   CLIMATE_BY_METRO,
   REGION_COOKER_TIP,
+  COOKER_TIP_BY_METRO,
   METRO_NOTE,
   METRO_LOCAL,
   GENERATED_MARKER,
@@ -863,6 +880,7 @@ module.exports = {
   regionOf,
   heritageFor,
   climateFor,
+  cookerTipFor,
   escapeHtml,
   sweepGenerated,
   run,
