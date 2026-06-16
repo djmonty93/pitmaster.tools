@@ -226,13 +226,14 @@ export function renderDigestEmail(input: DigestEmailInput): string {
     '</td></tr>' +
 
     // Footer — CAN-SPAM: physical postal address + clear opt-out + identity.
-    // {$unsubscribe} is Sender.net's unsubscribe merge tag (confirm the token
-    // name in the dashboard).
+    // Sender.net's unsubscribe merge tags are {{unsubscribe_link}} (href) and
+    // {{unsubscribe_text}} (link text) — verified: Sender rejects a campaign
+    // send (403) whose template lacks the link tag.
     '<tr><td style="padding:16px 24px 24px;border-top:1px solid #EDE7DC;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.6;color:#9A9A9A;">' +
       '<p style="margin:0 0 10px;">Scores assume pork butt on an offset smoker. Your detailed forecast scores for your own cut and cooker.</p>' +
-      '<p style="margin:0 0 10px;">You’re receiving this weekly Best Smoke Days forecast because you signed up at <a href="https://pitmaster.tools" style="color:#9A9A9A;">pitmaster.tools</a>. Not interested anymore? <a href="{$unsubscribe}" style="color:#B5651D;font-weight:700;">Unsubscribe here</a> and we’ll stop sending right away.</p>' +
+      '<p style="margin:0 0 10px;">You’re receiving this weekly Best Smoke Days forecast because you signed up at <a href="https://pitmaster.tools" style="color:#9A9A9A;">pitmaster.tools</a>. Not interested anymore? <a href="{{unsubscribe_link}}" style="color:#B5651D;font-weight:700;">Unsubscribe here</a> and we’ll stop sending right away.</p>' +
       `<p style="margin:0 0 4px;"><strong style="color:#6B6B6B;">${escapeHtml(SENDER_NAME)}</strong><br>${escapeHtml(SENDER_POSTAL_ADDRESS)}</p>` +
-      '<p style="margin:0;"><a href="https://pitmaster.tools" style="color:#9A9A9A;">pitmaster.tools</a> &middot; <a href="https://pitmaster.tools/tools" style="color:#9A9A9A;">All BBQ calculators</a> &middot; <a href="https://pitmaster.tools/privacy-policy" style="color:#9A9A9A;">Privacy</a> &middot; <a href="{$unsubscribe}" style="color:#9A9A9A;">Unsubscribe</a></p>' +
+      '<p style="margin:0;"><a href="https://pitmaster.tools" style="color:#9A9A9A;">pitmaster.tools</a> &middot; <a href="https://pitmaster.tools/tools" style="color:#9A9A9A;">All BBQ calculators</a> &middot; <a href="https://pitmaster.tools/privacy-policy" style="color:#9A9A9A;">Privacy</a> &middot; <a href="{{unsubscribe_link}}" style="color:#9A9A9A;">{{unsubscribe_text}}</a></p>' +
     '</td></tr>' +
 
     '</table></td></tr></table></body></html>'

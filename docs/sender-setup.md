@@ -69,11 +69,13 @@ scheduled-handler auto-retry on transient failures (5xx / 429 Retry-After honore
    / kill-switch state — and writes one `not-configured` warning event per (region, date).
    There is no per-region toggle in this model (a future enabled-regions list could add
    one for staging).
-3. **API contract.** The exact create/send payload field names and paths were not
-   confirmable against the live docs (they render client-side). The wire shape is
-   centralized in `worker/src/lib/sender/client.ts` (`campaignCreateBody` + the
-   `createCampaign`/`sendCampaign` paths) so confirming it against the live API — and the
-   unsubscribe merge tag (`{$unsubscribe}`) used in `digestEmail.ts` — is a one-file change.
+3. **API contract — VERIFIED** against the live API (a test campaign created + sent to
+   `pitmaster_southeast`): `POST /v2/campaigns` accepts `campaignCreateBody`'s shape
+   (`title`, `subject`, `from`, `from_email`, `reply_to`, `content_type:'html'`, `content`,
+   `groups:[id]`) and returns the id at `data.id`; `POST /v2/campaigns/{id}/send` sends.
+   The send REQUIRES Sender's unsubscribe merge tags **`{{unsubscribe_link}}`** (href) /
+   **`{{unsubscribe_text}}`** (link text) in the template — Sender returns `403` without
+   them; `digestEmail.ts` now includes both.
 4. **Re-send idempotency.** The cron persists the created `campaign_id` on the
    `friday_campaign_log` row and reuses it on any reclaim/retry, so at most **one campaign
    is ever created** per (region, send_date) — a lost send response or a failed post-send
