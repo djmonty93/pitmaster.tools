@@ -17,6 +17,7 @@ const METROS: DigestMetro[] = [
   {
     name: 'Atlanta, GA',
     days: [
+      { weekday: 'Fri', date: '2026-05-15', score: score('green', 76) },
       { weekday: 'Sat', date: '2026-05-16', score: score('ideal', 91) },
       { weekday: 'Sun', date: '2026-05-17', score: score('green', 78) },
       { weekday: 'Mon', date: '2026-05-18', score: score('yellow', 62) },
@@ -25,6 +26,7 @@ const METROS: DigestMetro[] = [
   {
     name: 'Miami, FL',
     days: [
+      { weekday: 'Fri', date: '2026-05-15', score: score('yellow', 49) },
       { weekday: 'Sat', date: '2026-05-16', score: score('red', 38) },
       { weekday: 'Sun', date: '2026-05-17', score: score('yellow', 55) },
       { weekday: 'Mon', date: '2026-05-18', score: score('green', 71) },
@@ -52,10 +54,24 @@ describe('renderDigestEmail', () => {
     expect(html).toContain('Miami, FL');
   });
 
-  it('shows all three weekend days (Sat/Sun/Mon) per metro', () => {
-    expect(html).toContain('Sat, May 16');
-    expect(html).toContain('Sun, May 17');
-    expect(html).toContain('Mon, May 18');
+  it('shows all four days Fri–Mon per metro (weekday-only labels)', () => {
+    expect(html).toContain('>Fri</div>');
+    expect(html).toContain('>Sat</div>');
+    expect(html).toContain('>Sun</div>');
+    expect(html).toContain('>Mon</div>');
+  });
+
+  it('brands the masthead with a Pitmaster Tools wordmark linked to the site', () => {
+    expect(html).toContain('>Pitmaster&nbsp;Tools</a>');
+    expect(html).toContain('href="https://pitmaster.tools"');
+  });
+
+  it('uses the weekend-beginning tagline built from the Friday send date', () => {
+    expect(html).toContain('the weekend beginning Friday, May 15th');
+  });
+
+  it('includes the CAN-SPAM physical postal address in the footer', () => {
+    expect(html).toContain('Aureate LLC, 3419 Virginia Beach Blvd #B32, Virginia Beach, VA 23452');
   });
 
   it('uses the relabeled quality band words, not color names', () => {

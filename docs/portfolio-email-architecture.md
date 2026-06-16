@@ -74,7 +74,7 @@ between the two shapes.
 The Friday digest cron (`worker/src/crons/fridayEmail.ts`) fires
 hourly Fri UTC across the anchor-timezone Friday-6am windows. For each
 region whose anchor tz says it is now Fri 06:00 local, the cron
-**builds the HTML digest itself** (the region's metros with Sat/Sun/Mon
+**builds the HTML digest itself** (the region's metros with Fri/Sat/Sun/Mon
 smoke scores — see `worker/src/lib/digest/buildRegionDigest.ts` and
 `worker/src/lib/render/digestEmail.ts`), then **creates and sends a
 Sender.net campaign** targeting the `pitmaster_<region>` group by id:
