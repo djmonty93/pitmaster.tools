@@ -99,6 +99,17 @@
       "0 12 * * 1",
       "0 4,5 * * *"
     ]
+  },
+  // Non-secret sender identity for the Friday digest. Kept HERE (in config)
+  // rather than as dashboard plaintext vars so a Workers Builds deploy never
+  // wipes them — a `wrangler deploy` syncs `vars` to this block, clearing any
+  // dashboard var absent here. An unset SENDER_FROM_EMAIL dark-disables the
+  // digest, so these must persist. SENDER_API_TOKEN + SUBSCRIBER_TOKEN_SECRET
+  // stay as encrypted secrets (`wrangler secret put`), which deploys preserve.
+  "vars": {
+    "SENDER_FROM_EMAIL": "contact@pitmaster.tools",
+    "SENDER_FROM_NAME": "Pitmaster Tools",
+    "SENDER_REPLY_TO": "contact@pitmaster.tools"
   }
   // SENDER_API_TOKEN — Bearer token for the Sender.net API,
   // used by worker/src/lib/sender/client.ts. Provisioned with
