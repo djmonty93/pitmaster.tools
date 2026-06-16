@@ -122,7 +122,7 @@ and every `pitmaster_<region>` group, but leaves any
 `powersizing_*` / `overlanding_*` memberships intact.
 
 The digest email footer carries the per-group unsubscribe link via
-Sender's `{$unsubscribe}` merge tag (rendered in
+Sender's `{{unsubscribe_link}}` / `{{unsubscribe_text}}` merge tags (rendered in
 `worker/src/lib/render/digestEmail.ts`); the in-app unsubscribe path uses
 our `removeBbqGroups()` helper. Both must resolve to group-scoped removal,
 not account-scoped — confirm the merge tag's behavior in the dashboard.

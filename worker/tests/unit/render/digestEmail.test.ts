@@ -98,8 +98,9 @@ describe('renderDigestEmail', () => {
     expect(html).toContain('pork butt on an offset');
   });
 
-  it('includes a per-group unsubscribe link', () => {
-    expect(html).toContain('{$unsubscribe}');
+  it("includes Sender's unsubscribe merge tags (required for send)", () => {
+    expect(html).toContain('{{unsubscribe_link}}');
+    expect(html).toContain('{{unsubscribe_text}}');
     expect(html).toMatch(/Unsubscribe/i);
   });
 
