@@ -12,7 +12,7 @@
 // Per tick, for each region whose anchor timezone says it is now
 // Friday 06:00 local, this cron:
 //   1. Claims an idempotency slot in `friday_campaign_log (region, send_date)`
-//   2. Builds the region's HTML digest (its metros + Sat/Sun/Mon scores)
+//   2. Builds the region's HTML digest (its metros + Fri/Sat/Sun/Mon scores)
 //   3. Creates a Sender.net campaign targeting `pitmaster_<region>` and
 //      broadcasts it (one createCampaign + one sendCampaign call)
 //   4. Records a 'send' row in `events` for /api/status observability

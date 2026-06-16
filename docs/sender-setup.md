@@ -45,7 +45,7 @@ wrangler kv:key delete --binding WEATHER_KV "sender_group_id:<old-name>"
 
 The Friday cron (`worker/src/crons/fridayEmail.ts`) fires hourly Fri UTC and, for each
 region whose anchor tz is now Fri 06:00 local, **builds the HTML digest in the worker**
-(the region's metros with Sat/Sun/Mon smoke scores) and **sends it as a Sender.net
+(the region's metros with Fri/Sat/Sun/Mon smoke scores) and **sends it as a Sender.net
 campaign** to the `pitmaster_<region>` group:
 
 1. Resolve the `pitmaster_<region>` group id (`resolveGroupId`, KV-cached).

@@ -246,7 +246,7 @@ verified, and rolled back independently.
   neutralized). `validate.ps1` now checks `smoke-weather/disclosures.html`.
 - **Step 11 (#44, updated #90).** Friday cron (F14) — portfolio-aware
   regional digest. `worker/src/crons/fridayEmail.ts` **builds each
-  region's HTML email itself** (the region's metros with Sat/Sun/Mon
+  region's HTML email itself** (the region's metros with Fri/Sat/Sun/Mon
   smoke scores, default pork-butt + offset profile — see
   `worker/src/lib/digest/buildRegionDigest.ts` and
   `worker/src/lib/render/digestEmail.ts`) and **sends it as a Sender.net

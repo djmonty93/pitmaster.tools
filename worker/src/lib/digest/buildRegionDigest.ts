@@ -1,5 +1,5 @@
 // Assembles one region's Friday digest: that region's metros, each with
-// Saturday/Sunday/Monday smoke scores, rendered to an HTML email body.
+// Friday-through-Monday smoke scores, rendered to an HTML email body.
 //
 // Group broadcasts can't personalise per subscriber, so every score uses
 // a single default profile (pork butt on an offset) disclosed in the
@@ -25,12 +25,12 @@ const DEFAULT_COOKER: Cooker = 'offset';
 /**
  * Match the nightly pre-warm's day count so a Friday read reuses its
  * cached entry (the cache key ignores `days`, but a cache MISS fetches
- * exactly this many). 7 days from Friday includes Sat/Sun/Mon.
+ * exactly this many). 7 days from Friday includes Fri/Sat/Sun/Mon.
  */
 const FORECAST_DAYS = 7;
 
 /** The weekend window, in render order. */
-const WEEKEND_WEEKDAYS = ['Sat', 'Sun', 'Mon'] as const;
+const WEEKEND_WEEKDAYS = ['Fri', 'Sat', 'Sun', 'Mon'] as const;
 const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const REGION_LABEL: Readonly<Record<Region, string>> = {
@@ -126,7 +126,7 @@ export async function buildRegionDigest(
   };
 }
 
-/** Pick the Sat/Sun/Mon days from a forecast and score each. */
+/** Pick the Fri/Sat/Sun/Mon days from a forecast and score each. */
 function pickWeekendDays(days: readonly { date: string }[]): DigestDay[] {
   const out: DigestDay[] = [];
   for (const target of WEEKEND_WEEKDAYS) {
