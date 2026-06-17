@@ -40,6 +40,7 @@ const INPUT: DigestEmailInput = {
   metros: METROS,
   tool: WEEKLY_TOOLS[0]!,
   detailUrl: 'https://pitmaster.tools/smoke-weather/',
+  campaign: 'smoke-days-southeast-2026-05-15',
 };
 
 describe('renderDigestEmail', () => {
@@ -63,7 +64,7 @@ describe('renderDigestEmail', () => {
 
   it('brands the masthead with a Pitmaster Tools wordmark linked to the site', () => {
     expect(html).toContain('>Pitmaster&nbsp;Tools</a>');
-    expect(html).toContain('href="https://pitmaster.tools"');
+    expect(html).toContain('href="https://pitmaster.tools?utm_source=newsletter');
   });
 
   it('uses the weekend-beginning tagline built from the Friday send date', () => {
@@ -102,6 +103,34 @@ describe('renderDigestEmail', () => {
     expect(html).toContain('{{unsubscribe_link}}');
     expect(html).toContain('{{unsubscribe_text}}');
     expect(html).toMatch(/Unsubscribe/i);
+  });
+
+  it('tags every internal pitmaster.tools link with the campaign UTMs', () => {
+    // utm_content slot for each link position, plus its destination.
+    const slots: Array<[string, string]> = [
+      ['masthead', 'https://pitmaster.tools?'],
+      ['featured-tool', `${WEEKLY_TOOLS[0]!.url}?`],
+      ['forecast-cta', 'https://pitmaster.tools/smoke-weather/?'],
+      ['footer-signup', 'https://pitmaster.tools?'],
+      ['footer-home', 'https://pitmaster.tools?'],
+      ['footer-tools', 'https://pitmaster.tools/tools?'],
+      ['footer-privacy', 'https://pitmaster.tools/privacy-policy?'],
+    ];
+    for (const [slot, prefix] of slots) {
+      // Params are HTML-escaped in the href (& -> &amp;).
+      const expected =
+        `${prefix}utm_source=newsletter&amp;utm_medium=email` +
+        `&amp;utm_campaign=smoke-days-southeast-2026-05-15&amp;utm_content=${slot}`;
+      expect(html).toContain(expected);
+    }
+  });
+
+  it('never appends UTMs to Sender.net unsubscribe merge tags', () => {
+    // The merge tag must reach Sender untouched — no query string glued on.
+    expect(html).toContain('href="{{unsubscribe_link}}"');
+    expect(html).not.toContain('{{unsubscribe_link}}?');
+    expect(html).not.toContain('{{unsubscribe_link}}&');
+    expect(html).not.toContain('utm_content=unsubscribe');
   });
 
   it('escapes HTML in metro names', () => {
