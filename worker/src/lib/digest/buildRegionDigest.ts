@@ -119,6 +119,9 @@ export async function buildRegionDigest(
     metros,
     tool: pickWeeklyTool(sendDate),
     detailUrl: DETAIL_URL,
+    // Per-region, per-send so GA4 can compare weeks and regions, e.g.
+    // `smoke-days-southeast-2026-05-15`.
+    campaign: `smoke-days-${region}-${sendDate}`,
   });
   return {
     subject: `This weekend's best smoke days — ${regionLabel}`,

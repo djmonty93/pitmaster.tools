@@ -44,6 +44,12 @@ export interface DigestEmailInput {
   tool: WeeklyTool;
   /** Deep link to the zip-select forecast landing. */
   detailUrl: string;
+  /**
+   * utm_campaign value for every internal link in this send, e.g.
+   * `smoke-days-southeast-2026-05-15` (per region, per weekly send) so
+   * GA4 can attribute and compare digest traffic week over week.
+   */
+  campaign: string;
 }
 
 /**
@@ -176,11 +182,35 @@ function metroRow(metro: DigestMetro): string {
   );
 }
 
+/**
+ * Append UTM campaign params to an internal pitmaster.tools link so the
+ * Friday digest's click-throughs are attributable in GA4. Every link in
+ * the email is a first-party pitmaster.tools destination; the only other
+ * href is Sender.net's `{{unsubscribe_link}}` merge tag, which is owned
+ * by Sender and intentionally never passed through here.
+ *
+ * `slot` becomes utm_content so clicks can be told apart by position
+ * (masthead vs featured tool vs the forecast CTA vs each footer link).
+ *
+ * Returns a RAW (unescaped) URL — callers wrap it in escapeHtml when
+ * interpolating into an href, which turns the `&` separators into `&amp;`.
+ */
+function withUtm(url: string, slot: string, campaign: string): string {
+  const params =
+    'utm_source=newsletter' +
+    '&utm_medium=email' +
+    `&utm_campaign=${encodeURIComponent(campaign)}` +
+    `&utm_content=${encodeURIComponent(slot)}`;
+  return url + (url.includes('?') ? '&' : '?') + params;
+}
+
 /** Render the full HTML email body. */
 export function renderDigestEmail(input: DigestEmailInput): string {
   const metrosHtml = input.metros.map(metroRow).join('');
   const tool = input.tool;
-  const detailUrl = escapeHtml(input.detailUrl);
+  const campaign = input.campaign;
+  const link = (url: string, slot: string): string => escapeHtml(withUtm(url, slot, campaign));
+  const detailUrl = link(input.detailUrl, 'forecast-cta');
 
   return (
     '<!DOCTYPE html>' +
@@ -194,7 +224,7 @@ export function renderDigestEmail(input: DigestEmailInput): string {
 
     // Brand masthead (links to the site)
     '<tr><td style="padding:22px 24px 0;">' +
-      '<a href="https://pitmaster.tools" style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#B5651D;text-decoration:none;letter-spacing:.3px;">Pitmaster&nbsp;Tools</a>' +
+      `<a href="${link('https://pitmaster.tools', 'masthead')}" style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#B5651D;text-decoration:none;letter-spacing:.3px;">Pitmaster&nbsp;Tools</a>` +
       '<div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#9A9A9A;margin-top:3px;">Weather-scored BBQ forecasts</div>' +
       '<div style="height:2px;background:#EDD9AA;margin:14px 0 0;"></div>' +
     '</td></tr>' +
@@ -213,7 +243,7 @@ export function renderDigestEmail(input: DigestEmailInput): string {
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FBF3E6;border:1px solid #EDD9AA;border-radius:6px;">' +
         '<tr><td style="padding:14px 16px;font-family:Arial,Helvetica,sans-serif;">' +
           '<div style="font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#B5651D;">This week’s tool</div>' +
-          `<a href="${escapeHtml(tool.url)}" style="display:inline-block;margin:4px 0 2px;font-size:16px;font-weight:700;color:#B5651D;text-decoration:none;">${escapeHtml(tool.name)} →</a>` +
+          `<a href="${link(tool.url, 'featured-tool')}" style="display:inline-block;margin:4px 0 2px;font-size:16px;font-weight:700;color:#B5651D;text-decoration:none;">${escapeHtml(tool.name)} →</a>` +
           `<div style="font-size:13px;color:#5B5B5B;">${escapeHtml(tool.blurb)}</div>` +
         '</td></tr>' +
       '</table>' +
@@ -231,9 +261,9 @@ export function renderDigestEmail(input: DigestEmailInput): string {
     // send (403) whose template lacks the link tag.
     '<tr><td style="padding:16px 24px 24px;border-top:1px solid #EDE7DC;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.6;color:#9A9A9A;">' +
       '<p style="margin:0 0 10px;">Scores assume pork butt on an offset smoker. Your detailed forecast scores for your own cut and cooker.</p>' +
-      '<p style="margin:0 0 10px;">You’re receiving this weekly Best Smoke Days forecast because you signed up at <a href="https://pitmaster.tools" style="color:#9A9A9A;">pitmaster.tools</a>. Not interested anymore? <a href="{{unsubscribe_link}}" style="color:#B5651D;font-weight:700;">Unsubscribe here</a> and we’ll stop sending right away.</p>' +
+      `<p style="margin:0 0 10px;">You’re receiving this weekly Best Smoke Days forecast because you signed up at <a href="${link('https://pitmaster.tools', 'footer-signup')}" style="color:#9A9A9A;">pitmaster.tools</a>. Not interested anymore? <a href="{{unsubscribe_link}}" style="color:#B5651D;font-weight:700;">Unsubscribe here</a> and we’ll stop sending right away.</p>` +
       `<p style="margin:0 0 4px;"><strong style="color:#6B6B6B;">${escapeHtml(SENDER_NAME)}</strong><br>${escapeHtml(SENDER_POSTAL_ADDRESS)}</p>` +
-      '<p style="margin:0;"><a href="https://pitmaster.tools" style="color:#9A9A9A;">pitmaster.tools</a> &middot; <a href="https://pitmaster.tools/tools" style="color:#9A9A9A;">All BBQ calculators</a> &middot; <a href="https://pitmaster.tools/privacy-policy" style="color:#9A9A9A;">Privacy</a> &middot; <a href="{{unsubscribe_link}}" style="color:#9A9A9A;">{{unsubscribe_text}}</a></p>' +
+      `<p style="margin:0;"><a href="${link('https://pitmaster.tools', 'footer-home')}" style="color:#9A9A9A;">pitmaster.tools</a> &middot; <a href="${link('https://pitmaster.tools/tools', 'footer-tools')}" style="color:#9A9A9A;">All BBQ calculators</a> &middot; <a href="${link('https://pitmaster.tools/privacy-policy', 'footer-privacy')}" style="color:#9A9A9A;">Privacy</a> &middot; <a href="{{unsubscribe_link}}" style="color:#9A9A9A;">{{unsubscribe_text}}</a></p>` +
     '</td></tr>' +
 
     '</table></td></tr></table></body></html>'
