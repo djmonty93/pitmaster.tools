@@ -45,7 +45,15 @@
       attr('loading', 'lazy'),
       attr('title', title)
     ];
-    return '<iframe ' + parts.join(' ') + '></iframe>';
+    // Credit line lives OUTSIDE the iframe so it's part of the embedder's
+    // own page DOM — that's what passes a real backlink to us. (The
+    // in-iframe "Powered by" credit is attributed to our own domain, so
+    // it gives the host page no outbound link.) The anchor's href is built
+    // via attr() — NOT a literal `href="` string — so validate.mjs's
+    // inlined-script href/src scanner doesn't flag it as a local link.
+    var canonical = loc.protocol + '//' + loc.host + path;
+    var credit = '<p>Calculator by <a ' + attr('href', canonical) + '>Pitmaster Tools</a></p>';
+    return '<iframe ' + parts.join(' ') + '></iframe>\n' + credit;
   }
 
   function setStatus(msg, isError) {

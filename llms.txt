@@ -5,19 +5,19 @@ Pitmaster Tools provides browser-based calculators for low-and-slow BBQ cooking.
 
 ## Tools
 
-- Meat Smoking Calculator: https://pitmaster.tools/ — smoking times, timelines, wood pairings, serving estimates for brisket, pork butt, ribs, chicken, turkey
-- Brisket Calculator: https://pitmaster.tools/brisket-calculator — cook time, stall prediction, wrap-method adjustment, sliced vs. pulled
-- Pork Shoulder Calculator: https://pitmaster.tools/pork-shoulder-calculator — pulled pork and sliced pork butt cook times, stall, and timeline
-- Rib Calculator: https://pitmaster.tools/rib-calculator — baby back and spare rib times, 3-2-1 method, doneness indicators
-- Turkey Smoking Calculator: https://pitmaster.tools/turkey-smoking-calculator — spatchcock and whole turkey cook times, temp targets
-- Meat Per Person Calculator: https://pitmaster.tools/meat-per-person — raw-to-cooked yield, serving estimates for any crowd size
-- Cook Time Coordinator: https://pitmaster.tools/cook-time-coordinator — multi-meat simultaneous finish timing
-- Brine Calculator: https://pitmaster.tools/brine-calculator — wet and dry brine ratios by weight
-- Dry Rub Calculator: https://pitmaster.tools/dry-rub-calculator — scale any rub recipe to exact meat weight
-- Charcoal Calculator: https://pitmaster.tools/charcoal-calculator — charcoal and wood chunk estimates by cook length and smoker type
-- BBQ Cost Calculator: https://pitmaster.tools/bbq-cost-calculator — cost per serving and total cook budget
-- Catering Calculator: https://pitmaster.tools/catering-calculator — raw weight, sides, and total cost for catered events
-- Brisket Yield Calculator: https://pitmaster.tools/brisket-yield-calculator — how much brisket to buy for a target cooked yield
+- [Meat Smoking Calculator](https://pitmaster.tools/) — smoking times, timelines, wood pairings, serving estimates for brisket, pork butt, ribs, chicken, turkey
+- [Brisket Calculator](https://pitmaster.tools/brisket-calculator) — cook time, stall prediction, wrap-method adjustment, sliced vs. pulled
+- [Pork Shoulder Calculator](https://pitmaster.tools/pork-shoulder-calculator) — pulled pork and sliced pork butt cook times, stall, and timeline
+- [Rib Calculator](https://pitmaster.tools/rib-calculator) — baby back and spare rib times, 3-2-1 method, doneness indicators
+- [Turkey Smoking Calculator](https://pitmaster.tools/turkey-smoking-calculator) — spatchcock and whole turkey cook times, temp targets
+- [Meat Per Person Calculator](https://pitmaster.tools/meat-per-person) — raw-to-cooked yield, serving estimates for any crowd size
+- [Cook Time Coordinator](https://pitmaster.tools/cook-time-coordinator) — multi-meat simultaneous finish timing
+- [Brine Calculator](https://pitmaster.tools/brine-calculator) — wet and dry brine ratios by weight
+- [Dry Rub Calculator](https://pitmaster.tools/dry-rub-calculator) — scale any rub recipe to exact meat weight
+- [Charcoal Calculator](https://pitmaster.tools/charcoal-calculator) — charcoal and wood chunk estimates by cook length and smoker type
+- [BBQ Cost Calculator](https://pitmaster.tools/bbq-cost-calculator) — cost per serving and total cook budget
+- [Catering Calculator](https://pitmaster.tools/catering-calculator) — raw weight, sides, and total cost for catered events
+- [Brisket Yield Calculator](https://pitmaster.tools/brisket-yield-calculator) — how much brisket to buy for a target cooked yield
 
 ## Key Facts
 
@@ -31,4 +31,4 @@ Pitmaster Tools provides browser-based calculators for low-and-slow BBQ cooking.
 
 ## Contact
 
-contact@pitmaster.tools
+[contact@pitmaster.tools](mailto:contact@pitmaster.tools)
