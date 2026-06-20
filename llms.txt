@@ -20,6 +20,7 @@ Pitmaster Tools provides browser-based calculators for low-and-slow BBQ cooking.
 - [Brisket Yield Calculator](https://pitmaster.tools/brisket-yield-calculator) — how much brisket to buy for a target cooked yield
 - [Best Smoke Days Forecast](https://pitmaster.tools/smoke-weather/) — 7-day weather forecast scored 0-100 for your cut and cooker, by ZIP
 - [Best Cities to Smoke Meat Today](https://pitmaster.tools/smoke-weather/best-cities) — all 50 U.S. metros ranked by today's smoke score, updated daily
+- [Smoking Times & Temperatures Chart](https://pitmaster.tools/smoking-times-and-temps) — free printable cook times, smoker and pull temps, rest, and USDA safe minimums
 
 ## Key Facts
 
