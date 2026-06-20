@@ -91,6 +91,12 @@
     <priority>0.85</priority>
   </url>
   <url>
+    <loc>https://pitmaster.tools/smoke-weather/best-cities</loc>
+    <lastmod>2026-06-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://pitmaster.tools/smoke-weather/new-york-ny</loc>
     <lastmod>2026-06-15</lastmod>
     <changefreq>daily</changefreq>

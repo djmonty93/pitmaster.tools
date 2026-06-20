@@ -1,0 +1,244 @@
+<!-- meta:
+  title="Best Cities to Smoke Meat Today | Pitmaster Tools"
+  description="All 50 U.S. metros ranked by today's smoke score — see the best and toughest cities to smoke meat right now, updated daily from live weather."
+  canonical="https://pitmaster.tools/smoke-weather/best-cities"
+  og_title="Best Cities to Smoke Meat Today — Live Rankings"
+  og_desc="All 50 U.S. metros ranked by today's smoke score. See the best and toughest cities to fire up the smoker right now, updated daily from live weather."
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- INJECT:head-meta.html -->
+<!-- INJECT:head-og.html -->
+<!-- INJECT:head-favicons.html -->
+<!-- INJECT:consent-init.html -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Pitmaster Tools — Best Cities to Smoke Meat",
+  "url": "https://pitmaster.tools/smoke-weather/best-cities",
+  "description": "All 50 U.S. metros ranked by today's smoke score — the best and toughest cities to smoke meat right now, updated daily from live weather.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "isAccessibleForFree": true,
+  "browserRequirements": "Requires JavaScript enabled in a modern browser.",
+  "dateModified": "2026-06-20",
+  "featureList": [
+    "All 50 U.S. metros ranked by today's 0-100 smoke score",
+    "Best and toughest cities to smoke meat today",
+    "Best day this week for each metro",
+    "Updated daily from live weather"
+  ],
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How are the cities ranked?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Each metro gets a 0-100 smoke score for today's weather, and the cities are ranked from highest to lowest. The score starts at 100 and subtracts penalties for rain, wind and gusts, cold mornings, hot afternoons, and stall risk. A higher score means better conditions to run the smoker. See the methodology page for the full formula."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often is the ranking updated?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The ranking refreshes daily from live weather forecasts, so the best and toughest cities change as conditions move. It reflects today's score for each metro; open a city's page for its full 7-day outlook."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which city is the best place to smoke meat?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There's no single answer — it changes every day with the weather. A humid Gulf Coast day that hurts brisket in Houston can rank below a clear, calm day in Denver. Check the live ranking above for today's best city, then confirm with that city's 7-day forecast before you commit."
+      }
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://pitmaster.tools/" },
+    { "@type": "ListItem", "position": 2, "name": "Best Smoke Days", "item": "https://pitmaster.tools/smoke-weather/" },
+    { "@type": "ListItem", "position": 3, "name": "Best Cities to Smoke", "item": "https://pitmaster.tools/smoke-weather/best-cities" }
+  ]
+}
+</script>
+<!-- INJECT:site-header.css -->
+<!-- INJECT:site-base.css -->
+<!-- INJECT:smoke-weather.css -->
+<style>
+  .lb-status { margin: .75rem 0; color: var(--smoke, #555); }
+  .lb-hero { font-weight: 600; margin: .25rem 0 1rem; }
+  .lb-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .98rem; }
+  .lb-table caption { text-align: left; font-weight: 600; padding: .25rem 0 .6rem; }
+  .lb-table th, .lb-table td { padding: .5rem .6rem; border-bottom: 1px solid rgba(0,0,0,.1); text-align: left; }
+  .lb-table th { font-size: .82rem; text-transform: uppercase; letter-spacing: .03em; color: #666; }
+  .lb-rank { width: 2.5rem; color: #888; font-variant-numeric: tabular-nums; }
+  .lb-score { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .lb-best { white-space: nowrap; color: #555; }
+  .lb-row td:first-child { border-left: 4px solid transparent; }
+  .lb-row.band-ideal td:first-child { border-left-color: #1f8a3b; }
+  .lb-row.band-green td:first-child { border-left-color: #6fae3f; }
+  .lb-row.band-yellow td:first-child { border-left-color: #e0a92e; }
+  .lb-row.band-red td:first-child { border-left-color: #c0463b; }
+  /* Browse-all fallback reuses the metro-tile grid but without the per-tile
+     score/best text (those only hydrate on the chooser page). */
+  .metros-browse .metro-tile__score,
+  .metros-browse .metro-tile__best { display: none; }
+  .metros-browse .metros-grid { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .metros-browse .metro-tile { flex: 0 1 auto; }
+</style>
+</head>
+<body>
+
+<!-- INJECT:site-header-smoke.html -->
+
+<main id="main-content">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <ol>
+      <li><a href="/">Home</a></li>
+      <li><a href="/smoke-weather/">Best Smoke Days</a></li>
+      <li><span aria-current="page">Best Cities to Smoke</span></li>
+    </ol>
+  </nav>
+
+  <section class="page-hero" aria-label="Page introduction">
+    <h1>Best Cities to Smoke Meat Today</h1>
+    <p>All 50 U.S. metros, ranked by today's 0-100 smoke score — a weather-aware rating of how good a day it is to run the smoker. Updated daily. Want the full picture for one city? Open its <a href="/smoke-weather/">7-day forecast</a>, or read the <a href="/smoke-weather/methodology">scoring methodology</a>.</p>
+  </section>
+
+  <section class="form-card" aria-labelledby="lb-title">
+    <h2 id="lb-title">Today's ranking <span id="lbDate" class="lb-date"></span></h2>
+    <p id="lbHero" class="lb-hero" aria-live="polite" hidden></p>
+    <p id="lbStatus" class="lb-status" role="status">Loading today's rankings…</p>
+    <div id="lbLive" hidden>
+      <table class="lb-table" id="lbTable">
+        <caption>U.S. metros ranked by today's smoke score (higher is better)</caption>
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">City</th>
+            <th scope="col">Score</th>
+            <th scope="col">Conditions</th>
+            <th scope="col">Best day this week</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </section>
+
+  <section class="form-card metros-browse" aria-labelledby="browse-title">
+    <h2 id="browse-title">Browse all metro forecasts</h2>
+    <p>Tap a city for its full 7-day smoke forecast scored to your cut and cooker.</p>
+    <div class="metros-grid">
+      <!-- INJECT:metros-list.html -->
+    </div>
+  </section>
+
+  <section class="form-card" aria-labelledby="faq-title">
+    <h2 id="faq-title">Frequently asked questions</h2>
+    <h3>How are the cities ranked?</h3>
+    <p>Each metro gets a 0-100 smoke score for today's weather, and the cities are ranked from highest to lowest. The score starts at 100 and subtracts penalties for rain, wind and gusts, cold mornings, hot afternoons, and stall risk. A higher score means better conditions to run the smoker. See the <a href="/smoke-weather/methodology">methodology page</a> for the full formula.</p>
+    <h3>How often is the ranking updated?</h3>
+    <p>The ranking refreshes daily from live weather forecasts, so the best and toughest cities change as conditions move. It reflects today's score for each metro; open a city's page for its full 7-day outlook.</p>
+    <h3>Which city is the best place to smoke meat?</h3>
+    <p>There's no single answer — it changes every day with the weather. A humid Gulf Coast day that hurts brisket in Houston can rank below a clear, calm day in Denver. Check the live ranking above for today's best city, then confirm with that city's 7-day forecast before you commit.</p>
+  </section>
+</main>
+
+<!-- INJECT:site-footer-smoke.html -->
+
+<script>
+(function () {
+  'use strict';
+  var BANDS = { ideal: 'Ideal', green: 'Good', yellow: 'Average', red: 'Poor' };
+  function bandLabel(b) { return BANDS[b] || '—'; }
+  function fmtDate(iso) {
+    if (!iso) return '';
+    var p = String(iso).split('-');
+    if (p.length !== 3) return iso;
+    var d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]));
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' });
+  }
+  function cell(cls, text) {
+    var td = document.createElement('td');
+    if (cls) td.className = cls;
+    if (text != null) td.textContent = text;
+    return td;
+  }
+  var live = document.getElementById('lbLive');
+  var statusEl = document.getElementById('lbStatus');
+  var table = document.getElementById('lbTable');
+  if (!live || !table) return;
+
+  fetch('/api/metros', { headers: { 'accept': 'application/json' } })
+    .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+    .then(function (data) {
+      var metros = (data && data.metros) || [];
+      if (!metros.length) throw new Error('empty');
+      metros.sort(function (a, b) { return (b.todayScore || 0) - (a.todayScore || 0); });
+
+      var tbody = document.createElement('tbody');
+      metros.forEach(function (m, i) {
+        var tr = document.createElement('tr');
+        tr.className = 'lb-row band-' + (m.todayBand || 'red');
+        tr.appendChild(cell('lb-rank', i + 1));
+
+        var tdCity = cell('lb-city');
+        var a = document.createElement('a');
+        a.setAttribute('href', '/smoke-weather/' + m.slug);
+        a.textContent = m.name + ', ' + m.state;
+        tdCity.appendChild(a);
+        tr.appendChild(tdCity);
+
+        var tdScore = cell('lb-score');
+        var strong = document.createElement('strong');
+        strong.textContent = m.todayScore;
+        tdScore.appendChild(strong);
+        tdScore.appendChild(document.createTextNode('/100'));
+        tr.appendChild(tdScore);
+
+        tr.appendChild(cell('lb-band', bandLabel(m.todayBand)));
+        tr.appendChild(cell('lb-best', m.bestDay ? (fmtDate(m.bestDay.date) + ' (' + m.bestDay.score + ')') : '—'));
+        tbody.appendChild(tr);
+      });
+      var old = table.querySelector('tbody');
+      if (old) table.removeChild(old);
+      table.appendChild(tbody);
+
+      var best = metros[0], worst = metros[metros.length - 1];
+      var hero = document.getElementById('lbHero');
+      if (hero) {
+        hero.textContent = 'Today’s best city to smoke: ' + best.name + ', ' + best.state +
+          ' (' + best.todayScore + '/100). Toughest: ' + worst.name + ', ' + worst.state +
+          ' (' + worst.todayScore + '/100).';
+        hero.removeAttribute('hidden');
+      }
+      var dateEl = document.getElementById('lbDate');
+      if (dateEl && data.etDate) dateEl.textContent = '· ' + fmtDate(data.etDate);
+
+      live.removeAttribute('hidden');
+      if (statusEl) statusEl.setAttribute('hidden', '');
+    })
+    .catch(function () {
+      if (statusEl) statusEl.textContent = 'Live rankings are unavailable right now — browse all metros below for each city’s forecast.';
+    });
+})();
+</script>
+</body>
+</html>
