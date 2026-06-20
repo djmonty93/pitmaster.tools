@@ -123,8 +123,8 @@
 
   <section class="form-card" aria-labelledby="lb-title">
     <h2 id="lb-title">Today's ranking <span id="lbDate" class="lb-date"></span></h2>
-    <p id="lbHero" class="lb-hero" hidden></p>
-    <p id="lbStatus" class="lb-status">Loading today's rankings…</p>
+    <p id="lbHero" class="lb-hero" aria-live="polite" hidden></p>
+    <p id="lbStatus" class="lb-status" role="status">Loading today's rankings…</p>
     <div id="lbLive" hidden>
       <table class="lb-table" id="lbTable">
         <caption>U.S. metros ranked by today's smoke score (higher is better)</caption>
