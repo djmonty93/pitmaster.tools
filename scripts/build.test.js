@@ -3,7 +3,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {
-  parseFrontmatter, substituteVars, injectPartials, resolvePermalink, minifyAsset
+  parseFrontmatter, substituteVars, injectPartials, resolvePermalink, minifyAsset,
+  derivePinVars, copyDir
 } = require('../build.js');
 
 test('parseFrontmatter — extracts simple key/value pairs', () => {
@@ -488,6 +489,114 @@ test('minifyAsset — fails loudly on a syntactically broken .js partial', async
 // itself is split via concatenation so neither the comment block nor
 // the assertion strings trip the same guard if the scan ever widens
 // to cover this file.
+// ── Social / Pinterest defaults (resolveVar fallbacks via substituteVars) ───
+
+test('substituteVars — og_type defaults to "website" when absent', () => {
+  assert.equal(
+    substituteVars('<meta property="og:type" content="{{OG_TYPE}}">', {}),
+    '<meta property="og:type" content="website">'
+  );
+});
+
+test('substituteVars — explicit og_type (article) beats the default', () => {
+  assert.equal(substituteVars('{{OG_TYPE}}', { og_type: 'article' }), 'article');
+});
+
+test('substituteVars — og_image / dims / alt fall back to the site-wide defaults', () => {
+  assert.equal(substituteVars('{{OG_IMAGE}}', {}), 'https://pitmaster.tools/og-image.png');
+  assert.equal(substituteVars('{{OG_IMAGE_W}}', {}), '1200');
+  assert.equal(substituteVars('{{OG_IMAGE_H}}', {}), '630');
+  assert.equal(substituteVars('{{OG_IMAGE_ALT}}', {}), 'Pitmaster Tools - Free BBQ Calculators');
+});
+
+test('substituteVars — modified falls back to published when only published is set', () => {
+  assert.equal(substituteVars('{{MODIFIED}}', { published: '2026-01-10' }), '2026-01-10');
+});
+
+// ── derivePinVars (per-page article/Pinterest derivation) ───────────────────
+
+test('derivePinVars — returns {} for non-article pages (output unchanged)', () => {
+  assert.deepEqual(derivePinVars('index.html', { title: 'Home' }, true), {});
+});
+
+test('derivePinVars — article with existing og PNG derives the vertical 1000x1500 image', () => {
+  const out = derivePinVars(
+    'brisket-calculator.html',
+    { og_type: 'article', canonical: 'https://pitmaster.tools/brisket-calculator',
+      description: 'Free brisket calculator.' },
+    true
+  );
+  assert.equal(out.og_image, 'https://pitmaster.tools/og/brisket-calculator.png');
+  assert.equal(out.og_image_w, '1000');
+  assert.equal(out.og_image_h, '1500');
+});
+
+test('derivePinVars — article with NO og PNG falls back to /og-image.png at 1200x630', () => {
+  const out = derivePinVars(
+    'brisket-calculator.html',
+    { og_type: 'article', canonical: 'https://pitmaster.tools/brisket-calculator' },
+    false
+  );
+  assert.equal(out.og_image, 'https://pitmaster.tools/og-image.png');
+  assert.equal(out.og_image_w, '1200');
+  assert.equal(out.og_image_h, '630');
+});
+
+test('derivePinVars — an explicit og_image overrides the slug-derived default', () => {
+  const out = derivePinVars(
+    'brisket-calculator.html',
+    { og_type: 'article', og_image: 'https://pitmaster.tools/og/custom.png',
+      canonical: 'https://pitmaster.tools/brisket-calculator' },
+    true
+  );
+  assert.equal(out.og_image, 'https://pitmaster.tools/og/custom.png');
+});
+
+test('derivePinVars — pin_href is a URL-encoded pinterest create-button link', () => {
+  const out = derivePinVars(
+    'brisket-calculator.html',
+    { og_type: 'article', canonical: 'https://pitmaster.tools/brisket-calculator',
+      description: 'Free brisket calculator: time & temp.' },
+    true
+  );
+  assert.ok(out.pin_href.startsWith('https://www.pinterest.com/pin/create/button/?url='));
+  assert.ok(out.pin_href.includes('url=' + encodeURIComponent('https://pitmaster.tools/brisket-calculator')));
+  assert.ok(out.pin_href.includes('media=' + encodeURIComponent('https://pitmaster.tools/og/brisket-calculator.png')));
+  assert.ok(out.pin_href.includes('description=' + encodeURIComponent('Free brisket calculator: time & temp.')));
+});
+
+test('derivePinVars — pin_desc takes precedence over description in pin_href', () => {
+  const out = derivePinVars(
+    'rib-calculator.html',
+    { og_type: 'article', canonical: 'https://pitmaster.tools/rib-calculator',
+      description: 'generic', pin_desc: 'Pin-specific copy' },
+    true
+  );
+  assert.ok(out.pin_href.includes('description=' + encodeURIComponent('Pin-specific copy')));
+});
+
+// ── copyDir (recursive og/ image copy) ──────────────────────────────────────
+
+test('copyDir — recursively copies files and returns the count; absent src = 0', () => {
+  const fs = require('node:fs');
+  const os = require('node:os');
+  const path = require('node:path');
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'pin-copydir-'));
+  try {
+    assert.equal(copyDir(path.join(root, 'nope'), path.join(root, 'd1')), 0);
+    const src = path.join(root, 'og');
+    fs.mkdirSync(path.join(src, 'nested'), { recursive: true });
+    fs.writeFileSync(path.join(src, 'a.png'), 'a');
+    fs.writeFileSync(path.join(src, 'nested', 'b.png'), 'b');
+    const dest = path.join(root, 'dist-og');
+    assert.equal(copyDir(src, dest), 2);
+    assert.ok(fs.existsSync(path.join(dest, 'a.png')));
+    assert.ok(fs.existsSync(path.join(dest, 'nested', 'b.png')));
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('no _partials/*.js source contains a literal script-close sequence', () => {
   const fs = require('node:fs');
   const path = require('node:path');

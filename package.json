@@ -4,6 +4,7 @@
   "scripts": {
     "build:metros": "node scripts/generate-metros.js",
     "build": "npm run build:metros && node build.js",
+    "pins:render": "node scripts/render-pins.mjs",
     "validate": "npm run build && node scripts/validate.mjs",
     "dev:worker": "wrangler dev",
     "deploy": "wrangler deploy",
@@ -21,6 +22,7 @@
     "@types/node": "^22.10.5",
     "csso": "^5.0.5",
     "miniflare": "^4.20260508.0",
+    "playwright": "^1.54.2",
     "terser": "^5.48.0",
     "typescript": "^5.7.3",
     "vitest": "^4.1.6",
