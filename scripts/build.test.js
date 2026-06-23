@@ -513,6 +513,10 @@ test('substituteVars — modified falls back to published when only published is
   assert.equal(substituteVars('{{MODIFIED}}', { published: '2026-01-10' }), '2026-01-10');
 });
 
+test('substituteVars — published falls back to modified when only modified is set', () => {
+  assert.equal(substituteVars('{{PUBLISHED}}', { modified: '2026-06-23' }), '2026-06-23');
+});
+
 // ── derivePinVars (per-page article/Pinterest derivation) ───────────────────
 
 test('derivePinVars — returns {} for non-article pages (output unchanged)', () => {

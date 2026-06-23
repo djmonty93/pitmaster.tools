@@ -176,9 +176,13 @@ function resolveVar(key, vars) {
   if (key === 'og_image_w')   return '1200';
   if (key === 'og_image_h')   return '630';
   if (key === 'og_image_alt') return 'Pitmaster Tools - Free BBQ Calculators';
-  // article:modified_time defaults to the published date when only the latter
-  // is set (a page edited zero times since publication).
-  if (key === 'modified' && vars.published != null) return vars.published;
+  // article:published_time / article:modified_time mirror each other when only
+  // one is set, so an author dating an "article" page with either key satisfies
+  // both tokens. Omitting BOTH still leaves the token unresolved → a loud
+  // validate.mjs failure, which is the intended signal that an article page
+  // must carry a date.
+  if (key === 'modified'  && vars.published != null) return vars.published;
+  if (key === 'published' && vars.modified  != null) return vars.modified;
   return null;
 }
 
