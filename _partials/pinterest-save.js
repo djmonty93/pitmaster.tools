@@ -32,18 +32,41 @@
       return el ? (el.getAttribute('content') || '') : '';
     }
 
+    // The calculators render results with different markup, so read values from
+    // whichever convention a page uses: stat cards (.sc-* and pork-shoulder's
+    // BEM .stat-card__*), the catering summary grid (.sum-*), or the
+    // coordinator's summary chips (.chip-*). Groups are tried in priority order
+    // and the first that yields any value wins, so the description carries the
+    // concise summary rather than every per-row figure.
+    var RESULT_GROUPS = [
+      { value: '.sc-value, .stat-card__val', label: '.sc-label, .stat-card__label' },
+      { value: '.sum-value', label: '.sum-label' },
+      { value: '.chip-val', label: '.chip-label' }
+    ];
+
+    function collectResultPairs() {
+      for (var g = 0; g < RESULT_GROUPS.length; g++) {
+        var group = RESULT_GROUPS[g];
+        var values = modal.querySelectorAll(group.value);
+        if (!values.length) continue;
+        var pairs = [];
+        for (var i = 0; i < values.length && pairs.length < 6; i++) {
+          var value = text(values[i]);
+          // Skip the em-dash placeholder shown before a result exists.
+          if (!value || value === '—' || value === '-') continue;
+          var parent = values[i].parentNode;
+          var label = parent ? text(parent.querySelector(group.label)) : '';
+          pairs.push(label ? label + ' ' + value : value);
+        }
+        if (pairs.length) return pairs;
+      }
+      return [];
+    }
+
     // Compose the pin description from the visible result, falling back to the
     // page's meta description before any calculation has run.
     function describe() {
-      var parts = [];
-      var cards = modal.querySelectorAll('.stat-card');
-      for (var i = 0; i < cards.length; i++) {
-        var value = text(cards[i].querySelector('.sc-value'));
-        // Skip the em-dash placeholder shown before a result exists.
-        if (!value || value === '—' || value === '-') continue;
-        var label = text(cards[i].querySelector('.sc-label'));
-        parts.push(label ? label + ' ' + value : value);
-      }
+      var parts = collectResultPairs();
       var title = text(document.getElementById('resultsModalTitle')) || document.title;
       var desc = parts.length
         ? title + ' — ' + parts.join(' · ')

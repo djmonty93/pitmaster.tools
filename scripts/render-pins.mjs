@@ -149,6 +149,7 @@ async function run() {
     deviceScaleFactor: SCALE,
   });
 
+  let failed = 0;
   for (const p of pins) {
     const name = p.slug || p.id || "pin";
     try {
@@ -158,12 +159,20 @@ async function run() {
       await page.screenshot({ path: file, clip: { x: 0, y: 0, width: PIN_W, height: PIN_H } });
       console.log("rendered", file);
     } catch (e) {
+      failed++;
       console.error("failed", name, e.message);
     }
   }
 
   await browser.close();
-  console.log(`\nDone. ${pins.length} pin(s) in ./${OUT} at ${PIN_W * SCALE}x${PIN_H * SCALE}.`);
+  const ok = pins.length - failed;
+  console.log(`\nDone. ${ok}/${pins.length} pin(s) in ./${OUT} at ${PIN_W * SCALE}x${PIN_H * SCALE}.`);
+  // Fail loudly so a partial render (missing/stale og/<slug>.png) can't pass
+  // silently — the caller (and any human re-running pins:render) sees exit 1.
+  if (failed > 0) {
+    console.error(`${failed} pin(s) failed to render.`);
+    process.exitCode = 1;
+  }
 }
 
 run();
