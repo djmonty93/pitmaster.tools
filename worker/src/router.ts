@@ -142,3 +142,19 @@ export function html(status: number, body: string, extraHeaders: Record<string, 
     },
   });
 }
+
+/**
+ * Ensure a frame-blocking CSP on a Worker-generated response. _headers
+ * does not apply to responses built in Worker code (CF docs), and the
+ * upstream asset fetch may or may not carry the inherited policy — so set
+ * `frame-ancestors 'self'` only when no CSP is present, never stripping a
+ * fuller inherited one. The SSR content handlers route EVERY return path
+ * (early passthroughs included) through this so framing protection is
+ * consistent — not just on the hydrated happy path.
+ */
+export function withFrameProtection(res: Response): Response {
+  if (res.headers.has('Content-Security-Policy')) return res;
+  const headers = new Headers(res.headers);
+  headers.set('Content-Security-Policy', "frame-ancestors 'self'");
+  return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
+}

@@ -38,7 +38,7 @@ import {
   pickBestDay,
 } from '../lib/render/smokeWeather.js';
 import { WeatherError } from '../lib/weather/errors.js';
-import { type RouteContext } from '../router.js';
+import { type RouteContext, withFrameProtection } from '../router.js';
 import type { Cooker, Cut } from '@shared/types';
 
 const DEFAULT_CUT: Cut = 'brisket-packer';
@@ -139,7 +139,7 @@ export async function handleMetroPage(rc: RouteContext): Promise<Response> {
 
   const upstream = await rc.env.ASSETS.fetch(rc.request);
   if (!upstream.ok || upstream.headers.get('content-type')?.indexOf('text/html') !== 0) {
-    return upstream;
+    return withFrameProtection(upstream);
   }
 
   const rewriter = new HTMLRewriter()
@@ -189,18 +189,13 @@ export async function handleMetroPage(rc: RouteContext): Promise<Response> {
   const nowMs = Date.now();
   const sMaxAge = Math.max(60, Math.floor((nextEtMidnightMs(nowMs) - nowMs) / 1000));
   headers.set('Cache-Control', 'public, max-age=300, s-maxage=' + sMaxAge);
-  // _headers does not apply to Worker-generated responses (CF docs). The
-  // upstream asset fetch may or may not carry the inherited CSP, so set
-  // frame-blocking only when no CSP is present — never strip a fuller
-  // inherited policy. This forecast page is SEO content; block framing.
-  if (!headers.has('Content-Security-Policy')) {
-    headers.set('Content-Security-Policy', "frame-ancestors 'self'");
-  }
-  return new Response(transformed.body, {
+  // Frame-blocking is applied on every return path via withFrameProtection
+  // (see router.ts) — _headers does not cover Worker-generated responses.
+  return withFrameProtection(new Response(transformed.body, {
     status: transformed.status,
     statusText: transformed.statusText,
     headers,
-  });
+  }));
 }
 
 // Known non-metro slugs under /smoke-weather/. Listed explicitly so a

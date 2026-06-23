@@ -16,6 +16,10 @@
 # Matching rules INHERIT and comma-join the parent CSP (two policies =
 # most-restrictive wins = 'self'), so detach the inherited /* CSP first,
 # then re-set the full policy with permissive frame-ancestors.
+# SYNC: this CSP must stay byte-identical to the /* CSP above EXCEPT for
+# `frame-ancestors` (* here vs 'self' there). When you edit one CSP (e.g.
+# add an analytics/ad origin), edit BOTH or tool pages silently drift to a
+# stale policy. The static _headers format has no include/templating.
 /tools/*
   ! Content-Security-Policy
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://*.googletagmanager.com https://*.google-analytics.com https://pagead2.googlesyndication.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://*.googletagmanager.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://stats.g.doubleclick.net; frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors *; upgrade-insecure-requests
