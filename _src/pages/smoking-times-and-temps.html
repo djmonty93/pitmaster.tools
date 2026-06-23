@@ -1,0 +1,223 @@
+<!-- meta:
+  title="Smoking Times & Temperatures Chart | Pitmaster Tools"
+  description="Free printable smoking times and temperatures chart: cook times, smoker and pull temps, rest, and USDA safe minimums for brisket, pork, ribs, and turkey."
+  canonical="https://pitmaster.tools/smoking-times-and-temps"
+  og_title="Smoking Times & Temperatures Chart (Free Printable)"
+  og_desc="A free printable BBQ cheat sheet — cook times, smoker and pull temps, rest, yield, and USDA safe minimums for brisket, pork butt, ribs, and turkey."
+  permalink="smoking-times-and-temps.html"
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- INJECT:head-meta.html -->
+<!-- INJECT:head-og.html -->
+<!-- INJECT:head-favicons.html -->
+<!-- INJECT:consent-init.html -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Smoking Times & Temperatures Chart",
+  "url": "https://pitmaster.tools/smoking-times-and-temps",
+  "description": "Free printable smoking times and temperatures chart — cook times, smoker and pull temps, rest, yield, and USDA safe minimums for brisket, pork, ribs, and turkey.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "isAccessibleForFree": true,
+  "browserRequirements": "Requires JavaScript enabled in a modern browser.",
+  "dateModified": "2026-06-20",
+  "featureList": [
+    "Cook time per pound for brisket, pork butt, ribs, and turkey",
+    "Smoker and pull temperatures by cut",
+    "Rest times and cooked-yield loss",
+    "USDA safe minimum internal temperatures",
+    "Print or save as PDF"
+  ],
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What temperature do you smoke meat at?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Most low-and-slow BBQ runs at 225–250°F. Brisket and pork butt do well at 225–250°F, ribs at around 225°F, and turkey is smoked hotter at 250°F or above so the skin renders and the bird clears the food-safety danger zone quickly."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does it take to smoke a brisket?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Plan about 1.25–1.5 hours per pound at 225°F. A 12-pound packer brisket usually takes roughly 15–18 hours including the stall, then 90 minutes to 4 hours of rest. Cook to temperature and feel, not the clock — always build in a buffer. Our brisket calculator works the start time back from when you want to serve."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What internal temperature should I pull smoked meat at?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Brisket: 195°F for sliced, 205°F for pulled or very tender. Pork butt: 203–205°F for pulled pork. Ribs: roughly 195–198°F, but judge by the bend test. Whole turkey: 165°F in the thigh. These BBQ targets are well above the USDA safe minimums because collagen needs the extra heat to break down."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the safe internal temperature for smoked meat?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "USDA safe minimums are 165°F for all poultry and 145°F with a 3-minute rest for whole cuts of pork and beef. Low-and-slow BBQ cuts like brisket and pork butt are intentionally cooked far past safe — to 195–205°F — so the connective tissue renders and they pull or slice tender."
+      }
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://pitmaster.tools/" },
+    { "@type": "ListItem", "position": 2, "name": "Smoking Times & Temperatures", "item": "https://pitmaster.tools/smoking-times-and-temps" }
+  ]
+}
+</script>
+<!-- INJECT:site-header.css -->
+<!-- INJECT:site-base.css -->
+<style>
+  .times-table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+  .times-table caption { text-align: left; font-weight: 600; padding: .25rem 0 .6rem; }
+  .times-table th, .times-table td { border: 1px solid #d5ccbd; padding: .55rem .7rem; text-align: left; vertical-align: top; }
+  .times-table thead th { background: rgba(0,0,0,.05); font-size: .82rem; text-transform: uppercase; letter-spacing: .02em; }
+  .times-table tbody th { font-weight: 700; white-space: nowrap; }
+  .safe-temps { border: 2px solid var(--charcoal, #2b2b2b); border-radius: 10px; padding: .85rem 1.1rem; margin: 1.2rem 0; background: rgba(192,70,59,.06); }
+  .safe-temps h2 { margin-top: 0; }
+  .chart-note { color: #555; font-size: .9rem; }
+  .chart-actions { margin: .5rem 0 1rem; }
+  @media print {
+    .times-table th, .times-table td { font-size: 11px; padding: .3rem .4rem; }
+    .times-table, .safe-temps { page-break-inside: avoid; }
+    .safe-temps { border-color: #000; background: transparent; }
+    main { padding: .25rem; }
+    h1 { font-size: 1.3rem; margin: .2rem 0; }
+  }
+</style>
+</head>
+<body>
+<!-- INJECT:site-header.html -->
+
+<main id="main-content">
+  <nav class="breadcrumb no-print" aria-label="Breadcrumb">
+    <ol>
+      <li><a href="/">Home</a></li>
+      <li><span aria-current="page">Smoking Times &amp; Temperatures</span></li>
+    </ol>
+  </nav>
+
+  <div class="page-hero">
+    <h1>Smoking Times &amp; Temperatures Chart</h1>
+    <p class="no-print">A free, printable BBQ cheat sheet — cook times, smoker and pull temperatures, rest, and cooked-yield loss for the cuts you smoke most, plus the USDA safe minimums. Print it for the smoker, or run the exact numbers in our <a href="/tools">free calculators</a>.</p>
+  </div>
+
+  <div class="chart-actions no-print">
+    <button type="button" class="print-btn" id="printChartBtn">Print / Save as PDF</button>
+  </div>
+
+  <section aria-labelledby="chart-title">
+    <table class="times-table">
+      <caption id="chart-title">Low-and-slow smoking times &amp; temperatures by cut</caption>
+      <thead>
+        <tr>
+          <th scope="col">Cut</th>
+          <th scope="col">Cook time</th>
+          <th scope="col">Smoker temp</th>
+          <th scope="col">Pull temp</th>
+          <th scope="col">Rest</th>
+          <th scope="col">Yield loss</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Brisket (packer)</th>
+          <td>~1.25–1.5 hr/lb</td>
+          <td>225–250°F</td>
+          <td>195°F sliced · 205°F pulled</td>
+          <td>90 min – 4 hr</td>
+          <td>~40%</td>
+        </tr>
+        <tr>
+          <th scope="row">Pork butt (pulled)</th>
+          <td>~1.25–1.5 hr/lb</td>
+          <td>225–250°F</td>
+          <td>203–205°F</td>
+          <td>60 min+</td>
+          <td>~35%</td>
+        </tr>
+        <tr>
+          <th scope="row">Baby back ribs</th>
+          <td>5–5.5 hr total</td>
+          <td>225°F</td>
+          <td>~195°F (bend test)</td>
+          <td>20 min</td>
+          <td>~25%</td>
+        </tr>
+        <tr>
+          <th scope="row">Spare / St. Louis ribs</th>
+          <td>6–6.5 hr total</td>
+          <td>225°F</td>
+          <td>~198°F (bend test)</td>
+          <td>20 min</td>
+          <td>~30%</td>
+        </tr>
+        <tr>
+          <th scope="row">Whole turkey</th>
+          <td>~30 min/lb</td>
+          <td>250°F+</td>
+          <td>165°F (thigh)</td>
+          <td>35 min</td>
+          <td>~25%</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="chart-note">Times are planning estimates at the listed smoker temp — cook to internal temperature and feel, not the clock, and build in a rest/buffer. Higher pit temps (275–300°F) cut the times noticeably.</p>
+  </section>
+
+  <section class="safe-temps" aria-labelledby="safe-title">
+    <h2 id="safe-title">USDA safe minimum internal temperatures</h2>
+    <ul>
+      <li><strong>Poultry (all):</strong> 165°F.</li>
+      <li><strong>Pork &amp; whole-muscle beef:</strong> 145°F with a 3-minute rest.</li>
+      <li><strong>Ground meats:</strong> 160°F.</li>
+    </ul>
+    <p class="chart-note">BBQ cuts like brisket and pork butt are taken far past these minimums (195–205°F) so collagen renders and they pull or slice tender. The safe minimum is the floor, not the target.</p>
+  </section>
+
+  <section class="no-print" aria-labelledby="faq-title">
+    <h2 id="faq-title">Frequently asked questions</h2>
+    <h3>What temperature do you smoke meat at?</h3>
+    <p>Most low-and-slow BBQ runs at 225–250°F. Brisket and pork butt do well at 225–250°F, ribs at around 225°F, and turkey is smoked hotter at 250°F or above so the skin renders and the bird clears the food-safety danger zone quickly.</p>
+    <h3>How long does it take to smoke a brisket?</h3>
+    <p>Plan about 1.25–1.5 hours per pound at 225°F. A 12-pound packer brisket usually takes roughly 15–18 hours including the stall, then 90 minutes to 4 hours of rest. Cook to temperature and feel, not the clock — always build in a buffer. Our <a href="/brisket-calculator">brisket calculator</a> works the start time back from when you want to serve.</p>
+    <h3>What internal temperature should I pull smoked meat at?</h3>
+    <p>Brisket: 195°F for sliced, 205°F for pulled or very tender. Pork butt: 203–205°F for pulled pork. Ribs: roughly 195–198°F, but judge by the bend test. Whole turkey: 165°F in the thigh. These BBQ targets are well above the USDA safe minimums because collagen needs the extra heat to break down.</p>
+    <h3>What is the safe internal temperature for smoked meat?</h3>
+    <p>USDA safe minimums are 165°F for all poultry and 145°F with a 3-minute rest for whole cuts of pork and beef. Low-and-slow BBQ cuts like brisket and pork butt are intentionally cooked far past safe — to 195–205°F — so the connective tissue renders and they pull or slice tender.</p>
+  </section>
+
+  <p class="no-print">Want exact numbers for your cook? Try the <a href="/brisket-calculator">brisket</a>, <a href="/pork-shoulder-calculator">pork shoulder</a>, <a href="/rib-calculator">rib</a>, and <a href="/turkey-smoking-calculator">turkey</a> calculators, or browse <a href="/tools">all BBQ tools</a>.</p>
+</main>
+
+<!-- INJECT:site-footer.html -->
+
+<script>
+(function () {
+  var btn = document.getElementById('printChartBtn');
+  if (btn) btn.addEventListener('click', function () { window.print(); });
+})();
+</script>
+</body>
+</html>

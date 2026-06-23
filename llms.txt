@@ -20,12 +20,13 @@ Pitmaster Tools provides browser-based calculators for low-and-slow BBQ cooking.
 - [Brisket Yield Calculator](https://pitmaster.tools/brisket-yield-calculator) — how much brisket to buy for a target cooked yield
 - [Best Smoke Days Forecast](https://pitmaster.tools/smoke-weather/) — 7-day weather forecast scored 0-100 for your cut and cooker, by ZIP
 - [Best Cities to Smoke Meat Today](https://pitmaster.tools/smoke-weather/best-cities) — all 50 U.S. metros ranked by today's smoke score, updated daily
+- [Smoking Times & Temperatures Chart](https://pitmaster.tools/smoking-times-and-temps) — free printable cook times, smoker and pull temps, rest, and USDA safe minimums
 
 ## Key Facts
 
 - Brisket cooks at ~1.25–1.5 hrs/lb at 225°F; pull at 195°F (sliced) or 205°F (pulled)
 - Pork shoulder: ~1.5 hrs/lb at 225°F; pull at 205°F for pulled pork
-- Baby back ribs: 4–5 hrs at 225°F; spare ribs: 5–6 hrs
+- Baby back ribs: 5–5.5 hrs at 225°F; spare ribs: 6–6.5 hrs
 - Brisket loses ~40% weight during cooking; pork butt ~35%
 - Minimum brisket rest: 90 minutes; ideal rest: 2–4 hours
 - Safe minimum internal temperature for poultry: 165°F (USDA)

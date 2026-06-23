@@ -21,7 +21,7 @@
 import { aggregateKey, type MetroTileSummary, type MetrosSummary } from '../crons/metrosPrewarm.js';
 import { etDayBucket, nextEtMidnightMs, previousEtDate } from '../lib/cache/weather.js';
 import { escapeHtml, jsonForScriptTag } from '../lib/render/smokeWeather.js';
-import { type RouteContext } from '../router.js';
+import { type RouteContext, withFrameProtection } from '../router.js';
 
 // Quality labels for the chooser tiles. Kept byte-identical to the
 // shared bandLabel in lib/render/smokeWeather.ts and the client copy in
@@ -71,13 +71,13 @@ export async function handleMetrosChooser(rc: RouteContext): Promise<Response> {
 
   const upstream = await rc.env.ASSETS.fetch(rc.request);
   if (!upstream.ok || upstream.headers.get('content-type')?.indexOf('text/html') !== 0) {
-    return upstream;
+    return withFrameProtection(upstream);
   }
 
   // Cold KV: serve the skeleton template unchanged. The client script
   // still calls /api/metros and fills in tiles when it lands.
   if (!summary || !Array.isArray(summary.metros) || summary.metros.length === 0) {
-    return upstream;
+    return withFrameProtection(upstream);
   }
 
   const bySlug = new Map<string, MetroTileSummary>();
@@ -136,9 +136,11 @@ export async function handleMetrosChooser(rc: RouteContext): Promise<Response> {
     ? 60
     : Math.max(60, Math.floor((nextEtMidnightMs(nowMs) - nowMs) / 1000));
   headers.set('Cache-Control', 'public, max-age=300, s-maxage=' + sMaxAge);
-  return new Response(transformed.body, {
+  // Frame-blocking is applied on every return path via withFrameProtection
+  // (see router.ts) — _headers does not cover Worker-generated responses.
+  return withFrameProtection(new Response(transformed.body, {
     status: transformed.status,
     statusText: transformed.statusText,
     headers,
-  });
+  }));
 }

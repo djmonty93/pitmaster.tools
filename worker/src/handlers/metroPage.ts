@@ -38,7 +38,7 @@ import {
   pickBestDay,
 } from '../lib/render/smokeWeather.js';
 import { WeatherError } from '../lib/weather/errors.js';
-import { type RouteContext } from '../router.js';
+import { type RouteContext, withFrameProtection } from '../router.js';
 import type { Cooker, Cut } from '@shared/types';
 
 const DEFAULT_CUT: Cut = 'brisket-packer';
@@ -56,13 +56,13 @@ interface MetroRow {
 
 export async function handleMetroPage(rc: RouteContext): Promise<Response> {
   const slug = rc.params.slug;
-  if (!slug) return rc.env.ASSETS.fetch(rc.request);
+  if (!slug) return withFrameProtection(await rc.env.ASSETS.fetch(rc.request));
 
   // Slug is reserved when it matches a known non-metro path under
   // /smoke-weather/. Pass those straight through to ASSETS instead of
   // hitting D1 — even a fast miss costs ~5 ms.
   if (RESERVED_SLUGS.has(slug)) {
-    return rc.env.ASSETS.fetch(rc.request);
+    return withFrameProtection(await rc.env.ASSETS.fetch(rc.request));
   }
 
   let metro: MetroRow | null;
@@ -78,12 +78,12 @@ export async function handleMetroPage(rc: RouteContext): Promise<Response> {
     // static template still works without SSR data (client JS will
     // populate the day cards from /api/forecast).
     console.warn('metroPage: D1 lookup failed', { slug, err: String(err) });
-    return rc.env.ASSETS.fetch(rc.request);
+    return withFrameProtection(await rc.env.ASSETS.fetch(rc.request));
   }
   if (!metro) {
     // Unknown slug under /smoke-weather/ — let ASSETS handle (it will
     // 404 if no static file matches).
-    return rc.env.ASSETS.fetch(rc.request);
+    return withFrameProtection(await rc.env.ASSETS.fetch(rc.request));
   }
 
   // Fetch the forecast. KV hit is the happy path; a miss triggers an
@@ -102,13 +102,13 @@ export async function handleMetroPage(rc: RouteContext): Promise<Response> {
     if (!(err instanceof WeatherError)) {
       console.warn('metroPage: forecast fetch failed', { slug, err: String(err) });
     }
-    return rc.env.ASSETS.fetch(rc.request);
+    return withFrameProtection(await rc.env.ASSETS.fetch(rc.request));
   }
 
   const scored = scoreAllDays(forecast.days, DEFAULT_CUT, DEFAULT_COOKER);
   if (scored.length === 0) {
     // Empty forecast — render the static shell.
-    return rc.env.ASSETS.fetch(rc.request);
+    return withFrameProtection(await rc.env.ASSETS.fetch(rc.request));
   }
 
   const heroClass = 'verdict-hero band-' + verdictHeroBandClass(scored);
@@ -139,7 +139,7 @@ export async function handleMetroPage(rc: RouteContext): Promise<Response> {
 
   const upstream = await rc.env.ASSETS.fetch(rc.request);
   if (!upstream.ok || upstream.headers.get('content-type')?.indexOf('text/html') !== 0) {
-    return upstream;
+    return withFrameProtection(upstream);
   }
 
   const rewriter = new HTMLRewriter()
@@ -189,11 +189,13 @@ export async function handleMetroPage(rc: RouteContext): Promise<Response> {
   const nowMs = Date.now();
   const sMaxAge = Math.max(60, Math.floor((nextEtMidnightMs(nowMs) - nowMs) / 1000));
   headers.set('Cache-Control', 'public, max-age=300, s-maxage=' + sMaxAge);
-  return new Response(transformed.body, {
+  // Frame-blocking is applied on every return path via withFrameProtection
+  // (see router.ts) — _headers does not cover Worker-generated responses.
+  return withFrameProtection(new Response(transformed.body, {
     status: transformed.status,
     statusText: transformed.statusText,
     headers,
-  });
+  }));
 }
 
 // Known non-metro slugs under /smoke-weather/. Listed explicitly so a

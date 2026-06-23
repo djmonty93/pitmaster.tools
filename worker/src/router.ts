@@ -133,7 +133,28 @@ export function html(status: number, body: string, extraHeaders: Record<string, 
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
       ...SECURITY_HEADERS,
+      // /articles/:slug is rendered here, NOT served from dist, so it
+      // never gets the _headers CSP. Block third-party framing of this
+      // ranking content explicitly (matches the _headers '/*' default).
+      'Content-Security-Policy': "frame-ancestors 'self'",
+      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
       ...extraHeaders,
     },
   });
+}
+
+/**
+ * Ensure a frame-blocking CSP on a Worker-generated response. _headers
+ * does not apply to responses built in Worker code (CF docs), and the
+ * upstream asset fetch may or may not carry the inherited policy — so set
+ * `frame-ancestors 'self'` only when no CSP is present, never stripping a
+ * fuller inherited one. The SSR content handlers route EVERY return path
+ * (early passthroughs included) through this so framing protection is
+ * consistent — not just on the hydrated happy path.
+ */
+export function withFrameProtection(res: Response): Response {
+  if (res.headers.has('Content-Security-Policy')) return res;
+  const headers = new Headers(res.headers);
+  headers.set('Content-Security-Policy', "frame-ancestors 'self'");
+  return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
 }
