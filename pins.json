@@ -1,0 +1,150 @@
+[
+  {
+    "slug": "brisket-calculator",
+    "type": "cheatsheet",
+    "eyebrow": "Smoker cheat sheet",
+    "head": "Brisket\ncook time",
+    "sub": "by weight, smoking at 225°F",
+    "rows": [
+      ["8 lb", "10–12 hr"],
+      ["12 lb", "15–18 hr"],
+      ["16 lb", "20–22 hr"]
+    ],
+    "cta": "Get your exact time →",
+    "foot": "FREE BRISKET CALCULATOR"
+  },
+  {
+    "slug": "pork-shoulder-calculator",
+    "type": "cheatsheet",
+    "eyebrow": "Smoker cheat sheet",
+    "head": "Pork butt\ncook time",
+    "sub": "by weight, smoking at 225°F",
+    "rows": [
+      ["6 lb", "9–12 hr"],
+      ["8 lb", "12–16 hr"],
+      ["10 lb", "15–20 hr"]
+    ],
+    "cta": "Get your exact time →",
+    "foot": "FREE PORK SHOULDER CALCULATOR"
+  },
+  {
+    "slug": "rib-calculator",
+    "type": "cheatsheet",
+    "eyebrow": "Low and slow",
+    "head": "How long\nto smoke\nribs",
+    "sub": "smoking at 225°F",
+    "rows": [
+      ["Baby back", "5–6 hr"],
+      ["Spare / St. Louis", "6 hr"],
+      ["Beef ribs", "7–8 hr"]
+    ],
+    "cta": "Get your rib timeline →",
+    "foot": "FREE RIB CALCULATOR"
+  },
+  {
+    "slug": "turkey-smoking-calculator",
+    "type": "cheatsheet",
+    "eyebrow": "Holiday ready",
+    "head": "Smoked\nturkey time",
+    "sub": "whole bird, smoking at 275°F",
+    "rows": [
+      ["12 lb", "6 hr"],
+      ["16 lb", "8 hr"],
+      ["20 lb", "10 hr"]
+    ],
+    "cta": "Get your turkey time →",
+    "foot": "FREE TURKEY CALCULATOR"
+  },
+  {
+    "slug": "smoking-times-and-temps",
+    "type": "cheatsheet",
+    "eyebrow": "Printable cheat sheet",
+    "head": "Smoking\ntimes &\ntemps",
+    "sub": "pull temps for every cut",
+    "rows": [
+      ["Brisket", "195–205°F"],
+      ["Pork butt", "203°F"],
+      ["Chicken", "165°F"]
+    ],
+    "cta": "See the full chart →",
+    "foot": "FREE SMOKING CHART"
+  },
+  {
+    "slug": "meat-per-person",
+    "type": "answer",
+    "eyebrow": "Buy the right amount",
+    "head": "How much\nmeat per\nperson?",
+    "answer": {
+      "big": "½ lb cooked",
+      "small": "≈ 1 lb raw per guest · before sides"
+    },
+    "cta": "Calculate for your crowd →",
+    "foot": "FREE SERVING CALCULATOR"
+  },
+  {
+    "slug": "brisket-yield-calculator",
+    "type": "answer",
+    "eyebrow": "Trim + cook loss",
+    "head": "How much\nbrisket will\nit yield?",
+    "answer": {
+      "big": "≈ 50% cooked",
+      "small": "a 14 lb packer → about 7 lb cooked"
+    },
+    "cta": "Calculate your yield →",
+    "foot": "FREE BRISKET YIELD CALCULATOR"
+  },
+  {
+    "slug": "catering-calculator",
+    "type": "utility",
+    "eyebrow": "Feed everyone",
+    "head": "Catering a\ncrowd?",
+    "sub": "Raw weight, servings, and cost for up to 500 guests — by meat and headcount.",
+    "cta": "Plan your menu →",
+    "foot": "FREE BBQ CATERING CALCULATOR"
+  },
+  {
+    "slug": "cook-time-coordinator",
+    "type": "utility",
+    "eyebrow": "Multi-meat timing",
+    "head": "Make it all\nfinish\ntogether",
+    "sub": "Stagger up to 6 meats to one serve time. No cold brisket waiting on the ribs.",
+    "cta": "Build your schedule →",
+    "foot": "FREE COOK TIME COORDINATOR"
+  },
+  {
+    "slug": "charcoal-calculator",
+    "type": "utility",
+    "eyebrow": "No more refills",
+    "head": "How much\ncharcoal?",
+    "sub": "Exact charcoal for Minion, Snake, or direct-heat cooks by temp and time.",
+    "cta": "Calculate charcoal →",
+    "foot": "FREE CHARCOAL CALCULATOR"
+  },
+  {
+    "slug": "dry-rub-calculator",
+    "type": "utility",
+    "eyebrow": "Stop eyeballing it",
+    "head": "Scale any\ndry rub",
+    "sub": "Salt, sugar, and spice stay balanced for any amount of meat.",
+    "cta": "Scale your rub →",
+    "foot": "FREE DRY RUB CALCULATOR"
+  },
+  {
+    "slug": "brine-calculator",
+    "type": "utility",
+    "eyebrow": "Stop guessing",
+    "head": "Perfect\nbrine every\ntime",
+    "sub": "Exact salt, sugar, and water for wet or dry brining any cut, by weight.",
+    "cta": "Build your brine →",
+    "foot": "FREE BRINE CALCULATOR"
+  },
+  {
+    "slug": "bbq-cost-calculator",
+    "type": "utility",
+    "eyebrow": "Know your number",
+    "head": "What does\nyour BBQ\ncost?",
+    "sub": "Total cost, cost per pound, and cost per serving — meat, rub, fuel, and time.",
+    "cta": "Calculate your cost →",
+    "foot": "FREE BBQ COST CALCULATOR"
+  }
+]

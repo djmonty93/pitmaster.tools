@@ -49,9 +49,15 @@ Every HTML file must include **all** of the following in `<head>`, in this order
 - Do not include a static `<script async src="https://www.googletagmanager.com/gtag/js?...">` tag in HTML. GA loads dynamically via `loadAnalytics()` on every page view **except** when the visitor has a stored `pitmaster_consent=rejected` cookie (then gtag.js never loads and `_ga*` cookies are purged). Region scoping (cookieless vs full) is handled by Consent Mode, not by withholding the script.
 - Do not load AdSense before explicit accept, in any region.
 - Keep the analytics loader logic in `site-utils.js`; it must not fetch ad origins before consent (ad-domain preconnect is gated inside `loadAds`).
-- `og:image` always points to `/og-image.png` — do not vary per page.
+- `og:image`/`og:type` defaults: non-calculator pages use the shared `/og-image.png` (1200×630) and `og:type=website` — do not vary per page. **Calculator pages are the exception** (see Pinterest Rich Pins below): they set `og_type="article"` and get a per-page vertical `/og/<slug>.png` (1000×1500). `head-og.html` is token-driven; `build.js` `resolveVar` supplies the website/`og-image.png`/1200×630 defaults so every non-calculator page stays byte-identical.
 - Schema (`WebApplication` + `FAQPage`) is required on tool pages; omit on legal pages.
 - Never omit OG or Twitter tags even on `noindex` pages.
+
+### Pinterest Rich Pins (calculator pages)
+
+- A calculator opts into Article Rich Pins with a single frontmatter line `og_type="article"` plus `published="YYYY-MM-DD"` / `modified="YYYY-MM-DD"`, and injects `<!-- INJECT:head-article.html -->` right after `head-og.html`. `build.js` derives `og:image` = `https://pitmaster.tools/og/<slug>.png` (1000×1500) and a prefilled `pin_href`; all are overridable via explicit frontmatter (`og_image`, `og_image_w/h`, `og_image_alt`, `pin_desc`). If `og/<slug>.png` is missing at build time it falls back to `/og-image.png` (1200×630), so the build never references a missing image.
+- Per-page pin images live in `og/<slug>.png`, generated locally and committed. `build.js` copies `og/` → `dist/og/`. Regenerate with `npm run pins:render` (edit `pins.json` for copy). This launches headless Chromium and is a **local/offline dev step only — never run it in build or deploy**; `playwright` is a devDependency.
+- The "Save to Pinterest" control: calculator result modals get a JS-injected link (`_partials/pinterest-save.js`, loaded via the tool footer) that builds the pin description from the live result; the static chart page uses `<!-- INJECT:pinterest-save.html -->` (build-time `{{PIN_HREF}}`).
 
 ## Analytics & AdSense IDs
 

@@ -165,6 +165,24 @@ function resolveVar(key, vars) {
   if (key === 'og_title' && vars.title != null) return vars.title;
   if (key === 'og_desc'  && vars.description != null) return vars.description;
   if (key === 'robots'   && vars.robots == null)      return 'index, follow';
+  // Social / Pinterest defaults. head-og.html references these on EVERY page;
+  // non-"article" pages carry no og_* frontmatter, so these defaults reproduce
+  // the pre-Pinterest output byte-for-byte (website / shared og-image.png /
+  // 1200x630). Calculator ("article") pages override via derivePinVars +
+  // frontmatter. Keeping the defaults here means an unresolved {{token}} can
+  // never leak to dist (which validate.mjs treats as a hard failure).
+  if (key === 'og_type')      return 'website';
+  if (key === 'og_image')     return 'https://pitmaster.tools/og-image.png';
+  if (key === 'og_image_w')   return '1200';
+  if (key === 'og_image_h')   return '630';
+  if (key === 'og_image_alt') return 'Pitmaster Tools - Free BBQ Calculators';
+  // article:published_time / article:modified_time mirror each other when only
+  // one is set, so an author dating an "article" page with either key satisfies
+  // both tokens. Omitting BOTH still leaves the token unresolved → a loud
+  // validate.mjs failure, which is the intended signal that an article page
+  // must carry a date.
+  if (key === 'modified'  && vars.published != null) return vars.published;
+  if (key === 'published' && vars.modified  != null) return vars.modified;
   return null;
 }
 
@@ -263,6 +281,57 @@ function listHtml(dir) {
   return out;
 }
 
+// ── Per-page Pinterest / article social derivation ──────────────────────────
+// Calculator pages opt into Rich Pins with a single `og_type="article"`
+// frontmatter line. This derives, per page, the vertical OG image, its
+// dimensions, and a prefilled pinterest.com "create pin" link — all overridable
+// by an explicit frontmatter key. Non-article pages get an empty object so
+// their output is unchanged.
+//
+// Image: a calculator at dist path `<slug>.html` maps to /og/<slug>.png. If
+// that PNG isn't present at build time (ogImageExists=false) we fall back to the
+// site-wide /og-image.png at 1200x630 so the build never references a missing
+// file (Pinterest images are rendered locally and committed; see
+// scripts/render-pins.mjs). Returned values are raw (unescaped); substituteVars
+// HTML-escapes them at injection time, turning the pin_href '&' separators into
+// '&amp;' — valid inside an HTML attribute.
+const PINTEREST_CREATE = 'https://www.pinterest.com/pin/create/button/';
+
+function derivePinVars(distRel, vars, ogImageExists) {
+  if (vars.og_type !== 'article') return {};
+  var slug = String(distRel).replace(/\.html$/, '').split('/').pop();
+  var ogImage = vars.og_image != null ? vars.og_image
+    : (ogImageExists ? 'https://pitmaster.tools/og/' + slug + '.png'
+                     : 'https://pitmaster.tools/og-image.png');
+  var ogW = vars.og_image_w != null ? vars.og_image_w : (ogImageExists ? '1000' : '1200');
+  var ogH = vars.og_image_h != null ? vars.og_image_h : (ogImageExists ? '1500' : '630');
+  var desc = vars.pin_desc != null ? vars.pin_desc
+    : (vars.description != null ? vars.description : '');
+  var url = vars.canonical != null ? vars.canonical : '';
+  var pinHref = PINTEREST_CREATE + '?url=' + encodeURIComponent(url) +
+    '&media=' + encodeURIComponent(ogImage) +
+    '&description=' + encodeURIComponent(desc);
+  return { og_image: ogImage, og_image_w: ogW, og_image_h: ogH, pin_href: pinHref };
+}
+
+// ── Recursive directory copy (for the og/ image tree → dist/og/) ────────────
+// STATIC_ASSETS only copies flat files; per-calculator Pinterest PNGs live under
+// og/ and must mirror into dist/og/. Returns the number of files copied (0 if
+// the source directory is absent, so a checkout without rendered pins still
+// builds cleanly).
+function copyDir(srcDir, destDir) {
+  if (!fs.existsSync(srcDir)) return 0;
+  fs.mkdirSync(destDir, { recursive: true });
+  var n = 0;
+  fs.readdirSync(srcDir, { withFileTypes: true }).forEach(function(entry) {
+    var s = path.join(srcDir, entry.name);
+    var d = path.join(destDir, entry.name);
+    if (entry.isDirectory()) n += copyDir(s, d);
+    else if (entry.isFile()) { fs.copyFileSync(s, d); n++; }
+  });
+  return n;
+}
+
 // ── Partial minification ────────────────────────────────────────────────────
 // Each _partials/*.js is minified with terser and each *.css with csso ONCE at
 // load time (then injected into every page that references it), shrinking the
@@ -303,7 +372,7 @@ async function minifyAsset(name, content) {
 // ── Exports for unit tests ──────────────────────────────────────────────────
 module.exports = {
   parseFrontmatter, substituteVars, injectPartials, listHtml, resolvePermalink,
-  minifyAsset
+  minifyAsset, derivePinVars, copyDir
 };
 
 // ── Script entry point (skipped when imported as a module) ──────────────────
@@ -351,6 +420,11 @@ async function runBuild() {
     }
     emitted[distRel] = rel;
     emittedCi[ciKey] = distRel;
+    // Merge per-page Pinterest/article defaults (no-op for non-article pages).
+    // The og PNG existence check decides vertical-image vs site-wide fallback.
+    var slug = distRel.replace(/\.html$/, '').split('/').pop();
+    var ogExists = fs.existsSync(path.join('og', slug + '.png'));
+    Object.assign(fm.vars, derivePinVars(distRel, fm.vars, ogExists));
     var distPath = path.join(DIST, distRel);
     var output   = injectPartials(fm.body, fm.vars, partials, rel);
     fs.mkdirSync(path.dirname(distPath), { recursive: true });
@@ -368,6 +442,11 @@ async function runBuild() {
     }
   });
   console.log('Copied ' + copied + ' static assets → ' + DIST + '/');
+
+  // Copy the per-calculator Pinterest image tree (og/ → dist/og/), if present.
+  var ogCopied = copyDir('og', path.join(DIST, 'og'));
+  if (ogCopied) console.log('Copied ' + ogCopied + ' og/ images → ' + DIST + '/og/');
+
   console.log('Build complete.');
 }
 
