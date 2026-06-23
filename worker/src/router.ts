@@ -133,6 +133,11 @@ export function html(status: number, body: string, extraHeaders: Record<string, 
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
       ...SECURITY_HEADERS,
+      // /articles/:slug is rendered here, NOT served from dist, so it
+      // never gets the _headers CSP. Block third-party framing of this
+      // ranking content explicitly (matches the _headers '/*' default).
+      'Content-Security-Policy': "frame-ancestors 'self'",
+      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
       ...extraHeaders,
     },
   });
