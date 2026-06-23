@@ -189,6 +189,13 @@ export async function handleMetroPage(rc: RouteContext): Promise<Response> {
   const nowMs = Date.now();
   const sMaxAge = Math.max(60, Math.floor((nextEtMidnightMs(nowMs) - nowMs) / 1000));
   headers.set('Cache-Control', 'public, max-age=300, s-maxage=' + sMaxAge);
+  // _headers does not apply to Worker-generated responses (CF docs). The
+  // upstream asset fetch may or may not carry the inherited CSP, so set
+  // frame-blocking only when no CSP is present — never strip a fuller
+  // inherited policy. This forecast page is SEO content; block framing.
+  if (!headers.has('Content-Security-Policy')) {
+    headers.set('Content-Security-Policy', "frame-ancestors 'self'");
+  }
   return new Response(transformed.body, {
     status: transformed.status,
     statusText: transformed.statusText,

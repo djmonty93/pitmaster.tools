@@ -13,7 +13,11 @@
 # "Embed this calculator" backlink feature in _partials/embed-cta.js).
 # Keep permissive frame-ancestors HERE ONLY so the global 'self' above
 # blocks framing of ranking content (smoke-weather, articles, home).
+# Matching rules INHERIT and comma-join the parent CSP (two policies =
+# most-restrictive wins = 'self'), so detach the inherited /* CSP first,
+# then re-set the full policy with permissive frame-ancestors.
 /tools/*
+  ! Content-Security-Policy
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://*.googletagmanager.com https://*.google-analytics.com https://pagead2.googlesyndication.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://*.googletagmanager.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://stats.g.doubleclick.net; frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors *; upgrade-insecure-requests
 
 /favicon.ico
