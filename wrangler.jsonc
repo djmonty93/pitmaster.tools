@@ -71,6 +71,10 @@
   //      (Pinterest copies the image at pin time, so our object only needs
   //      to outlive the fetch — keeps storage bounded). Dashboard → R2 →
   //      pitmaster-pins → Settings → Object lifecycle rules, or via API.
+  //   3. Recommended backstop: a Cloudflare rate-limit/WAF rule on
+  //      `POST /api/pin-image` (the handler already enforces same-site
+  //      Origin + 600 KB stream cap + PNG-signature checks, but a per-IP
+  //      rate limit caps automated abuse of the public upload route).
   // Tests use Miniflare's in-memory R2 and ignore the bucket_name value.
   "r2_buckets": [
     {

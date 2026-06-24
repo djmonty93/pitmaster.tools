@@ -20,10 +20,17 @@ const PNG_1x1 = new Uint8Array([
   0x42, 0x60, 0x82,
 ]);
 
-function uploadPng(body: BodyInit, contentType = 'image/png'): Promise<Response> {
+function uploadPng(
+  body: BodyInit,
+  contentType: string | null = 'image/png',
+  origin: string | null = 'https://pitmaster.tools'
+): Promise<Response> {
+  const headers: Record<string, string> = {};
+  if (contentType !== null) headers['Content-Type'] = contentType;
+  if (origin !== null) headers['Origin'] = origin;
   return SELF.fetch(`${ORIGIN}/api/pin-image`, {
     method: 'POST',
-    headers: { 'Content-Type': contentType },
+    headers,
     body,
   });
 }
@@ -49,6 +56,26 @@ describe('POST /api/pin-image + GET /og/r/:hash', () => {
     const pa = (await a.json<{ path: string }>()).path;
     const pb = (await b.json<{ path: string }>()).path;
     expect(pa).toBe(pb);
+  });
+
+  it('rejects a cross-site origin with 403', async () => {
+    const res = await uploadPng(PNG_1x1, 'image/png', 'https://evil.example');
+    expect(res.status).toBe(403);
+  });
+
+  it('rejects a missing origin with 403', async () => {
+    const res = await uploadPng(PNG_1x1, 'image/png', null);
+    expect(res.status).toBe(403);
+  });
+
+  it('accepts the www origin', async () => {
+    const res = await uploadPng(PNG_1x1, 'image/png', 'https://www.pitmaster.tools');
+    expect(res.status).toBe(200);
+  });
+
+  it('rejects a content-type with image/png only as a parameter (no substring pass)', async () => {
+    const res = await uploadPng(PNG_1x1, 'text/plain; x=image/png');
+    expect(res.status).toBe(415);
   });
 
   it('rejects a non-PNG content-type with 415', async () => {

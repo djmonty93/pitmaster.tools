@@ -365,6 +365,10 @@
       if (!win) return; // popup blocked → let the default anchor open static pin
 
       e.preventDefault();
+      // Sever the new tab's back-reference to us before it ever navigates to
+      // pinterest.com — prevents reverse tabnabbing (we can't pass 'noopener'
+      // to window.open because we need the handle to set its location).
+      try { win.opener = null; } catch (err) { /* ignore */ }
       // Show a lightweight loading state in the blank tab while we render +
       // upload (textContent only — no markup injection).
       try {
