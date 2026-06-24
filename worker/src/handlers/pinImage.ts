@@ -44,11 +44,15 @@ const ALLOWED_ORIGINS = new Set([
   'https://www.pitmaster.tools',
 ]);
 
-// Per-IP upload rate limit. The Origin allowlist only stops browsers; a
-// scripted client can spoof Origin, so this WEATHER_KV counter is the real
-// server-side abuse control (the plan's earmarked mitigation). A Cloudflare
-// rate-limit/WAF rule on the route is recommended as additional defense in
-// depth (see wrangler.jsonc) and covers the distributed-IP case this can't.
+// Per-IP upload rate limit — a BEST-EFFORT soft backstop, not a hard quota.
+// The Origin allowlist only stops browsers (a scripted client can spoof
+// Origin), so this WEATHER_KV counter adds real friction against sequential
+// scripted abuse. It is deliberately approximate: KV is eventually consistent
+// and the get→put is not atomic, so a highly-concurrent burst from one IP can
+// undercount. The AUTHORITATIVE per-IP control is the Cloudflare
+// rate-limit/WAF rule on POST /api/pin-image (see wrangler.jsonc), which also
+// covers the distributed-IP case this counter can't. Keep this as defense in
+// depth, not the sole guarantee.
 const RATE_LIMIT = 60; // uploads per IP per window
 const RATE_WINDOW_S = 3600; // 1 hour
 
@@ -78,9 +82,11 @@ function looksLikePng(bytes: Uint8Array): boolean {
 }
 
 /**
- * Per-IP fixed-window rate limit backed by WEATHER_KV. Returns true when the
- * caller is over the limit (→ 429). Keyed on CF-Connecting-IP; requests with
- * no client IP share a single 'unknown' bucket.
+ * Per-IP fixed-window rate limit backed by WEATHER_KV — best-effort only (see
+ * the RATE_LIMIT note: KV's non-atomic get→put means concurrent bursts can
+ * undercount; the CF WAF rule is the authoritative control). Returns true when
+ * the caller is over the limit (→ 429). Keyed on CF-Connecting-IP; requests
+ * with no client IP share a single 'unknown' bucket.
  */
 async function isRateLimited(rc: RouteContext): Promise<boolean> {
   const ip = rc.request.headers.get('CF-Connecting-IP') || 'unknown';
