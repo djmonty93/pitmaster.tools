@@ -262,6 +262,11 @@ main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
 .print-btn:hover { background: var(--charcoal); color: #fff; }
 .print-btn svg { width: 16px; height: 16px; }
 
+/* Save to Pinterest — sits inline beside .print-btn but in Pinterest red. */
+.pin-save { display: inline-flex; align-items: center; gap: .5rem; padding: .7rem 1.25rem; background: #e60023; border: 2px solid #e60023; border-radius: 6px; font-family: inherit; font-size: .9rem; font-weight: 700; color: #fff; text-decoration: none; cursor: pointer; letter-spacing: .03em; transition: background .15s,border-color .15s; }
+.pin-save:hover, .pin-save:focus-visible { background: #ad081b; border-color: #ad081b; color: #fff; }
+.pin-save svg { width: 16px; height: 16px; fill: currentColor; }
+
 /* ----- Share buttons ----- */
 .share-buttons { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.25rem; }
 .share-btn { display: inline-flex; align-items: center; justify-content: center; padding: .65rem 1rem; border-radius: 999px; border: 1px solid var(--amber); background: var(--amber-light); color: var(--amber-dark); font-size: .85rem; font-weight: 700; text-decoration: none; cursor: pointer; transition: background .15s,color .15s,border-color .15s; }

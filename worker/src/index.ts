@@ -16,6 +16,7 @@ import { handleForecast } from './handlers/forecast.js';
 import { handleMetros } from './handlers/metros.js';
 import { handleMetroPage } from './handlers/metroPage.js';
 import { handleMetrosChooser } from './handlers/metrosChooser.js';
+import { handlePinImageGet, handlePinImageUpload } from './handlers/pinImage.js';
 import { handlePreferences } from './handlers/preferences.js';
 import { handleStatus } from './handlers/status.js';
 import { handleSubscribe } from './handlers/subscribe.js';
@@ -29,6 +30,14 @@ export interface Env {
   ASSETS: Fetcher;
   WEATHER_KV: KVNamespace;
   SMOKE_DB: D1Database;
+  /**
+   * R2 bucket for dynamic "Save to Pinterest" result images. The browser
+   * renders the live calculator result to a 1000×1500 PNG and POSTs it to
+   * /api/pin-image; the worker stores it content-addressed under
+   * `r/<sha256>.png` and serves it back at /og/r/<hash>.png. See
+   * worker/src/handlers/pinImage.ts.
+   */
+  PIN_BUCKET: R2Bucket;
   SENDER_API_TOKEN: string;
   SUBSCRIBER_TOKEN_SECRET: string;
   /**
@@ -66,6 +75,11 @@ const routes = compileRoutes([
   { method: 'GET', pattern: '/api/preferences', handler: handlePreferences },
   { method: 'PATCH', pattern: '/api/preferences', handler: handlePreferences },
   { method: 'GET', pattern: '/api/status', handler: handleStatus },
+  // Dynamic "Save to Pinterest" result image: client uploads the rendered
+  // PNG, worker stores it content-addressed and serves it back. The GET
+  // route shadows the static /og/ asset tree only under /og/r/.
+  { method: 'POST', pattern: '/api/pin-image', handler: handlePinImageUpload },
+  { method: 'GET', pattern: '/og/r/:hash', handler: handlePinImageGet },
   { method: 'GET', pattern: '/articles/:slug', handler: handleArticles },
   // SSR routes: per-metro forecast page + 50-metros chooser. The
   // /metros/ route is the chooser; everything else under
