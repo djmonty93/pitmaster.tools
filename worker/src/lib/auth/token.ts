@@ -14,6 +14,8 @@
 // `verifyToken` uses a constant-time compare so we don't leak the
 // expected token via timing differences.
 
+import { toHex } from '../hex.js';
+
 const enc = new TextEncoder();
 
 async function importKey(secret: string): Promise<CryptoKey> {
@@ -45,12 +47,6 @@ export async function verifyToken(email: string, token: string, secret: string):
   if (token.length !== 64) return false; // 32 bytes → 64 hex chars
   const expected = await signToken(email, secret);
   return constantTimeEqual(expected, token);
-}
-
-function toHex(bytes: Uint8Array): string {
-  let out = '';
-  for (let i = 0; i < bytes.length; i++) out += bytes[i]!.toString(16).padStart(2, '0');
-  return out;
 }
 
 function constantTimeEqual(a: string, b: string): boolean {

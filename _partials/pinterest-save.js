@@ -116,12 +116,12 @@
 
     // Pinterest create URL. `media` is the image the pin shows; pass the hosted
     // dynamic image when we have one, else the page's static og:image.
-    function buildHref(mediaOverride) {
+    function buildHref(mediaOverride, urlOverride, descOverride) {
       var params = new URLSearchParams();
-      params.set('url', location.href);
+      params.set('url', urlOverride || location.href);
       var media = mediaOverride || metaContent('meta[property="og:image"]');
       if (media) params.set('media', media);
-      var desc = describe();
+      var desc = descOverride || describe();
       if (desc) params.set('description', desc);
       return 'https://www.pinterest.com/pin/create/button/?' + params.toString();
     }
@@ -227,6 +227,9 @@
             lines = wrapLines(ctx, headline, contentW);
             if (lines.length <= 3) break;
           }
+          // Never draw more than 3 headline lines — a pathologically long
+          // title would otherwise push the value rows over the CTA bar.
+          if (lines.length > 3) lines = lines.slice(0, 3);
           ctx.fillStyle = COLORS.cream;
           var lineH = size * 0.98;
           var y = 300 + 70 + size;
@@ -239,7 +242,9 @@
           setSpacing(ctx, 0);
           var ctaTop = IMG_H - 70 - 130;          // CTA bar top
           var footY = IMG_H - 60;
-          var rowsTop = y + 40;
+          // Pull the rows block up if a long headline ran past its budget, so
+          // value rows always sit above the CTA bar (≥70px per row).
+          var rowsTop = Math.min(y + 40, ctaTop - 50 - rows.length * 70);
           var avail = ctaTop - 50 - rowsTop;
           var rowH = Math.min(120, Math.max(70, avail / rows.length));
           var ry = rowsTop;
@@ -358,6 +363,13 @@
       var rows = collectResultRows();
       if (!rows.length) return; // no result yet → default anchor → static pin
 
+      // Snapshot the click-through url + description now, so the pin metadata
+      // matches the canvas we render from this same `rows` snapshot — the
+      // calculator's plan-url.js can rewrite location.href during the async
+      // render+upload window.
+      var pinUrl = location.href;
+      var pinDesc = describe();
+
       // Open the destination tab synchronously inside the user gesture so it
       // isn't popup-blocked; we redirect it once the upload resolves. (No
       // 'noopener' here — we need the handle to set its location.)
@@ -382,7 +394,7 @@
       } catch (err) { /* tab navigated/closed, ignore */ }
 
       var fallback = function () {
-        try { win.location.href = buildHref(); } catch (err) { /* tab closed */ }
+        try { win.location.href = buildHref(null, pinUrl, pinDesc); } catch (err) { /* tab closed */ }
       };
 
       loadHeadlineFont()
@@ -390,7 +402,7 @@
         .then(function (blob) { return blob ? uploadPin(blob) : null; })
         .then(function (mediaUrl) {
           try {
-            win.location.href = mediaUrl ? buildHref(mediaUrl) : buildHref();
+            win.location.href = buildHref(mediaUrl || null, pinUrl, pinDesc);
           } catch (err) { /* tab closed */ }
         })
         .catch(fallback);

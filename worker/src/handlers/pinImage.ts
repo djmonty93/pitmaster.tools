@@ -26,6 +26,7 @@
 // wrangler.jsonc). The client falls back to the page's static og:image
 // whenever this 4xxs, so Save still works.
 
+import { toHex } from '../lib/hex.js';
 import { json, jsonError, type RouteContext } from '../router.js';
 
 // Cap upload size. A 1000×1500 PNG of flat result art is well under this;
@@ -57,13 +58,6 @@ const RATE_LIMIT = 60; // uploads per IP per window
 const RATE_WINDOW_S = 3600; // 1 hour
 
 const HASH_RE = /^[0-9a-f]{64}$/;
-
-function toHex(buf: ArrayBuffer): string {
-  const b = new Uint8Array(buf);
-  let out = '';
-  for (let i = 0; i < b.length; i++) out += b[i]!.toString(16).padStart(2, '0');
-  return out;
-}
 
 function looksLikePng(bytes: Uint8Array): boolean {
   // Need the 8-byte signature, the IHDR length field (= 13), and the IHDR
@@ -176,7 +170,7 @@ export async function handlePinImageUpload(rc: RouteContext): Promise<Response> 
   }
 
   const digest = await crypto.subtle.digest('SHA-256', bytes);
-  const hash = toHex(digest);
+  const hash = toHex(new Uint8Array(digest));
   const key = `r/${hash}.png`;
 
   // Idempotent by construction: same bytes → same key. A repeat upload
