@@ -144,8 +144,9 @@ export async function handlePinImageUpload(rc: RouteContext): Promise<Response> 
     return jsonError(403, 'forbidden', 'Cross-site uploads are not allowed');
   }
 
-  // Per-IP rate limit — the real abuse control behind the spoofable Origin
-  // check. Rejected before reading the body.
+  // Best-effort per-IP soft backstop behind the spoofable Origin check;
+  // authoritative enforcement is the Cloudflare rate-limit/WAF rule. Rejected
+  // before reading the body.
   if (await isRateLimited(rc)) {
     return jsonError(429, 'rate_limited', 'Too many uploads — try again later');
   }
