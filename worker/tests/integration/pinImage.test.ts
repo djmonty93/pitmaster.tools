@@ -3,7 +3,7 @@
 // provides an in-memory R2 for PIN_BUCKET) so the round-trip
 // POST /api/pin-image → GET /og/r/<hash>.png is exercised end-to-end.
 
-import { SELF } from 'cloudflare:test';
+import { SELF, env } from 'cloudflare:test';
 import { describe, expect, it } from 'vitest';
 
 // Use the apex host so the www→apex 301 in the worker's fetch() doesn't
@@ -96,6 +96,19 @@ describe('POST /api/pin-image + GET /og/r/:hash', () => {
     big.set(PNG_1x1.subarray(0, 4), 0);
     const res = await uploadPng(big);
     expect(res.status).toBe(413);
+  });
+
+  it('rate-limits a single IP once its window counter is exhausted (429)', async () => {
+    const ip = '203.0.113.7';
+    const bucket = Math.floor(Date.now() / 1000 / 3600);
+    const kv = (env as unknown as { WEATHER_KV: KVNamespace }).WEATHER_KV;
+    await kv.put(`pinrl:${ip}:${bucket}`, '60', { expirationTtl: 3600 });
+    const res = await SELF.fetch(`${ORIGIN}/api/pin-image`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'image/png', Origin: 'https://pitmaster.tools', 'CF-Connecting-IP': ip },
+      body: PNG_1x1,
+    });
+    expect(res.status).toBe(429);
   });
 
   it('404s a well-formed but unknown hash', async () => {

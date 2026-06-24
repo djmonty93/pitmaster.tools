@@ -34,13 +34,23 @@ const MAX_PIN_BYTES = 600 * 1024;
 
 // Full 8-byte PNG signature: \x89 P N G \r \n \x1a \n.
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
-// 'IHDR' — the first chunk type, at bytes 12–15 of a well-formed PNG.
-const IHDR = [0x49, 0x48, 0x44, 0x52];
+// IHDR is always the first chunk: its length field (bytes 8–11) is the
+// fixed value 13, followed by the type 'IHDR' (bytes 12–15).
+const IHDR_LENGTH = [0x00, 0x00, 0x00, 0x0d];
+const IHDR_TYPE = [0x49, 0x48, 0x44, 0x52];
 
 const ALLOWED_ORIGINS = new Set([
   'https://pitmaster.tools',
   'https://www.pitmaster.tools',
 ]);
+
+// Per-IP upload rate limit. The Origin allowlist only stops browsers; a
+// scripted client can spoof Origin, so this WEATHER_KV counter is the real
+// server-side abuse control (the plan's earmarked mitigation). A Cloudflare
+// rate-limit/WAF rule on the route is recommended as additional defense in
+// depth (see wrangler.jsonc) and covers the distributed-IP case this can't.
+const RATE_LIMIT = 60; // uploads per IP per window
+const RATE_WINDOW_S = 3600; // 1 hour
 
 const HASH_RE = /^[0-9a-f]{64}$/;
 
@@ -52,15 +62,34 @@ function toHex(buf: ArrayBuffer): string {
 }
 
 function looksLikePng(bytes: Uint8Array): boolean {
-  // Need the 8-byte signature, the 4-byte IHDR length, and the IHDR type.
+  // Need the 8-byte signature, the IHDR length field (= 13), and the IHDR
+  // chunk type.
   if (bytes.length < 16) return false;
   for (let i = 0; i < PNG_SIGNATURE.length; i++) {
     if (bytes[i] !== PNG_SIGNATURE[i]) return false;
   }
-  for (let i = 0; i < IHDR.length; i++) {
-    if (bytes[12 + i] !== IHDR[i]) return false;
+  for (let i = 0; i < IHDR_LENGTH.length; i++) {
+    if (bytes[8 + i] !== IHDR_LENGTH[i]) return false;
+  }
+  for (let i = 0; i < IHDR_TYPE.length; i++) {
+    if (bytes[12 + i] !== IHDR_TYPE[i]) return false;
   }
   return true;
+}
+
+/**
+ * Per-IP fixed-window rate limit backed by WEATHER_KV. Returns true when the
+ * caller is over the limit (→ 429). Keyed on CF-Connecting-IP; requests with
+ * no client IP share a single 'unknown' bucket.
+ */
+async function isRateLimited(rc: RouteContext): Promise<boolean> {
+  const ip = rc.request.headers.get('CF-Connecting-IP') || 'unknown';
+  const bucket = Math.floor(Date.now() / 1000 / RATE_WINDOW_S);
+  const key = `pinrl:${ip}:${bucket}`;
+  const current = Number((await rc.env.WEATHER_KV.get(key)) || '0');
+  if (current >= RATE_LIMIT) return true;
+  await rc.env.WEATHER_KV.put(key, String(current + 1), { expirationTtl: RATE_WINDOW_S });
+  return false;
 }
 
 /**
@@ -107,6 +136,12 @@ export async function handlePinImageUpload(rc: RouteContext): Promise<Response> 
   const origin = rc.request.headers.get('origin');
   if (!origin || !ALLOWED_ORIGINS.has(origin)) {
     return jsonError(403, 'forbidden', 'Cross-site uploads are not allowed');
+  }
+
+  // Per-IP rate limit — the real abuse control behind the spoofable Origin
+  // check. Rejected before reading the body.
+  if (await isRateLimited(rc)) {
+    return jsonError(429, 'rate_limited', 'Too many uploads — try again later');
   }
 
   // Exact content-type match, ignoring any parameters (e.g. "; charset=…").
