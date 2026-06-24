@@ -58,6 +58,33 @@
       "migrations_dir": "worker/migrations"
     }
   ],
+  // PIN_BUCKET — R2 bucket for dynamic "Save to Pinterest" result images.
+  // On Save-after-calculate the browser renders the live result to a
+  // 1000×1500 PNG and POSTs it to /api/pin-image; the worker stores it
+  // content-addressed (r/<sha256>.png) and serves it at /og/r/<hash>.png
+  // so the shared pin's IMAGE shows the real numbers. Worker only stores/
+  // streams bytes (no server-side rendering) → Free-plan safe.
+  //
+  // Operator pre-flight before first deploy that lands these routes:
+  //   1. `wrangler r2 bucket create pitmaster-pins`
+  //   2. Add a lifecycle rule expiring objects under `r/` after ~30 days
+  //      (Pinterest copies the image at pin time, so our object only needs
+  //      to outlive the fetch — keeps storage bounded). Dashboard → R2 →
+  //      pitmaster-pins → Settings → Object lifecycle rules, or via API.
+  //   3. AUTHORITATIVE abuse control: add a Cloudflare rate-limit/WAF rule on
+  //      `POST /api/pin-image`. The handler enforces same-site Origin +
+  //      600 KB stream cap + PNG-signature checks and a BEST-EFFORT KV per-IP
+  //      counter, but KV's non-atomic get→put can undercount concurrent
+  //      bursts, so the CF rule is the real per-IP enforcement layer (and the
+  //      only thing that covers the distributed-IP case). Configure it before
+  //      the public route sees traffic.
+  // Tests use Miniflare's in-memory R2 and ignore the bucket_name value.
+  "r2_buckets": [
+    {
+      "binding": "PIN_BUCKET",
+      "bucket_name": "pitmaster-pins"
+    }
+  ],
   // Cron triggers:
   //
   // 1. `0 10-14 * * 5` — Friday digest. Fires hourly Fri UTC across

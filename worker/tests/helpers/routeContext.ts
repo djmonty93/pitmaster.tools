@@ -42,6 +42,7 @@ export function buildContext(
     ASSETS: overrides.ASSETS ?? (e.ASSETS as Fetcher),
     WEATHER_KV: e.WEATHER_KV as KVNamespace,
     SMOKE_DB: e.SMOKE_DB as D1Database,
+    PIN_BUCKET: e.PIN_BUCKET as R2Bucket,
     SENDER_API_TOKEN: overrides.SENDER_API_TOKEN ?? 'sender_test_token',
     SUBSCRIBER_TOKEN_SECRET:
       overrides.SUBSCRIBER_TOKEN_SECRET ?? TEST_SUBSCRIBER_TOKEN_SECRET,

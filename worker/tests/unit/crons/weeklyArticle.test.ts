@@ -28,6 +28,7 @@ function buildEnv(): Env {
     ASSETS: undefined as unknown as Fetcher,
     WEATHER_KV: KV,
     SMOKE_DB: DB,
+    PIN_BUCKET: undefined as unknown as R2Bucket,
     SENDER_API_TOKEN: 'sender_test_token',
     SUBSCRIBER_TOKEN_SECRET: 'test-secret-32-bytes-long-aaaaaaaaa',
   };
