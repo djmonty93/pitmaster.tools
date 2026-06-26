@@ -86,6 +86,15 @@ async function mockForecast(page, body = FIXTURE) {
 test.describe('Best Smoke Days — F3/F4/F5 detail view', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
+  // Seed consent so the fixed cookie banner doesn't overlay the day-card
+  // controls and intercept the hourly-summary taps (the banner stacks taller
+  // on this 390px mobile viewport). 'rejected' loads no third-party scripts.
+  test.beforeEach(async ({ page }) => {
+    await page.context().addCookies([
+      { name: 'pitmaster_consent', value: 'rejected', url: 'http://127.0.0.1:4173' },
+    ]);
+  });
+
   test('hourly <details> renders empty body until first open, then fills with rows', async ({ page }) => {
     await mockForecast(page);
     await page.goto('/smoke-weather/');

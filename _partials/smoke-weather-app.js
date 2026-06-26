@@ -152,6 +152,20 @@
     return best;
   }
 
+  // Brand gauge for a score object (the signature data element). Falls back
+  // to a plain number if gauge-svg.js failed to load, so the card stays
+  // readable. band is the bare word ('ideal'|'green'|'yellow'|'red').
+  function scoreGauge(scoreObj) {
+    var n = Number(scoreObj.score) || 0;
+    if (typeof window.renderGauge === 'function') {
+      // No band in the label: the visible .day-card__score-band / the verdict
+      // headline already name the band, so adding it here double-announces it.
+      return window.renderGauge(n, scoreObj.band, { label: 'Smoke score ' + n + ' of 100' });
+    }
+    return '<span class="day-card__score-num">' + n + '</span>' +
+      '<span class="day-card__score-suffix">/100</span>';
+  }
+
   function renderVerdictHero(forecast, days) {
     var hero = $('verdictHero');
     if (!hero) return;
@@ -186,14 +200,17 @@
       : (forecast.metro ? forecast.metro : 'ZIP ' + forecast.zip);
     var sourceLabel = forecast.source === 'nws' ? 'National Weather Service' : 'Open-Meteo';
     hero.innerHTML =
-      '<p class="verdict-hero__location">Forecast for <strong>' + escapeHtml(locLabel) + '</strong> &middot; ZIP ' + escapeHtml(String(forecast.zip)) + '</p>' +
-      '<div class="verdict-hero__label">Best day in the next ' + Number(days.length) + ' days</div>' +
-      '<h2 class="verdict-hero__verdict">' + escapeHtml(verdict) + ' &mdash; ' + escapeHtml(formatDateLabel(best.date)) + '</h2>' +
-      '<div class="verdict-hero__meta">' +
-        '<span>Score <strong>' + Number(best.score.score) + '</strong>/100</span>' +
-        '<span>High ' + fmtNum(best.day.tempHighF) + '&deg;F / Low ' + fmtNum(best.day.tempLowF) + '&deg;F</span>' +
-      '</div>' +
-      '<div class="verdict-hero__source">Source: ' + escapeHtml(sourceLabel) + '</div>';
+      '<div class="verdict-hero__gauge">' + scoreGauge(best.score) + '</div>' +
+      '<div class="verdict-hero__body">' +
+        '<p class="verdict-hero__location">Forecast for <strong>' + escapeHtml(locLabel) + '</strong> &middot; ZIP ' + escapeHtml(String(forecast.zip)) + '</p>' +
+        '<div class="verdict-hero__label">Best day in the next ' + Number(days.length) + ' days</div>' +
+        '<h2 class="verdict-hero__verdict">' + escapeHtml(verdict) + ' &mdash; ' + escapeHtml(formatDateLabel(best.date)) + '</h2>' +
+        '<div class="verdict-hero__meta">' +
+          '<span>Score <strong>' + Number(best.score.score) + '</strong>/100</span>' +
+          '<span>High ' + fmtNum(best.day.tempHighF) + '&deg;F / Low ' + fmtNum(best.day.tempLowF) + '&deg;F</span>' +
+        '</div>' +
+        '<div class="verdict-hero__source">Source: ' + escapeHtml(sourceLabel) + '</div>' +
+      '</div>';
   }
 
   // Confidence-pill tooltip text (F3). Same wording shown across all
@@ -310,8 +327,7 @@
     article.innerHTML =
       '<div class="day-card__date">' + escapeHtml(formatDateLabel(entry.date)) + '</div>' +
       '<div class="day-card__score">' +
-        '<span class="day-card__score-num">' + Number(entry.score.score) + '</span>' +
-        '<span class="day-card__score-suffix">/100</span>' +
+        scoreGauge(entry.score) +
         '<span class="day-card__score-band">' + escapeHtml(bandLabel(entry.score.band)) + '</span>' +
       '</div>' +
       '<div class="day-card__temps">' + fmtNum(entry.day.tempHighF) + '&deg;F / ' + fmtNum(entry.day.tempLowF) + '&deg;F &middot; gust ' + fmtNum(entry.day.gustMphMax) + ' mph</div>' +

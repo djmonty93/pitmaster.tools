@@ -95,7 +95,14 @@ a { color: inherit; }
 main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
 .page-hero {
   max-width: 820px;
-  margin: 0 auto 1.4rem;
+  margin: 0 0 1.4rem;
+  text-align: left;
+}
+/* Opt-in centering utility — left-aligned is the deliberate default; add this
+   class to any hero that should center instead. (Currently unused.) */
+.page-hero--center {
+  margin-left: auto;
+  margin-right: auto;
   text-align: center;
 }
 .page-hero h1 {
@@ -109,6 +116,16 @@ main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
   color: #544e47;
   font-size: 1.05rem;
   line-height: 1.75;
+}
+/* Eyebrow kicker above an H1 — Oswald, uppercase, ember (utility/data role). */
+.eyebrow {
+  font-family: var(--font-util);
+  font-size: .8rem;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ember);
+  margin-bottom: .5rem;
 }
 
 /* ----- Unit controls (°F/°C, lbs/kg toggles) ----- */

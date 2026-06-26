@@ -104,6 +104,16 @@ async function mockForecast(page, body = FORECAST_FIXTURE, status = 200) {
 test.describe('Best Smoke Days verdict landing', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
+  // Seed consent so the fixed cookie banner doesn't overlay the "Get forecast"
+  // CTA and intercept clicks (the banner stacks taller on this 390px mobile
+  // viewport). 'rejected' loads no third-party scripts, so the forecast
+  // behavior under test is unaffected.
+  test.beforeEach(async ({ page }) => {
+    await page.context().addCookies([
+      { name: 'pitmaster_consent', value: 'rejected', url: 'http://127.0.0.1:4173' },
+    ]);
+  });
+
   test('renders an affiliate card with FTC disclosure when the response includes a recommendation (F15)', async ({ page }) => {
     const withRec = JSON.parse(JSON.stringify(FORECAST_FIXTURE));
     withRec.recommendation = {
