@@ -769,6 +769,7 @@ function renderMetro(metro) {
     '</main>',
     '',
     '<!-- INJECT:site-footer-smoke.html -->',
+    '<!-- INJECT:gauge-svg.js:script -->',
     '<!-- INJECT:weather-score-shared.js:script -->',
     '<!-- INJECT:smoke-weather-app.js:script -->',
     '<!-- INJECT:subscribe-form.js:script -->',

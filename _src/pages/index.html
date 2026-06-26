@@ -274,15 +274,18 @@
 .model-note { font-size: .8rem; color: var(--text-muted); line-height: 1.6; margin-top: 1.25rem; padding: .875rem 1rem; background: #FAFAF8; border: 1px solid var(--card-border); border-radius: var(--radius); }
 .hero-row { display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap; margin: 1.25rem 0 1.5rem; }
 .hero-row > .page-hero { flex: 1 1 360px; margin: 0; }
-.hero-forecast-card { flex: 1 1 320px; padding: 1.25rem 1.5rem; background: rgba(255,180,80,.08); border: 1px solid var(--amber); border-radius: 12px; display: flex; flex-direction: column; justify-content: center; }
-.hero-forecast-card h2 { font-family: Georgia,serif; font-size: 1.25rem; margin: 0 0 .4rem; color: var(--amber-dark); }
+.hero-forecast-card { flex: 1 1 320px; padding: 1.25rem 1.5rem; background: rgba(237,120,24,.07); border: 1px solid var(--amber); border-radius: 12px; display: flex; flex-direction: column; justify-content: center; }
 .hero-forecast-card p { margin: 0 0 .85rem; font-size: .95rem; line-height: 1.5; }
+.hero-gauge { display: flex; justify-content: center; }
+.hero-gauge .gauge { width: 210px; max-width: 100%; height: auto; display: block; }
+.hero-gauge__caption { margin: .2rem 0 .9rem; font-size: .9rem; line-height: 1.45; color: var(--text-muted); text-align: center; }
+.hero-gauge__caption strong { color: var(--charcoal); }
 .hero-forecast-card__form { display: flex; gap: .5rem; margin-bottom: .6rem; }
 .hero-forecast-card__form .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .hero-forecast-card__form input { flex: 1 1 0; min-width: 0; padding: .55rem .75rem; border: 1px solid var(--card-border); border-radius: 6px; font: inherit; }
 .hero-forecast-card__form input:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; border-color: var(--amber); }
-.hero-forecast-card__btn { padding: .55rem 1rem; background: var(--amber); color: #fff; border: none; border-radius: 6px; font-family: inherit; font-size: .9rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
-.hero-forecast-card__btn:hover, .hero-forecast-card__btn:focus-visible { background: var(--amber-dark); outline: none; }
+.hero-forecast-card__btn { padding: .55rem 1rem; background: var(--amber); color: var(--charcoal); border: none; border-radius: 6px; font-family: inherit; font-size: .9rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.hero-forecast-card__btn:hover, .hero-forecast-card__btn:focus-visible { background: var(--amber-dark); color: #fff; outline: none; }
 .hero-forecast-card__alt { margin: 0; font-size: .85rem; }
 .hero-forecast-card__alt a { color: var(--amber-dark); text-decoration: underline; font-weight: 600; }
 .hero-forecast-card__alt a:hover { color: var(--charcoal); }
@@ -301,13 +304,16 @@
 
   <div class="hero-row">
     <section class="page-hero" aria-label="Page introduction">
+      <p class="eyebrow">Weather-scored BBQ planning</p>
       <h1>Free Meat Smoking Calculator &amp; Smoke-Day Forecast</h1>
       <p>The only BBQ planner that scores your local 7-day weather for smoking &mdash; wind, humidity, and rain &mdash; and builds your cook timeline backward from serving time. Free, no signup, built for backyard pitmasters.</p>
     </section>
 
     <aside class="hero-forecast-card" aria-label="Best Smoke Days forecast">
-      <h2>Best Smoke Days</h2>
-      <p>7-day forecast scored for wind, humidity, and rain &mdash; see which day the weather is on your side.</p>
+      <div class="hero-gauge" id="heroGauge">
+        <svg class="gauge" viewBox="0 0 220 150" role="img" aria-label="Daily smoke score, scored 0 to 100" xmlns="http://www.w3.org/2000/svg"><path class="gauge__track" d="M20 110 A90 90 0 0 1 200 110" fill="none" stroke="#E6D9BE" stroke-width="16" stroke-linecap="round"/><path class="gauge__fill" d="M20 110 A90 90 0 0 1 200 110" fill="none" stroke="#2D7A3A" stroke-width="16" stroke-linecap="round" stroke-dasharray="212.06 282.74"/><line x1="110" y1="110" x2="163.7" y2="56.3" stroke="#26231F" stroke-width="6" stroke-linecap="round"/><circle cx="110" cy="110" r="9" fill="#26231F"/><text x="110" y="148" text-anchor="middle" font-family="'Zilla Slab',Georgia,serif" font-weight="700" font-size="42" fill="#26231F">75</text></svg>
+      </div>
+      <p class="hero-gauge__caption" id="heroGaugeCaption">Best Smoke Days, scored <strong>0&ndash;100</strong> for wind, humidity &amp; rain.</p>
       <form class="hero-forecast-card__form" id="heroForecastForm" action="/smoke-weather/" method="get" autocomplete="off" novalidate>
         <label for="heroZipInput" class="visually-hidden">ZIP code</label>
         <input type="text" id="heroZipInput" name="zip" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder="ZIP code">
@@ -1723,6 +1729,7 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
 })();
 </script>
 <!-- INJECT:site-header.js:script -->
+<!-- INJECT:gauge-svg.js:script -->
 <script>
 (function () {
   var form = document.getElementById('heroForecastForm');
@@ -1738,6 +1745,30 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
     // Otherwise let the form submit as GET to /smoke-weather/; the
     // smoke page falls back to geo-IP or asks for a ZIP.
   });
+})();
+
+(function () {
+  // Upgrade the static illustrative hero gauge to today's #1 smoke city.
+  // No-JS visitors keep the static gauge (no CLS, same footprint).
+  var box = document.getElementById('heroGauge');
+  var cap = document.getElementById('heroGaugeCaption');
+  if (!box || typeof window.renderGauge !== 'function') return;
+  fetch('/api/metros', { headers: { 'accept': 'application/json' } })
+    .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+    .then(function (data) {
+      var metros = (data && data.metros) || [];
+      if (!metros.length) return;
+      metros.sort(function (a, b) { return (b.todayScore || 0) - (a.todayScore || 0); });
+      var top = metros[0];
+      // Strip markup-significant chars as defense-in-depth before innerHTML.
+      var city = String(top.name + ', ' + top.state).replace(/[<>&"]/g, '');
+      var sc = Number(top.todayScore);
+      box.innerHTML = window.renderGauge(sc, top.todayBand, {
+        label: 'Today’s top smoke city: ' + city + ' — ' + sc + ' of 100'
+      });
+      if (cap) cap.innerHTML = 'Today’s top smoke city: <strong>' + city + '</strong> &middot; ' + sc + '/100';
+    })
+    .catch(function () { /* keep the static illustrative gauge */ });
 })();
 </script>
 <!-- INJECT:subscribe-form.js:script -->

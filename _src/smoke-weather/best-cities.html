@@ -91,16 +91,45 @@
   .lb-score { font-variant-numeric: tabular-nums; white-space: nowrap; }
   .lb-best { white-space: nowrap; color: #555; }
   .lb-row td:first-child { border-left: 4px solid transparent; }
-  .lb-row.band-ideal td:first-child { border-left-color: #1f8a3b; }
-  .lb-row.band-green td:first-child { border-left-color: #6fae3f; }
-  .lb-row.band-yellow td:first-child { border-left-color: #e0a92e; }
-  .lb-row.band-red td:first-child { border-left-color: #c0463b; }
+  .lb-row.band-ideal td:first-child { border-left-color: var(--score-ideal); }
+  .lb-row.band-green td:first-child { border-left-color: var(--score-green); }
+  .lb-row.band-yellow td:first-child { border-left-color: var(--score-yellow); }
+  .lb-row.band-red td:first-child { border-left-color: var(--score-red); }
+  /* #1 prominent gauge above the ranking table */
+  .lb-top { display: flex; align-items: center; gap: 1rem; margin: .25rem 0 1.1rem; }
+  .lb-top .gauge { width: 160px; height: auto; flex: 0 0 auto; }
+  .lb-top__label { font-family: var(--font-util); text-transform: uppercase; letter-spacing: .12em; font-size: .72rem; font-weight: 600; color: var(--ember); }
+  .lb-top__city { font-family: var(--font-display); font-weight: 700; font-size: 1.3rem; line-height: 1.15; }
+  .lb-top__sub { font-size: .85rem; color: var(--text-muted); }
+  /* per-row proportional score bar */
+  .lb-score { min-width: 5.5rem; }
+  .lb-bar { height: 6px; border-radius: 999px; background: var(--card-border); margin-top: .3rem; overflow: hidden; }
+  .lb-bar > span { display: block; height: 100%; border-radius: 999px; }
+  .lb-row.band-ideal  .lb-bar > span { background: var(--score-ideal); }
+  .lb-row.band-green  .lb-bar > span { background: var(--score-green); }
+  .lb-row.band-yellow .lb-bar > span { background: var(--score-yellow); }
+  .lb-row.band-red    .lb-bar > span { background: var(--score-red); }
   /* Browse-all fallback reuses the metro-tile grid but without the per-tile
      score/best text (those only hydrate on the chooser page). */
   .metros-browse .metro-tile__score,
   .metros-browse .metro-tile__best { display: none; }
   .metros-browse .metros-grid { display: flex; flex-wrap: wrap; gap: .5rem; }
   .metros-browse .metro-tile { flex: 0 1 auto; }
+  /* Stacked card layout on phones — the table reflows to labeled cards. */
+  @media (max-width: 600px) {
+    .lb-top { flex-direction: column; align-items: flex-start; gap: .5rem; }
+    .lb-table thead { position: absolute; left: -9999px; }
+    .lb-table, .lb-table caption, .lb-table tbody, .lb-table tr, .lb-table td { display: block; width: 100%; }
+    .lb-table tr { border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: .6rem; padding: .55rem .8rem; background: var(--surface-strong); }
+    .lb-table td { border-bottom: none; padding: .18rem 0; }
+    .lb-row td:first-child { border-left: 4px solid transparent; padding-left: .6rem; }
+    .lb-table td.lb-city { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; }
+    .lb-table td.lb-score, .lb-table td.lb-band, .lb-table td.lb-best { font-size: .9rem; }
+    .lb-table td.lb-rank::before  { content: '#'; color: var(--text-muted); margin-right: .35rem; }
+    .lb-table td.lb-score::before { content: 'Score '; color: var(--text-muted); }
+    .lb-table td.lb-band::before  { content: 'Conditions '; color: var(--text-muted); }
+    .lb-table td.lb-best::before  { content: 'Best day '; color: var(--text-muted); }
+  }
 </style>
 </head>
 <body>
@@ -123,6 +152,7 @@
 
   <section class="form-card" aria-labelledby="lb-title">
     <h2 id="lb-title">Today's ranking <span id="lbDate" class="lb-date"></span></h2>
+    <div id="lbTop" class="lb-top" hidden></div>
     <p id="lbHero" class="lb-hero" aria-live="polite" hidden></p>
     <p id="lbStatus" class="lb-status" role="status">Loading today's rankings…</p>
     <div id="lbLive" hidden>
@@ -162,6 +192,7 @@
 
 <!-- INJECT:site-footer-smoke.html -->
 
+<!-- INJECT:gauge-svg.js:script -->
 <script>
 (function () {
   'use strict';
@@ -211,6 +242,12 @@
         strong.textContent = m.todayScore;
         tdScore.appendChild(strong);
         tdScore.appendChild(document.createTextNode('/100'));
+        var bar = document.createElement('div');
+        bar.className = 'lb-bar';
+        var fill = document.createElement('span');
+        fill.style.width = Math.max(0, Math.min(100, Number(m.todayScore) || 0)) + '%';
+        bar.appendChild(fill);
+        tdScore.appendChild(bar);
         tr.appendChild(tdScore);
 
         tr.appendChild(cell('lb-band', bandLabel(m.todayBand)));
@@ -222,6 +259,18 @@
       table.appendChild(tbody);
 
       var best = metros[0], worst = metros[metros.length - 1];
+      var lbTop = document.getElementById('lbTop');
+      if (lbTop && typeof window.renderGauge === 'function') {
+        var topCity = String(best.name + ', ' + best.state).replace(/[<>&"]/g, '');
+        var topScore = Number(best.todayScore);
+        lbTop.innerHTML = window.renderGauge(topScore, best.todayBand, {
+          label: 'Today’s #1 smoke city: ' + topCity + ' — ' + topScore + ' of 100'
+        }) +
+          '<div><div class="lb-top__label">Today’s #1 smoke city</div>' +
+          '<div class="lb-top__city">' + topCity + '</div>' +
+          '<div class="lb-top__sub">Score ' + topScore + '/100 · ' + bandLabel(best.todayBand) + ' conditions</div></div>';
+        lbTop.removeAttribute('hidden');
+      }
       var hero = document.getElementById('lbHero');
       if (hero) {
         hero.textContent = 'Today’s best city to smoke: ' + best.name + ', ' + best.state +
