@@ -33,6 +33,15 @@
     return BAND[key] || '#ED7818'; // amber fallback for unknown/pending band
   }
 
+  // Escape a value destined for a double-quoted SVG attribute. renderGauge is a
+  // global, so it self-defends even if a future caller passes an unsanitized
+  // string (e.g. an API-supplied city name) straight into opts.label.
+  function escAttr(v) {
+    return String(v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
   function renderGauge(score, band, opts) {
     opts = opts || {};
     var s = Math.max(0, Math.min(100, Math.round(Number(score) || 0)));
@@ -43,10 +52,14 @@
     var ny = (CY - (R - 14) * Math.sin(theta)).toFixed(1);
     var label = opts.label || ('Smoke score ' + s + ' of 100');
     var showNumber = opts.showNumber !== false;
-    var sizeAttr = opts.size ? ' width="' + opts.size + '"' : '';
+    var size = Number(opts.size);
+    var sizeAttr = (isFinite(size) && size > 0) ? ' width="' + size + '"' : '';
 
+    // role="meter" exposes the 0-100 value to assistive tech as a navigable
+    // range; aria-label carries the prose description.
     return '<svg class="gauge" viewBox="0 0 220 150"' + sizeAttr +
-      ' role="img" aria-label="' + label + '" xmlns="http://www.w3.org/2000/svg">' +
+      ' role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + s + '"' +
+      ' aria-label="' + escAttr(label) + '" xmlns="http://www.w3.org/2000/svg">' +
       '<path class="gauge__track" d="M20 110 A90 90 0 0 1 200 110" fill="none" ' +
         'stroke="#E6D9BE" stroke-width="16" stroke-linecap="round"/>' +
       '<path class="gauge__fill" d="M20 110 A90 90 0 0 1 200 110" fill="none" ' +
