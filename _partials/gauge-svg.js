@@ -62,9 +62,13 @@
       ' aria-label="' + escAttr(label) + '" xmlns="http://www.w3.org/2000/svg">' +
       '<path class="gauge__track" d="M20 110 A90 90 0 0 1 200 110" fill="none" ' +
         'stroke="#E6D9BE" stroke-width="16" stroke-linecap="round"/>' +
-      '<path class="gauge__fill" d="M20 110 A90 90 0 0 1 200 110" fill="none" ' +
-        'stroke="' + color + '" stroke-width="16" stroke-linecap="round" ' +
-        'stroke-dasharray="' + filled.toFixed(2) + ' ' + SEMI.toFixed(2) + '"/>' +
+      // Omit the fill arc at score 0: a round line-cap on a zero-length dash
+      // paints a stray colored dot at the left rim, reading as a small fill.
+      (s > 0
+        ? '<path class="gauge__fill" d="M20 110 A90 90 0 0 1 200 110" fill="none" ' +
+          'stroke="' + color + '" stroke-width="16" stroke-linecap="round" ' +
+          'stroke-dasharray="' + filled.toFixed(2) + ' ' + SEMI.toFixed(2) + '"/>'
+        : '') +
       '<line class="gauge__needle" x1="' + CX + '" y1="' + CY + '" x2="' + nx + '" y2="' + ny + '" ' +
         'stroke="#26231F" stroke-width="6" stroke-linecap="round"/>' +
       '<circle cx="' + CX + '" cy="' + CY + '" r="9" fill="#26231F"/>' +
