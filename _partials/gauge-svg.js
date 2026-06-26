@@ -65,7 +65,8 @@
       // Omit the fill arc at score 0: a round line-cap on a zero-length dash
       // paints a stray colored dot at the left rim, reading as a small fill.
       (s > 0
-        ? '<path class="gauge__fill" d="M20 110 A90 90 0 0 1 200 110" fill="none" ' +
+        ? '<path class="gauge__fill" style="--gauge-dash:' + filled.toFixed(2) + '" ' +
+          'd="M20 110 A90 90 0 0 1 200 110" fill="none" ' +
           'stroke="' + color + '" stroke-width="16" stroke-linecap="round" ' +
           'stroke-dasharray="' + filled.toFixed(2) + ' ' + SEMI.toFixed(2) + '"/>'
         : '') +

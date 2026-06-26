@@ -16,7 +16,7 @@
       already ran client-side, so this is pure presentation; the worker only
       stores/streams bytes.
 
-   No third-party scripts. The headline font (Anton) is self-hosted and loaded
+   No third-party scripts. The headline font (Zilla Slab) is self-hosted and loaded
    lazily on first Save (same-origin → respects the consent rules in CLAUDE.md).
    It is a no-op on pages without a #results modal. */
 (function () {
@@ -25,18 +25,19 @@
   var IMG_W = 1000;
   var IMG_H = 1500;
   var UPLOAD_ENDPOINT = '/api/pin-image';
-  var FONT_URL = '/og/fonts/anton.woff2';
+  var FONT_URL = '/og/fonts/zilla-slab-700.woff2';
   var MAX_UPLOAD_BYTES = 600 * 1024;
 
   // Pin aesthetic mirrors scripts/render-pins.mjs so the dynamic image reads as
-  // the same family as the static per-calculator pins.
+  // the same family as the static per-calculator pins — brand palette
+  // (charcoal/cream/amber) with a Zilla Slab headline.
   var COLORS = {
-    bg: '#1c140d',
-    cream: '#f3ead8',
-    label: '#e8ddc7',
-    accent: '#d9542e',
-    rule: '#463422',
-    muted: '#8a7d66'
+    bg: '#26231F',
+    cream: '#FBEED8',
+    label: '#EFE3CB',
+    accent: '#ED7818',
+    rule: '#3A342D',
+    muted: '#9A8D74'
   };
   var MONO = 'ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace';
   var SANS = '"Public Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
@@ -138,7 +139,7 @@
         return fontPromise;
       }
       try {
-        var face = new FontFace('PinAnton', 'url(' + FONT_URL + ')', { style: 'normal', weight: '400' });
+        var face = new FontFace('PinZilla', 'url(' + FONT_URL + ')', { style: 'normal', weight: '700' });
         fontPromise = face.load().then(function (loaded) {
           document.fonts.add(loaded);
           return true;
@@ -149,8 +150,8 @@
       return fontPromise;
     }
 
-    function headlineFont(size, haveAnton) {
-      return size + 'px ' + (haveAnton ? '"PinAnton", ' : '') + 'Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif';
+    function headlineFont(size, haveFont) {
+      return '700 ' + size + 'px ' + (haveFont ? '"PinZilla", ' : '') + 'Georgia, "Times New Roman", serif';
     }
 
     function wrapLines(ctx, str, maxWidth) {
@@ -178,7 +179,7 @@
 
     // Draw the result to an offscreen 1000×1500 canvas and resolve a PNG Blob,
     // or null on any failure (caller falls back to the static image).
-    function renderToBlob(rows, haveAnton) {
+    function renderToBlob(rows, haveFont) {
       return new Promise(function (resolve) {
         try {
           var canvas = document.createElement('canvas');
@@ -223,7 +224,7 @@
           var size = 120;
           var lines;
           for (; size >= 56; size -= 6) {
-            ctx.font = headlineFont(size, haveAnton);
+            ctx.font = headlineFont(size, haveFont);
             lines = wrapLines(ctx, headline, contentW);
             if (lines.length <= 3) break;
           }
@@ -398,7 +399,7 @@
       };
 
       loadHeadlineFont()
-        .then(function (haveAnton) { return renderToBlob(rows, haveAnton); })
+        .then(function (haveFont) { return renderToBlob(rows, haveFont); })
         .then(function (blob) { return blob ? uploadPin(blob) : null; })
         .then(function (mediaUrl) {
           try {

@@ -603,6 +603,48 @@ body.embed-mode main { padding-top: .5rem; }
   outline: none;
 }
 
+/* ----- Texture: ember-warm hairline top-rules between content sections ----- */
+.editorial-section,
+.related-tools {
+  border-top: 1px solid var(--line);
+  padding-top: 1.6rem;
+  margin-top: 2.2rem;
+}
+/* A short ember tick leads the editorial/related headings — echoes the gauge
+   accent without stock imagery. */
+.editorial-section > h2:first-child::before,
+.related-tools > .section-title::before {
+  content: '';
+  display: inline-block;
+  width: 1.6rem;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--ember);
+  vertical-align: middle;
+  margin-right: .6rem;
+}
+
+/* ----- Motion (keyframes defined always; APPLIED only when the visitor has
+   not asked for reduced motion). Base styles keep everything visible, so
+   reduced-motion users and browsers without scroll-timelines see final state. */
+@keyframes gauge-in    { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes gauge-sweep { from { stroke-dashoffset: var(--gauge-dash, 0); } to { stroke-dashoffset: 0; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Signature gauge: fade/scale in + sweep the arc to its score. The gauge is
+     decorative/dynamic, so animating it never hides indexable text. (We do NOT
+     scroll-reveal editorial/FAQ content — opacity-0-until-scroll would risk
+     hiding it from crawlers on an SEO-focused site.) */
+  .gauge { animation: gauge-in .5s ease-out both; }
+  .gauge__fill { animation: gauge-sweep .9s ease-out both; }
+
+  /* Hover micro-interactions (transform-based, so gated). */
+  .calc-btn { transition: transform .1s ease, box-shadow .15s ease, background .15s ease; }
+  .calc-btn:hover { transform: translateY(-1px); }
+  .share-btn, .pin-save, .print-btn { transition: transform .12s ease, background .15s, border-color .15s, color .15s; }
+  .share-btn:hover, .pin-save:hover, .print-btn:hover { transform: translateY(-1px); }
+}
+
 /* ----- Print ----- */
 @media print {
   body { background: #fff !important; color: #000 !important; font-size: 12px; }
