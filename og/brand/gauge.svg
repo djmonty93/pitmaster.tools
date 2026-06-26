@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="Pitmaster Tools gauge mark">
+  <defs>
+    <linearGradient id="pmArc" x1="0" y1="120" x2="120" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#B02C1A"/>
+      <stop offset=".5" stop-color="#ED7818"/>
+      <stop offset="1" stop-color="#FAB746"/>
+    </linearGradient>
+  </defs>
+  <!-- dial face + bezel -->
+  <circle cx="60" cy="60" r="54" fill="#FBEED8" stroke="#26231F" stroke-width="7"/>
+  <!-- tick marks around the dial -->
+  <g stroke="#26231F" stroke-width="2.4" stroke-linecap="round" opacity=".55">
+    <line x1="22.4" y1="84.2" x2="27.6" y2="80.9"/>
+    <line x1="20.1" y1="60" x2="26.2" y2="60"/>
+    <line x1="27.1" y1="36.6" x2="31.6" y2="40.5"/>
+    <line x1="44.7" y1="22.4" x2="47.4" y2="27.8"/>
+    <line x1="60" y1="19.4" x2="60" y2="25.6"/>
+    <line x1="75.3" y1="22.4" x2="72.6" y2="27.8"/>
+    <line x1="92.9" y1="36.6" x2="88.4" y2="40.5"/>
+    <line x1="99.9" y1="60" x2="93.8" y2="60"/>
+    <line x1="97.6" y1="84.2" x2="92.4" y2="80.9"/>
+  </g>
+  <!-- the sweep arc -->
+  <path d="M27.1 79 A38 38 0 1 0 92.9 79" fill="none" stroke="url(#pmArc)" stroke-width="10" stroke-linecap="round"/>
+  <!-- needle reading high -->
+  <line x1="60" y1="60" x2="79.5" y2="32.2" stroke="#B02C1A" stroke-width="7" stroke-linecap="round"/>
+  <!-- hub -->
+  <circle cx="60" cy="60" r="8.5" fill="#26231F"/>
+  <circle cx="60" cy="60" r="3.2" fill="#FAB746"/>
+</svg>
