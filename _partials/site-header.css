@@ -46,9 +46,11 @@
 .nav-links a {
   color: #ccc;
   text-decoration: none;
-  font-size: .95rem;
-  font-weight: 700;
-  letter-spacing: .02em;
+  font-family: var(--font-util);
+  font-size: .9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .08em;
   transition: color .15s;
   white-space: nowrap;
 }
@@ -68,15 +70,17 @@
   background: none;
   border: none;
   color: #ccc;
-  font-size: .95rem;
-  font-weight: 700;
+  font-family: var(--font-util);
+  font-size: .9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .08em;
   transition: color .15s;
   white-space: nowrap;
   display: flex;
   align-items: center;
   gap: .45rem;
   cursor: pointer;
-  font-family: inherit;
   padding: 0;
 }
 
@@ -137,9 +141,10 @@
 .nav-dropdown__group-label {
   display: block;
   padding: .55rem 1rem .2rem;
+  font-family: var(--font-util);
   font-size: .72rem;
-  font-weight: 800;
-  letter-spacing: .08em;
+  font-weight: 600;
+  letter-spacing: .12em;
   text-transform: uppercase;
   color: #888;
   cursor: default;
@@ -149,7 +154,9 @@
 .nav-dropdown__menu a {
   display: block;
   padding: .4rem 1rem;
+  font-family: var(--font-util);
   font-size: .92rem;
+  letter-spacing: .01em;
   color: #bbb;
   white-space: nowrap;
   transition: color .1s, background .1s;
