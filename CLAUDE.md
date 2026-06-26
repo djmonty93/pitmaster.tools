@@ -11,6 +11,8 @@ Every HTML file must include **all** of the following in `<head>`, in this order
 <meta name="description" content="…">
 <meta name="robots" content="index, follow">              <!-- noindex, follow for legal pages -->
 <link rel="canonical" href="https://pitmaster.tools/…">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/og/fonts/zilla-slab-700.woff2">  <!-- critical brand fonts, self-hosted (INJECT:head-meta.html) -->
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/og/fonts/oswald.woff2">
 <meta property="og:title" content="…">
 <meta property="og:description" content="…">
 <meta property="og:type" content="website">
@@ -19,8 +21,9 @@ Every HTML file must include **all** of the following in `<head>`, in this order
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="…">
 <meta name="twitter:description" content="…">
-<link rel="icon" href="favicon.ico" sizes="any">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,…">  <!-- same SVG favicon fallback on every page -->
+<link rel="icon" href="favicon.ico" sizes="any">                              <!-- raster fallback (gauge mark, 16/32/48) -->
+<link rel="icon" type="image/svg+xml" href="/og/brand/gauge.svg">           <!-- full gauge badge; modern browsers prefer the SVG (INJECT:head-favicons.html) -->
+<link rel="apple-touch-icon" href="/og/apple-touch-icon.png">               <!-- 180px gauge on cream tile -->
 <script>  <!-- Google Consent Mode v2 default — region-scoped (INJECT:consent-init.html) -->
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}

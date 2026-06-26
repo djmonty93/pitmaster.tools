@@ -5,7 +5,7 @@
 // Run locally:  node scripts/gen-favicon.mjs
 // Never wired into npm run build / deploy. Requires the `sharp` devDependency.
 import sharp from 'sharp';
-import { writeFileSync, readFileSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 
 const BADGE = 'og/brand/gauge.svg';
 const CREAM = { r: 0xFB, g: 0xEE, b: 0xD8, alpha: 1 }; // #FBEED8 apple-touch tile
@@ -47,7 +47,7 @@ console.log(`wrote favicon.ico (${offset} bytes, ${count} images)`);
 
 // apple-touch-icon — 180px full gauge on an opaque cream tile (iOS masks to a
 // rounded square; a filled tile avoids black corners on older iOS).
-const badge180 = await sharp(BADGE).resize(164, 164).png().toBuffer();
+const badge180 = await sharp(BADGE).resize(164, 164, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer();
 await sharp({ create: { width: 180, height: 180, channels: 4, background: CREAM } })
   .composite([{ input: badge180, gravity: 'center' }])
   .png()
