@@ -104,6 +104,81 @@
   ]
 }
 </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "@id": "https://pitmaster.tools/smoke-weather/jacksonville-fl#climate-normals",
+  "name": "Jacksonville, FL Monthly Climate Normals for Barbecue",
+  "description": "Monthly climate normals for Jacksonville, FL — average high and low temperature, wind speed, relative humidity, and rainy days, each scored 0-100 for low-and-slow barbecue suitability. Temperature and rain days from NOAA 1991-2020 U.S. Climate Normals (station JACKSONVILLE NAS, FL); wind and humidity from Open-Meteo historical reanalysis, 2015-2024.",
+  "url": "https://pitmaster.tools/smoke-weather/jacksonville-fl",
+  "temporalCoverage": [
+    "1991/2020",
+    "2015/2024"
+  ],
+  "spatialCoverage": {
+    "@type": "Place",
+    "name": "Jacksonville, FL",
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 30.3322,
+      "longitude": -81.6557
+    }
+  },
+  "variableMeasured": [
+    {
+      "@type": "PropertyValue",
+      "name": "Average high temperature",
+      "unitText": "degree Fahrenheit"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "Average low temperature",
+      "unitText": "degree Fahrenheit"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "Average wind speed",
+      "unitText": "mile per hour"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "Relative humidity",
+      "unitText": "percent",
+      "minValue": 0,
+      "maxValue": 100
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "Rainy days (at least 0.1 inch)",
+      "unitText": "days per month"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "Smoke-day score",
+      "description": "0-100 suitability for low-and-slow barbecue",
+      "minValue": 0,
+      "maxValue": 100
+    }
+  ],
+  "distribution": {
+    "@type": "DataDownload",
+    "encodingFormat": "application/json",
+    "contentUrl": "https://pitmaster.tools/smoke-weather/jacksonville-fl-normals.json"
+  },
+  "isBasedOn": [
+    "https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals",
+    "https://open-meteo.com/"
+  ],
+  "creator": {
+    "@type": "Organization",
+    "name": "Pitmaster Tools",
+    "url": "https://pitmaster.tools"
+  },
+  "license": "https://pitmaster.tools/terms-of-service",
+  "dateModified": "2026-06-14"
+}
+</script>
 <!-- INJECT:site-header.css -->
 <!-- INJECT:site-base.css -->
 <!-- INJECT:smoke-weather.css -->
@@ -203,6 +278,31 @@
     <h2>Planning a weekend smoke in Jacksonville</h2>
     <p>Jacksonville sits in northeast Florida, in genuinely humid subtropical climate rather than the tropical far south of the state. Summers are hot and sticky, with high dew points and near-daily afternoon thunderstorms from June through September, and the metro sits squarely in the Atlantic hurricane track through the season. The payoff comes on the other end: October through April runs warm, drier, and reliably cookable, with winter rarely cold enough to stop a cook.</p>
     <p>Summer humidity pushes the wet-bulb temperature high and the stall long — the textbook condition for a patient brisket. A sealed kamado runs a tight, fuel-efficient stall through the muggy months and a pellet rig handles it without drama; the open offset is happiest on the drier days. Jacksonville’s pits run Carolina pork and Texas brisket as the backbone, both long cuts that want extra time in this air. Fire the cook at first light so the meat is wrapped and coasting before the afternoon storms build, leave a buffer, and aim the biggest cooks at the October-to-April dry stretch.</p>
+  </section>
+
+  <section class="editorial-section climate-normals" aria-labelledby="normals-title">
+    <h2 id="normals-title">Jacksonville climate normals by month</h2>
+    <p>Typical conditions for each month, scored 0-100 for a packer brisket on an offset — the most weather-sensitive low-and-slow cook. Temperature and rain days are NOAA 1991-2020 climate normals; wind and humidity are 2015-2024 reanalysis averages.</p>
+    <div class="normals-scroll">
+      <table class="normals-table">
+        <thead><tr><th scope="col">Month</th><th scope="col">Avg High</th><th scope="col">Avg Low</th><th scope="col">Avg Wind</th><th scope="col">Humidity</th><th scope="col">Rain Days</th><th scope="col">Smoke Score</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">January</th><td>65.5&deg;F</td><td>47.2&deg;F</td><td>7.9 mph</td><td>76%</td><td>5.0</td><td>76</td></tr>
+          <tr><th scope="row">February</th><td>68.9&deg;F</td><td>50.2&deg;F</td><td>7.8 mph</td><td>78%</td><td>5.0</td><td>75</td></tr>
+          <tr><th scope="row">March</th><td>74.3&deg;F</td><td>55.0&deg;F</td><td>7.9 mph</td><td>73%</td><td>5.5</td><td>75</td></tr>
+          <tr><th scope="row">April</th><td>80.5&deg;F</td><td>61.1&deg;F</td><td>8.0 mph</td><td>73%</td><td>4.1</td><td>77</td></tr>
+          <tr><th scope="row">May</th><td>86.2&deg;F</td><td>68.9&deg;F</td><td>7.2 mph</td><td>73%</td><td>4.8</td><td>77</td></tr>
+          <tr><th scope="row">June</th><td>90.1&deg;F</td><td>73.9&deg;F</td><td>6.5 mph</td><td>78%</td><td>10.3</td><td>63</td></tr>
+          <tr><th scope="row">July</th><td>91.8&deg;F</td><td>76.0&deg;F</td><td>5.7 mph</td><td>80%</td><td>10.1</td><td>62</td></tr>
+          <tr><th scope="row">August</th><td>91.1&deg;F</td><td>76.3&deg;F</td><td>5.9 mph</td><td>83%</td><td>10.2</td><td>62</td></tr>
+          <tr><th scope="row">September</th><td>87.8&deg;F</td><td>73.9&deg;F</td><td>6.7 mph</td><td>82%</td><td>7.8</td><td>69</td></tr>
+          <tr><th scope="row">October</th><td>81.6&deg;F</td><td>66.0&deg;F</td><td>7.5 mph</td><td>79%</td><td>4.8</td><td>77</td></tr>
+          <tr><th scope="row">November</th><td>73.3&deg;F</td><td>56.1&deg;F</td><td>7.6 mph</td><td>80%</td><td>3.9</td><td>78</td></tr>
+          <tr><th scope="row">December</th><td>67.5&deg;F</td><td>50.4&deg;F</td><td>7.4 mph</td><td>81%</td><td>4.2</td><td>77</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Historically, the best months to smoke in Jacksonville are <strong>November, April, and May</strong>. April is the windiest month (avg 8.0 mph) — the one to plan around.</p>
   </section>
 
   <section class="editorial-section" aria-label="Jacksonville BBQ context">

@@ -104,6 +104,81 @@
   ]
 }
 </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "@id": "https://pitmaster.tools/smoke-weather/baltimore-md#climate-normals",
+  "name": "Baltimore, MD Monthly Climate Normals for Barbecue",
+  "description": "Monthly climate normals for Baltimore, MD — average high and low temperature, wind speed, relative humidity, and rainy days, each scored 0-100 for low-and-slow barbecue suitability. Temperature and rain days from NOAA 1991-2020 U.S. Climate Normals (station MD SCI CTR BALTIMORE, MD); wind and humidity from Open-Meteo historical reanalysis, 2015-2024.",
+  "url": "https://pitmaster.tools/smoke-weather/baltimore-md",
+  "temporalCoverage": [
+    "1991/2020",
+    "2015/2024"
+  ],
+  "spatialCoverage": {
+    "@type": "Place",
+    "name": "Baltimore, MD",
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 39.2904,
+      "longitude": -76.6122
+    }
+  },
+  "variableMeasured": [
+    {
+      "@type": "PropertyValue",
+      "name": "Average high temperature",
+      "unitText": "degree Fahrenheit"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "Average low temperature",
+      "unitText": "degree Fahrenheit"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "Average wind speed",
+      "unitText": "mile per hour"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "Relative humidity",
+      "unitText": "percent",
+      "minValue": 0,
+      "maxValue": 100
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "Rainy days (at least 0.1 inch)",
+      "unitText": "days per month"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "Smoke-day score",
+      "description": "0-100 suitability for low-and-slow barbecue",
+      "minValue": 0,
+      "maxValue": 100
+    }
+  ],
+  "distribution": {
+    "@type": "DataDownload",
+    "encodingFormat": "application/json",
+    "contentUrl": "https://pitmaster.tools/smoke-weather/baltimore-md-normals.json"
+  },
+  "isBasedOn": [
+    "https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals",
+    "https://open-meteo.com/"
+  ],
+  "creator": {
+    "@type": "Organization",
+    "name": "Pitmaster Tools",
+    "url": "https://pitmaster.tools"
+  },
+  "license": "https://pitmaster.tools/terms-of-service",
+  "dateModified": "2026-06-14"
+}
+</script>
 <!-- INJECT:site-header.css -->
 <!-- INJECT:site-base.css -->
 <!-- INJECT:smoke-weather.css -->
@@ -203,6 +278,31 @@
     <h2>Planning a weekend smoke in Baltimore</h2>
     <p>Baltimore’s smoke calendar runs the Mid-Atlantic pattern: humid, storm-prone summers and damp, gusty winters bracketing two strong shoulder seasons. April into June and September into October are the sweet spots, with mild highs and dew points off the July peak. Summer brings Chesapeake humidity and afternoon thunderstorms; winter rarely freezes the season solid, but raw, wet, windy stretches from December through February favor a cooker that makes its own steady heat.</p>
     <p>Those summer dew points stretch the stall on long cuts, so budget extra time from June through September and keep a wrap handy. A sealed kamado or pellet cooker carries the damp shoulder and winter weekends comfortably, while a stick burner shines on the calm, dry days the score flags green. Baltimore’s own contribution is pit beef — top round cooked hot and fast over charcoal, sliced thin and piled on a kaiser roll — which sits alongside the region’s pulled pork and brisket. Pit beef is a hotter, shorter cook than a low-and-slow brisket, so for that one, watch the wind more than the humidity.</p>
+  </section>
+
+  <section class="editorial-section climate-normals" aria-labelledby="normals-title">
+    <h2 id="normals-title">Baltimore climate normals by month</h2>
+    <p>Typical conditions for each month, scored 0-100 for a packer brisket on an offset — the most weather-sensitive low-and-slow cook. Temperature and rain days are NOAA 1991-2020 climate normals; wind and humidity are 2015-2024 reanalysis averages.</p>
+    <div class="normals-scroll">
+      <table class="normals-table">
+        <thead><tr><th scope="col">Month</th><th scope="col">Avg High</th><th scope="col">Avg Low</th><th scope="col">Avg Wind</th><th scope="col">Humidity</th><th scope="col">Rain Days</th><th scope="col">Smoke Score</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">January</th><td>43.7&deg;F</td><td>30.0&deg;F</td><td>8.4 mph</td><td>68%</td><td>5.5</td><td>69</td></tr>
+          <tr><th scope="row">February</th><td>46.8&deg;F</td><td>31.9&deg;F</td><td>8.1 mph</td><td>67%</td><td>5.7</td><td>69</td></tr>
+          <tr><th scope="row">March</th><td>55.2&deg;F</td><td>38.7&deg;F</td><td>8.7 mph</td><td>66%</td><td>6.7</td><td>72</td></tr>
+          <tr><th scope="row">April</th><td>66.8&deg;F</td><td>48.2&deg;F</td><td>8.6 mph</td><td>67%</td><td>6.4</td><td>73</td></tr>
+          <tr><th scope="row">May</th><td>75.9&deg;F</td><td>58.0&deg;F</td><td>7.2 mph</td><td>73%</td><td>6.6</td><td>75</td></tr>
+          <tr><th scope="row">June</th><td>85.4&deg;F</td><td>67.7&deg;F</td><td>7.0 mph</td><td>70%</td><td>6.3</td><td>75</td></tr>
+          <tr><th scope="row">July</th><td>90.1&deg;F</td><td>72.9&deg;F</td><td>5.7 mph</td><td>74%</td><td>7.4</td><td>68</td></tr>
+          <tr><th scope="row">August</th><td>87.3&deg;F</td><td>71.0&deg;F</td><td>5.8 mph</td><td>76%</td><td>6.3</td><td>73</td></tr>
+          <tr><th scope="row">September</th><td>80.4&deg;F</td><td>64.5&deg;F</td><td>6.7 mph</td><td>74%</td><td>5.2</td><td>77</td></tr>
+          <tr><th scope="row">October</th><td>68.8&deg;F</td><td>52.6&deg;F</td><td>7.4 mph</td><td>74%</td><td>4.9</td><td>77</td></tr>
+          <tr><th scope="row">November</th><td>57.6&deg;F</td><td>42.6&deg;F</td><td>7.7 mph</td><td>69%</td><td>4.7</td><td>77</td></tr>
+          <tr><th scope="row">December</th><td>48.0&deg;F</td><td>34.6&deg;F</td><td>7.3 mph</td><td>72%</td><td>6.8</td><td>71</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Historically, the best months to smoke in Baltimore are <strong>September, October, and November</strong>. March is the windiest month (avg 8.7 mph) — the one to plan around.</p>
   </section>
 
   <section class="editorial-section" aria-label="Baltimore BBQ context">

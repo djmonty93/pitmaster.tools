@@ -248,13 +248,23 @@ test('renderMetro embeds canonical, title, description, and ZIP-prefilled input'
   }
 });
 
-test('renderMetro embeds three JSON-LD blocks (WebApplication + FAQPage + BreadcrumbList)', () => {
+test('renderMetro embeds four JSON-LD blocks (WebApplication + FAQPage + BreadcrumbList + Dataset)', () => {
   const html = gen.renderMetro(gen.METROS[0]);
   const ldBlocks = html.match(/<script type="application\/ld\+json">/g) || [];
-  assert.equal(ldBlocks.length, 3);
+  assert.equal(ldBlocks.length, 4);
   assert.ok(html.includes('"@type": "WebApplication"'));
   assert.ok(html.includes('"@type": "FAQPage"'));
   assert.ok(html.includes('"@type": "BreadcrumbList"'));
+  assert.ok(html.includes('"@type": "Dataset"'));
+});
+
+test('ldJson escapes script-breaking characters in JSON-LD', () => {
+  const out = gen.ldJson({ evil: '</script><img src=x onerror=alert(1)>', amp: 'a & b' });
+  // No raw <, >, or & may survive into the <script> body.
+  assert.ok(!/[<>&]/.test(out), 'ldJson left a raw <, >, or & in the output');
+  assert.ok(out.includes('\\u003c') && out.includes('\\u003e') && out.includes('\\u0026'));
+  // Still valid JSON that round-trips to the original values.
+  assert.deepEqual(JSON.parse(out), { evil: '</script><img src=x onerror=alert(1)>', amp: 'a & b' });
 });
 
 test('every metro emits a 3-level BreadcrumbList (Home → Best Smoke Days → metro)', () => {
@@ -558,4 +568,90 @@ test('every metro has a METRO_LOCAL entry (rollout complete)', () => {
   // any metro added later must ship with one too.
   const missing = gen.METROS.filter((m) => !gen.METRO_LOCAL[m.slug]).map((m) => m.slug);
   assert.deepEqual(missing, [], 'metros missing a local guide: ' + missing.join(', '));
+});
+
+// ── Climate normals + Dataset schema ────────────────────────────────────────
+
+test('every metro has committed climate normals with 12 complete months', () => {
+  for (const m of gen.METROS) {
+    const e = gen.METRO_NORMALS[m.slug];
+    assert.ok(e, 'no climate normals for ' + m.slug + ' — run scripts/generate-normals.mjs');
+    assert.equal(e.months.length, 12, m.slug + ' must have 12 months');
+    e.months.forEach((mo, i) => {
+      assert.equal(mo.month, i + 1, m.slug + ' months must be ordered 1..12');
+      for (const k of ['avg_high_f', 'avg_low_f', 'avg_wind_mph', 'avg_humidity', 'precip_days']) {
+        assert.ok(Number.isFinite(mo[k]), m.slug + ' month ' + mo.month + ' missing ' + k);
+      }
+    });
+    assert.ok(e.station && typeof e.station.id === 'string', m.slug + ' missing station provenance');
+  }
+});
+
+test('metroNormals hard-fails for a metro with no normals (no thin pages)', () => {
+  assert.throws(() => gen.metroNormals('not-a-real-metro'), /missing or incomplete climate normals/);
+});
+
+test('monthlyNormalScore returns a 0-100 integer from the shared engine', () => {
+  for (const m of gen.METROS.slice(0, 5)) {
+    for (const mo of gen.METRO_NORMALS[m.slug].months) {
+      const s = gen.monthlyNormalScore(mo);
+      assert.ok(Number.isInteger(s) && s >= 0 && s <= 100, m.slug + ' month ' + mo.month + ' score ' + s);
+    }
+  }
+});
+
+test('renderMetro renders a 12-row normals table + derived best-months sentence', () => {
+  const metro = gen.METROS.find((m) => m.slug === 'austin-tx');
+  const html = gen.renderMetro(metro);
+  assert.ok(html.includes('class="editorial-section climate-normals"'), 'normals section missing');
+  assert.ok(html.includes('<table class="normals-table">'), 'normals table missing');
+  // 12 data rows, each a row-header month cell.
+  const rowHeaders = html.match(/<th scope="row">/g) || [];
+  assert.equal(rowHeaders.length, 12, 'expected 12 month rows');
+  assert.ok(/best months to smoke in Austin are <strong>[^<]+<\/strong>/.test(html),
+    'derived best-months sentence missing');
+  assert.ok(/is the windiest month \(avg [\d.]+ mph\)/.test(html), 'windiest-month clause missing');
+});
+
+test('Dataset JSON-LD parses and every variableMeasured is visible in the table (parity)', () => {
+  const metro = gen.METROS.find((m) => m.slug === 'austin-tx');
+  const html = gen.renderMetro(metro);
+  const blocks = html.match(/<script type="application\/ld\+json">\n([\s\S]*?)\n<\/script>/g) || [];
+  const dataset = blocks
+    .map((b) => JSON.parse(b.replace(/<\/?script[^>]*>/g, '')))
+    .find((j) => j['@type'] === 'Dataset');
+  assert.ok(dataset, 'Dataset JSON-LD block missing or unparseable');
+  assert.equal(dataset.distribution.contentUrl,
+    'https://pitmaster.tools/smoke-weather/austin-tx-normals.json');
+  assert.ok(dataset.spatialCoverage.geo.latitude === metro.latitude);
+  // Parity: the column headers the table renders must cover each measured var.
+  const headerBlob = (html.match(/<thead>[\s\S]*?<\/thead>/) || [''])[0].toLowerCase();
+  const expectHeaders = ['high', 'low', 'wind', 'humidity', 'rain', 'smoke score'];
+  for (const h of expectHeaders) {
+    assert.ok(headerBlob.includes(h), 'table header missing column: ' + h);
+  }
+  assert.ok(dataset.variableMeasured.length >= 6, 'expected >= 6 measured variables');
+});
+
+test('run() emits one normals distribution file per metro with derived scores', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'metros-test-'));
+  const tmpNormals = fs.mkdtempSync(path.join(os.tmpdir(), 'normals-test-'));
+  try {
+    const subset = gen.METROS.slice(0, 3);
+    gen.run({ outDir: tmp, metros: subset, listPartialOut: null, normalsDir: tmpNormals });
+    for (const metro of subset) {
+      const p = path.join(tmpNormals, metro.slug + '-normals.json');
+      assert.ok(fs.existsSync(p), metro.slug + ' distribution file missing');
+      const dist = JSON.parse(fs.readFileSync(p, 'utf8'));
+      assert.equal(dist.metro, metro.slug);
+      assert.equal(dist.months.length, 12);
+      for (const mo of dist.months) {
+        assert.ok(Number.isInteger(mo.smoke_score) && mo.smoke_score >= 0 && mo.smoke_score <= 100,
+          metro.slug + ' month ' + mo.month + ' bad smoke_score');
+      }
+    }
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+    fs.rmSync(tmpNormals, { recursive: true, force: true });
+  }
 });

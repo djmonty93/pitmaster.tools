@@ -1,5 +1,10 @@
 dist/
 
+# Generated passthrough tree: build:metros emits per-metro climate-normals
+# distribution JSON here; build.js copies public/ → dist/. Pure build artifact,
+# regenerated on every build from the committed data/metro-normals.json.
+public/
+
 # wrangler files
 .wrangler
 .dev.vars*
@@ -16,3 +21,6 @@ test-results/
 .claude/settings.local.json
 .claude/logs/
 .claude/cache/
+
+# Local scratch / API response cache for offline data scripts (generate-normals.mjs)
+.tmp/

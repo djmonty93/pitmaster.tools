@@ -542,3 +542,49 @@ a.affiliate-card__product:focus-visible {
   border-radius: 8px;
   margin-top: 1rem;
 }
+
+/* ----- Climate normals table ----- */
+/* Horizontal scroll wrapper so the 7-column table never overflows the page
+   on narrow viewports (the table stays legible; the container scrolls). */
+.climate-normals .normals-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1rem 0;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow);
+}
+.normals-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .9rem;
+  min-width: 34rem;
+}
+.normals-table th,
+.normals-table td {
+  padding: .5rem .65rem;
+  text-align: right;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--card-border);
+}
+.normals-table thead th {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--charcoal);
+  text-align: right;
+  border-bottom: 2px solid var(--card-border);
+}
+/* Month name column reads as a row label, left-aligned. */
+.normals-table tbody th[scope="row"],
+.normals-table thead th:first-child {
+  text-align: left;
+  font-weight: 600;
+  color: var(--charcoal);
+}
+.normals-table tbody tr:last-child th,
+.normals-table tbody tr:last-child td { border-bottom: none; }
+.normals-table tbody tr:nth-child(even) { background: rgba(0,0,0,.025); }
+/* Smoke-score column carries the page's accent so the standout months read
+   at a glance without per-cell band coloring. */
+.normals-table td:last-child { font-weight: 700; color: var(--charcoal); }
