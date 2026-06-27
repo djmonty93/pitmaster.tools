@@ -5,10 +5,14 @@
     <span class="logo-text">pitmaster<span class="logo-tld">.tools</span></span>
   </a>
   <nav class="header-nav" aria-label="Site navigation">
-    <div class="nav-dropdown">
+    <div class="nav-dropdown nav-dropdown--mega">
       <button class="nav-dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="tools-menu">Tools</button>
       <!-- INJECT:site-header-tools-menu.html -->
     </div>
+    <!-- Guides mega-menu drops in here once guide pages exist: a second
+         <div class="nav-dropdown nav-dropdown--mega"> with a Guides trigger
+         (aria-controls="guides-menu") + INJECT:site-header-guides-menu.html.
+         No CSS/JS changes needed — the .nav-dropdown--mega pattern is generic. -->
     <a href="/about">About</a>
   </nav>
 </header>
