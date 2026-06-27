@@ -798,12 +798,10 @@ function renderMetro(metro) {
     'isAccessibleForFree': true,
     'browserRequirements': 'Requires JavaScript enabled in a modern browser.',
     'dateModified': LAST_MODIFIED,
-    'areaServed': {
-      '@type': 'City',
-      'name': name,
-      'addressRegion': metro.state,
-      'addressCountry': 'US',
-    },
+    // No `areaServed` here: it isn't a recognized property of WebApplication
+    // (it belongs on Organization/Service), and validator.schema.org warns on
+    // it. The metro's geography is modeled correctly on the Dataset block
+    // (spatialCoverage → City + GeoCoordinates) instead.
     'featureList': [
       '7-day smoking weather forecast scored 0-100 for ' + name,
       'Cut-aware stall-risk modeling using wet-bulb temperature',
