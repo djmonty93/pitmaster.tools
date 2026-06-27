@@ -174,15 +174,26 @@
    scroll. Rules are keyed to .nav-dropdown--mega (not #tools-menu) so a second
    Guides menu is a pure drop-in. Desktop only — the mobile block below resets
    this back to the stacked accordion. */
+/* Anchor the mega panel to the sticky <header> (the nearest positioned
+   ancestor), NOT the Tools trigger: the trigger is not the rightmost header
+   item (About — and the unit controls on tool pages — sit to its right), so a
+   trigger-relative right:0 would push the leftward-growing panel off the left
+   viewport edge. position:static hands the panel's containing block up to
+   <header>, whose padding box spans the viewport, so the offsets below are
+   measured from the header's content edges regardless of what follows the
+   trigger. Non-mega dropdowns keep their trigger-relative position:relative. */
+.nav-dropdown--mega { position: static; }
+
 .nav-dropdown--mega .nav-dropdown__menu {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: .1rem 1.25rem;
-  /* Right-anchored (base rule sets right:0), so the panel grows leftward from
-     the Tools trigger. The reserve must exceed the header's 1.5rem right
-     padding so the panel keeps a positive left margin and never overflows the
-     left viewport edge (3rem also absorbs the scrollbar width that 100vw
-     includes). Caps at 720px on wide screens for the 4-column grid. */
+  /* right:1.5rem matches the header's 1.5rem side padding so the panel's right
+     edge sits at the header content edge; the 3rem width reserve then leaves a
+     matching ~1.5rem gap on the left, so the panel never overflows either
+     viewport edge (the reserve also absorbs the scrollbar width 100vw counts).
+     Caps at 720px on wide screens for the 4-column grid. */
+  right: 1.5rem;
   width: min(720px, calc(100vw - 3rem));
   padding: .5rem 1.1rem 1rem;
 }
