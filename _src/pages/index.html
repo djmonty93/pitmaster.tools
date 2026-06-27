@@ -277,9 +277,14 @@
 .hero-forecast-card { flex: 1 1 320px; padding: 1.25rem 1.5rem; background: rgba(237,120,24,.07); border: 1px solid var(--amber); border-radius: 12px; display: flex; flex-direction: column; justify-content: center; }
 .hero-forecast-card p { margin: 0 0 .85rem; font-size: .95rem; line-height: 1.5; }
 .hero-forecast-card__title { margin: 0 0 .5rem; text-align: center; font-family: var(--font-util); text-transform: uppercase; letter-spacing: .14em; font-size: .8rem; font-weight: 600; color: var(--ember); }
-.hero-gauge { display: flex; justify-content: center; }
-.hero-gauge .gauge { width: 210px; max-width: 100%; height: auto; display: block; }
-.hero-gauge__caption { margin: .2rem 0 .9rem; font-size: .9rem; line-height: 1.45; color: var(--text-muted); text-align: center; }
+.hero-gauge { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; justify-items: center; }
+.hero-gauge:not(.hero-gauge--live) { grid-template-columns: 1fr; }   /* static / single fallback centers one gauge */
+.hero-gauge .gauge { width: 100%; max-width: 180px; height: auto; display: block; }
+.hero-gauge__cell { display: flex; flex-direction: column; align-items: center; gap: .15rem; text-decoration: none; color: inherit; padding: .3rem .35rem; border-radius: 8px; transition: background .15s; }
+.hero-gauge__cell:hover, .hero-gauge__cell:focus-visible { background: rgba(237,120,24,.12); outline: none; }
+.hero-gauge__city { font-size: .9rem; font-weight: 700; color: var(--charcoal); text-align: center; line-height: 1.2; }
+.hero-gauge__score { font-size: .82rem; color: var(--text-muted); }
+.hero-gauge__caption { margin: .55rem 0 .9rem; font-size: .9rem; line-height: 1.45; color: var(--text-muted); text-align: center; }
 .hero-gauge__caption strong { color: var(--charcoal); }
 .hero-forecast-card__form { display: flex; gap: .5rem; margin-bottom: .6rem; }
 .hero-forecast-card__form .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
@@ -290,7 +295,7 @@
 .hero-forecast-card__alt { margin: 0; font-size: .85rem; }
 .hero-forecast-card__alt a { color: var(--amber-dark); text-decoration: underline; font-weight: 600; }
 .hero-forecast-card__alt a:hover { color: var(--charcoal); }
-@media (max-width: 600px) { .hero-row { gap: 1rem; } .hero-forecast-card { padding: 1rem 1.1rem; } }
+@media (max-width: 600px) { .hero-row { gap: 1rem; } .hero-forecast-card { padding: 1rem 1.1rem; } .hero-gauge { grid-template-columns: 1fr; gap: 1.25rem; } }
 </style>
 </head>
 <body>
@@ -1750,25 +1755,42 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
 })();
 
 (function () {
-  // Upgrade the static illustrative hero gauge to today's #1 smoke city.
-  // No-JS visitors keep the static gauge (no CLS, same footprint).
+  // Upgrade the static illustrative hero gauge to today's TOP 2 smoke cities,
+  // each linking to its metro page. No-JS / fetch-fail visitors keep the static
+  // single gauge (no CLS, the grid falls back to one centered column).
   var box = document.getElementById('heroGauge');
   var cap = document.getElementById('heroGaugeCaption');
   if (!box || typeof window.renderGauge !== 'function') return;
+  var BAND_LABEL = { ideal: 'Ideal', green: 'Good', yellow: 'Average', red: 'Poor' };
   fetch('/api/metros', { headers: { 'accept': 'application/json' } })
     .then(function (r) { if (!r.ok) throw 0; return r.json(); })
     .then(function (data) {
       var metros = (data && data.metros) || [];
-      if (!metros.length) return;
+      if (!metros.length) return; // keep the static gauge
       metros.sort(function (a, b) { return (b.todayScore || 0) - (a.todayScore || 0); });
-      var top = metros[0];
-      // Strip markup-significant chars as defense-in-depth before innerHTML.
-      var city = String(top.name + ', ' + top.state).replace(/[<>&"]/g, '');
-      var sc = Number(top.todayScore);
-      box.innerHTML = window.renderGauge(sc, top.todayBand, {
-        label: 'Today’s top smoke city: ' + city + ' — ' + sc + ' of 100'
-      });
-      if (cap) cap.innerHTML = 'Today’s top smoke city: <strong>' + city + '</strong> &middot; ' + sc + '/100';
+      var top = metros.slice(0, 2);
+      box.innerHTML = top.map(function (m) {
+        // Defense-in-depth before innerHTML: strip markup chars from the city
+        // label and restrict the slug to the safe URL alphabet.
+        var city = String(m.name + ', ' + m.state).replace(/[<>&"]/g, '');
+        var slug = String(m.slug || '').replace(/[^a-z0-9-]/g, '');
+        var sc = Number(m.todayScore);
+        var bandWord = BAND_LABEL[m.todayBand] || '';
+        return '<a class="hero-gauge__cell" href="/smoke-weather/' + slug + '">' +
+          window.renderGauge(sc, m.todayBand, {
+            size: 150,
+            label: 'Today’s smoke score in ' + city + ': ' + sc + ' of 100'
+          }) +
+          '<span class="hero-gauge__city">' + city + '</span>' +
+          '<span class="hero-gauge__score">' + sc + '/100' +
+            (bandWord ? ' &middot; ' + bandWord : '') + '</span>' +
+        '</a>';
+      }).join('');
+      box.classList.add('hero-gauge--live');
+      if (cap) {
+        cap.innerHTML = (top.length === 2 ? 'Today’s top 2 smoke cities' : 'Today’s top smoke city') +
+          ', scored <strong>0&ndash;100</strong> for wind, humidity &amp; rain.';
+      }
     })
     .catch(function () { /* keep the static illustrative gauge */ });
 })();

@@ -179,6 +179,65 @@ const BBQ_HERITAGE_BY_REGION = {
   pacific:       'The West Coast built its own barbecue mostly in the last twenty years. Modern pitmasters across the Pacific run full Texas and Carolina menus on offsets, pellets, kamados and kettles. The climate is the gift: mild marine air, low summer humidity along the coast, and predictable seasonal patterns. The stall is shorter than in the humid Southeast and East, and wind off the Pacific is the variable to watch on an offset cook.',
 };
 
+// Per-metro BBQ heritage (Layer C). One unique entry per metro so same-state
+// siblings no longer render the shared BBQ_HERITAGE_BY_STATE/_BY_REGION text —
+// the duplicate-content signal AdSense flagged. heritageFor() prefers this map
+// and falls back to the state/region maps above (kept for safety + the parity
+// test). Copy is grounded in documented regional BBQ identity; no invented
+// business names. Cross-metro 5-gram overlap stays well under the test bar.
+const METRO_HERITAGE = {
+  'new-york-ny': 'New York City has no single native barbecue tradition — it draws talent and technique from every region simultaneously. Pitmasters working in the five boroughs represent authentic Kansas City, Carolina, and Texas styles side by side, often in the same neighborhood. The result is arguably the most varied barbecue market in the country: whole-hog platters a few blocks from brisket sliced Hill Country-style, all competing on equal footing.',
+  'los-angeles-ca': 'Southern California’s barbecue identity has been shaped by its sheer diversity. The region leans on the Santa Maria tri-tip tradition—oak-grilled, salt-and-pepper seasoned, served with salsa and pinquito beans—while simultaneously absorbing Korean short-rib techniques and full Texas-style brisket operations. LA pitmasters embrace bold fusion, and the year-round grilling climate means the craft is practiced with unusual frequency and genuine seriousness.',
+  'chicago-il': 'Chicago’s most distinctive barbecue contribution is the South Side rib-tip-and-hot-links tradition, cooked in enclosed aquarium smokers and served with a tangy sauce over white bread. This working-class practice traces back to the Great Migration, when Southern pitmasters brought their craft north to the stockyards city. Beyond rib tips, Chicago hosts every major regional style, but the aquarium smoker setup remains the city’s single most identifiable barbecue signature.',
+  'dallas-fort-worth-tx': 'The Dallas–Fort Worth Metroplex sits at the intersection of Texas barbecue’s competing influences. Central Texas minimalism, East Texas hickory-smoke tradition, and Kansas City rib culture all have devoted followings here. DFW pitmasters tend to anchor the plate with brisket but support smoked sausage, pork ribs, and smoked turkey with equal enthusiasm. It’s Texas barbecue at its most broadly cosmopolitan, without strong allegiance to any single regional school.',
+  'houston-tx': 'Houston’s position as one of America’s most diverse cities shows up directly on the barbecue plate. Gulf Coast and deep Creole influences bring smoked sausage and spiced meats alongside Central Texas brisket, while Vietnamese and Caribbean communities have contributed distinct smoke traditions of their own. East Texas hickory-smoke heritage is well represented, and Houston pitmasters are generally more open to bold seasoning and global spice profiles than the minimalist Hill Country tradition to the west.',
+  'washington-dc': 'Washington, D.C. sits at the crossroads of Virginia, Maryland, and the broader Mid-Atlantic, giving its barbecue scene a genuinely mixed regional character. Virginia-style chopped pork with sweet tomato-vinegar sauce, Carolina whole-hog, and Texas brisket all have serious followings in the metro area. The region lacks a single dominant native style, but that cultural crossroads has produced a competitive scene where multiple traditions are practiced with genuine care.',
+  'miami-fl': 'Miami’s barbecue identity is inseparable from its Caribbean and Latin American heritage. Cuban-style whole roasted pork—seasoned with mojo, garlic, citrus, and oregano—anchors the outdoor-cooking tradition more than any smoker-based technique. Caribbean jerk and Haitian smoked-meat traditions layer on top of that, while Southern-style pulled pork and Texas brisket are present but play a secondary role. The flavors here are brighter and more acidic than anywhere else in the South.',
+  'philadelphia-pa': 'Philadelphia has no single native barbecue canon, but its position between the South, New York, and the Mid-Atlantic creates a well-stocked scene. Pitmasters draw from Carolina, Texas, and Kansas City blueprints without strong allegiance to any one. The city’s general affection for bold, direct food carries over: Philadelphia diners tend to want their barbecue sauced, smoked hard, and served in portions that require no apology.',
+  'atlanta-ga': 'Atlanta sits at the geographic and cultural center of Southern barbecue, pulling influences from East Tennessee, the Carolinas, and the Deep South simultaneously. Chopped pork shoulder with a sweet-vinegar sauce is the backbone, and Brunswick stew—the slow-cooked tomato-and-meat accompaniment—remains a fixture at serious joints. Memphis-style dry-rub ribs also have a strong following, and Atlanta’s rapid growth has brought Texas brisket culture firmly into the mainstream.',
+  'boston-ma': 'New England never developed a distinct barbecue tradition of its own—the wood-smoke and low-and-slow culture is largely a late arrival. Boston’s scene is built by transplants and enthusiasts who learned their craft from Carolina, Texas, and Kansas City traditions. What the city lacks in heritage it compensates for in seriousness: Boston pitmasters tend to be meticulous students of the craft, and the competition scene has grown steadily in recent years.',
+  'phoenix-az': 'Phoenix and the Valley of the Sun draw their barbecue identity from two overlapping traditions: the Texas stick-burner style that dominates much of the desert Southwest, and a Sonoran influence that prizes mesquite smoke and bold chili-forward spice. The dry desert heat enables year-round outdoor cooking, and Phoenix pitmasters have built a serious scene around brisket and ribs while honoring carne asada and mesquite-grilled traditions rooted in the region’s border culture.',
+  'san-francisco-ca': 'The Bay Area approaches barbecue through a craft-and-provenance lens that reflects Northern California’s broader food culture. California’s Santa Maria tri-tip tradition—red oak, salt, pepper, garlic, pinquito beans—informs the regional sensibility, and Bay Area pitmasters have adopted it alongside full Texas and Carolina operations. Heritage-breed pork, deliberate wood selection, and farm-direct sourcing are regular talking points, driven by a community where fine-dining technique and live-fire cooking share the same kitchen.',
+  'riverside-ca': 'Riverside and the Inland Empire sit close enough to Santa Maria’s ranching country that tri-tip over red oak feels almost ancestral here. Central California cattle culture runs deep through the region, and weekend cooking over live fire is a genuine community practice, not a trend. Beyond tri-tip, decades of migration from Texas and the Deep South have made brisket and ribs fixtures at local barbecue stands alongside the California-native cuts.',
+  'detroit-mi': 'Detroit’s barbecue story is closely tied to the Great Migration. Generations of families from Alabama, Georgia, and Mississippi brought their smoking traditions north to the auto industry’s workforce, and the city developed a strong pulled-pork and rib culture rooted in Deep Southern technique. Hickory and fruit woods are common, the sweet-sauced mid-South tradition has strong local roots, and Detroit’s scene remains working-class in character and proud of it.',
+  'seattle-wa': 'Seattle’s most authentic smoked-meat tradition isn’t Southern at all—it’s Pacific Northwest smoked salmon, alder-wood cured and slow-smoked, a practice that predates any Southern-style pit by generations. That said, the past two decades have produced a serious modern BBQ scene, with Texas-style brisket and Carolina whole-hog finding committed practitioners. The PNW’s premium wood supply—alder, cherry, apple—gives Seattle pitmasters excellent raw materials alongside the traditional Southern hardwoods.',
+  'minneapolis-mn': 'Minnesota’s Scandinavian and Northern European immigrant heritage didn’t include a Southern smoked-meat tradition, so Minneapolis built its barbecue scene largely from scratch over the past two decades. The Twin Cities now host a competitive melting-pot market with Kansas City, Texas, and Carolina styles all represented. The short Upper Midwest summer drives intense grilling culture, and the craft-beer community’s overlap with the smoking world has pushed quality upward consistently.',
+  'san-diego-ca': 'San Diego’s barbecue identity sits at the convergence of California’s modern-BBQ culture and deep Baja influence. Mesquite-grilled carne asada is effectively the city’s default outdoor cooking, and the border region’s cattle and spice traditions run through San Diego’s DNA. Texas-style brisket and Carolina pork have dedicated followings, but San Diego pitmasters often layer in citrus, chiles, and adobo-influenced dry rubs that set the work apart from more orthodox regional traditions.',
+  'tampa-fl': 'Tampa’s barbecue scene sits at a genuine cultural crossroads. The Ybor City Cuban heritage introduced generations of Tampans to slow-roasted lechon—whole pig marinated in citrus and garlic—a tradition that parallels the Southern whole-hog technique without sharing its roots. Florida-style smoked ribs and pulled pork exist alongside that Latin foundation, and Gulf Coast proximity keeps smoked fish and shellfish on the radar of local pitmasters who push beyond the standard beef-and-pork repertoire.',
+  'denver-co': 'Denver’s mile-high elevation adds a genuine variable to barbecue physics: lower atmospheric pressure changes how fire breathes and how collagen breaks down, and serious Colorado pitmasters account for it. The city’s scene draws heavily from Texas stick-burner tradition and Kansas City rib culture, with brisket firmly at the center. Colorado’s premium ranching heritage means local beef quality is high, and many Denver pitmasters source whole animals from Front Range farms rather than commodity suppliers.',
+  'baltimore-md': 'Baltimore and the Chesapeake region have a smoked-meat identity that sits where Southern tradition meets Mid-Atlantic seafood culture. Virginia-style chopped pork and Carolina-inflected ribs are the core of the barbecue scene, but Old Bay seasoning and the Bay’s own smoking traditions thread through local technique in ways you don’t see further south. It’s a market where pulled pork and smoked bluefish can share a platter without anyone raising an eyebrow.',
+  'st-louis-mo': 'St. Louis carved out its own lane in American barbecue with the St. Louis-cut spareribs—a trimmed, rectangular rack that cooks more evenly than a full slab and has become a standard cut nationwide. The city’s sauce runs sharper and less sweet than Kansas City’s, built on tomato and vinegar with far less molasses. A tradition of grilling ribs over charcoal then finishing with sauce sets St. Louis apart from the pure low-and-slow orthodoxy a few hours to the west.',
+  'charlotte-nc': 'Charlotte anchors the Piedmont, or Lexington, style of North Carolina barbecue—a tradition distinct from the state’s Eastern school. Where Eastern-style pitmasters smoke the whole hog, Piedmont pitmasters focus on the pork shoulder and finish with a dip that adds tomato or ketchup to the base vinegar. The result is a slightly sweeter, richer sauce and a shoulder-centric chopped pork that loyal partisans consider the more complex of North Carolina’s two great styles.',
+  'orlando-fl': 'Central Florida’s barbecue scene reflects the state’s identity as a crossroads for migrants from across the South and Northeast. Orlando draws on Carolina pulled-pork tradition, Texas brisket culture, and Caribbean flavors that travel north from Miami. Local pitmasters serve neighborhoods rather than theme parks, and those joints tend toward Southern-style ribs and smoked chicken that Central Florida families grew up eating. It’s a broad, inclusive scene without a single dominant native voice.',
+  'san-antonio-tx': 'San Antonio’s barbecue sits where Texas beef tradition meets deep Tejano and border culture. Barbacoa—beef cheeks and head meat slow-cooked until falling apart, traditionally prepared in a pit or wrapped tight—is woven into the city’s weekend food ritual in ways that predate the Anglo-Texas smoked brisket tradition. Mesquite is the native fuel of the South Texas brush country, and San Antonio pitmasters are generally more comfortable with bold chili and spice profiles than their Hill Country counterparts.',
+  'portland-or': 'Portland’s barbecue scene grew from the Pacific Northwest’s craft-food culture rather than any inherited regional tradition. PNW smoked salmon and alder-wood technique provide an indigenous foundation, but the modern pit circuit leans heavily on Texas brisket and whole-hog Carolina methods brought in by trained pitmasters who apprenticed in the South. The Willamette Valley’s abundance of fruit woods—cherry, apple, pear—gives local smoke a distinctly regional character even when the cut is entirely traditional.',
+  'sacramento-ca': 'Sacramento and the Central Valley occupy a key position in California barbecue: close enough to Santa Maria’s original tri-tip territory to claim that tradition seriously, and embedded in a ranching belt where exceptional beef and pork are sourced at the source. Farm-to-table sensibility runs through the Sacramento BBQ scene more visibly than in any other California metro, with pitmasters naming specific ranches and wood varieties the way a chef calls out suppliers on a menu.',
+  'pittsburgh-pa': 'Pittsburgh’s working-class food culture—built around hearty, unapologetic eating—translated readily into the barbecue revival of the past two decades. Pitmasters here draw from Kansas City, Carolina, and Texas traditions with particular fondness for slow-smoked brisket and ribs. The region’s Eastern European immigrant communities, who brought their own sausage-smoking and cured-meat traditions, add a parallel layer of smoked-meat culture that gives Pittsburgh’s scene more depth than a simple transplant story would suggest.',
+  'las-vegas-nv': 'Las Vegas has no native barbecue tradition, but the hospitality economy has made it an unusual market. Major Texas, Kansas City, and Memphis-style operations run alongside casino food halls, and the concentrated restaurant talent pool ensures consistent quality. What Vegas lacks in regional identity it compensates for in variety: nearly every significant American smoke style is represented within a few miles, and competition for diners keeps the standards elevated in ways a smaller city couldn’t sustain.',
+  'cincinnati-oh': 'Cincinnati’s most famous food contribution is its Greek-influenced chili, but the city’s barbecue scene draws from a different set of roots. Proximity to Kentucky brings Western Kentucky mutton traditions and Louisville’s broad pork culture within easy reach, and the Ohio River corridor has long moved Southern food north. Cincinnati pitmasters lean toward ribs and pulled pork with sweet tomato-based sauces, and the city’s German heritage adds an appreciation for smoked sausage that fits naturally alongside the pit work.',
+  'kansas-city-mo': 'Kansas City is one of the genuine capitals of American barbecue. The tradition here grew from the city’s slaughterhouse history—every cut got slow-smoked over hickory, which is how burnt ends emerged from brisket points. The sauce is sweet, thick, and tomato-molasses-based, anchoring a style imitated nationwide. Kansas City treats nearly any cut—brisket, ribs, pulled pork, smoked turkey—as worthy of the pit, and the regional competition circuit is among the most active in the country.',
+  'columbus-oh': 'Columbus is a university city with a fluid food culture, and its barbecue scene reflects that openness. Without a single native style to defend, Ohio’s capital has become a testing ground where Texas, Kansas City, and Carolina traditions compete on equal footing. The food-truck scene helped establish serious smoked-meat operations, and a growing craft-beer community has pushed pairing culture that rewards carefully managed smoke. Younger than Cincinnati’s scene but arguably more willing to experiment.',
+  'indianapolis-in': 'Indiana occupies a transitional zone between the Midwest’s melting-pot barbecue culture and the Kentucky-influenced pork traditions just south. Indianapolis pitmasters draw from Louisville’s rib and pulled-pork heritage while also embracing the Kansas City and Texas styles that define much of Midwestern cooking. The state’s fair and festival culture has long celebrated smoked meats, and a competitive circuit built around pork—ribs especially—keeps the local scene rooted in technique rather than trend.',
+  'cleveland-oh': 'Cleveland’s Great Lakes position and layered immigrant history give its smoked-meat scene a character unlike Cincinnati’s Kentucky-tinged city to the south or Columbus’s university-driven experimentation. Slovenian and other Eastern European communities, with generations of roots in the Cleveland area, brought sausage-smoking and cured-meat traditions that run parallel to the Southern barbecue revival. The broader scene pulls from Carolina, Texas, and Kansas City traditions, but that smoked-sausage thread gives Cleveland its most distinctive local flavor.',
+  'austin-tx': 'Austin is the city most responsible for taking Central Texas pit barbecue to a national audience. The Hill Country style—post-oak smoke, salt-and-pepper rub, offset smoker, brisket held without sauce—became something close to a religion here, drawing food writers and competition judges from around the country. Austin debates brisket with the intensity other cities reserve for sports, and the long-weekend pilgrimage to eat smoked meat outdoors at a picnic table has become a civic ritual.',
+  'nashville-tn': 'Nashville occupies a different barbecue space than Memphis, 200 miles to the west. The city built its identity around smoked chicken—both in the deep-South smoking tradition and as a natural cousin to the hot-chicken phenomenon that put Nashville on the global food map. Brisket has grown sharply in prominence as Texas-trained pitmasters arrived during the city’s rapid expansion. The result is a scene that’s genuinely newer and less rigid than Memphis, and more willing to absorb outside influence.',
+  'virginia-beach-va': 'Virginia Beach and the Tidewater region sit at the southeastern corner of the Commonwealth, where Virginia’s chopped-pork-shoulder tradition meets the vinegar-heavy influence of neighboring Eastern North Carolina. The local identity leans toward pork—shoulder and whole hog—with a sauce that falls between Virginia’s sweeter tomato-vinegar and the thinner, sharper Eastern NC style. Coastal proximity means smoked fish and shellfish from the Chesapeake and the Atlantic appear on Tidewater menus in ways absent from inland Virginia.',
+  'providence-ri': 'Rhode Island’s barbecue culture is a genuine work-in-progress—the state never developed a regional tradition of its own, and Providence’s compact size means it draws from New York, Boston, and an increasing number of Southern practitioners who’ve settled in New England. The city’s restaurant scene is disproportionately sophisticated for its size, and that sensibility carries over: Providence pitmasters tend to be careful, technique-driven operators who have studied the major traditions and chosen their own synthesis.',
+  'milwaukee-wi': 'Milwaukee’s food identity is built on German bratwurst, beer, and a sausage-smoking tradition that runs deep in the city’s history—and that sensibility overlaps naturally with Southern barbecue culture. Smoked brats and sausage are cultural common ground, and from that foundation the city has absorbed Texas brisket and Kansas City rib traditions with genuine seriousness. The summer outdoor-cooking culture here is intense, driven by a short season that makes every warm weekend worth building a fire.',
+  'jacksonville-fl': 'Jacksonville sits in North Florida, geographically and culturally closer to Georgia and South Carolina than to Miami or Tampa. That positioning shapes the barbecue identity: smoked pork shoulder and pulled pork in the Carolina tradition, with vinegar-based and mild tomato sauces, are far more common than the Caribbean-influenced preparations found further south. The St. Johns River corridor carries its own outdoor-cooking culture rooted in Southern hunting and fishing traditions, where smoked wild game sits comfortably alongside pork ribs.',
+  'oklahoma-city-ok': 'Oklahoma City barbecue sits at a three-way intersection of Texas, Kansas City, and Memphis traditions, seasoned by the state’s cattle and oil-country identity. Brisket cooked on large offset stick burners is the anchor, but smoked bologna—known locally as Oklahoma prime rib—is a genuine and beloved regional specialty. The prairie winds sweeping through central Oklahoma demand serious fire management, and local pitmasters take pride in controlling their pits across temperature swings that challenge less experienced operators.',
+  'raleigh-nc': 'Raleigh traces its barbecue identity to the Eastern North Carolina whole-hog tradition, among the oldest continuous pit practices in the country. The whole hog—cooked slowly over hardwood coals, hand-pulled and chopped—gets dressed with a thin vinegar-and-red-pepper sauce and nothing else. No tomato, no sweetener. That simplicity is philosophical, not lazy, and Eastern NC pitmasters defend it with conviction. The Triangle’s growth has brought outside styles in, but the whole-hog tradition remains the region’s true north.',
+  'memphis-tn': 'Memphis may have a stronger claim than anywhere else to the title of America’s rib city. The dry-rub approach—a blend of paprika, garlic, and cayenne rubbed onto the rack and cooked without sauce—is the signature, though wet-sauced ribs have equal standing. Pulled pork and whole-hog traditions run equally deep. The annual World Championship Barbecue Cooking Contest draws thousands of teams internationally and has shaped a competition culture that defines how Memphis understands the craft.',
+  'richmond-va': 'Richmond sits in Virginia’s Piedmont corridor, and its barbecue identity reflects the Commonwealth’s pork-shoulder tradition at its most developed. Chopped or pulled pork with a sweeter tomato-vinegar sauce is the baseline, and the city’s growing culinary culture has embraced whole-hog technique alongside the craft-food sensibility that now defines Richmond’s broader restaurant scene. The result runs richer and slightly sweeter than Tidewater Virginia, shaped more by the Piedmont’s rural smokehouse heritage than by the coastal plain’s Carolina influence.',
+  'louisville-ky': 'Louisville sits at the northern edge of Kentucky’s barbecue belt, blending influences from the state’s Western Kentucky mutton tradition with the broader Southern pork culture of Tennessee and Indiana to the north. Slow-smoked ribs and pulled pork are the everyday anchor, but the mutton tradition—sheep cooked over hardwood and finished with a thin, tangy black dip sauce—creeps into Louisville’s orbit from the western counties and distinguishes Kentucky barbecue from anything else in the region.',
+  'new-orleans-la': 'New Orleans barbecue is inseparable from the city’s Creole and Cajun cooking traditions. Andouille sausage—coarse-ground pork heavily spiced with garlic, peppers, and thyme, then smoked over pecan or hickory—is the signature smoked meat, used as much in cooking as on the plate. Smoked boudin, slow-cooked ribs with Creole seasoning rubs, and Gulf-coast smoked seafood round out the tradition, giving the city’s outdoor-cooking culture a character drawn as much from the bayou as from any Southern pit canon.',
+  'hartford-ct': 'Connecticut has no native barbecue tradition, and Hartford’s scene reflects that honestly. The city draws from New York and Boston in equal measure while hosting transplants who brought Carolina, Texas, and Memphis techniques north. What Hartford offers is a food culture with a strong appreciation for craft and quality—a sensibility that’s produced serious practitioners even without a regional style to anchor them. The scene is compact but committed, and it has grown meaningfully over the past decade.',
+  'salt-lake-city-ut': 'Salt Lake City’s high-elevation desert setting creates its own smoking variables—thinner air, low humidity, and sharp day-to-night temperature swings demand careful fire management. The scene is largely transplant-driven, built on Texas and Kansas City traditions with California tri-tip influence from the West. Utah’s cattle ranching heritage means local beef quality is a genuine asset, and a growing competition circuit has brought technical seriousness to what was once a purely casual outdoor-cooking market.',
+  'birmingham-al': 'Birmingham and North Alabama anchor one of the most distinctive regional barbecue identities in the country. The signature is smoked chicken dressed with North Alabama white sauce—a mayonnaise-and-vinegar base, sharp and tangy, developed as a counterpoint to the richness of smoked poultry—a preparation found almost nowhere else in the barbecue world. Pulled pork and smoked ribs round out the menu, but it’s the white sauce that makes Birmingham’s tradition genuinely irreplaceable and regionally specific.',
+  'buffalo-ny': 'Buffalo is best known for its chicken wings—a genuinely iconic contribution to American food culture—but the city’s smoked-meat tradition operates in a different register. Western New York draws on Midwestern, Appalachian, and Great Lakes influences without any single dominant barbecue style. Ribs and pulled pork are the backbone of the local scene, and the city’s Polish and Italian immigrant communities have contributed a robust sausage-smoking culture that runs alongside the Southern-influenced pit work.',
+  'tulsa-ok': 'Tulsa’s barbecue character shares Oklahoma roots with Oklahoma City but tilts east: the city sits closer to Arkansas and the wooded hill country, where hickory smoke is more prevalent than the mesquite of the western plains. Smoked bologna is a unifying thread across both Oklahoma metros, but Tulsa’s tradition leans more toward Memphis-style ribs and East Texas pork alongside its beef. The local competition circuit is smaller than Oklahoma City’s but intensely local in flavor and loyalty.',
+};
+
 const REGION_CLIMATE = {
   northeast:     'The Northeast’s smoke calendar shifts dramatically with the season. Summers run warm and humid with frequent afternoon thunderstorms; winters bring cold, snow, and steady gradient winds that pull an offset fire hard. Spring and fall — when daytime highs sit between 50 and 75 °F and dew points drop — are the strongest windows for long cooks. A well-insulated kamado or pellet cooker buys back winter Saturdays the offset crowd has to skip. Watch the gust forecast in spring, when frontal passages can swing wind speeds 25 mph in a single afternoon.',
   southeast:     'The Southeast’s defining variable is humidity. Summer dew points routinely sit in the 70s, which translates directly into the wet-bulb temperature that drives evaporative cooling on a brisket or pork-butt cook. Long stalls are the norm from May through September. Winters are mild but increasingly damp and storm-prone, and tropical systems through autumn can erase a planned Saturday cook with no warning. The score weighs stall risk heavily for this region — a humid day on an offset asks a lot of the fire-tender.',
@@ -513,8 +572,12 @@ function regionOf(state) {
   return r;
 }
 
-function heritageFor(state) {
-  return BBQ_HERITAGE_BY_STATE[state] || BBQ_HERITAGE_BY_REGION[regionOf(state)];
+// Prefer the per-metro heritage (Layer C); fall back to the state, then region
+// map so a newly-added metro without a METRO_HERITAGE entry still renders.
+function heritageFor(metro) {
+  return METRO_HERITAGE[metro.slug] ||
+    BBQ_HERITAGE_BY_STATE[metro.state] ||
+    BBQ_HERITAGE_BY_REGION[regionOf(metro.state)];
 }
 
 function climateFor(metro) {
@@ -555,11 +618,13 @@ function metroNormals(slug) {
   return n;
 }
 
-// Derive a month's 0-100 smoke score by scoring a representative "typical day"
-// through the shared engine. precipProbPct is the share of the month's days
-// that see >= 0.1" rain; gustMphMax 0 lets the engine apply its sustained-wind
-// gust estimate; dewPoint is unused by scoreDay (stall risk derives from rhMean).
-function monthlyNormalScore(m) {
+// Score a representative "typical day" for a month through the shared engine
+// and return its FULL result ({score, band, stallRiskPct, reasons}). The
+// narrative builders below need band + stallRiskPct, not just the number.
+// precipProbPct is the share of the month's days that see >= 0.1" rain;
+// gustMphMax 0 lets the engine apply its sustained-wind gust estimate;
+// dewPoint is unused by scoreDay (stall risk derives from rhMean).
+function monthScoreFull(m) {
   const day = {
     tempHighF: m.avg_high_f,
     tempLowF: m.avg_low_f,
@@ -572,15 +637,332 @@ function monthlyNormalScore(m) {
     dewPointMeanF: 0,
     confidence: 'high',
   };
-  return NORMAL_SCORER.scoreDay({ cut: NORMALS_CUT, cooker: NORMALS_COOKER, day }).score;
+  return NORMAL_SCORER.scoreDay({ cut: NORMALS_CUT, cooker: NORMALS_COOKER, day });
 }
 
-// rows (each month + derived score), best 3 months by score, windiest month.
+// Thin wrapper kept for callers/tests that only want the 0-100 integer.
+// Output-identical to the original — monthScoreFull owns the day envelope.
+function monthlyNormalScore(m) {
+  return monthScoreFull(m).score;
+}
+
+// rows (each month + derived score + full engine result), best 3 months by
+// score, windiest month, and the single worst-scoring month.
 function normalsDerived(entry) {
-  const rows = entry.months.map((m) => Object.assign({}, m, { smoke_score: monthlyNormalScore(m) }));
+  const rows = entry.months.map((m) => {
+    const result = monthScoreFull(m);
+    return Object.assign({}, m, { smoke_score: result.score, result: result });
+  });
   const best = rows.slice().sort((a, b) => b.smoke_score - a.smoke_score).slice(0, 3).map((r) => r.month);
   const windiest = rows.slice().sort((a, b) => (b.avg_wind_mph || 0) - (a.avg_wind_mph || 0))[0];
-  return { rows: rows, best: best, windiest: windiest };
+  const worst = rows.slice().sort((a, b) => a.smoke_score - b.smoke_score)[0];
+  return { rows: rows, best: best, windiest: windiest, worst: worst };
+}
+
+// ── Smoke-season narrative derivation (unique per-metro editorial) ───────────
+// Everything below turns the per-metro climate normals into prose. The numbers
+// come straight from the shared scoring engine; only the driver RANKING below
+// re-derives cheap severities. That ranking mirrors a handful of numeric
+// constants from _partials/weather-score-shared.js (gust factor 1.4, offset
+// wind sensitivity 1.5, and the penalty thresholds) — a deliberate, documented
+// coupling. If the engine's weights change, the labels below could drift, but
+// the SCORE itself always tracks the engine because it comes from scoreDay.
+
+// Meteorological seasons. Winter wraps the year boundary (Dec, Jan, Feb).
+const SEASONS = [
+  { key: 'spring', label: 'Spring', span: 'March–May',         months: [3, 4, 5] },
+  { key: 'summer', label: 'Summer', span: 'June–August',       months: [6, 7, 8] },
+  { key: 'fall',   label: 'Fall',   span: 'September–November', months: [9, 10, 11] },
+  { key: 'winter', label: 'Winter', span: 'December–February',  months: [12, 1, 2] },
+];
+
+// Mirror of _partials/weather-score-shared.js COOKER_WIND_SENSITIVITY.offset
+// (the metro normals score a packer brisket on an offset). Used only to rank
+// the wind driver against the others, never to compute the score.
+const OFFSET_WIND_SENSITIVITY = 1.5;
+
+// Word the section uses for a season's grade, by score band.
+const BAND_WORD = { ideal: 'prime', green: 'strong', yellow: 'workable', red: 'tough' };
+
+// Two short variants per driving variable so two metros that share a driver
+// don't render the identical clause; the per-metro seed picks one. Kept short
+// (fewer fixed words → fewer shared 5-grams across pages).
+const DRIVER_CLAUSES = {
+  heat:     ['hot afternoons stretch the stall', 'midday heat lengthens the cook', 'high sun pushes the wet-bulb up'],
+  cold:     ['cold mornings fight an open firebox', 'frigid starts drag out every cook', 'the chill saps an open fire'],
+  wind:     ['gusts pull pit temp off target', 'wind burns through offset fuel', 'breezes rob the firebox of heat'],
+  humidity: ['humidity drives a stubborn stall', 'damp air keeps the plateau flat', 'moist air locks the stall on'],
+  rain:     ['rain threatens the cook', 'wet days scrub Saturdays', 'showers are the weekend risk'],
+  none:     ['no one factor dominates', 'conditions stay forgiving', 'nothing much gets in the way'],
+};
+
+// Cheap deterministic per-metro seed (slug-derived). Used only to rotate
+// phrasing variants so same-climate metros don't read identically — never
+// touches a number or a score.
+function seedOf(slug) {
+  let n = 7;
+  for (let i = 0; i < slug.length; i++) n = (n * 31 + slug.charCodeAt(i)) % 100000;
+  return n;
+}
+// Pick from `arr` using an independent "digit" of the seed (base-3 place
+// `place`). Two metros that collide on one place almost never collide on the
+// others, so each builder gets a near-independent choice — even climate-twin
+// metros (Charlotte/Raleigh) diverge across the section instead of rendering a
+// verbatim copy. `rot` rotates the choice (used to vary the four seasons within
+// one metro).
+function pickAxis(arr, seed, place, rot) {
+  const idx = (Math.floor(seed / Math.pow(3, place)) + (rot || 0)) % arr.length;
+  return arr[(idx + arr.length) % arr.length];
+}
+
+// Per-month penalty contributions, recomputed exactly as the engine weights
+// them, so the largest is the month's true driving variable. stallRiskPct is
+// taken from the engine result (humidity needs no re-derivation).
+function monthPenalties(m, result) {
+  const c01 = (x) => Math.max(0, Math.min(1, x));
+  const precipProb = m.precip_days == null ? 0
+    : Math.min(100, (m.precip_days / DAYS_IN_MONTH[m.month - 1]) * 100);
+  const gust = (m.avg_wind_mph == null ? 0 : m.avg_wind_mph) * 1.4;
+  return {
+    rain:     c01(precipProb / 100) * 50,
+    wind:     c01((gust - 10) / 25) * 20 * OFFSET_WIND_SENSITIVITY,
+    cold:     c01((40 - m.avg_low_f) / 30) * 20,
+    heat:     c01((m.avg_high_f - 85) / 25) * 25,
+    humidity: ((result && result.stallRiskPct ? result.stallRiskPct : 0) / 100) * 20,
+  };
+}
+
+// Pick the dominant driver from a penalty map. A small points floor keeps a
+// benign month from being labelled by a trivial penalty.
+function dominantFactor(pen) {
+  let key = 'none';
+  let max = 2.0;
+  for (const k of ['heat', 'cold', 'wind', 'humidity', 'rain']) {
+    if (pen[k] > max) { max = pen[k]; key = k; }
+  }
+  return { key: key, value: key === 'none' ? 0 : max };
+}
+
+// Aggregate the per-month rows into the four seasons, each with averaged
+// temps/wind/score and its dominant driver (from averaged penalties).
+function seasonStats(derived) {
+  const byMonth = {};
+  for (const r of derived.rows) byMonth[r.month] = r;
+  return SEASONS.map((s) => {
+    const ms = s.months.map((mo) => byMonth[mo]);
+    const avg = (f) => ms.reduce((a, r) => a + f(r), 0) / ms.length;
+    const pen = { rain: 0, wind: 0, cold: 0, heat: 0, humidity: 0 };
+    for (const r of ms) {
+      const p = monthPenalties(r, r.result);
+      for (const k of Object.keys(pen)) pen[k] += p[k];
+    }
+    for (const k of Object.keys(pen)) pen[k] /= ms.length;
+    return {
+      key: s.key,
+      label: s.label,
+      span: s.span,
+      score: Math.round(avg((r) => r.smoke_score)),
+      band: NORMAL_SCORER.bandFor
+        ? NORMAL_SCORER.bandFor(Math.round(avg((r) => r.smoke_score)))
+        : null,
+      hiF: Math.round(avg((r) => r.avg_high_f)),
+      loF: Math.round(avg((r) => r.avg_low_f)),
+      windMph: +avg((r) => r.avg_wind_mph || 0).toFixed(1),
+      driver: dominantFactor(pen),
+    };
+  });
+}
+
+// Band for a 0-100 score (mirrors the legend on the page). Used when the
+// engine doesn't expose bandFor for the season aggregate above.
+function bandForScore(s) {
+  if (s >= 85) return 'ideal';
+  if (s >= 70) return 'green';
+  if (s >= 50) return 'yellow';
+  return 'red';
+}
+
+// One sentence per season, each carrying that season's grade, score, temps,
+// wind, and — when a factor dominates — its driver clause. The metro name sits
+// in every sentence and the template rotates by (seed + season index), so the
+// four sentences differ within a metro and same-climate metros don't align
+// sentence-for-sentence. That keeps cross-metro 5-gram overlap low.
+function seasonNarrative(name, seasons, seed) {
+  const tmpl = [
+    (s, g, lo, d) => name + ' in ' + lo + ' (' + s.span + ') grades ' + g + ' at ' +
+      s.score + '/100 — highs near ' + s.hiF + '°F, lows near ' + s.loF + '°F, wind about ' +
+      s.windMph.toFixed(1) + ' mph' + d,
+    (s, g, lo, d) => 'Through ' + lo + ' (' + s.span + '), ' + name + ' runs ' + g + ': a ' +
+      s.score + ' score off ' + s.hiF + '°F highs, ' + s.loF + '°F lows, and ' +
+      s.windMph.toFixed(1) + '-mph wind' + d,
+    (s, g, lo, d) => name + '’s ' + lo + ' (' + s.span + ') is ' + g + ', scoring ' + s.score +
+      ' on ' + s.hiF + '°F highs, ' + s.loF + '°F lows and wind near ' + s.windMph.toFixed(1) +
+      ' mph' + d,
+    (s, g, lo, d) => 'In ' + lo + ' (' + s.span + '), ' + name + ' rates ' + s.score + '/100 — a ' +
+      g + ' window with ' + s.hiF + '°F days, ' + s.loF + '°F nights and ' + s.windMph.toFixed(1) +
+      ' mph of wind' + d,
+  ];
+  return seasons.map((s, i) => {
+    const band = s.band || bandForScore(s.score);
+    const grade = BAND_WORD[band] || 'workable';
+    // Template offset and driver-clause choice ride INDEPENDENT seed digits, so
+    // two metros that align on one still diverge on the other.
+    const fn = pickAxis(tmpl, seed, 1, i);
+    const d = s.driver.key !== 'none'
+      ? ' as ' + pickAxis(DRIVER_CLAUSES[s.driver.key], seed, 3, i) : '';
+    return fn(s, grade, s.label.toLowerCase(), d) + '.';
+  }).join(' ');
+}
+
+// Best-month / worst-month callout with each month's driving variable.
+function bestWorstCallout(name, derived, seed) {
+  const bestMonth = derived.best[0];
+  const bestRow = derived.rows.find((r) => r.month === bestMonth);
+  const worstRow = derived.worst;
+  const worstDriver = dominantFactor(monthPenalties(worstRow, worstRow.result)).key;
+  const clause = worstDriver !== 'none'
+    ? ' where ' + pickAxis(DRIVER_CLAUSES[worstDriver], seed, 4, 0) : '';
+  const v = [
+    MONTH_NAMES[bestMonth] + ' is the prime month to smoke in ' + name + ' at ' +
+      bestRow.smoke_score + '/100; ' + MONTH_NAMES[worstRow.month] + ' is the hardest at ' +
+      worstRow.smoke_score + clause + '.',
+    name + '’s calendar peaks in ' + MONTH_NAMES[bestMonth] + ' (' + bestRow.smoke_score +
+      ') and bottoms out in ' + MONTH_NAMES[worstRow.month] + ' (' + worstRow.smoke_score +
+      ')' + clause + '.',
+    'The numbers favor ' + MONTH_NAMES[bestMonth] + ' (' + bestRow.smoke_score + ') in ' + name +
+      ' and warn off ' + MONTH_NAMES[worstRow.month] + ' (' + worstRow.smoke_score + ')' +
+      clause + '.',
+  ];
+  return pickAxis(v, seed, 5, 0);
+}
+
+// "How many months grade Good or better" framing — months, not fabricated day
+// counts, so the claim stays factually defensible. A peak score + month are
+// woven in to break the fixed scaffold across metros.
+function goodDaysFraming(name, derived, seed) {
+  const good = derived.rows.filter((r) => r.smoke_score >= 70).length;
+  const ideal = derived.rows.filter((r) => r.smoke_score >= 85).length;
+  const peak = derived.rows.find((r) => r.month === derived.best[0]);
+  const idealTail = ideal > 0 ? ' and ' + ideal + ' crack Ideal' : ' though none crack the 85 Ideal mark';
+  const v = [
+    'Tallied across the year, ' + good + ' of 12 months clear the Good line in ' + name +
+      ', peaking at ' + peak.smoke_score + ' in ' + MONTH_NAMES[peak.month] + ',' + idealTail + '.',
+    name + ' books ' + good + ' Good-or-better months out of 12, topping out at ' +
+      peak.smoke_score + ' in ' + MONTH_NAMES[peak.month] + ',' + idealTail + '.',
+    'Count it up and ' + name + ' lands ' + good + ' of 12 months at Good or better, best in ' +
+      MONTH_NAMES[peak.month] + ' at ' + peak.smoke_score + ',' + idealTail + '.',
+  ];
+  return pickAxis(v, seed, 6, 0);
+}
+
+// 1-2 cut-specific sentences, chosen by which climate archetypes the data
+// actually supports. Each interpolates the metro name and a datum so two
+// metros sharing an archetype don't render a verbatim-identical sentence.
+function cutGuidance(name, derived, seasons, seed) {
+  const summer = seasons.find((s) => s.key === 'summer');
+  const coldest = derived.rows.slice().sort((a, b) => a.avg_low_f - b.avg_low_f)[0];
+  const summerHi = summer ? summer.hiF : 0;
+  const summerScore = summer ? summer.score : 0;
+  const wMonth = derived.windiest ? MONTH_NAMES[derived.windiest.month] : '';
+  const wMph = derived.windiest ? fmtNum(derived.windiest.avg_wind_mph, 1) : '0';
+  const cMonth = MONTH_NAMES[coldest.month];
+  const cLow = Math.round(coldest.avg_low_f);
+  const candidates = [];
+  // Humid-summer: stall management.
+  if (summer && summer.driver.key === 'humidity') {
+    candidates.push({ sev: 3, text: pickAxis([
+      'A summer ' + summerScore + ' on stall risk means brisket and pork butt want extra hours in ' +
+        name + '; keep a wrap handy and let a kamado run the stall.',
+      name + '’s ' + summerScore + '-grade summer holds the plateau flat — budget long for the big ' +
+        'cuts and lean on a sealed pellet rig or kamado.',
+      'With a ' + summerScore + ' summer in ' + name + ', the stall sticks; paper-wrap the long ' +
+        'cuts early and a kamado pays back the fuel.',
+    ], seed, 7, 0) });
+  }
+  // Windy: offset fire-tending.
+  if (derived.windiest && derived.windiest.avg_wind_mph >= 11) {
+    candidates.push({ sev: 2.5, text: pickAxis([
+      'Wind is the offset hazard in ' + name + ' — ' + wMonth + ' averages ' + wMph +
+        ' mph, so build a break and burn dense post oak.',
+      'Watch the gusts on ' + name + ' offset days; ' + wMonth + ' runs ' + wMph +
+        ' mph, where a kamado holds steadier than an open fire.',
+      name + ' breezes peak in ' + wMonth + ' at ' + wMph + ' mph — shelter the firebox and reach ' +
+        'for heavier wood to keep smoke on the meat.',
+    ], seed, 7, 0) });
+  }
+  // Cold-winter: insulated rig.
+  if (coldest.avg_low_f < 30) {
+    candidates.push({ sev: 2.4, text: pickAxis([
+      'From ' + cMonth + ', ' + name + ' lows near ' + cLow + '°F starve an open fire — a sealed ' +
+        'kamado or pellet cooker is the practical winter long-cook.',
+      name + ' winters bite (' + cMonth + ' near ' + cLow + '°F); only an insulated rig holds ' +
+        'temperature where an offset bleeds heat.',
+      'Cold runs the ' + name + ' calendar in ' + cMonth + ' (lows ' + cLow + '°F); cook those ' +
+        'months on a kamado or pellet and save the offset for spring.',
+    ], seed, 7, 0) });
+  }
+  // Hot-dry: bark + moisture loss.
+  if (summer && summer.driver.key === 'heat') {
+    candidates.push({ sev: 2.2, text: pickAxis([
+      name + ' summer highs near ' + summerHi + '°F set bark fast but dry the cook — run a water ' +
+        'pan and paper-wrap the long cuts.',
+      'Hot ' + summerHi + '°F afternoons in ' + name + ' shorten the stall; guard moisture with a ' +
+        'pan and a paper wrap on brisket and ribs.',
+      'With ' + name + ' near ' + summerHi + '°F, bark forms early — fight dry-out with foil-free ' +
+        'wraps and a water pan.',
+    ], seed, 7, 0) });
+  }
+  if (!candidates.length) {
+    return pickAxis([
+      name + '’s mild calendar gives the widest cooker latitude: offset, pellet, kamado or kettle ' +
+        'all turn out clean long cooks year-round.',
+      'No cooker wins or loses in ' + name + ' — the weather rarely forces your hand on a long cook.',
+      name + ' rewards whatever you own; the gentle climate keeps offset, pellet and kamado all in play.',
+    ], seed, 7, 0);
+  }
+  candidates.sort((a, b) => b.sev - a.sev);
+  return candidates.slice(0, 2).map((c) => c.text).join(' ');
+}
+
+// Layer B: a single per-metro data sentence appended after the (shared,
+// region-level) climate paragraph, so same-region metros no longer read as a
+// verbatim climate clone. Windiest month + best low-and-slow month, by number.
+function climateDataSentence(name, derived) {
+  const w = derived.windiest;
+  const bestMonth = derived.best[0];
+  const bestRow = derived.rows.find((r) => r.month === bestMonth);
+  return 'In ' + name + ', the normals bear this out: ' + MONTH_NAMES[w.month] +
+    ' is the windiest month at ' + fmtNum(w.avg_wind_mph, 1) + ' mph, while ' +
+    MONTH_NAMES[bestMonth] + ' scores highest for low-and-slow at ' + bestRow.smoke_score +
+    ' of 100.';
+}
+
+// Layer B: a per-metro data sentence appended after the (shared) cooker tip.
+// Count of Good-or-better months + the windiest month's estimated gust, so the
+// cooker advice is anchored to this city's numbers.
+function cookerDataSentence(name, derived) {
+  const good = derived.rows.filter((r) => r.smoke_score >= 70).length;
+  const gust = fmtNum((derived.windiest.avg_wind_mph || 0) * 1.4, 0);
+  return name + ' grades Good or better in ' + good + ' of 12 months; on the windiest weekends, ' +
+    'plan for gusts near ' + gust + ' mph and let an insulated cooker carry the long cuts.';
+}
+
+// Assemble the smoke-windows section (array-of-strings, like
+// climateNormalsSection). ~120-150 unique words derived from this metro's data.
+function smokeWindowsSection(metro, derived) {
+  const name = metro.name;
+  const seed = seedOf(metro.slug);
+  const seasons = seasonStats(derived);
+  const paras = [
+    seasonNarrative(name, seasons, seed),
+    bestWorstCallout(name, derived, seed),
+    goodDaysFraming(name, derived, seed),
+    cutGuidance(name, derived, seasons, seed),
+  ];
+  return ['  <section class="editorial-section smoke-windows" aria-label="' + escapeHtml(name) + ' smoke season">',
+          '    <h2>' + escapeHtml(name) + '’s smoke season, month by month</h2>']
+    .concat(paras.map((p) => '    <p>' + escapeHtml(p) + '</p>'))
+    .concat(['  </section>', '']);
 }
 
 function fmtNum(v, places) {
@@ -714,7 +1096,7 @@ function renderMetro(metro) {
   const region   = regionOf(metro.state);
   const stateNm  = STATE_NAME[metro.state] || metro.state;
   const regLbl   = REGION_LABEL[region];
-  const heritage = heritageFor(metro.state);
+  const heritage = heritageFor(metro);
   const climate  = climateFor(metro);
   const cooker   = cookerTipFor(metro);
   const name     = metro.name;
@@ -817,6 +1199,7 @@ function renderMetro(metro) {
   const normalsEntry = metroNormals(slug);
   const normalsDerivedData = normalsDerived(normalsEntry);
   const normalsLines = climateNormalsSection(metro, normalsDerivedData);
+  const smokeWindowsLines = smokeWindowsSection(metro, normalsDerivedData);
   const datasetJson = normalsDataset(metro, canonical, normalsEntry);
 
   return [
@@ -944,13 +1327,16 @@ function renderMetro(metro) {
     '',
     ...localGuideLines,
     ...normalsLines,
+    ...smokeWindowsLines,
     '  <section class="editorial-section" aria-label="' + escapeHtml(name) + ' BBQ context">',
     '    <h2>Barbecue heritage</h2>',
     '    <p>' + escapeHtml(heritage) + '</p>',
     '    <h2>' + escapeHtml(name) + ' climate</h2>',
     '    <p>' + escapeHtml(climate) + '</p>',
+    '    <p>' + escapeHtml(climateDataSentence(name, normalsDerivedData)) + '</p>',
     '    <h2>Cooker fit for ' + escapeHtml(name) + '</h2>',
     '    <p>' + escapeHtml(cooker) + '</p>',
+    '    <p>' + escapeHtml(cookerDataSentence(name, normalsDerivedData)) + '</p>',
     '    <p>' + escapeHtml(closing) + '</p>',
     '  </section>',
     '',
@@ -1122,6 +1508,7 @@ module.exports = {
   REGION_LABEL,
   BBQ_HERITAGE_BY_STATE,
   BBQ_HERITAGE_BY_REGION,
+  METRO_HERITAGE,
   REGION_CLIMATE,
   CLIMATE_BY_METRO,
   REGION_COOKER_TIP,
@@ -1137,6 +1524,11 @@ module.exports = {
   NORMALS_DIST_DIR,
   metroNormals,
   monthlyNormalScore,
+  monthScoreFull,
+  monthPenalties,
+  dominantFactor,
+  seasonStats,
+  smokeWindowsSection,
   normalsDerived,
   climateNormalsSection,
   normalsDataset,
