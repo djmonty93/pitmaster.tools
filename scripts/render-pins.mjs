@@ -19,9 +19,9 @@
  * Output: one PNG per pin named by `slug`, in og/ by default.
  *
  * Notes:
- *  - Fonts load from Google Fonts at render time, so the machine needs internet
- *    on first run (Chromium caches them). To go fully offline, self-host the
- *    woff2 files and swap the <link> for an @font-face block.
+ *  - Fonts are self-hosted: the brand woff2 (Zilla Slab 700 + Oswald) under
+ *    og/fonts/ are base64-embedded as @font-face data URIs, so the render is
+ *    fully offline — no Google Fonts dependency.
  *  - SCALE=2 produces 2000x3000, which Pinterest downsamples crisply. The pin's
  *    layout is identical; only pixel density changes.
  */
@@ -51,6 +51,24 @@ const esc = (s) =>
 // headline string with "\n" -> <br>
 const headLines = (s) => esc(s).replace(/\n/g, "<br>");
 
+// Self-host the brand fonts as base64 data URIs so the render is fully offline
+// (no Google Fonts dependency) and setContent — which has no base URL — can
+// still resolve them. Zilla Slab 700 (display) + Oswald (utility/data).
+async function fontFaceCss() {
+  const load = async (file) =>
+    (await readFile(path.join("og", "fonts", file))).toString("base64");
+  const [zilla, oswald] = await Promise.all([
+    load("zilla-slab-700.woff2"),
+    load("oswald.woff2"),
+  ]);
+  return (
+    `@font-face{font-family:'Zilla Slab';font-weight:700;font-style:normal;` +
+    `src:url(data:font/woff2;base64,${zilla}) format('woff2')}` +
+    `@font-face{font-family:'Oswald';font-weight:200 700;font-style:normal;` +
+    `src:url(data:font/woff2;base64,${oswald}) format('woff2')}`
+  );
+}
+
 function buildBody(p) {
   const eyb = `<div class="eyb">${esc(p.eyebrow || "")}</div>`;
   const head = `<div class="head">${headLines(p.head || "")}</div>`;
@@ -79,48 +97,46 @@ function buildBody(p) {
   }
 }
 
-function buildPinHTML(p) {
+function buildPinHTML(p, faces) {
   const warm = p.variant === "warm" ? " warm" : "";
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;700&family=Public+Sans:wght@600&display=swap" rel="stylesheet">
 <style>
+  ${faces}
   *{margin:0;padding:0;box-sizing:border-box;font-synthesis:none}
   html,body{width:${PIN_W}px;height:${PIN_H}px}
   .pin{width:${PIN_W}px;height:${PIN_H}px;position:relative;overflow:hidden;
-    background:#1c140d;color:#f3ead8;display:flex;flex-direction:column;
-    font-family:'Public Sans',sans-serif;-webkit-font-smoothing:antialiased}
-  .pin.warm{background:linear-gradient(160deg,#b8401f,#7d2a14)}
-  .brand{position:absolute;top:50px;left:60px;font-family:'JetBrains Mono',monospace;
-    font-weight:700;font-size:31px;letter-spacing:.18em;color:#d9542e}
-  .pin.warm .brand{color:#ffd9c9}
+    background:#26231F;color:#FBEED8;display:flex;flex-direction:column;
+    font-family:'Oswald',sans-serif;-webkit-font-smoothing:antialiased}
+  .pin.warm{background:linear-gradient(160deg,#C0341E,#7A2412)}
+  .brand{position:absolute;top:50px;left:60px;font-family:'Oswald',sans-serif;
+    font-weight:600;font-size:31px;letter-spacing:.18em;color:#ED7818;text-transform:uppercase}
+  .pin.warm .brand{color:#FBEED8}
   .tick{position:absolute;top:54px;right:60px;width:70px;height:24px;display:flex;gap:10px}
-  .tick i{flex:1;background:#d9542e;opacity:.5}
+  .tick i{flex:1;background:#ED7818;opacity:.5}
   .tick i:last-child{opacity:1}
-  .pin.warm .tick i{background:#ffd9c9}
+  .pin.warm .tick i{background:#FBEED8}
   .body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:60px 60px 0}
-  .eyb{font-family:'JetBrains Mono',monospace;font-size:30px;letter-spacing:.22em;
-    text-transform:uppercase;color:#d9542e;margin-bottom:25px}
-  .pin.warm .eyb{color:#ffd9c9}
-  .head{font-family:'Anton',sans-serif;text-transform:uppercase;line-height:.92;
-    font-size:115px;letter-spacing:.5px}
-  .sub{font-size:40px;color:#cdbfa6;margin-top:30px;line-height:1.3;font-weight:600}
-  .pin.warm .sub{color:#ffe4d8}
-  table{width:100%;border-collapse:collapse;margin-top:50px;font-family:'JetBrains Mono',monospace}
-  td{padding:26px 0;border-top:4px solid #463422;font-size:44px}
-  td:first-child{color:#e8ddc7}
-  td:last-child{text-align:right;color:#d9542e;font-weight:700}
-  .answer{margin-top:40px;background:#33230f;border-left:14px solid #d9542e;padding:40px 45px}
-  .answer .n{font-family:'Anton',sans-serif;font-size:90px;line-height:.95;color:#fff}
-  .answer .n small{font-family:'JetBrains Mono',monospace;font-size:34px;color:#cdbfa6;
-    letter-spacing:.5px;display:block;margin-top:15px;font-weight:400}
-  .cta{margin:60px 60px;background:#d9542e;color:#1c140d;font-family:'JetBrains Mono',monospace;
-    font-weight:700;font-size:37px;letter-spacing:.04em;text-align:center;padding:36px;text-transform:uppercase}
-  .pin.warm .cta{background:#1c140d;color:#ffd9c9}
-  .foot{padding:0 60px 50px;font-family:'JetBrains Mono',monospace;font-size:28px;
-    letter-spacing:.1em;color:#8a7d66;text-align:center}
-  .pin.warm .foot{color:#f0c3b3}
+  .eyb{font-family:'Oswald',sans-serif;font-weight:600;font-size:30px;letter-spacing:.22em;
+    text-transform:uppercase;color:#ED7818;margin-bottom:25px}
+  .pin.warm .eyb{color:#FBEED8}
+  .head{font-family:'Zilla Slab',Georgia,serif;font-weight:700;text-transform:uppercase;
+    line-height:.96;font-size:92px;letter-spacing:-.5px}
+  .sub{font-family:'Oswald',sans-serif;font-weight:500;font-size:38px;color:#CDBFA6;margin-top:30px;line-height:1.3}
+  .pin.warm .sub{color:#FFE4D8}
+  table{width:100%;border-collapse:collapse;margin-top:50px;font-family:'Oswald',sans-serif}
+  td{padding:26px 0;border-top:4px solid #3A342D;font-size:44px}
+  td:first-child{color:#EFE3CB;font-weight:500}
+  td:last-child{text-align:right;color:#ED7818;font-weight:600}
+  .answer{margin-top:40px;background:#1F1C18;border-left:14px solid #ED7818;padding:40px 45px}
+  .answer .n{font-family:'Zilla Slab',Georgia,serif;font-weight:700;font-size:92px;line-height:.98;color:#FBEED8}
+  .answer .n small{font-family:'Oswald',sans-serif;font-weight:500;font-size:32px;color:#CDBFA6;
+    letter-spacing:.5px;display:block;margin-top:15px}
+  .cta{margin:60px 60px;background:#ED7818;color:#26231F;font-family:'Oswald',sans-serif;
+    font-weight:600;font-size:37px;letter-spacing:.06em;text-align:center;padding:36px;text-transform:uppercase}
+  .pin.warm .cta{background:#26231F;color:#FBEED8}
+  .foot{padding:0 60px 50px;font-family:'Oswald',sans-serif;font-weight:500;font-size:28px;
+    letter-spacing:.1em;color:#9A8D74;text-align:center;text-transform:uppercase}
+  .pin.warm .foot{color:#FBEED8}
 </style></head>
 <body>
   <div class="pin${warm}">
@@ -143,6 +159,7 @@ async function run() {
   }
 
   await mkdir(OUT, { recursive: true });
+  const faces = await fontFaceCss();
   const browser = await chromium.launch();
   const page = await browser.newPage({
     viewport: { width: PIN_W, height: PIN_H },
@@ -153,7 +170,7 @@ async function run() {
   for (const p of pins) {
     const name = p.slug || p.id || "pin";
     try {
-      await page.setContent(buildPinHTML(p), { waitUntil: "networkidle" });
+      await page.setContent(buildPinHTML(p, faces), { waitUntil: "networkidle" });
       await page.evaluate(() => document.fonts.ready);
       const file = path.join(OUT, `${name}.png`);
       await page.screenshot({ path: file, clip: { x: 0, y: 0, width: PIN_W, height: PIN_H } });
