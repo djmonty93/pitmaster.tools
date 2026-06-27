@@ -691,7 +691,7 @@ const DRIVER_CLAUSES = {
   heat:     ['hot afternoons stretch the stall', 'midday heat lengthens the cook', 'high sun pushes the wet-bulb up'],
   cold:     ['cold mornings fight an open firebox', 'frigid starts drag out every cook', 'the chill saps an open fire'],
   wind:     ['gusts pull pit temp off target', 'wind burns through offset fuel', 'breezes rob the firebox of heat'],
-  humidity: ['humidity drives a stubborn stall', 'damp air keeps the plateau flat', 'moist air locks the stall on'],
+  humidity: ['the stall digs in and holds', 'the plateau runs long and flat', 'a stubborn stall settles over the cook'],
   rain:     ['rain threatens the cook', 'wet days scrub Saturdays', 'showers are the weekend risk'],
   none:     ['no one factor dominates', 'conditions stay forgiving', 'nothing much gets in the way'],
 };
