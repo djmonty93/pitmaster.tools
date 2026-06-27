@@ -104,6 +104,78 @@
   ]
 }
 </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "@id": "https://pitmaster.tools/smoke-weather/buffalo-ny#climate-normals",
+  "name": "Buffalo, NY Monthly Climate Normals for Barbecue",
+  "description": "Monthly climate normals for Buffalo, NY — average high and low temperature, wind speed, relative humidity, and rainy days, each scored 0-100 for low-and-slow barbecue suitability. Temperature and rain days from NOAA 1991-2020 U.S. Climate Normals (station BUFFALO, NY); wind and humidity from Open-Meteo historical reanalysis, 2015-2024.",
+  "url": "https://pitmaster.tools/smoke-weather/buffalo-ny",
+  "temporalCoverage": "1991/2020",
+  "spatialCoverage": {
+    "@type": "Place",
+    "name": "Buffalo, NY",
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 42.8864,
+      "longitude": -78.8784
+    }
+  },
+  "variableMeasured": [
+    {
+      "@type": "PropertyValue",
+      "name": "Average high temperature",
+      "unitText": "degree Fahrenheit"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "Average low temperature",
+      "unitText": "degree Fahrenheit"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "Average wind speed",
+      "unitText": "mile per hour"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "Relative humidity",
+      "unitText": "percent",
+      "minValue": 0,
+      "maxValue": 100
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "Rainy days (at least 0.1 inch)",
+      "unitText": "days per month"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "Smoke-day score",
+      "description": "0-100 suitability for low-and-slow barbecue",
+      "minValue": 0,
+      "maxValue": 100
+    }
+  ],
+  "distribution": {
+    "@type": "DataDownload",
+    "encodingFormat": "application/json",
+    "contentUrl": "https://pitmaster.tools/smoke-weather/buffalo-ny-normals.json"
+  },
+  "isBasedOn": [
+    "https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals",
+    "https://open-meteo.com/"
+  ],
+  "creator": {
+    "@type": "Organization",
+    "name": "Pitmaster Tools",
+    "url": "https://pitmaster.tools"
+  },
+  "license": "https://pitmaster.tools/terms-of-service",
+  "dateModified": "2026-06-14"
+}
+</script>
 <!-- INJECT:site-header.css -->
 <!-- INJECT:site-base.css -->
 <!-- INJECT:smoke-weather.css -->
@@ -203,6 +275,31 @@
     <h2>Planning a weekend smoke in Buffalo</h2>
     <p>Buffalo’s winters are legendary, and they define the cooking calendar. Lake-effect snow off Lake Erie can bury the city under feet of snow in a single storm, and the cold, gray season runs long — December through March is no-go territory for an open firebox. The flip side is a genuinely pleasant summer: warm, not overly humid, with the lake breeze keeping the worst heat down. Late spring through early fall is the reliable window, and the summer months are the heart of it.</p>
     <p>Because the cookable season is short, Buffalo pitmasters make the most of it, and an insulated kamado or pellet cooker stretches the margins, holding fire through the raw, windy shoulder weeks an open pit can’t. Summer humidity runs milder than the Southeast, so stalls are a touch shorter and the offset is comfortable on calm days. Buffalo’s own foods — beef on weck and chicken wings — share the backyard with Carolina-style pulled pork and brisket. Pack the long cooks into the dependable summer Saturdays, and don’t fight the lake-effect winter; that stretch belongs to the insulated cooker, if you cook at all.</p>
+  </section>
+
+  <section class="editorial-section climate-normals" aria-labelledby="normals-title">
+    <h2 id="normals-title">Buffalo climate normals by month</h2>
+    <p>Typical conditions for each month, scored 0-100 for a packer brisket on an offset — the most weather-sensitive low-and-slow cook. Temperature and rain days are NOAA 1991-2020 climate normals; wind and humidity are 2015-2024 reanalysis averages.</p>
+    <div class="normals-scroll">
+      <table class="normals-table">
+        <thead><tr><th scope="col">Month</th><th scope="col">Avg High</th><th scope="col">Avg Low</th><th scope="col">Avg Wind</th><th scope="col">Humidity</th><th scope="col">Rain Days</th><th scope="col">Smoke Score</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">January</th><td>32&deg;F</td><td>19&deg;F</td><td>11 mph</td><td>75%</td><td>9.1</td><td>50</td></tr>
+          <tr><th scope="row">February</th><td>33&deg;F</td><td>20&deg;F</td><td>11 mph</td><td>73%</td><td>7.2</td><td>52</td></tr>
+          <tr><th scope="row">March</th><td>42&deg;F</td><td>26&deg;F</td><td>10 mph</td><td>71%</td><td>7.9</td><td>59</td></tr>
+          <tr><th scope="row">April</th><td>55&deg;F</td><td>37&deg;F</td><td>9 mph</td><td>72%</td><td>8.2</td><td>66</td></tr>
+          <tr><th scope="row">May</th><td>67&deg;F</td><td>48&deg;F</td><td>8 mph</td><td>73%</td><td>7.6</td><td>72</td></tr>
+          <tr><th scope="row">June</th><td>76&deg;F</td><td>58&deg;F</td><td>8 mph</td><td>72%</td><td>7.7</td><td>71</td></tr>
+          <tr><th scope="row">July</th><td>80&deg;F</td><td>63&deg;F</td><td>7 mph</td><td>76%</td><td>6.1</td><td>75</td></tr>
+          <tr><th scope="row">August</th><td>79&deg;F</td><td>62&deg;F</td><td>7 mph</td><td>77%</td><td>6.2</td><td>75</td></tr>
+          <tr><th scope="row">September</th><td>72&deg;F</td><td>55&deg;F</td><td>8 mph</td><td>76%</td><td>6.8</td><td>73</td></tr>
+          <tr><th scope="row">October</th><td>60&deg;F</td><td>44&deg;F</td><td>10 mph</td><td>75%</td><td>9.0</td><td>67</td></tr>
+          <tr><th scope="row">November</th><td>48&deg;F</td><td>34&deg;F</td><td>11 mph</td><td>72%</td><td>8.4</td><td>62</td></tr>
+          <tr><th scope="row">December</th><td>37&deg;F</td><td>26&deg;F</td><td>11 mph</td><td>76%</td><td>9.7</td><td>54</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Historically, the best months to smoke in Buffalo are <strong>July, August, and September</strong>. February is the windiest month (avg 11 mph) — the one to plan around.</p>
   </section>
 
   <section class="editorial-section" aria-label="Buffalo BBQ context">

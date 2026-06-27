@@ -223,3 +223,32 @@ test('generated metro pages carry a valid 3-level BreadcrumbList', () => {
     assert.equal(items[2].item, expectedMetroUrl, file + ' breadcrumb level 3 URL');
   }
 });
+
+test('generated metro pages carry a valid climate-normals Dataset', () => {
+  const files = listHtmlRecursive(METRO_DIR)
+    .filter((file) => !EXEMPT_PAGES.has(file))
+    .filter((file) => fs.readFileSync(file, 'utf8').startsWith(GENERATED_MARKER));
+
+  assert.equal(files.length, 50, 'expected exactly 50 generated metro pages');
+
+  for (const file of files) {
+    const html = fs.readFileSync(file, 'utf8');
+    const dataset = findJsonLdType(parseLdBlocks(file, html), 'Dataset');
+    assert.ok(dataset, file + ' is missing the climate-normals Dataset JSON-LD');
+
+    const slug = path.basename(file, '.html');
+    // The DataDownload must point at the per-metro distribution file that
+    // build.js publishes from public/ → dist/.
+    assert.ok(dataset.distribution, file + ' Dataset missing distribution');
+    assert.equal(
+      dataset.distribution.contentUrl,
+      'https://pitmaster.tools/smoke-weather/' + slug + '-normals.json',
+      file + ' Dataset distribution.contentUrl is wrong'
+    );
+    // Geo + measured variables must be present (E-E-A-T scaffolding).
+    assert.ok(dataset.spatialCoverage && dataset.spatialCoverage.geo,
+      file + ' Dataset missing spatialCoverage.geo');
+    assert.ok(Array.isArray(dataset.variableMeasured) && dataset.variableMeasured.length >= 6,
+      file + ' Dataset must measure >= 6 variables');
+  }
+});

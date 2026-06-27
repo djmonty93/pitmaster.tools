@@ -1,0 +1,5852 @@
+{
+  "atlanta-ga": {
+    "station": {
+      "id": "USW00003888",
+      "name": "ATLANTA FULTON CO AP, GA",
+      "latitude": 33.7792,
+      "longitude": -84.5214,
+      "distance_mi": 7.8
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 53.7,
+        "avg_low_f": 33.5,
+        "avg_wind_mph": 8.6,
+        "avg_humidity": 72,
+        "precip_days": 6.5
+      },
+      {
+        "month": 2,
+        "avg_high_f": 58.4,
+        "avg_low_f": 36.6,
+        "avg_wind_mph": 8.7,
+        "avg_humidity": 72,
+        "precip_days": 6.9
+      },
+      {
+        "month": 3,
+        "avg_high_f": 65.8,
+        "avg_low_f": 42.9,
+        "avg_wind_mph": 8.4,
+        "avg_humidity": 70,
+        "precip_days": 7.2
+      },
+      {
+        "month": 4,
+        "avg_high_f": 73.9,
+        "avg_low_f": 49.5,
+        "avg_wind_mph": 8.1,
+        "avg_humidity": 67,
+        "precip_days": 6.1
+      },
+      {
+        "month": 5,
+        "avg_high_f": 81.2,
+        "avg_low_f": 58.4,
+        "avg_wind_mph": 6.7,
+        "avg_humidity": 70,
+        "precip_days": 6.7
+      },
+      {
+        "month": 6,
+        "avg_high_f": 87.1,
+        "avg_low_f": 66.6,
+        "avg_wind_mph": 5.9,
+        "avg_humidity": 72,
+        "precip_days": 6.7
+      },
+      {
+        "month": 7,
+        "avg_high_f": 90,
+        "avg_low_f": 70.2,
+        "avg_wind_mph": 4.9,
+        "avg_humidity": 76,
+        "precip_days": 7.1
+      },
+      {
+        "month": 8,
+        "avg_high_f": 89.1,
+        "avg_low_f": 69.4,
+        "avg_wind_mph": 5.2,
+        "avg_humidity": 76,
+        "precip_days": 6.4
+      },
+      {
+        "month": 9,
+        "avg_high_f": 83.9,
+        "avg_low_f": 63,
+        "avg_wind_mph": 6.1,
+        "avg_humidity": 72,
+        "precip_days": 4.5
+      },
+      {
+        "month": 10,
+        "avg_high_f": 74.5,
+        "avg_low_f": 51.3,
+        "avg_wind_mph": 7.1,
+        "avg_humidity": 72,
+        "precip_days": 4.3
+      },
+      {
+        "month": 11,
+        "avg_high_f": 64,
+        "avg_low_f": 40.7,
+        "avg_wind_mph": 7.6,
+        "avg_humidity": 72,
+        "precip_days": 5.1
+      },
+      {
+        "month": 12,
+        "avg_high_f": 55.9,
+        "avg_low_f": 36,
+        "avg_wind_mph": 8,
+        "avg_humidity": 76,
+        "precip_days": 7.1
+      }
+    ]
+  },
+  "austin-tx": {
+    "station": {
+      "id": "USW00013958",
+      "name": "AUSTIN-CAMP MABRY, TX",
+      "latitude": 30.3208,
+      "longitude": -97.7603,
+      "distance_mi": 3.8
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 62.5,
+        "avg_low_f": 41.8,
+        "avg_wind_mph": 8.1,
+        "avg_humidity": 67,
+        "precip_days": 4.1
+      },
+      {
+        "month": 2,
+        "avg_high_f": 66.5,
+        "avg_low_f": 45.8,
+        "avg_wind_mph": 9,
+        "avg_humidity": 69,
+        "precip_days": 3.6
+      },
+      {
+        "month": 3,
+        "avg_high_f": 73.3,
+        "avg_low_f": 52.2,
+        "avg_wind_mph": 9.2,
+        "avg_humidity": 69,
+        "precip_days": 4.7
+      },
+      {
+        "month": 4,
+        "avg_high_f": 80.3,
+        "avg_low_f": 58.9,
+        "avg_wind_mph": 9.5,
+        "avg_humidity": 69,
+        "precip_days": 3.9
+      },
+      {
+        "month": 5,
+        "avg_high_f": 86.9,
+        "avg_low_f": 66.8,
+        "avg_wind_mph": 8.8,
+        "avg_humidity": 75,
+        "precip_days": 5.5
+      },
+      {
+        "month": 6,
+        "avg_high_f": 93.2,
+        "avg_low_f": 72.9,
+        "avg_wind_mph": 7.8,
+        "avg_humidity": 71,
+        "precip_days": 5.2
+      },
+      {
+        "month": 7,
+        "avg_high_f": 96.6,
+        "avg_low_f": 75,
+        "avg_wind_mph": 8.1,
+        "avg_humidity": 64,
+        "precip_days": 3
+      },
+      {
+        "month": 8,
+        "avg_high_f": 97.8,
+        "avg_low_f": 75.1,
+        "avg_wind_mph": 7.5,
+        "avg_humidity": 62,
+        "precip_days": 3.1
+      },
+      {
+        "month": 9,
+        "avg_high_f": 91.4,
+        "avg_low_f": 70.1,
+        "avg_wind_mph": 6.6,
+        "avg_humidity": 66,
+        "precip_days": 4.3
+      },
+      {
+        "month": 10,
+        "avg_high_f": 82.5,
+        "avg_low_f": 60.8,
+        "avg_wind_mph": 7.6,
+        "avg_humidity": 63,
+        "precip_days": 4.5
+      },
+      {
+        "month": 11,
+        "avg_high_f": 71.5,
+        "avg_low_f": 50.5,
+        "avg_wind_mph": 7.6,
+        "avg_humidity": 71,
+        "precip_days": 3.8
+      },
+      {
+        "month": 12,
+        "avg_high_f": 63.9,
+        "avg_low_f": 43.4,
+        "avg_wind_mph": 7.6,
+        "avg_humidity": 71,
+        "precip_days": 4
+      }
+    ]
+  },
+  "baltimore-md": {
+    "station": {
+      "id": "USW00093784",
+      "name": "MD SCI CTR BALTIMORE, MD",
+      "latitude": 39.2814,
+      "longitude": -76.6089,
+      "distance_mi": 0.6
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 43.7,
+        "avg_low_f": 30,
+        "avg_wind_mph": 8.4,
+        "avg_humidity": 68,
+        "precip_days": 5.5
+      },
+      {
+        "month": 2,
+        "avg_high_f": 46.8,
+        "avg_low_f": 31.9,
+        "avg_wind_mph": 8.1,
+        "avg_humidity": 67,
+        "precip_days": 5.7
+      },
+      {
+        "month": 3,
+        "avg_high_f": 55.2,
+        "avg_low_f": 38.7,
+        "avg_wind_mph": 8.7,
+        "avg_humidity": 66,
+        "precip_days": 6.7
+      },
+      {
+        "month": 4,
+        "avg_high_f": 66.8,
+        "avg_low_f": 48.2,
+        "avg_wind_mph": 8.6,
+        "avg_humidity": 67,
+        "precip_days": 6.4
+      },
+      {
+        "month": 5,
+        "avg_high_f": 75.9,
+        "avg_low_f": 58,
+        "avg_wind_mph": 7.2,
+        "avg_humidity": 73,
+        "precip_days": 6.6
+      },
+      {
+        "month": 6,
+        "avg_high_f": 85.4,
+        "avg_low_f": 67.7,
+        "avg_wind_mph": 7,
+        "avg_humidity": 70,
+        "precip_days": 6.3
+      },
+      {
+        "month": 7,
+        "avg_high_f": 90.1,
+        "avg_low_f": 72.9,
+        "avg_wind_mph": 5.7,
+        "avg_humidity": 74,
+        "precip_days": 7.4
+      },
+      {
+        "month": 8,
+        "avg_high_f": 87.3,
+        "avg_low_f": 71,
+        "avg_wind_mph": 5.8,
+        "avg_humidity": 76,
+        "precip_days": 6.3
+      },
+      {
+        "month": 9,
+        "avg_high_f": 80.4,
+        "avg_low_f": 64.5,
+        "avg_wind_mph": 6.7,
+        "avg_humidity": 74,
+        "precip_days": 5.2
+      },
+      {
+        "month": 10,
+        "avg_high_f": 68.8,
+        "avg_low_f": 52.6,
+        "avg_wind_mph": 7.4,
+        "avg_humidity": 74,
+        "precip_days": 4.9
+      },
+      {
+        "month": 11,
+        "avg_high_f": 57.6,
+        "avg_low_f": 42.6,
+        "avg_wind_mph": 7.7,
+        "avg_humidity": 69,
+        "precip_days": 4.7
+      },
+      {
+        "month": 12,
+        "avg_high_f": 48,
+        "avg_low_f": 34.6,
+        "avg_wind_mph": 7.3,
+        "avg_humidity": 72,
+        "precip_days": 6.8
+      }
+    ]
+  },
+  "birmingham-al": {
+    "station": {
+      "id": "USW00013876",
+      "name": "BIRMINGHAM AP, AL",
+      "latitude": 33.5656,
+      "longitude": -86.745,
+      "distance_mi": 5
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 54.5,
+        "avg_low_f": 34.9,
+        "avg_wind_mph": 7.9,
+        "avg_humidity": 71,
+        "precip_days": 7.4
+      },
+      {
+        "month": 2,
+        "avg_high_f": 59.1,
+        "avg_low_f": 38.4,
+        "avg_wind_mph": 8.2,
+        "avg_humidity": 73,
+        "precip_days": 7.5
+      },
+      {
+        "month": 3,
+        "avg_high_f": 67.1,
+        "avg_low_f": 45,
+        "avg_wind_mph": 7.8,
+        "avg_humidity": 71,
+        "precip_days": 7.8
+      },
+      {
+        "month": 4,
+        "avg_high_f": 75,
+        "avg_low_f": 52.1,
+        "avg_wind_mph": 7.5,
+        "avg_humidity": 69,
+        "precip_days": 6.3
+      },
+      {
+        "month": 5,
+        "avg_high_f": 82,
+        "avg_low_f": 61,
+        "avg_wind_mph": 6.2,
+        "avg_humidity": 70,
+        "precip_days": 6.8
+      },
+      {
+        "month": 6,
+        "avg_high_f": 88.1,
+        "avg_low_f": 68.5,
+        "avg_wind_mph": 5.5,
+        "avg_humidity": 72,
+        "precip_days": 8.2
+      },
+      {
+        "month": 7,
+        "avg_high_f": 91,
+        "avg_low_f": 72.1,
+        "avg_wind_mph": 4.6,
+        "avg_humidity": 75,
+        "precip_days": 7.8
+      },
+      {
+        "month": 8,
+        "avg_high_f": 90.6,
+        "avg_low_f": 71.3,
+        "avg_wind_mph": 4.9,
+        "avg_humidity": 73,
+        "precip_days": 6.7
+      },
+      {
+        "month": 9,
+        "avg_high_f": 85.9,
+        "avg_low_f": 65.3,
+        "avg_wind_mph": 5.6,
+        "avg_humidity": 69,
+        "precip_days": 4.3
+      },
+      {
+        "month": 10,
+        "avg_high_f": 76,
+        "avg_low_f": 53.9,
+        "avg_wind_mph": 6.6,
+        "avg_humidity": 67,
+        "precip_days": 4.5
+      },
+      {
+        "month": 11,
+        "avg_high_f": 65,
+        "avg_low_f": 43,
+        "avg_wind_mph": 6.9,
+        "avg_humidity": 70,
+        "precip_days": 6
+      },
+      {
+        "month": 12,
+        "avg_high_f": 56.9,
+        "avg_low_f": 37.9,
+        "avg_wind_mph": 7.5,
+        "avg_humidity": 75,
+        "precip_days": 7.7
+      }
+    ]
+  },
+  "boston-ma": {
+    "station": {
+      "id": "USW00014739",
+      "name": "BOSTON LOGAN INTL AP, MA",
+      "latitude": 42.3606,
+      "longitude": -71.0106,
+      "distance_mi": 2.7
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 36.8,
+        "avg_low_f": 23.1,
+        "avg_wind_mph": 9.6,
+        "avg_humidity": 67,
+        "precip_days": 6.6
+      },
+      {
+        "month": 2,
+        "avg_high_f": 39,
+        "avg_low_f": 24.6,
+        "avg_wind_mph": 9.3,
+        "avg_humidity": 69,
+        "precip_days": 6.2
+      },
+      {
+        "month": 3,
+        "avg_high_f": 45.5,
+        "avg_low_f": 31.1,
+        "avg_wind_mph": 9.7,
+        "avg_humidity": 67,
+        "precip_days": 6.9
+      },
+      {
+        "month": 4,
+        "avg_high_f": 56.4,
+        "avg_low_f": 40.8,
+        "avg_wind_mph": 9.2,
+        "avg_humidity": 69,
+        "precip_days": 6.7
+      },
+      {
+        "month": 5,
+        "avg_high_f": 66.5,
+        "avg_low_f": 50.3,
+        "avg_wind_mph": 8.4,
+        "avg_humidity": 70,
+        "precip_days": 6.8
+      },
+      {
+        "month": 6,
+        "avg_high_f": 76.2,
+        "avg_low_f": 59.7,
+        "avg_wind_mph": 7.8,
+        "avg_humidity": 71,
+        "precip_days": 6.7
+      },
+      {
+        "month": 7,
+        "avg_high_f": 82.1,
+        "avg_low_f": 66,
+        "avg_wind_mph": 7.1,
+        "avg_humidity": 72,
+        "precip_days": 6.1
+      },
+      {
+        "month": 8,
+        "avg_high_f": 80.4,
+        "avg_low_f": 65.1,
+        "avg_wind_mph": 7,
+        "avg_humidity": 73,
+        "precip_days": 5.4
+      },
+      {
+        "month": 9,
+        "avg_high_f": 73.1,
+        "avg_low_f": 58.2,
+        "avg_wind_mph": 7.6,
+        "avg_humidity": 75,
+        "precip_days": 6
+      },
+      {
+        "month": 10,
+        "avg_high_f": 62.1,
+        "avg_low_f": 47.5,
+        "avg_wind_mph": 8.3,
+        "avg_humidity": 76,
+        "precip_days": 6
+      },
+      {
+        "month": 11,
+        "avg_high_f": 51.6,
+        "avg_low_f": 37.9,
+        "avg_wind_mph": 8.8,
+        "avg_humidity": 71,
+        "precip_days": 6.4
+      },
+      {
+        "month": 12,
+        "avg_high_f": 42.2,
+        "avg_low_f": 29.2,
+        "avg_wind_mph": 8.7,
+        "avg_humidity": 73,
+        "precip_days": 7.2
+      }
+    ]
+  },
+  "buffalo-ny": {
+    "station": {
+      "id": "USW00014733",
+      "name": "BUFFALO, NY",
+      "latitude": 42.9486,
+      "longitude": -78.7369,
+      "distance_mi": 8.4
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 32.1,
+        "avg_low_f": 19,
+        "avg_wind_mph": 10.9,
+        "avg_humidity": 75,
+        "precip_days": 9.1
+      },
+      {
+        "month": 2,
+        "avg_high_f": 33.3,
+        "avg_low_f": 19.5,
+        "avg_wind_mph": 11.1,
+        "avg_humidity": 73,
+        "precip_days": 7.2
+      },
+      {
+        "month": 3,
+        "avg_high_f": 41.8,
+        "avg_low_f": 26.4,
+        "avg_wind_mph": 9.9,
+        "avg_humidity": 71,
+        "precip_days": 7.9
+      },
+      {
+        "month": 4,
+        "avg_high_f": 54.7,
+        "avg_low_f": 36.5,
+        "avg_wind_mph": 9.4,
+        "avg_humidity": 72,
+        "precip_days": 8.2
+      },
+      {
+        "month": 5,
+        "avg_high_f": 67.4,
+        "avg_low_f": 48.3,
+        "avg_wind_mph": 7.9,
+        "avg_humidity": 73,
+        "precip_days": 7.6
+      },
+      {
+        "month": 6,
+        "avg_high_f": 75.6,
+        "avg_low_f": 58.1,
+        "avg_wind_mph": 8.1,
+        "avg_humidity": 72,
+        "precip_days": 7.7
+      },
+      {
+        "month": 7,
+        "avg_high_f": 80.2,
+        "avg_low_f": 63.1,
+        "avg_wind_mph": 7.3,
+        "avg_humidity": 76,
+        "precip_days": 6.1
+      },
+      {
+        "month": 8,
+        "avg_high_f": 79,
+        "avg_low_f": 61.7,
+        "avg_wind_mph": 7.4,
+        "avg_humidity": 77,
+        "precip_days": 6.2
+      },
+      {
+        "month": 9,
+        "avg_high_f": 72.3,
+        "avg_low_f": 54.5,
+        "avg_wind_mph": 7.6,
+        "avg_humidity": 76,
+        "precip_days": 6.8
+      },
+      {
+        "month": 10,
+        "avg_high_f": 59.6,
+        "avg_low_f": 43.9,
+        "avg_wind_mph": 9.6,
+        "avg_humidity": 75,
+        "precip_days": 9
+      },
+      {
+        "month": 11,
+        "avg_high_f": 47.8,
+        "avg_low_f": 34.2,
+        "avg_wind_mph": 10.5,
+        "avg_humidity": 72,
+        "precip_days": 8.4
+      },
+      {
+        "month": 12,
+        "avg_high_f": 37.2,
+        "avg_low_f": 25.6,
+        "avg_wind_mph": 10.6,
+        "avg_humidity": 76,
+        "precip_days": 9.7
+      }
+    ]
+  },
+  "charlotte-nc": {
+    "station": {
+      "id": "USW00013881",
+      "name": "CHARLOTTE DOUGLAS AP, NC",
+      "latitude": 35.2236,
+      "longitude": -80.9553,
+      "distance_mi": 6.3
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 52.3,
+        "avg_low_f": 31.8,
+        "avg_wind_mph": 7,
+        "avg_humidity": 71,
+        "precip_days": 7.1
+      },
+      {
+        "month": 2,
+        "avg_high_f": 56.6,
+        "avg_low_f": 34.9,
+        "avg_wind_mph": 7.6,
+        "avg_humidity": 70,
+        "precip_days": 6.4
+      },
+      {
+        "month": 3,
+        "avg_high_f": 64.2,
+        "avg_low_f": 41.2,
+        "avg_wind_mph": 7.5,
+        "avg_humidity": 66,
+        "precip_days": 7.3
+      },
+      {
+        "month": 4,
+        "avg_high_f": 73.2,
+        "avg_low_f": 49.1,
+        "avg_wind_mph": 7.9,
+        "avg_humidity": 62,
+        "precip_days": 6.1
+      },
+      {
+        "month": 5,
+        "avg_high_f": 80.1,
+        "avg_low_f": 58,
+        "avg_wind_mph": 6.9,
+        "avg_humidity": 66,
+        "precip_days": 5.9
+      },
+      {
+        "month": 6,
+        "avg_high_f": 86.9,
+        "avg_low_f": 66.2,
+        "avg_wind_mph": 6,
+        "avg_humidity": 66,
+        "precip_days": 6.7
+      },
+      {
+        "month": 7,
+        "avg_high_f": 90.3,
+        "avg_low_f": 69.9,
+        "avg_wind_mph": 5.3,
+        "avg_humidity": 70,
+        "precip_days": 6.1
+      },
+      {
+        "month": 8,
+        "avg_high_f": 88.6,
+        "avg_low_f": 68.7,
+        "avg_wind_mph": 5.1,
+        "avg_humidity": 73,
+        "precip_days": 6.3
+      },
+      {
+        "month": 9,
+        "avg_high_f": 82.8,
+        "avg_low_f": 62.6,
+        "avg_wind_mph": 5.9,
+        "avg_humidity": 73,
+        "precip_days": 5.1
+      },
+      {
+        "month": 10,
+        "avg_high_f": 73.3,
+        "avg_low_f": 50.4,
+        "avg_wind_mph": 6.1,
+        "avg_humidity": 73,
+        "precip_days": 4.4
+      },
+      {
+        "month": 11,
+        "avg_high_f": 62.9,
+        "avg_low_f": 39.8,
+        "avg_wind_mph": 6.3,
+        "avg_humidity": 70,
+        "precip_days": 5.3
+      },
+      {
+        "month": 12,
+        "avg_high_f": 54.9,
+        "avg_low_f": 34.5,
+        "avg_wind_mph": 6.6,
+        "avg_humidity": 74,
+        "precip_days": 6.1
+      }
+    ]
+  },
+  "chicago-il": {
+    "station": {
+      "id": "USW00014819",
+      "name": "CHICAGO MIDWAY AP, IL",
+      "latitude": 41.7861,
+      "longitude": -87.7522,
+      "distance_mi": 9.6
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 32.7,
+        "avg_low_f": 19.4,
+        "avg_wind_mph": 11.4,
+        "avg_humidity": 76,
+        "precip_days": 3.4
+      },
+      {
+        "month": 2,
+        "avg_high_f": 36.8,
+        "avg_low_f": 22.6,
+        "avg_wind_mph": 11.9,
+        "avg_humidity": 73,
+        "precip_days": 3.4
+      },
+      {
+        "month": 3,
+        "avg_high_f": 47.6,
+        "avg_low_f": 31.7,
+        "avg_wind_mph": 11.5,
+        "avg_humidity": 74,
+        "precip_days": 5
+      },
+      {
+        "month": 4,
+        "avg_high_f": 59.9,
+        "avg_low_f": 41.4,
+        "avg_wind_mph": 11.5,
+        "avg_humidity": 73,
+        "precip_days": 6.9
+      },
+      {
+        "month": 5,
+        "avg_high_f": 71.1,
+        "avg_low_f": 52,
+        "avg_wind_mph": 10.4,
+        "avg_humidity": 76,
+        "precip_days": 8.2
+      },
+      {
+        "month": 6,
+        "avg_high_f": 80.9,
+        "avg_low_f": 62.3,
+        "avg_wind_mph": 9.6,
+        "avg_humidity": 73,
+        "precip_days": 8
+      },
+      {
+        "month": 7,
+        "avg_high_f": 85,
+        "avg_low_f": 67.7,
+        "avg_wind_mph": 8.4,
+        "avg_humidity": 77,
+        "precip_days": 5.5
+      },
+      {
+        "month": 8,
+        "avg_high_f": 82.7,
+        "avg_low_f": 66.4,
+        "avg_wind_mph": 8.4,
+        "avg_humidity": 76,
+        "precip_days": 6.4
+      },
+      {
+        "month": 9,
+        "avg_high_f": 76.3,
+        "avg_low_f": 58.8,
+        "avg_wind_mph": 9.7,
+        "avg_humidity": 74,
+        "precip_days": 5.4
+      },
+      {
+        "month": 10,
+        "avg_high_f": 63.4,
+        "avg_low_f": 46.5,
+        "avg_wind_mph": 11.5,
+        "avg_humidity": 72,
+        "precip_days": 6.3
+      },
+      {
+        "month": 11,
+        "avg_high_f": 49.1,
+        "avg_low_f": 35,
+        "avg_wind_mph": 11.6,
+        "avg_humidity": 73,
+        "precip_days": 4.7
+      },
+      {
+        "month": 12,
+        "avg_high_f": 37.6,
+        "avg_low_f": 25,
+        "avg_wind_mph": 11.1,
+        "avg_humidity": 75,
+        "precip_days": 4.3
+      }
+    ]
+  },
+  "cincinnati-oh": {
+    "station": {
+      "id": "USW00093812",
+      "name": "CINCINNATI LUNKEN AP, OH",
+      "latitude": 39.1033,
+      "longitude": -84.4189,
+      "distance_mi": 5
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 40.6,
+        "avg_low_f": 23.6,
+        "avg_wind_mph": 7.8,
+        "avg_humidity": 70,
+        "precip_days": 6.2
+      },
+      {
+        "month": 2,
+        "avg_high_f": 45,
+        "avg_low_f": 25.7,
+        "avg_wind_mph": 8,
+        "avg_humidity": 68,
+        "precip_days": 5.6
+      },
+      {
+        "month": 3,
+        "avg_high_f": 54.6,
+        "avg_low_f": 33.4,
+        "avg_wind_mph": 8.1,
+        "avg_humidity": 66,
+        "precip_days": 7.8
+      },
+      {
+        "month": 4,
+        "avg_high_f": 66.6,
+        "avg_low_f": 42.5,
+        "avg_wind_mph": 8,
+        "avg_humidity": 66,
+        "precip_days": 8.2
+      },
+      {
+        "month": 5,
+        "avg_high_f": 75.4,
+        "avg_low_f": 52.7,
+        "avg_wind_mph": 6.8,
+        "avg_humidity": 71,
+        "precip_days": 8.7
+      },
+      {
+        "month": 6,
+        "avg_high_f": 83.3,
+        "avg_low_f": 61.2,
+        "avg_wind_mph": 6.3,
+        "avg_humidity": 68,
+        "precip_days": 7.6
+      },
+      {
+        "month": 7,
+        "avg_high_f": 86.6,
+        "avg_low_f": 65.3,
+        "avg_wind_mph": 5.3,
+        "avg_humidity": 72,
+        "precip_days": 7.4
+      },
+      {
+        "month": 8,
+        "avg_high_f": 85.9,
+        "avg_low_f": 63.7,
+        "avg_wind_mph": 5.1,
+        "avg_humidity": 72,
+        "precip_days": 5.5
+      },
+      {
+        "month": 9,
+        "avg_high_f": 79.7,
+        "avg_low_f": 55.9,
+        "avg_wind_mph": 5.6,
+        "avg_humidity": 70,
+        "precip_days": 5
+      },
+      {
+        "month": 10,
+        "avg_high_f": 67.9,
+        "avg_low_f": 44.2,
+        "avg_wind_mph": 6.9,
+        "avg_humidity": 69,
+        "precip_days": 5.7
+      },
+      {
+        "month": 11,
+        "avg_high_f": 55.1,
+        "avg_low_f": 34.1,
+        "avg_wind_mph": 7.2,
+        "avg_humidity": 70,
+        "precip_days": 6
+      },
+      {
+        "month": 12,
+        "avg_high_f": 44.6,
+        "avg_low_f": 28,
+        "avg_wind_mph": 7.4,
+        "avg_humidity": 73,
+        "precip_days": 6.3
+      }
+    ]
+  },
+  "cleveland-oh": {
+    "station": {
+      "id": "USW00004853",
+      "name": "CLEVELAND BURKE AP, OH",
+      "latitude": 41.5175,
+      "longitude": -81.6836,
+      "distance_mi": 1.4
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 35.3,
+        "avg_low_f": 23.5,
+        "avg_wind_mph": 12,
+        "avg_humidity": 75,
+        "precip_days": 4.3
+      },
+      {
+        "month": 2,
+        "avg_high_f": 37.3,
+        "avg_low_f": 24.5,
+        "avg_wind_mph": 11.7,
+        "avg_humidity": 74,
+        "precip_days": 4.2
+      },
+      {
+        "month": 3,
+        "avg_high_f": 44.9,
+        "avg_low_f": 31.2,
+        "avg_wind_mph": 11.1,
+        "avg_humidity": 72,
+        "precip_days": 5.7
+      },
+      {
+        "month": 4,
+        "avg_high_f": 57.1,
+        "avg_low_f": 41.3,
+        "avg_wind_mph": 10.5,
+        "avg_humidity": 73,
+        "precip_days": 7.3
+      },
+      {
+        "month": 5,
+        "avg_high_f": 67.9,
+        "avg_low_f": 53.1,
+        "avg_wind_mph": 9.1,
+        "avg_humidity": 76,
+        "precip_days": 8
+      },
+      {
+        "month": 6,
+        "avg_high_f": 76.7,
+        "avg_low_f": 63.3,
+        "avg_wind_mph": 8.7,
+        "avg_humidity": 75,
+        "precip_days": 6.5
+      },
+      {
+        "month": 7,
+        "avg_high_f": 80.7,
+        "avg_low_f": 67.9,
+        "avg_wind_mph": 7.4,
+        "avg_humidity": 77,
+        "precip_days": 6
+      },
+      {
+        "month": 8,
+        "avg_high_f": 79.7,
+        "avg_low_f": 67,
+        "avg_wind_mph": 7.7,
+        "avg_humidity": 77,
+        "precip_days": 5.8
+      },
+      {
+        "month": 9,
+        "avg_high_f": 73.5,
+        "avg_low_f": 60.1,
+        "avg_wind_mph": 8.6,
+        "avg_humidity": 76,
+        "precip_days": 6.1
+      },
+      {
+        "month": 10,
+        "avg_high_f": 62.5,
+        "avg_low_f": 49.2,
+        "avg_wind_mph": 10.8,
+        "avg_humidity": 73,
+        "precip_days": 7.6
+      },
+      {
+        "month": 11,
+        "avg_high_f": 50.5,
+        "avg_low_f": 38.4,
+        "avg_wind_mph": 12,
+        "avg_humidity": 71,
+        "precip_days": 6.3
+      },
+      {
+        "month": 12,
+        "avg_high_f": 40.1,
+        "avg_low_f": 29.8,
+        "avg_wind_mph": 11.8,
+        "avg_humidity": 76,
+        "precip_days": 5.7
+      }
+    ]
+  },
+  "columbus-oh": {
+    "station": {
+      "id": "USW00014821",
+      "name": "COLUMBUS PORT COLUMBUS INTL AP, OH",
+      "latitude": 39.9914,
+      "longitude": -82.8808,
+      "distance_mi": 6.6
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 37.1,
+        "avg_low_f": 22,
+        "avg_wind_mph": 8.1,
+        "avg_humidity": 72,
+        "precip_days": 6.5
+      },
+      {
+        "month": 2,
+        "avg_high_f": 40.8,
+        "avg_low_f": 24.2,
+        "avg_wind_mph": 8.2,
+        "avg_humidity": 70,
+        "precip_days": 6.1
+      },
+      {
+        "month": 3,
+        "avg_high_f": 51.1,
+        "avg_low_f": 32,
+        "avg_wind_mph": 8.4,
+        "avg_humidity": 68,
+        "precip_days": 7.5
+      },
+      {
+        "month": 4,
+        "avg_high_f": 64.1,
+        "avg_low_f": 42.2,
+        "avg_wind_mph": 8.2,
+        "avg_humidity": 68,
+        "precip_days": 8.1
+      },
+      {
+        "month": 5,
+        "avg_high_f": 74.1,
+        "avg_low_f": 52.4,
+        "avg_wind_mph": 7,
+        "avg_humidity": 71,
+        "precip_days": 8.6
+      },
+      {
+        "month": 6,
+        "avg_high_f": 82.2,
+        "avg_low_f": 61.6,
+        "avg_wind_mph": 6.6,
+        "avg_humidity": 70,
+        "precip_days": 7.6
+      },
+      {
+        "month": 7,
+        "avg_high_f": 85.4,
+        "avg_low_f": 65.4,
+        "avg_wind_mph": 5.5,
+        "avg_humidity": 73,
+        "precip_days": 7.4
+      },
+      {
+        "month": 8,
+        "avg_high_f": 84.1,
+        "avg_low_f": 63.9,
+        "avg_wind_mph": 5.4,
+        "avg_humidity": 73,
+        "precip_days": 6.4
+      },
+      {
+        "month": 9,
+        "avg_high_f": 77.8,
+        "avg_low_f": 56.5,
+        "avg_wind_mph": 5.8,
+        "avg_humidity": 70,
+        "precip_days": 5.5
+      },
+      {
+        "month": 10,
+        "avg_high_f": 65.5,
+        "avg_low_f": 44.8,
+        "avg_wind_mph": 7.2,
+        "avg_humidity": 71,
+        "precip_days": 5.8
+      },
+      {
+        "month": 11,
+        "avg_high_f": 52.3,
+        "avg_low_f": 35,
+        "avg_wind_mph": 7.5,
+        "avg_humidity": 71,
+        "precip_days": 6
+      },
+      {
+        "month": 12,
+        "avg_high_f": 41.5,
+        "avg_low_f": 27.4,
+        "avg_wind_mph": 7.5,
+        "avg_humidity": 75,
+        "precip_days": 6.4
+      }
+    ]
+  },
+  "dallas-fort-worth-tx": {
+    "station": {
+      "id": "USW00013960",
+      "name": "DALLAS LOVE FLD, TX",
+      "latitude": 32.8519,
+      "longitude": -96.8556,
+      "distance_mi": 5.5
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 57.7,
+        "avg_low_f": 37.9,
+        "avg_wind_mph": 9.2,
+        "avg_humidity": 65,
+        "precip_days": 4
+      },
+      {
+        "month": 2,
+        "avg_high_f": 62,
+        "avg_low_f": 41.9,
+        "avg_wind_mph": 10,
+        "avg_humidity": 67,
+        "precip_days": 4.2
+      },
+      {
+        "month": 3,
+        "avg_high_f": 69.9,
+        "avg_low_f": 49.4,
+        "avg_wind_mph": 10.2,
+        "avg_humidity": 68,
+        "precip_days": 4.7
+      },
+      {
+        "month": 4,
+        "avg_high_f": 77.4,
+        "avg_low_f": 56.8,
+        "avg_wind_mph": 10.6,
+        "avg_humidity": 67,
+        "precip_days": 4.5
+      },
+      {
+        "month": 5,
+        "avg_high_f": 84.9,
+        "avg_low_f": 66,
+        "avg_wind_mph": 9.5,
+        "avg_humidity": 73,
+        "precip_days": 6.3
+      },
+      {
+        "month": 6,
+        "avg_high_f": 92.7,
+        "avg_low_f": 73.8,
+        "avg_wind_mph": 8.2,
+        "avg_humidity": 69,
+        "precip_days": 5.2
+      },
+      {
+        "month": 7,
+        "avg_high_f": 96.9,
+        "avg_low_f": 77.7,
+        "avg_wind_mph": 8,
+        "avg_humidity": 61,
+        "precip_days": 3
+      },
+      {
+        "month": 8,
+        "avg_high_f": 97.1,
+        "avg_low_f": 77.4,
+        "avg_wind_mph": 7.4,
+        "avg_humidity": 60,
+        "precip_days": 3.5
+      },
+      {
+        "month": 9,
+        "avg_high_f": 90,
+        "avg_low_f": 70.1,
+        "avg_wind_mph": 7.1,
+        "avg_humidity": 63,
+        "precip_days": 3.8
+      },
+      {
+        "month": 10,
+        "avg_high_f": 79.5,
+        "avg_low_f": 58.7,
+        "avg_wind_mph": 8.8,
+        "avg_humidity": 61,
+        "precip_days": 4.9
+      },
+      {
+        "month": 11,
+        "avg_high_f": 67.8,
+        "avg_low_f": 47.8,
+        "avg_wind_mph": 8.7,
+        "avg_humidity": 69,
+        "precip_days": 4.1
+      },
+      {
+        "month": 12,
+        "avg_high_f": 59.2,
+        "avg_low_f": 39.8,
+        "avg_wind_mph": 8.6,
+        "avg_humidity": 69,
+        "precip_days": 4.1
+      }
+    ]
+  },
+  "denver-co": {
+    "station": {
+      "id": "USW00023062",
+      "name": "DENVER-STAPLETON, CO",
+      "latitude": 39.7633,
+      "longitude": -104.8694,
+      "distance_mi": 7
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 46.5,
+        "avg_low_f": 17.6,
+        "avg_wind_mph": 5.4,
+        "avg_humidity": 63,
+        "precip_days": 1.6
+      },
+      {
+        "month": 2,
+        "avg_high_f": 47.5,
+        "avg_low_f": 19.3,
+        "avg_wind_mph": 5.8,
+        "avg_humidity": 61,
+        "precip_days": 2.1
+      },
+      {
+        "month": 3,
+        "avg_high_f": 56.4,
+        "avg_low_f": 27.1,
+        "avg_wind_mph": 5.9,
+        "avg_humidity": 58,
+        "precip_days": 2.8
+      },
+      {
+        "month": 4,
+        "avg_high_f": 62.5,
+        "avg_low_f": 33.7,
+        "avg_wind_mph": 6.1,
+        "avg_humidity": 53,
+        "precip_days": 4.4
+      },
+      {
+        "month": 5,
+        "avg_high_f": 71.7,
+        "avg_low_f": 43.4,
+        "avg_wind_mph": 5.6,
+        "avg_humidity": 60,
+        "precip_days": 5.2
+      },
+      {
+        "month": 6,
+        "avg_high_f": 84.1,
+        "avg_low_f": 52.9,
+        "avg_wind_mph": 5.4,
+        "avg_humidity": 49,
+        "precip_days": 4.1
+      },
+      {
+        "month": 7,
+        "avg_high_f": 90.2,
+        "avg_low_f": 59.3,
+        "avg_wind_mph": 5.2,
+        "avg_humidity": 47,
+        "precip_days": 4
+      },
+      {
+        "month": 8,
+        "avg_high_f": 87.9,
+        "avg_low_f": 57.2,
+        "avg_wind_mph": 5.1,
+        "avg_humidity": 47,
+        "precip_days": 3.5
+      },
+      {
+        "month": 9,
+        "avg_high_f": 80.1,
+        "avg_low_f": 48.2,
+        "avg_wind_mph": 5.1,
+        "avg_humidity": 43,
+        "precip_days": 3.3
+      },
+      {
+        "month": 10,
+        "avg_high_f": 66.7,
+        "avg_low_f": 35.7,
+        "avg_wind_mph": 5.4,
+        "avg_humidity": 50,
+        "precip_days": 2.7
+      },
+      {
+        "month": 11,
+        "avg_high_f": 54.8,
+        "avg_low_f": 25.5,
+        "avg_wind_mph": 5.2,
+        "avg_humidity": 56,
+        "precip_days": 2.2
+      },
+      {
+        "month": 12,
+        "avg_high_f": 45.9,
+        "avg_low_f": 17.7,
+        "avg_wind_mph": 5.2,
+        "avg_humidity": 56,
+        "precip_days": 1.6
+      }
+    ]
+  },
+  "detroit-mi": {
+    "station": {
+      "id": "USW00014822",
+      "name": "DETROIT CITY AP, MI",
+      "latitude": 42.4092,
+      "longitude": -83.01,
+      "distance_mi": 5.7
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 32.4,
+        "avg_low_f": 19.8,
+        "avg_wind_mph": 10.4,
+        "avg_humidity": 75,
+        "precip_days": 4.1
+      },
+      {
+        "month": 2,
+        "avg_high_f": 35,
+        "avg_low_f": 21,
+        "avg_wind_mph": 10.7,
+        "avg_humidity": 73,
+        "precip_days": 3.7
+      },
+      {
+        "month": 3,
+        "avg_high_f": 44.9,
+        "avg_low_f": 28.4,
+        "avg_wind_mph": 10.5,
+        "avg_humidity": 69,
+        "precip_days": 5
+      },
+      {
+        "month": 4,
+        "avg_high_f": 57.6,
+        "avg_low_f": 38.6,
+        "avg_wind_mph": 10.3,
+        "avg_humidity": 69,
+        "precip_days": 6.4
+      },
+      {
+        "month": 5,
+        "avg_high_f": 69.5,
+        "avg_low_f": 49.8,
+        "avg_wind_mph": 9.3,
+        "avg_humidity": 69,
+        "precip_days": 8.2
+      },
+      {
+        "month": 6,
+        "avg_high_f": 79.2,
+        "avg_low_f": 60.2,
+        "avg_wind_mph": 8.9,
+        "avg_humidity": 67,
+        "precip_days": 5.6
+      },
+      {
+        "month": 7,
+        "avg_high_f": 83.5,
+        "avg_low_f": 64.9,
+        "avg_wind_mph": 7.5,
+        "avg_humidity": 70,
+        "precip_days": 6.6
+      },
+      {
+        "month": 8,
+        "avg_high_f": 81.4,
+        "avg_low_f": 63.7,
+        "avg_wind_mph": 7.6,
+        "avg_humidity": 72,
+        "precip_days": 5.8
+      },
+      {
+        "month": 9,
+        "avg_high_f": 74.3,
+        "avg_low_f": 55.8,
+        "avg_wind_mph": 8.4,
+        "avg_humidity": 74,
+        "precip_days": 6.1
+      },
+      {
+        "month": 10,
+        "avg_high_f": 61.4,
+        "avg_low_f": 44.7,
+        "avg_wind_mph": 10.1,
+        "avg_humidity": 72,
+        "precip_days": 5.6
+      },
+      {
+        "month": 11,
+        "avg_high_f": 48.2,
+        "avg_low_f": 34.4,
+        "avg_wind_mph": 10.4,
+        "avg_humidity": 73,
+        "precip_days": 5.3
+      },
+      {
+        "month": 12,
+        "avg_high_f": 37.2,
+        "avg_low_f": 25.8,
+        "avg_wind_mph": 10.2,
+        "avg_humidity": 77,
+        "precip_days": 4.7
+      }
+    ]
+  },
+  "hartford-ct": {
+    "station": {
+      "id": "USW00014752",
+      "name": "HARTFORD BRAINARD FLD, CT",
+      "latitude": 41.7361,
+      "longitude": -72.6506,
+      "distance_mi": 2.6
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 36.8,
+        "avg_low_f": 20.3,
+        "avg_wind_mph": 6.9,
+        "avg_humidity": 67,
+        "precip_days": 6.3
+      },
+      {
+        "month": 2,
+        "avg_high_f": 39.5,
+        "avg_low_f": 22.1,
+        "avg_wind_mph": 6.9,
+        "avg_humidity": 69,
+        "precip_days": 5.7
+      },
+      {
+        "month": 3,
+        "avg_high_f": 47.6,
+        "avg_low_f": 29.6,
+        "avg_wind_mph": 7.3,
+        "avg_humidity": 65,
+        "precip_days": 6.7
+      },
+      {
+        "month": 4,
+        "avg_high_f": 60.1,
+        "avg_low_f": 40,
+        "avg_wind_mph": 7,
+        "avg_humidity": 68,
+        "precip_days": 6.4
+      },
+      {
+        "month": 5,
+        "avg_high_f": 70.9,
+        "avg_low_f": 50.1,
+        "avg_wind_mph": 6.3,
+        "avg_humidity": 70,
+        "precip_days": 7.2
+      },
+      {
+        "month": 6,
+        "avg_high_f": 79.6,
+        "avg_low_f": 59.8,
+        "avg_wind_mph": 6,
+        "avg_humidity": 71,
+        "precip_days": 6.4
+      },
+      {
+        "month": 7,
+        "avg_high_f": 84.6,
+        "avg_low_f": 65.7,
+        "avg_wind_mph": 5.4,
+        "avg_humidity": 74,
+        "precip_days": 6.8
+      },
+      {
+        "month": 8,
+        "avg_high_f": 83,
+        "avg_low_f": 64.2,
+        "avg_wind_mph": 5.3,
+        "avg_humidity": 74,
+        "precip_days": 5.6
+      },
+      {
+        "month": 9,
+        "avg_high_f": 75.6,
+        "avg_low_f": 56,
+        "avg_wind_mph": 5.7,
+        "avg_humidity": 76,
+        "precip_days": 5.3
+      },
+      {
+        "month": 10,
+        "avg_high_f": 63.7,
+        "avg_low_f": 44.3,
+        "avg_wind_mph": 6.3,
+        "avg_humidity": 76,
+        "precip_days": 6
+      },
+      {
+        "month": 11,
+        "avg_high_f": 52.1,
+        "avg_low_f": 34.6,
+        "avg_wind_mph": 6.5,
+        "avg_humidity": 72,
+        "precip_days": 6.2
+      },
+      {
+        "month": 12,
+        "avg_high_f": 41.7,
+        "avg_low_f": 25.9,
+        "avg_wind_mph": 6.3,
+        "avg_humidity": 74,
+        "precip_days": 7.5
+      }
+    ]
+  },
+  "houston-tx": {
+    "station": {
+      "id": "USW00012918",
+      "name": "HOUSTON HOBBY AP, TX",
+      "latitude": 29.6381,
+      "longitude": -95.2819,
+      "distance_mi": 10.5
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 63.8,
+        "avg_low_f": 46.1,
+        "avg_wind_mph": 8.6,
+        "avg_humidity": 73,
+        "precip_days": 6.1
+      },
+      {
+        "month": 2,
+        "avg_high_f": 67.6,
+        "avg_low_f": 50.1,
+        "avg_wind_mph": 9.2,
+        "avg_humidity": 77,
+        "precip_days": 4.6
+      },
+      {
+        "month": 3,
+        "avg_high_f": 73.4,
+        "avg_low_f": 55.9,
+        "avg_wind_mph": 9.1,
+        "avg_humidity": 77,
+        "precip_days": 4.4
+      },
+      {
+        "month": 4,
+        "avg_high_f": 79.3,
+        "avg_low_f": 61.8,
+        "avg_wind_mph": 9.3,
+        "avg_humidity": 77,
+        "precip_days": 4.2
+      },
+      {
+        "month": 5,
+        "avg_high_f": 85.9,
+        "avg_low_f": 69.3,
+        "avg_wind_mph": 8.5,
+        "avg_humidity": 80,
+        "precip_days": 5.1
+      },
+      {
+        "month": 6,
+        "avg_high_f": 91,
+        "avg_low_f": 74.9,
+        "avg_wind_mph": 7,
+        "avg_humidity": 79,
+        "precip_days": 7.2
+      },
+      {
+        "month": 7,
+        "avg_high_f": 92.9,
+        "avg_low_f": 76.6,
+        "avg_wind_mph": 6.3,
+        "avg_humidity": 79,
+        "precip_days": 6.2
+      },
+      {
+        "month": 8,
+        "avg_high_f": 93.5,
+        "avg_low_f": 76.7,
+        "avg_wind_mph": 6.1,
+        "avg_humidity": 77,
+        "precip_days": 6.1
+      },
+      {
+        "month": 9,
+        "avg_high_f": 89.3,
+        "avg_low_f": 72.9,
+        "avg_wind_mph": 6.1,
+        "avg_humidity": 78,
+        "precip_days": 6.3
+      },
+      {
+        "month": 10,
+        "avg_high_f": 82.1,
+        "avg_low_f": 63.9,
+        "avg_wind_mph": 7.5,
+        "avg_humidity": 73,
+        "precip_days": 5
+      },
+      {
+        "month": 11,
+        "avg_high_f": 72.6,
+        "avg_low_f": 54,
+        "avg_wind_mph": 7.7,
+        "avg_humidity": 76,
+        "precip_days": 5.1
+      },
+      {
+        "month": 12,
+        "avg_high_f": 65.7,
+        "avg_low_f": 48,
+        "avg_wind_mph": 8.1,
+        "avg_humidity": 77,
+        "precip_days": 5.5
+      }
+    ]
+  },
+  "indianapolis-in": {
+    "station": {
+      "id": "USW00093819",
+      "name": "INDIANAPOLIS, IN",
+      "latitude": 39.7075,
+      "longitude": -86.2803,
+      "distance_mi": 7.7
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 36.1,
+        "avg_low_f": 20.9,
+        "avg_wind_mph": 8.4,
+        "avg_humidity": 72,
+        "precip_days": 6.3
+      },
+      {
+        "month": 2,
+        "avg_high_f": 40.8,
+        "avg_low_f": 24.2,
+        "avg_wind_mph": 8.6,
+        "avg_humidity": 69,
+        "precip_days": 5.4
+      },
+      {
+        "month": 3,
+        "avg_high_f": 51.9,
+        "avg_low_f": 33,
+        "avg_wind_mph": 8.7,
+        "avg_humidity": 68,
+        "precip_days": 6.7
+      },
+      {
+        "month": 4,
+        "avg_high_f": 63.9,
+        "avg_low_f": 43.3,
+        "avg_wind_mph": 8.6,
+        "avg_humidity": 66,
+        "precip_days": 8
+      },
+      {
+        "month": 5,
+        "avg_high_f": 73.4,
+        "avg_low_f": 53.7,
+        "avg_wind_mph": 7.5,
+        "avg_humidity": 70,
+        "precip_days": 8.9
+      },
+      {
+        "month": 6,
+        "avg_high_f": 82,
+        "avg_low_f": 62.9,
+        "avg_wind_mph": 6.9,
+        "avg_humidity": 67,
+        "precip_days": 7.9
+      },
+      {
+        "month": 7,
+        "avg_high_f": 85.2,
+        "avg_low_f": 66.4,
+        "avg_wind_mph": 5.7,
+        "avg_humidity": 73,
+        "precip_days": 6.6
+      },
+      {
+        "month": 8,
+        "avg_high_f": 84.3,
+        "avg_low_f": 65,
+        "avg_wind_mph": 5.7,
+        "avg_humidity": 72,
+        "precip_days": 5.5
+      },
+      {
+        "month": 9,
+        "avg_high_f": 78.2,
+        "avg_low_f": 57.4,
+        "avg_wind_mph": 6.3,
+        "avg_humidity": 69,
+        "precip_days": 4.7
+      },
+      {
+        "month": 10,
+        "avg_high_f": 65.6,
+        "avg_low_f": 45.5,
+        "avg_wind_mph": 7.8,
+        "avg_humidity": 68,
+        "precip_days": 5.6
+      },
+      {
+        "month": 11,
+        "avg_high_f": 51.8,
+        "avg_low_f": 34.9,
+        "avg_wind_mph": 8,
+        "avg_humidity": 71,
+        "precip_days": 6
+      },
+      {
+        "month": 12,
+        "avg_high_f": 40.4,
+        "avg_low_f": 26.2,
+        "avg_wind_mph": 8.1,
+        "avg_humidity": 74,
+        "precip_days": 6.1
+      }
+    ]
+  },
+  "jacksonville-fl": {
+    "station": {
+      "id": "USW00093837",
+      "name": "JACKSONVILLE NAS, FL",
+      "latitude": 30.2333,
+      "longitude": -81.6667,
+      "distance_mi": 6.9
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 65.5,
+        "avg_low_f": 47.2,
+        "avg_wind_mph": 7.9,
+        "avg_humidity": 76,
+        "precip_days": 5
+      },
+      {
+        "month": 2,
+        "avg_high_f": 68.9,
+        "avg_low_f": 50.2,
+        "avg_wind_mph": 7.8,
+        "avg_humidity": 78,
+        "precip_days": 5
+      },
+      {
+        "month": 3,
+        "avg_high_f": 74.3,
+        "avg_low_f": 55,
+        "avg_wind_mph": 7.9,
+        "avg_humidity": 73,
+        "precip_days": 5.5
+      },
+      {
+        "month": 4,
+        "avg_high_f": 80.5,
+        "avg_low_f": 61.1,
+        "avg_wind_mph": 8,
+        "avg_humidity": 73,
+        "precip_days": 4.1
+      },
+      {
+        "month": 5,
+        "avg_high_f": 86.2,
+        "avg_low_f": 68.9,
+        "avg_wind_mph": 7.2,
+        "avg_humidity": 73,
+        "precip_days": 4.8
+      },
+      {
+        "month": 6,
+        "avg_high_f": 90.1,
+        "avg_low_f": 73.9,
+        "avg_wind_mph": 6.5,
+        "avg_humidity": 78,
+        "precip_days": 10.3
+      },
+      {
+        "month": 7,
+        "avg_high_f": 91.8,
+        "avg_low_f": 76,
+        "avg_wind_mph": 5.7,
+        "avg_humidity": 80,
+        "precip_days": 10.1
+      },
+      {
+        "month": 8,
+        "avg_high_f": 91.1,
+        "avg_low_f": 76.3,
+        "avg_wind_mph": 5.9,
+        "avg_humidity": 83,
+        "precip_days": 10.2
+      },
+      {
+        "month": 9,
+        "avg_high_f": 87.8,
+        "avg_low_f": 73.9,
+        "avg_wind_mph": 6.7,
+        "avg_humidity": 82,
+        "precip_days": 7.8
+      },
+      {
+        "month": 10,
+        "avg_high_f": 81.6,
+        "avg_low_f": 66,
+        "avg_wind_mph": 7.5,
+        "avg_humidity": 79,
+        "precip_days": 4.8
+      },
+      {
+        "month": 11,
+        "avg_high_f": 73.3,
+        "avg_low_f": 56.1,
+        "avg_wind_mph": 7.6,
+        "avg_humidity": 80,
+        "precip_days": 3.9
+      },
+      {
+        "month": 12,
+        "avg_high_f": 67.5,
+        "avg_low_f": 50.4,
+        "avg_wind_mph": 7.4,
+        "avg_humidity": 81,
+        "precip_days": 4.2
+      }
+    ]
+  },
+  "kansas-city-mo": {
+    "station": {
+      "id": "USW00013988",
+      "name": "KANSAS CITY DOWNTOWN AP, MO",
+      "latitude": 39.1208,
+      "longitude": -94.5969,
+      "distance_mi": 1.8
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 39.9,
+        "avg_low_f": 22.2,
+        "avg_wind_mph": 8,
+        "avg_humidity": 69,
+        "precip_days": 2.2
+      },
+      {
+        "month": 2,
+        "avg_high_f": 45.1,
+        "avg_low_f": 26.4,
+        "avg_wind_mph": 8.4,
+        "avg_humidity": 64,
+        "precip_days": 2.7
+      },
+      {
+        "month": 3,
+        "avg_high_f": 56.6,
+        "avg_low_f": 36.2,
+        "avg_wind_mph": 8.9,
+        "avg_humidity": 66,
+        "precip_days": 4.6
+      },
+      {
+        "month": 4,
+        "avg_high_f": 66.8,
+        "avg_low_f": 46.3,
+        "avg_wind_mph": 9.1,
+        "avg_humidity": 63,
+        "precip_days": 6.5
+      },
+      {
+        "month": 5,
+        "avg_high_f": 76.2,
+        "avg_low_f": 57.2,
+        "avg_wind_mph": 7.7,
+        "avg_humidity": 71,
+        "precip_days": 7.7
+      },
+      {
+        "month": 6,
+        "avg_high_f": 85.8,
+        "avg_low_f": 67.2,
+        "avg_wind_mph": 7.1,
+        "avg_humidity": 68,
+        "precip_days": 7.5
+      },
+      {
+        "month": 7,
+        "avg_high_f": 90.2,
+        "avg_low_f": 71.9,
+        "avg_wind_mph": 6.1,
+        "avg_humidity": 71,
+        "precip_days": 6.2
+      },
+      {
+        "month": 8,
+        "avg_high_f": 88.6,
+        "avg_low_f": 69.9,
+        "avg_wind_mph": 6.3,
+        "avg_humidity": 71,
+        "precip_days": 5.5
+      },
+      {
+        "month": 9,
+        "avg_high_f": 80.4,
+        "avg_low_f": 61,
+        "avg_wind_mph": 7,
+        "avg_humidity": 68,
+        "precip_days": 5.7
+      },
+      {
+        "month": 10,
+        "avg_high_f": 68.2,
+        "avg_low_f": 48.7,
+        "avg_wind_mph": 8.2,
+        "avg_humidity": 64,
+        "precip_days": 4.8
+      },
+      {
+        "month": 11,
+        "avg_high_f": 54.5,
+        "avg_low_f": 36.3,
+        "avg_wind_mph": 8.1,
+        "avg_humidity": 69,
+        "precip_days": 3.4
+      },
+      {
+        "month": 12,
+        "avg_high_f": 43.9,
+        "avg_low_f": 26.7,
+        "avg_wind_mph": 8.1,
+        "avg_humidity": 70,
+        "precip_days": 2.8
+      }
+    ]
+  },
+  "las-vegas-nv": {
+    "station": {
+      "id": "USW00053123",
+      "name": "LAS VEGAS AIR TERMINAL, NV",
+      "latitude": 36.2117,
+      "longitude": -115.1958,
+      "distance_mi": 4.2
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 58,
+        "avg_low_f": 39.4,
+        "avg_wind_mph": 5.4,
+        "avg_humidity": 47,
+        "precip_days": 1.7
+      },
+      {
+        "month": 2,
+        "avg_high_f": 62.4,
+        "avg_low_f": 42.7,
+        "avg_wind_mph": 6.6,
+        "avg_humidity": 37,
+        "precip_days": 1.7
+      },
+      {
+        "month": 3,
+        "avg_high_f": 70.5,
+        "avg_low_f": 48.5,
+        "avg_wind_mph": 7.7,
+        "avg_humidity": 31,
+        "precip_days": 0.9
+      },
+      {
+        "month": 4,
+        "avg_high_f": 77.9,
+        "avg_low_f": 55,
+        "avg_wind_mph": 8.2,
+        "avg_humidity": 21,
+        "precip_days": 0.6
+      },
+      {
+        "month": 5,
+        "avg_high_f": 87.8,
+        "avg_low_f": 64.2,
+        "avg_wind_mph": 8,
+        "avg_humidity": 20,
+        "precip_days": 0.3
+      },
+      {
+        "month": 6,
+        "avg_high_f": 98.6,
+        "avg_low_f": 73.7,
+        "avg_wind_mph": 8,
+        "avg_humidity": 14,
+        "precip_days": 0
+      },
+      {
+        "month": 7,
+        "avg_high_f": 103.8,
+        "avg_low_f": 79.8,
+        "avg_wind_mph": 6.9,
+        "avg_humidity": 20,
+        "precip_days": 0.4
+      },
+      {
+        "month": 8,
+        "avg_high_f": 102.1,
+        "avg_low_f": 77.5,
+        "avg_wind_mph": 6.4,
+        "avg_humidity": 23,
+        "precip_days": 0.8
+      },
+      {
+        "month": 9,
+        "avg_high_f": 94.2,
+        "avg_low_f": 70.2,
+        "avg_wind_mph": 6.2,
+        "avg_humidity": 22,
+        "precip_days": 0.6
+      },
+      {
+        "month": 10,
+        "avg_high_f": 80.5,
+        "avg_low_f": 57.5,
+        "avg_wind_mph": 5.7,
+        "avg_humidity": 25,
+        "precip_days": 1.1
+      },
+      {
+        "month": 11,
+        "avg_high_f": 66.8,
+        "avg_low_f": 45.5,
+        "avg_wind_mph": 5.3,
+        "avg_humidity": 30,
+        "precip_days": 0.9
+      },
+      {
+        "month": 12,
+        "avg_high_f": 56.3,
+        "avg_low_f": 38,
+        "avg_wind_mph": 4.7,
+        "avg_humidity": 41,
+        "precip_days": 1.2
+      }
+    ]
+  },
+  "los-angeles-ca": {
+    "station": {
+      "id": "USW00093134",
+      "name": "LOS ANGELES DWTN USC CAMPUS, CA",
+      "latitude": 34.0511,
+      "longitude": -118.2353,
+      "distance_mi": 5.4
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 68,
+        "avg_low_f": 48.9,
+        "avg_wind_mph": 5.2,
+        "avg_humidity": 70,
+        "precip_days": 4.4
+      },
+      {
+        "month": 2,
+        "avg_high_f": 68,
+        "avg_low_f": 50,
+        "avg_wind_mph": 5.9,
+        "avg_humidity": 62,
+        "precip_days": 4.7
+      },
+      {
+        "month": 3,
+        "avg_high_f": 69.9,
+        "avg_low_f": 52.4,
+        "avg_wind_mph": 6.1,
+        "avg_humidity": 68,
+        "precip_days": 3.3
+      },
+      {
+        "month": 4,
+        "avg_high_f": 72.4,
+        "avg_low_f": 54.8,
+        "avg_wind_mph": 6.5,
+        "avg_humidity": 62,
+        "precip_days": 1.4
+      },
+      {
+        "month": 5,
+        "avg_high_f": 73.7,
+        "avg_low_f": 58.1,
+        "avg_wind_mph": 6.4,
+        "avg_humidity": 67,
+        "precip_days": 0.7
+      },
+      {
+        "month": 6,
+        "avg_high_f": 77.2,
+        "avg_low_f": 61.4,
+        "avg_wind_mph": 6.1,
+        "avg_humidity": 65,
+        "precip_days": 0.2
+      },
+      {
+        "month": 7,
+        "avg_high_f": 82,
+        "avg_low_f": 64.7,
+        "avg_wind_mph": 5.9,
+        "avg_humidity": 65,
+        "precip_days": 0.1
+      },
+      {
+        "month": 8,
+        "avg_high_f": 84,
+        "avg_low_f": 65.4,
+        "avg_wind_mph": 5.7,
+        "avg_humidity": 65,
+        "precip_days": 0
+      },
+      {
+        "month": 9,
+        "avg_high_f": 83,
+        "avg_low_f": 64.2,
+        "avg_wind_mph": 5.6,
+        "avg_humidity": 65,
+        "precip_days": 0.2
+      },
+      {
+        "month": 10,
+        "avg_high_f": 78.6,
+        "avg_low_f": 59.9,
+        "avg_wind_mph": 5.2,
+        "avg_humidity": 60,
+        "precip_days": 1.1
+      },
+      {
+        "month": 11,
+        "avg_high_f": 72.9,
+        "avg_low_f": 53.1,
+        "avg_wind_mph": 5,
+        "avg_humidity": 54,
+        "precip_days": 1.7
+      },
+      {
+        "month": 12,
+        "avg_high_f": 67.4,
+        "avg_low_f": 48.2,
+        "avg_wind_mph": 4.9,
+        "avg_humidity": 62,
+        "precip_days": 3.6
+      }
+    ]
+  },
+  "louisville-ky": {
+    "station": {
+      "id": "USW00093821",
+      "name": "LOUISVILLE INTL AP, KY",
+      "latitude": 38.1811,
+      "longitude": -85.7392,
+      "distance_mi": 5.1
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 43.6,
+        "avg_low_f": 27.8,
+        "avg_wind_mph": 7.2,
+        "avg_humidity": 70,
+        "precip_days": 6.3
+      },
+      {
+        "month": 2,
+        "avg_high_f": 48.3,
+        "avg_low_f": 30.7,
+        "avg_wind_mph": 7.4,
+        "avg_humidity": 68,
+        "precip_days": 6
+      },
+      {
+        "month": 3,
+        "avg_high_f": 58.1,
+        "avg_low_f": 38.6,
+        "avg_wind_mph": 7.6,
+        "avg_humidity": 68,
+        "precip_days": 7.9
+      },
+      {
+        "month": 4,
+        "avg_high_f": 69.6,
+        "avg_low_f": 48.5,
+        "avg_wind_mph": 7.4,
+        "avg_humidity": 68,
+        "precip_days": 7.9
+      },
+      {
+        "month": 5,
+        "avg_high_f": 77.8,
+        "avg_low_f": 58.7,
+        "avg_wind_mph": 6.3,
+        "avg_humidity": 73,
+        "precip_days": 8.2
+      },
+      {
+        "month": 6,
+        "avg_high_f": 85.7,
+        "avg_low_f": 67.2,
+        "avg_wind_mph": 5.6,
+        "avg_humidity": 71,
+        "precip_days": 7.6
+      },
+      {
+        "month": 7,
+        "avg_high_f": 89,
+        "avg_low_f": 70.8,
+        "avg_wind_mph": 4.7,
+        "avg_humidity": 76,
+        "precip_days": 7
+      },
+      {
+        "month": 8,
+        "avg_high_f": 88.4,
+        "avg_low_f": 69.5,
+        "avg_wind_mph": 4.6,
+        "avg_humidity": 75,
+        "precip_days": 5.4
+      },
+      {
+        "month": 9,
+        "avg_high_f": 82.2,
+        "avg_low_f": 61.9,
+        "avg_wind_mph": 5.1,
+        "avg_humidity": 72,
+        "precip_days": 4.7
+      },
+      {
+        "month": 10,
+        "avg_high_f": 70.5,
+        "avg_low_f": 50.1,
+        "avg_wind_mph": 6.3,
+        "avg_humidity": 71,
+        "precip_days": 5.3
+      },
+      {
+        "month": 11,
+        "avg_high_f": 57.6,
+        "avg_low_f": 39.4,
+        "avg_wind_mph": 6.6,
+        "avg_humidity": 71,
+        "precip_days": 6
+      },
+      {
+        "month": 12,
+        "avg_high_f": 47.2,
+        "avg_low_f": 32.1,
+        "avg_wind_mph": 6.9,
+        "avg_humidity": 74,
+        "precip_days": 7.2
+      }
+    ]
+  },
+  "memphis-tn": {
+    "station": {
+      "id": "USW00013893",
+      "name": "MEMPHIS INTL AP, TN",
+      "latitude": 35.0564,
+      "longitude": -89.9864,
+      "distance_mi": 7.3
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 50.9,
+        "avg_low_f": 33.3,
+        "avg_wind_mph": 8,
+        "avg_humidity": 71,
+        "precip_days": 6.4
+      },
+      {
+        "month": 2,
+        "avg_high_f": 55.5,
+        "avg_low_f": 36.7,
+        "avg_wind_mph": 8.5,
+        "avg_humidity": 71,
+        "precip_days": 6.5
+      },
+      {
+        "month": 3,
+        "avg_high_f": 64.2,
+        "avg_low_f": 44.3,
+        "avg_wind_mph": 8.2,
+        "avg_humidity": 70,
+        "precip_days": 7.9
+      },
+      {
+        "month": 4,
+        "avg_high_f": 73.4,
+        "avg_low_f": 53,
+        "avg_wind_mph": 8.3,
+        "avg_humidity": 69,
+        "precip_days": 7.2
+      },
+      {
+        "month": 5,
+        "avg_high_f": 81.7,
+        "avg_low_f": 62.4,
+        "avg_wind_mph": 7.2,
+        "avg_humidity": 72,
+        "precip_days": 6.9
+      },
+      {
+        "month": 6,
+        "avg_high_f": 89.4,
+        "avg_low_f": 70.4,
+        "avg_wind_mph": 6,
+        "avg_humidity": 71,
+        "precip_days": 5.8
+      },
+      {
+        "month": 7,
+        "avg_high_f": 91.9,
+        "avg_low_f": 73.6,
+        "avg_wind_mph": 5.4,
+        "avg_humidity": 73,
+        "precip_days": 6.3
+      },
+      {
+        "month": 8,
+        "avg_high_f": 91.5,
+        "avg_low_f": 72.6,
+        "avg_wind_mph": 5.2,
+        "avg_humidity": 74,
+        "precip_days": 4.9
+      },
+      {
+        "month": 9,
+        "avg_high_f": 86,
+        "avg_low_f": 65.9,
+        "avg_wind_mph": 5.6,
+        "avg_humidity": 69,
+        "precip_days": 4.1
+      },
+      {
+        "month": 10,
+        "avg_high_f": 75.1,
+        "avg_low_f": 54,
+        "avg_wind_mph": 6.9,
+        "avg_humidity": 66,
+        "precip_days": 5.3
+      },
+      {
+        "month": 11,
+        "avg_high_f": 62.6,
+        "avg_low_f": 42.9,
+        "avg_wind_mph": 7.1,
+        "avg_humidity": 71,
+        "precip_days": 5.9
+      },
+      {
+        "month": 12,
+        "avg_high_f": 53.4,
+        "avg_low_f": 36.2,
+        "avg_wind_mph": 7.6,
+        "avg_humidity": 74,
+        "precip_days": 7.2
+      }
+    ]
+  },
+  "miami-fl": {
+    "station": {
+      "id": "USW00092811",
+      "name": "MIAMI BEACH, FL",
+      "latitude": 25.8064,
+      "longitude": -80.1336,
+      "distance_mi": 5.1
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 73.6,
+        "avg_low_f": 61.2,
+        "avg_wind_mph": 9.8,
+        "avg_humidity": 73,
+        "precip_days": 4.5
+      },
+      {
+        "month": 2,
+        "avg_high_f": 74.8,
+        "avg_low_f": 63.3,
+        "avg_wind_mph": 9.7,
+        "avg_humidity": 73,
+        "precip_days": 3.7
+      },
+      {
+        "month": 3,
+        "avg_high_f": 76.5,
+        "avg_low_f": 65.2,
+        "avg_wind_mph": 9.9,
+        "avg_humidity": 69,
+        "precip_days": 4.1
+      },
+      {
+        "month": 4,
+        "avg_high_f": 79.6,
+        "avg_low_f": 69.8,
+        "avg_wind_mph": 9.4,
+        "avg_humidity": 71,
+        "precip_days": 4.7
+      },
+      {
+        "month": 5,
+        "avg_high_f": 82.7,
+        "avg_low_f": 73.6,
+        "avg_wind_mph": 8.6,
+        "avg_humidity": 73,
+        "precip_days": 6.2
+      },
+      {
+        "month": 6,
+        "avg_high_f": 86,
+        "avg_low_f": 76.5,
+        "avg_wind_mph": 6.6,
+        "avg_humidity": 81,
+        "precip_days": 10.1
+      },
+      {
+        "month": 7,
+        "avg_high_f": 87.8,
+        "avg_low_f": 78,
+        "avg_wind_mph": 6.4,
+        "avg_humidity": 78,
+        "precip_days": 8.6
+      },
+      {
+        "month": 8,
+        "avg_high_f": 88.1,
+        "avg_low_f": 78.1,
+        "avg_wind_mph": 6.8,
+        "avg_humidity": 78,
+        "precip_days": 10.2
+      },
+      {
+        "month": 9,
+        "avg_high_f": 87,
+        "avg_low_f": 77.2,
+        "avg_wind_mph": 6.7,
+        "avg_humidity": 81,
+        "precip_days": 11
+      },
+      {
+        "month": 10,
+        "avg_high_f": 83.7,
+        "avg_low_f": 74.4,
+        "avg_wind_mph": 9.2,
+        "avg_humidity": 78,
+        "precip_days": 9.2
+      },
+      {
+        "month": 11,
+        "avg_high_f": 78.9,
+        "avg_low_f": 68.6,
+        "avg_wind_mph": 9.2,
+        "avg_humidity": 75,
+        "precip_days": 4.9
+      },
+      {
+        "month": 12,
+        "avg_high_f": 76.1,
+        "avg_low_f": 64.6,
+        "avg_wind_mph": 9.4,
+        "avg_humidity": 75,
+        "precip_days": 3.8
+      }
+    ]
+  },
+  "milwaukee-wi": {
+    "station": {
+      "id": "USW00014839",
+      "name": "MILWAUKEE MITCHELL AP, WI",
+      "latitude": 42.955,
+      "longitude": -87.9044,
+      "distance_mi": 5.8
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 30.9,
+        "avg_low_f": 17.2,
+        "avg_wind_mph": 9.8,
+        "avg_humidity": 74,
+        "precip_days": 5
+      },
+      {
+        "month": 2,
+        "avg_high_f": 34.2,
+        "avg_low_f": 20,
+        "avg_wind_mph": 10.4,
+        "avg_humidity": 70,
+        "precip_days": 4.1
+      },
+      {
+        "month": 3,
+        "avg_high_f": 44.2,
+        "avg_low_f": 28.7,
+        "avg_wind_mph": 10,
+        "avg_humidity": 71,
+        "precip_days": 5.3
+      },
+      {
+        "month": 4,
+        "avg_high_f": 54.7,
+        "avg_low_f": 37.8,
+        "avg_wind_mph": 9.9,
+        "avg_humidity": 70,
+        "precip_days": 7.2
+      },
+      {
+        "month": 5,
+        "avg_high_f": 66.5,
+        "avg_low_f": 47.8,
+        "avg_wind_mph": 8.9,
+        "avg_humidity": 72,
+        "precip_days": 7.3
+      },
+      {
+        "month": 6,
+        "avg_high_f": 76.8,
+        "avg_low_f": 58.4,
+        "avg_wind_mph": 8.3,
+        "avg_humidity": 72,
+        "precip_days": 7.3
+      },
+      {
+        "month": 7,
+        "avg_high_f": 81.9,
+        "avg_low_f": 64.7,
+        "avg_wind_mph": 7.5,
+        "avg_humidity": 73,
+        "precip_days": 5.7
+      },
+      {
+        "month": 8,
+        "avg_high_f": 80.3,
+        "avg_low_f": 64.2,
+        "avg_wind_mph": 7.6,
+        "avg_humidity": 73,
+        "precip_days": 6.2
+      },
+      {
+        "month": 9,
+        "avg_high_f": 73.5,
+        "avg_low_f": 56.4,
+        "avg_wind_mph": 8.6,
+        "avg_humidity": 74,
+        "precip_days": 5.4
+      },
+      {
+        "month": 10,
+        "avg_high_f": 61.3,
+        "avg_low_f": 44.7,
+        "avg_wind_mph": 10,
+        "avg_humidity": 70,
+        "precip_days": 5.8
+      },
+      {
+        "month": 11,
+        "avg_high_f": 47.8,
+        "avg_low_f": 33.1,
+        "avg_wind_mph": 10.3,
+        "avg_humidity": 70,
+        "precip_days": 5.1
+      },
+      {
+        "month": 12,
+        "avg_high_f": 36.1,
+        "avg_low_f": 23,
+        "avg_wind_mph": 10,
+        "avg_humidity": 73,
+        "precip_days": 4.8
+      }
+    ]
+  },
+  "minneapolis-mn": {
+    "station": {
+      "id": "USW00014922",
+      "name": "MINNEAPOLIS/ST PAUL AP, MN",
+      "latitude": 44.8831,
+      "longitude": -93.2289,
+      "distance_mi": 7.4
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 23.6,
+        "avg_low_f": 8.8,
+        "avg_wind_mph": 6.9,
+        "avg_humidity": 77,
+        "precip_days": 3.1
+      },
+      {
+        "month": 2,
+        "avg_high_f": 28.5,
+        "avg_low_f": 12.7,
+        "avg_wind_mph": 7.4,
+        "avg_humidity": 72,
+        "precip_days": 2.5
+      },
+      {
+        "month": 3,
+        "avg_high_f": 41.7,
+        "avg_low_f": 24.9,
+        "avg_wind_mph": 7.7,
+        "avg_humidity": 67,
+        "precip_days": 4.6
+      },
+      {
+        "month": 4,
+        "avg_high_f": 56.6,
+        "avg_low_f": 37.5,
+        "avg_wind_mph": 8.4,
+        "avg_humidity": 66,
+        "precip_days": 6.3
+      },
+      {
+        "month": 5,
+        "avg_high_f": 69.2,
+        "avg_low_f": 49.9,
+        "avg_wind_mph": 7.4,
+        "avg_humidity": 65,
+        "precip_days": 8
+      },
+      {
+        "month": 6,
+        "avg_high_f": 79,
+        "avg_low_f": 60.4,
+        "avg_wind_mph": 7.2,
+        "avg_humidity": 65,
+        "precip_days": 7.5
+      },
+      {
+        "month": 7,
+        "avg_high_f": 83.4,
+        "avg_low_f": 65.3,
+        "avg_wind_mph": 6.2,
+        "avg_humidity": 70,
+        "precip_days": 6.6
+      },
+      {
+        "month": 8,
+        "avg_high_f": 80.7,
+        "avg_low_f": 62.8,
+        "avg_wind_mph": 6.4,
+        "avg_humidity": 72,
+        "precip_days": 6.1
+      },
+      {
+        "month": 9,
+        "avg_high_f": 72.9,
+        "avg_low_f": 54.2,
+        "avg_wind_mph": 7.3,
+        "avg_humidity": 71,
+        "precip_days": 5.3
+      },
+      {
+        "month": 10,
+        "avg_high_f": 58.1,
+        "avg_low_f": 40.9,
+        "avg_wind_mph": 7.8,
+        "avg_humidity": 69,
+        "precip_days": 4.9
+      },
+      {
+        "month": 11,
+        "avg_high_f": 41.9,
+        "avg_low_f": 27.7,
+        "avg_wind_mph": 7.7,
+        "avg_humidity": 72,
+        "precip_days": 3.6
+      },
+      {
+        "month": 12,
+        "avg_high_f": 28.8,
+        "avg_low_f": 15.2,
+        "avg_wind_mph": 7.2,
+        "avg_humidity": 77,
+        "precip_days": 3.3
+      }
+    ]
+  },
+  "nashville-tn": {
+    "station": {
+      "id": "USW00013897",
+      "name": "NASHVILLE INTL AP, TN",
+      "latitude": 36.1189,
+      "longitude": -86.6892,
+      "distance_mi": 6
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 49.1,
+        "avg_low_f": 30.1,
+        "avg_wind_mph": 7.1,
+        "avg_humidity": 72,
+        "precip_days": 6.6
+      },
+      {
+        "month": 2,
+        "avg_high_f": 53.8,
+        "avg_low_f": 33,
+        "avg_wind_mph": 7.4,
+        "avg_humidity": 72,
+        "precip_days": 7.2
+      },
+      {
+        "month": 3,
+        "avg_high_f": 62.7,
+        "avg_low_f": 40.2,
+        "avg_wind_mph": 7.2,
+        "avg_humidity": 71,
+        "precip_days": 8
+      },
+      {
+        "month": 4,
+        "avg_high_f": 72.6,
+        "avg_low_f": 48.9,
+        "avg_wind_mph": 7,
+        "avg_humidity": 70,
+        "precip_days": 7.5
+      },
+      {
+        "month": 5,
+        "avg_high_f": 80.4,
+        "avg_low_f": 58.3,
+        "avg_wind_mph": 6,
+        "avg_humidity": 73,
+        "precip_days": 7.8
+      },
+      {
+        "month": 6,
+        "avg_high_f": 87.7,
+        "avg_low_f": 66.4,
+        "avg_wind_mph": 5.2,
+        "avg_humidity": 72,
+        "precip_days": 7
+      },
+      {
+        "month": 7,
+        "avg_high_f": 90.9,
+        "avg_low_f": 70.5,
+        "avg_wind_mph": 4.4,
+        "avg_humidity": 77,
+        "precip_days": 6.7
+      },
+      {
+        "month": 8,
+        "avg_high_f": 90.4,
+        "avg_low_f": 69,
+        "avg_wind_mph": 4.4,
+        "avg_humidity": 77,
+        "precip_days": 5.7
+      },
+      {
+        "month": 9,
+        "avg_high_f": 84.4,
+        "avg_low_f": 61.8,
+        "avg_wind_mph": 4.8,
+        "avg_humidity": 73,
+        "precip_days": 5.1
+      },
+      {
+        "month": 10,
+        "avg_high_f": 73.5,
+        "avg_low_f": 49.9,
+        "avg_wind_mph": 6,
+        "avg_humidity": 70,
+        "precip_days": 5.6
+      },
+      {
+        "month": 11,
+        "avg_high_f": 61.4,
+        "avg_low_f": 39.2,
+        "avg_wind_mph": 6.3,
+        "avg_humidity": 71,
+        "precip_days": 5.9
+      },
+      {
+        "month": 12,
+        "avg_high_f": 52.2,
+        "avg_low_f": 33.3,
+        "avg_wind_mph": 6.9,
+        "avg_humidity": 75,
+        "precip_days": 7.6
+      }
+    ]
+  },
+  "new-orleans-la": {
+    "station": {
+      "id": "USW00012930",
+      "name": "NEW ORLEANS AUDUBON, LA",
+      "latitude": 29.9167,
+      "longitude": -90.1303,
+      "distance_mi": 4.2
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 64.3,
+        "avg_low_f": 46.5,
+        "avg_wind_mph": 9.8,
+        "avg_humidity": 76,
+        "precip_days": 6.4
+      },
+      {
+        "month": 2,
+        "avg_high_f": 68.4,
+        "avg_low_f": 50.5,
+        "avg_wind_mph": 9.8,
+        "avg_humidity": 78,
+        "precip_days": 5.4
+      },
+      {
+        "month": 3,
+        "avg_high_f": 74.5,
+        "avg_low_f": 55.8,
+        "avg_wind_mph": 9.5,
+        "avg_humidity": 77,
+        "precip_days": 4.9
+      },
+      {
+        "month": 4,
+        "avg_high_f": 80.9,
+        "avg_low_f": 62,
+        "avg_wind_mph": 9.3,
+        "avg_humidity": 74,
+        "precip_days": 5.1
+      },
+      {
+        "month": 5,
+        "avg_high_f": 87.9,
+        "avg_low_f": 69.3,
+        "avg_wind_mph": 7.5,
+        "avg_humidity": 76,
+        "precip_days": 5.3
+      },
+      {
+        "month": 6,
+        "avg_high_f": 92.5,
+        "avg_low_f": 74.9,
+        "avg_wind_mph": 6.6,
+        "avg_humidity": 79,
+        "precip_days": 9.3
+      },
+      {
+        "month": 7,
+        "avg_high_f": 93.9,
+        "avg_low_f": 76.6,
+        "avg_wind_mph": 5.6,
+        "avg_humidity": 81,
+        "precip_days": 10.6
+      },
+      {
+        "month": 8,
+        "avg_high_f": 94,
+        "avg_low_f": 76.9,
+        "avg_wind_mph": 6,
+        "avg_humidity": 80,
+        "precip_days": 9.3
+      },
+      {
+        "month": 9,
+        "avg_high_f": 90.1,
+        "avg_low_f": 73.6,
+        "avg_wind_mph": 6.5,
+        "avg_humidity": 79,
+        "precip_days": 6.9
+      },
+      {
+        "month": 10,
+        "avg_high_f": 82.6,
+        "avg_low_f": 64.7,
+        "avg_wind_mph": 8.1,
+        "avg_humidity": 75,
+        "precip_days": 4.4
+      },
+      {
+        "month": 11,
+        "avg_high_f": 72.9,
+        "avg_low_f": 54.6,
+        "avg_wind_mph": 8.7,
+        "avg_humidity": 76,
+        "precip_days": 4.7
+      },
+      {
+        "month": 12,
+        "avg_high_f": 66.4,
+        "avg_low_f": 49,
+        "avg_wind_mph": 9,
+        "avg_humidity": 80,
+        "precip_days": 5.9
+      }
+    ]
+  },
+  "new-york-ny": {
+    "station": {
+      "id": "USW00094728",
+      "name": "NEW YORK CNTRL PK TWR, NY",
+      "latitude": 40.7789,
+      "longitude": -73.9692,
+      "distance_mi": 2.4
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 39.5,
+        "avg_low_f": 27.9,
+        "avg_wind_mph": 9.1,
+        "avg_humidity": 68,
+        "precip_days": 6.3
+      },
+      {
+        "month": 2,
+        "avg_high_f": 42.2,
+        "avg_low_f": 29.5,
+        "avg_wind_mph": 8.8,
+        "avg_humidity": 69,
+        "precip_days": 6
+      },
+      {
+        "month": 3,
+        "avg_high_f": 49.9,
+        "avg_low_f": 35.8,
+        "avg_wind_mph": 9.5,
+        "avg_humidity": 66,
+        "precip_days": 7.5
+      },
+      {
+        "month": 4,
+        "avg_high_f": 61.8,
+        "avg_low_f": 45.5,
+        "avg_wind_mph": 9.2,
+        "avg_humidity": 67,
+        "precip_days": 6.5
+      },
+      {
+        "month": 5,
+        "avg_high_f": 71.4,
+        "avg_low_f": 55,
+        "avg_wind_mph": 8,
+        "avg_humidity": 71,
+        "precip_days": 7.3
+      },
+      {
+        "month": 6,
+        "avg_high_f": 79.7,
+        "avg_low_f": 64.4,
+        "avg_wind_mph": 7.6,
+        "avg_humidity": 71,
+        "precip_days": 7
+      },
+      {
+        "month": 7,
+        "avg_high_f": 84.9,
+        "avg_low_f": 70.1,
+        "avg_wind_mph": 6.6,
+        "avg_humidity": 73,
+        "precip_days": 6.9
+      },
+      {
+        "month": 8,
+        "avg_high_f": 83.3,
+        "avg_low_f": 68.9,
+        "avg_wind_mph": 6.7,
+        "avg_humidity": 74,
+        "precip_days": 6.5
+      },
+      {
+        "month": 9,
+        "avg_high_f": 76.2,
+        "avg_low_f": 62.3,
+        "avg_wind_mph": 7.3,
+        "avg_humidity": 75,
+        "precip_days": 6.2
+      },
+      {
+        "month": 10,
+        "avg_high_f": 64.5,
+        "avg_low_f": 51.4,
+        "avg_wind_mph": 8.1,
+        "avg_humidity": 74,
+        "precip_days": 5.6
+      },
+      {
+        "month": 11,
+        "avg_high_f": 54,
+        "avg_low_f": 42,
+        "avg_wind_mph": 8.3,
+        "avg_humidity": 70,
+        "precip_days": 5.7
+      },
+      {
+        "month": 12,
+        "avg_high_f": 44.3,
+        "avg_low_f": 33.8,
+        "avg_wind_mph": 8,
+        "avg_humidity": 73,
+        "precip_days": 7.3
+      }
+    ]
+  },
+  "oklahoma-city-ok": {
+    "station": {
+      "id": "USW00013967",
+      "name": "OKLAHOMA CITY WILL ROGERS AP, OK",
+      "latitude": 35.3889,
+      "longitude": -97.6006,
+      "distance_mi": 7.2
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 49.3,
+        "avg_low_f": 27,
+        "avg_wind_mph": 10,
+        "avg_humidity": 63,
+        "precip_days": 2.3
+      },
+      {
+        "month": 2,
+        "avg_high_f": 53.8,
+        "avg_low_f": 30.8,
+        "avg_wind_mph": 10.7,
+        "avg_humidity": 62,
+        "precip_days": 2.9
+      },
+      {
+        "month": 3,
+        "avg_high_f": 62.9,
+        "avg_low_f": 39.5,
+        "avg_wind_mph": 11.1,
+        "avg_humidity": 61,
+        "precip_days": 4.5
+      },
+      {
+        "month": 4,
+        "avg_high_f": 71.1,
+        "avg_low_f": 47.5,
+        "avg_wind_mph": 11.7,
+        "avg_humidity": 61,
+        "precip_days": 4.7
+      },
+      {
+        "month": 5,
+        "avg_high_f": 78.9,
+        "avg_low_f": 57.6,
+        "avg_wind_mph": 10.3,
+        "avg_humidity": 70,
+        "precip_days": 6.7
+      },
+      {
+        "month": 6,
+        "avg_high_f": 87.5,
+        "avg_low_f": 66.2,
+        "avg_wind_mph": 9.5,
+        "avg_humidity": 65,
+        "precip_days": 6.1
+      },
+      {
+        "month": 7,
+        "avg_high_f": 93.1,
+        "avg_low_f": 70.3,
+        "avg_wind_mph": 8.6,
+        "avg_humidity": 61,
+        "precip_days": 4.3
+      },
+      {
+        "month": 8,
+        "avg_high_f": 92.2,
+        "avg_low_f": 69.1,
+        "avg_wind_mph": 8.4,
+        "avg_humidity": 61,
+        "precip_days": 4.9
+      },
+      {
+        "month": 9,
+        "avg_high_f": 83.9,
+        "avg_low_f": 61.5,
+        "avg_wind_mph": 8.7,
+        "avg_humidity": 62,
+        "precip_days": 5.1
+      },
+      {
+        "month": 10,
+        "avg_high_f": 72.8,
+        "avg_low_f": 49.4,
+        "avg_wind_mph": 10.3,
+        "avg_humidity": 60,
+        "precip_days": 4.5
+      },
+      {
+        "month": 11,
+        "avg_high_f": 60.7,
+        "avg_low_f": 37.7,
+        "avg_wind_mph": 10,
+        "avg_humidity": 67,
+        "precip_days": 3.4
+      },
+      {
+        "month": 12,
+        "avg_high_f": 50.4,
+        "avg_low_f": 29.5,
+        "avg_wind_mph": 9.5,
+        "avg_humidity": 64,
+        "precip_days": 3.1
+      }
+    ]
+  },
+  "orlando-fl": {
+    "station": {
+      "id": "USW00012841",
+      "name": "ORLANDO EXECUTIVE AP, FL",
+      "latitude": 28.5453,
+      "longitude": -81.3331,
+      "distance_mi": 2.8
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 71.2,
+        "avg_low_f": 51.8,
+        "avg_wind_mph": 7.8,
+        "avg_humidity": 75,
+        "precip_days": 3.8
+      },
+      {
+        "month": 2,
+        "avg_high_f": 74.3,
+        "avg_low_f": 54.3,
+        "avg_wind_mph": 7.5,
+        "avg_humidity": 75,
+        "precip_days": 3.4
+      },
+      {
+        "month": 3,
+        "avg_high_f": 78.4,
+        "avg_low_f": 58.3,
+        "avg_wind_mph": 7.7,
+        "avg_humidity": 69,
+        "precip_days": 4
+      },
+      {
+        "month": 4,
+        "avg_high_f": 83.2,
+        "avg_low_f": 62.8,
+        "avg_wind_mph": 7.7,
+        "avg_humidity": 69,
+        "precip_days": 3.9
+      },
+      {
+        "month": 5,
+        "avg_high_f": 88.2,
+        "avg_low_f": 68.7,
+        "avg_wind_mph": 6.9,
+        "avg_humidity": 70,
+        "precip_days": 5.3
+      },
+      {
+        "month": 6,
+        "avg_high_f": 90.7,
+        "avg_low_f": 73.4,
+        "avg_wind_mph": 5.5,
+        "avg_humidity": 80,
+        "precip_days": 11.8
+      },
+      {
+        "month": 7,
+        "avg_high_f": 91.9,
+        "avg_low_f": 75,
+        "avg_wind_mph": 4.7,
+        "avg_humidity": 83,
+        "precip_days": 11.9
+      },
+      {
+        "month": 8,
+        "avg_high_f": 91.8,
+        "avg_low_f": 75.3,
+        "avg_wind_mph": 5.2,
+        "avg_humidity": 84,
+        "precip_days": 11.7
+      },
+      {
+        "month": 9,
+        "avg_high_f": 89.5,
+        "avg_low_f": 73.9,
+        "avg_wind_mph": 5.7,
+        "avg_humidity": 85,
+        "precip_days": 9.8
+      },
+      {
+        "month": 10,
+        "avg_high_f": 84.4,
+        "avg_low_f": 68.3,
+        "avg_wind_mph": 7.2,
+        "avg_humidity": 80,
+        "precip_days": 4.7
+      },
+      {
+        "month": 11,
+        "avg_high_f": 77.8,
+        "avg_low_f": 60.1,
+        "avg_wind_mph": 7.2,
+        "avg_humidity": 78,
+        "precip_days": 3
+      },
+      {
+        "month": 12,
+        "avg_high_f": 73.1,
+        "avg_low_f": 54.5,
+        "avg_wind_mph": 7.1,
+        "avg_humidity": 79,
+        "precip_days": 3.4
+      }
+    ]
+  },
+  "philadelphia-pa": {
+    "station": {
+      "id": "USW00013739",
+      "name": "PHILADELPHIA INTL AP, PA",
+      "latitude": 39.8683,
+      "longitude": -75.2311,
+      "distance_mi": 6.8
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 41.3,
+        "avg_low_f": 26,
+        "avg_wind_mph": 8.1,
+        "avg_humidity": 66,
+        "precip_days": 6
+      },
+      {
+        "month": 2,
+        "avg_high_f": 44.3,
+        "avg_low_f": 27.5,
+        "avg_wind_mph": 8,
+        "avg_humidity": 66,
+        "precip_days": 5.8
+      },
+      {
+        "month": 3,
+        "avg_high_f": 52.8,
+        "avg_low_f": 34.3,
+        "avg_wind_mph": 8.5,
+        "avg_humidity": 63,
+        "precip_days": 6.7
+      },
+      {
+        "month": 4,
+        "avg_high_f": 64.7,
+        "avg_low_f": 44.3,
+        "avg_wind_mph": 8.4,
+        "avg_humidity": 64,
+        "precip_days": 6.4
+      },
+      {
+        "month": 5,
+        "avg_high_f": 74.4,
+        "avg_low_f": 54.2,
+        "avg_wind_mph": 7.2,
+        "avg_humidity": 68,
+        "precip_days": 6.3
+      },
+      {
+        "month": 6,
+        "avg_high_f": 83.2,
+        "avg_low_f": 63.9,
+        "avg_wind_mph": 6.9,
+        "avg_humidity": 67,
+        "precip_days": 6.6
+      },
+      {
+        "month": 7,
+        "avg_high_f": 87.8,
+        "avg_low_f": 69.6,
+        "avg_wind_mph": 5.7,
+        "avg_humidity": 70,
+        "precip_days": 6.3
+      },
+      {
+        "month": 8,
+        "avg_high_f": 85.8,
+        "avg_low_f": 67.9,
+        "avg_wind_mph": 5.8,
+        "avg_humidity": 71,
+        "precip_days": 5.8
+      },
+      {
+        "month": 9,
+        "avg_high_f": 78.9,
+        "avg_low_f": 60.9,
+        "avg_wind_mph": 6.5,
+        "avg_humidity": 71,
+        "precip_days": 5.6
+      },
+      {
+        "month": 10,
+        "avg_high_f": 67.2,
+        "avg_low_f": 49.2,
+        "avg_wind_mph": 7.2,
+        "avg_humidity": 71,
+        "precip_days": 5.5
+      },
+      {
+        "month": 11,
+        "avg_high_f": 55.9,
+        "avg_low_f": 38.8,
+        "avg_wind_mph": 7.5,
+        "avg_humidity": 68,
+        "precip_days": 5.6
+      },
+      {
+        "month": 12,
+        "avg_high_f": 46,
+        "avg_low_f": 31.2,
+        "avg_wind_mph": 7.3,
+        "avg_humidity": 71,
+        "precip_days": 6.7
+      }
+    ]
+  },
+  "phoenix-az": {
+    "station": {
+      "id": "USW00023183",
+      "name": "PHOENIX SKY HARBOR INTL AP, AZ",
+      "latitude": 33.4278,
+      "longitude": -112.0039,
+      "distance_mi": 4.4
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 67.6,
+        "avg_low_f": 46,
+        "avg_wind_mph": 5.3,
+        "avg_humidity": 55,
+        "precip_days": 2.2
+      },
+      {
+        "month": 2,
+        "avg_high_f": 70.8,
+        "avg_low_f": 49,
+        "avg_wind_mph": 5.9,
+        "avg_humidity": 46,
+        "precip_days": 2.1
+      },
+      {
+        "month": 3,
+        "avg_high_f": 78.1,
+        "avg_low_f": 54.5,
+        "avg_wind_mph": 6.3,
+        "avg_humidity": 37,
+        "precip_days": 1.7
+      },
+      {
+        "month": 4,
+        "avg_high_f": 85.5,
+        "avg_low_f": 60.8,
+        "avg_wind_mph": 7,
+        "avg_humidity": 21,
+        "precip_days": 0.7
+      },
+      {
+        "month": 5,
+        "avg_high_f": 94.5,
+        "avg_low_f": 69.5,
+        "avg_wind_mph": 7.1,
+        "avg_humidity": 19,
+        "precip_days": 0.4
+      },
+      {
+        "month": 6,
+        "avg_high_f": 104.2,
+        "avg_low_f": 78.6,
+        "avg_wind_mph": 7.1,
+        "avg_humidity": 17,
+        "precip_days": 0.1
+      },
+      {
+        "month": 7,
+        "avg_high_f": 106.5,
+        "avg_low_f": 84.5,
+        "avg_wind_mph": 6.9,
+        "avg_humidity": 30,
+        "precip_days": 2
+      },
+      {
+        "month": 8,
+        "avg_high_f": 105.1,
+        "avg_low_f": 83.6,
+        "avg_wind_mph": 6.2,
+        "avg_humidity": 35,
+        "precip_days": 2.4
+      },
+      {
+        "month": 9,
+        "avg_high_f": 100.4,
+        "avg_low_f": 78.1,
+        "avg_wind_mph": 6.2,
+        "avg_humidity": 32,
+        "precip_days": 1.2
+      },
+      {
+        "month": 10,
+        "avg_high_f": 89.2,
+        "avg_low_f": 65.6,
+        "avg_wind_mph": 5.9,
+        "avg_humidity": 32,
+        "precip_days": 1.1
+      },
+      {
+        "month": 11,
+        "avg_high_f": 76.5,
+        "avg_low_f": 53.7,
+        "avg_wind_mph": 5.4,
+        "avg_humidity": 35,
+        "precip_days": 1.2
+      },
+      {
+        "month": 12,
+        "avg_high_f": 66.2,
+        "avg_low_f": 45.3,
+        "avg_wind_mph": 4.8,
+        "avg_humidity": 49,
+        "precip_days": 2.1
+      }
+    ]
+  },
+  "pittsburgh-pa": {
+    "station": {
+      "id": "USW00014762",
+      "name": "PITTSBURGH ALLEGHENY CO AP, PA",
+      "latitude": 40.3547,
+      "longitude": -79.9217,
+      "distance_mi": 7.1
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 36.6,
+        "avg_low_f": 22.3,
+        "avg_wind_mph": 7.7,
+        "avg_humidity": 72,
+        "precip_days": 6.3
+      },
+      {
+        "month": 2,
+        "avg_high_f": 39.9,
+        "avg_low_f": 24.3,
+        "avg_wind_mph": 7.8,
+        "avg_humidity": 69,
+        "precip_days": 6.4
+      },
+      {
+        "month": 3,
+        "avg_high_f": 49.4,
+        "avg_low_f": 31.3,
+        "avg_wind_mph": 7.9,
+        "avg_humidity": 67,
+        "precip_days": 7.8
+      },
+      {
+        "month": 4,
+        "avg_high_f": 62.5,
+        "avg_low_f": 41.8,
+        "avg_wind_mph": 7.5,
+        "avg_humidity": 68,
+        "precip_days": 8.8
+      },
+      {
+        "month": 5,
+        "avg_high_f": 71.9,
+        "avg_low_f": 51.8,
+        "avg_wind_mph": 6.4,
+        "avg_humidity": 73,
+        "precip_days": 9.2
+      },
+      {
+        "month": 6,
+        "avg_high_f": 79.1,
+        "avg_low_f": 59.9,
+        "avg_wind_mph": 6.1,
+        "avg_humidity": 72,
+        "precip_days": 8.2
+      },
+      {
+        "month": 7,
+        "avg_high_f": 83,
+        "avg_low_f": 64.1,
+        "avg_wind_mph": 5.1,
+        "avg_humidity": 75,
+        "precip_days": 8.2
+      },
+      {
+        "month": 8,
+        "avg_high_f": 81.3,
+        "avg_low_f": 62.8,
+        "avg_wind_mph": 5,
+        "avg_humidity": 75,
+        "precip_days": 7.4
+      },
+      {
+        "month": 9,
+        "avg_high_f": 74.8,
+        "avg_low_f": 55.9,
+        "avg_wind_mph": 5.6,
+        "avg_humidity": 75,
+        "precip_days": 5.9
+      },
+      {
+        "month": 10,
+        "avg_high_f": 63.3,
+        "avg_low_f": 45.1,
+        "avg_wind_mph": 6.6,
+        "avg_humidity": 74,
+        "precip_days": 7.8
+      },
+      {
+        "month": 11,
+        "avg_high_f": 51.1,
+        "avg_low_f": 35.3,
+        "avg_wind_mph": 7.2,
+        "avg_humidity": 71,
+        "precip_days": 6.3
+      },
+      {
+        "month": 12,
+        "avg_high_f": 41,
+        "avg_low_f": 27.7,
+        "avg_wind_mph": 7.3,
+        "avg_humidity": 74,
+        "precip_days": 7.1
+      }
+    ]
+  },
+  "portland-or": {
+    "station": {
+      "id": "USW00024229",
+      "name": "PORTLAND INTL AP, OR",
+      "latitude": 45.5908,
+      "longitude": -122.6003,
+      "distance_mi": 6.4
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 47.5,
+        "avg_low_f": 36.2,
+        "avg_wind_mph": 7.6,
+        "avg_humidity": 85,
+        "precip_days": 12.3
+      },
+      {
+        "month": 2,
+        "avg_high_f": 51.5,
+        "avg_low_f": 36.8,
+        "avg_wind_mph": 6.8,
+        "avg_humidity": 83,
+        "precip_days": 9.3
+      },
+      {
+        "month": 3,
+        "avg_high_f": 56.8,
+        "avg_low_f": 39.7,
+        "avg_wind_mph": 6.1,
+        "avg_humidity": 80,
+        "precip_days": 11.1
+      },
+      {
+        "month": 4,
+        "avg_high_f": 62,
+        "avg_low_f": 43.7,
+        "avg_wind_mph": 5.8,
+        "avg_humidity": 76,
+        "precip_days": 9
+      },
+      {
+        "month": 5,
+        "avg_high_f": 69.3,
+        "avg_low_f": 49.4,
+        "avg_wind_mph": 5.1,
+        "avg_humidity": 73,
+        "precip_days": 7.3
+      },
+      {
+        "month": 6,
+        "avg_high_f": 74.3,
+        "avg_low_f": 54.1,
+        "avg_wind_mph": 5.5,
+        "avg_humidity": 66,
+        "precip_days": 4.6
+      },
+      {
+        "month": 7,
+        "avg_high_f": 81.9,
+        "avg_low_f": 58.5,
+        "avg_wind_mph": 5.4,
+        "avg_humidity": 58,
+        "precip_days": 1.5
+      },
+      {
+        "month": 8,
+        "avg_high_f": 82.3,
+        "avg_low_f": 58.9,
+        "avg_wind_mph": 5.2,
+        "avg_humidity": 58,
+        "precip_days": 1.6
+      },
+      {
+        "month": 9,
+        "avg_high_f": 76.7,
+        "avg_low_f": 54.1,
+        "avg_wind_mph": 5.1,
+        "avg_humidity": 68,
+        "precip_days": 3.5
+      },
+      {
+        "month": 10,
+        "avg_high_f": 64.4,
+        "avg_low_f": 46.7,
+        "avg_wind_mph": 5.8,
+        "avg_humidity": 79,
+        "precip_days": 7.9
+      },
+      {
+        "month": 11,
+        "avg_high_f": 53.5,
+        "avg_low_f": 40.6,
+        "avg_wind_mph": 6.9,
+        "avg_humidity": 84,
+        "precip_days": 12.2
+      },
+      {
+        "month": 12,
+        "avg_high_f": 46.9,
+        "avg_low_f": 36.2,
+        "avg_wind_mph": 7.5,
+        "avg_humidity": 86,
+        "precip_days": 13
+      }
+    ]
+  },
+  "providence-ri": {
+    "station": {
+      "id": "USW00014765",
+      "name": "PROVIDENCE T F GREEN AP, RI",
+      "latitude": 41.7219,
+      "longitude": -71.4325,
+      "distance_mi": 7.1
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 38.3,
+        "avg_low_f": 22.1,
+        "avg_wind_mph": 8.3,
+        "avg_humidity": 67,
+        "precip_days": 6.8
+      },
+      {
+        "month": 2,
+        "avg_high_f": 40.5,
+        "avg_low_f": 23.5,
+        "avg_wind_mph": 8.1,
+        "avg_humidity": 69,
+        "precip_days": 6.3
+      },
+      {
+        "month": 3,
+        "avg_high_f": 47.7,
+        "avg_low_f": 30.2,
+        "avg_wind_mph": 8.7,
+        "avg_humidity": 65,
+        "precip_days": 7.2
+      },
+      {
+        "month": 4,
+        "avg_high_f": 58.9,
+        "avg_low_f": 39.6,
+        "avg_wind_mph": 8.2,
+        "avg_humidity": 68,
+        "precip_days": 7.1
+      },
+      {
+        "month": 5,
+        "avg_high_f": 68.9,
+        "avg_low_f": 49.2,
+        "avg_wind_mph": 7.4,
+        "avg_humidity": 70,
+        "precip_days": 7.1
+      },
+      {
+        "month": 6,
+        "avg_high_f": 77.7,
+        "avg_low_f": 58.8,
+        "avg_wind_mph": 6.9,
+        "avg_humidity": 71,
+        "precip_days": 6.4
+      },
+      {
+        "month": 7,
+        "avg_high_f": 83.6,
+        "avg_low_f": 65.2,
+        "avg_wind_mph": 6.3,
+        "avg_humidity": 74,
+        "precip_days": 5.5
+      },
+      {
+        "month": 8,
+        "avg_high_f": 82.2,
+        "avg_low_f": 63.9,
+        "avg_wind_mph": 6.2,
+        "avg_humidity": 74,
+        "precip_days": 5.8
+      },
+      {
+        "month": 9,
+        "avg_high_f": 74.8,
+        "avg_low_f": 56.5,
+        "avg_wind_mph": 6.7,
+        "avg_humidity": 76,
+        "precip_days": 6
+      },
+      {
+        "month": 10,
+        "avg_high_f": 63.8,
+        "avg_low_f": 45.1,
+        "avg_wind_mph": 7.3,
+        "avg_humidity": 76,
+        "precip_days": 6.7
+      },
+      {
+        "month": 11,
+        "avg_high_f": 53.2,
+        "avg_low_f": 35.8,
+        "avg_wind_mph": 7.8,
+        "avg_humidity": 70,
+        "precip_days": 6.3
+      },
+      {
+        "month": 12,
+        "avg_high_f": 43.4,
+        "avg_low_f": 27.6,
+        "avg_wind_mph": 7.7,
+        "avg_humidity": 72,
+        "precip_days": 7.7
+      }
+    ]
+  },
+  "raleigh-nc": {
+    "station": {
+      "id": "USW00013722",
+      "name": "RALEIGH DURHAM INTL AP, NC",
+      "latitude": 35.8922,
+      "longitude": -78.7819,
+      "distance_mi": 11.2
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 51.9,
+        "avg_low_f": 31.8,
+        "avg_wind_mph": 7.1,
+        "avg_humidity": 69,
+        "precip_days": 6.6
+      },
+      {
+        "month": 2,
+        "avg_high_f": 55.8,
+        "avg_low_f": 34.2,
+        "avg_wind_mph": 7.5,
+        "avg_humidity": 69,
+        "precip_days": 5.9
+      },
+      {
+        "month": 3,
+        "avg_high_f": 63.3,
+        "avg_low_f": 40.3,
+        "avg_wind_mph": 7.6,
+        "avg_humidity": 65,
+        "precip_days": 7.1
+      },
+      {
+        "month": 4,
+        "avg_high_f": 72.7,
+        "avg_low_f": 48.9,
+        "avg_wind_mph": 7.7,
+        "avg_humidity": 63,
+        "precip_days": 5.9
+      },
+      {
+        "month": 5,
+        "avg_high_f": 80,
+        "avg_low_f": 57.7,
+        "avg_wind_mph": 6.6,
+        "avg_humidity": 69,
+        "precip_days": 6.6
+      },
+      {
+        "month": 6,
+        "avg_high_f": 87.4,
+        "avg_low_f": 66,
+        "avg_wind_mph": 5.8,
+        "avg_humidity": 69,
+        "precip_days": 7
+      },
+      {
+        "month": 7,
+        "avg_high_f": 90.8,
+        "avg_low_f": 70.2,
+        "avg_wind_mph": 5.2,
+        "avg_humidity": 74,
+        "precip_days": 7.5
+      },
+      {
+        "month": 8,
+        "avg_high_f": 88.7,
+        "avg_low_f": 68.9,
+        "avg_wind_mph": 4.9,
+        "avg_humidity": 76,
+        "precip_days": 7.1
+      },
+      {
+        "month": 9,
+        "avg_high_f": 82.5,
+        "avg_low_f": 62.7,
+        "avg_wind_mph": 5.9,
+        "avg_humidity": 76,
+        "precip_days": 5.8
+      },
+      {
+        "month": 10,
+        "avg_high_f": 73,
+        "avg_low_f": 50.3,
+        "avg_wind_mph": 6.1,
+        "avg_humidity": 74,
+        "precip_days": 4.9
+      },
+      {
+        "month": 11,
+        "avg_high_f": 63,
+        "avg_low_f": 40,
+        "avg_wind_mph": 6.4,
+        "avg_humidity": 71,
+        "precip_days": 5
+      },
+      {
+        "month": 12,
+        "avg_high_f": 54.7,
+        "avg_low_f": 34.4,
+        "avg_wind_mph": 6.5,
+        "avg_humidity": 74,
+        "precip_days": 5.8
+      }
+    ]
+  },
+  "richmond-va": {
+    "station": {
+      "id": "USW00013740",
+      "name": "RICHMOND INTL AP, VA",
+      "latitude": 37.505,
+      "longitude": -77.3203,
+      "distance_mi": 6.8
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 47.8,
+        "avg_low_f": 28.8,
+        "avg_wind_mph": 7.2,
+        "avg_humidity": 68,
+        "precip_days": 6.1
+      },
+      {
+        "month": 2,
+        "avg_high_f": 51.6,
+        "avg_low_f": 30.4,
+        "avg_wind_mph": 7.2,
+        "avg_humidity": 68,
+        "precip_days": 5.7
+      },
+      {
+        "month": 3,
+        "avg_high_f": 59.6,
+        "avg_low_f": 37.2,
+        "avg_wind_mph": 7.6,
+        "avg_humidity": 64,
+        "precip_days": 6.7
+      },
+      {
+        "month": 4,
+        "avg_high_f": 70.4,
+        "avg_low_f": 46.4,
+        "avg_wind_mph": 7.6,
+        "avg_humidity": 64,
+        "precip_days": 6.5
+      },
+      {
+        "month": 5,
+        "avg_high_f": 77.8,
+        "avg_low_f": 55.7,
+        "avg_wind_mph": 6.5,
+        "avg_humidity": 70,
+        "precip_days": 7.1
+      },
+      {
+        "month": 6,
+        "avg_high_f": 85.6,
+        "avg_low_f": 64.5,
+        "avg_wind_mph": 5.9,
+        "avg_humidity": 69,
+        "precip_days": 6.6
+      },
+      {
+        "month": 7,
+        "avg_high_f": 89.5,
+        "avg_low_f": 69.2,
+        "avg_wind_mph": 5.3,
+        "avg_humidity": 71,
+        "precip_days": 7.5
+      },
+      {
+        "month": 8,
+        "avg_high_f": 87.5,
+        "avg_low_f": 67.6,
+        "avg_wind_mph": 5,
+        "avg_humidity": 74,
+        "precip_days": 6.6
+      },
+      {
+        "month": 9,
+        "avg_high_f": 81.2,
+        "avg_low_f": 61.1,
+        "avg_wind_mph": 5.8,
+        "avg_humidity": 74,
+        "precip_days": 5.7
+      },
+      {
+        "month": 10,
+        "avg_high_f": 70.9,
+        "avg_low_f": 49,
+        "avg_wind_mph": 6.2,
+        "avg_humidity": 74,
+        "precip_days": 5.1
+      },
+      {
+        "month": 11,
+        "avg_high_f": 60.4,
+        "avg_low_f": 38.8,
+        "avg_wind_mph": 6.4,
+        "avg_humidity": 71,
+        "precip_days": 5.2
+      },
+      {
+        "month": 12,
+        "avg_high_f": 51.5,
+        "avg_low_f": 32.1,
+        "avg_wind_mph": 6.4,
+        "avg_humidity": 73,
+        "precip_days": 6.2
+      }
+    ]
+  },
+  "riverside-ca": {
+    "station": {
+      "id": "USW00003171",
+      "name": "RIVERSIDE MUNI AP, CA",
+      "latitude": 33.9519,
+      "longitude": -117.4386,
+      "distance_mi": 4.1
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 67.7,
+        "avg_low_f": 43.6,
+        "avg_wind_mph": 4.8,
+        "avg_humidity": 63,
+        "precip_days": 2.8
+      },
+      {
+        "month": 2,
+        "avg_high_f": 67.9,
+        "avg_low_f": 44.7,
+        "avg_wind_mph": 4.9,
+        "avg_humidity": 58,
+        "precip_days": 4
+      },
+      {
+        "month": 3,
+        "avg_high_f": 72.1,
+        "avg_low_f": 46.9,
+        "avg_wind_mph": 4.9,
+        "avg_humidity": 64,
+        "precip_days": 2.3
+      },
+      {
+        "month": 4,
+        "avg_high_f": 75.9,
+        "avg_low_f": 50,
+        "avg_wind_mph": 5.5,
+        "avg_humidity": 57,
+        "precip_days": 1.7
+      },
+      {
+        "month": 5,
+        "avg_high_f": 79.9,
+        "avg_low_f": 55.3,
+        "avg_wind_mph": 5.9,
+        "avg_humidity": 62,
+        "precip_days": 0.5
+      },
+      {
+        "month": 6,
+        "avg_high_f": 86.7,
+        "avg_low_f": 59.3,
+        "avg_wind_mph": 6,
+        "avg_humidity": 56,
+        "precip_days": 0
+      },
+      {
+        "month": 7,
+        "avg_high_f": 93.3,
+        "avg_low_f": 63.9,
+        "avg_wind_mph": 6,
+        "avg_humidity": 52,
+        "precip_days": 0.2
+      },
+      {
+        "month": 8,
+        "avg_high_f": 94.9,
+        "avg_low_f": 64.7,
+        "avg_wind_mph": 5.6,
+        "avg_humidity": 51,
+        "precip_days": 0
+      },
+      {
+        "month": 9,
+        "avg_high_f": 91.3,
+        "avg_low_f": 61.9,
+        "avg_wind_mph": 5.1,
+        "avg_humidity": 53,
+        "precip_days": 0.1
+      },
+      {
+        "month": 10,
+        "avg_high_f": 82.7,
+        "avg_low_f": 55.2,
+        "avg_wind_mph": 5.1,
+        "avg_humidity": 49,
+        "precip_days": 0.9
+      },
+      {
+        "month": 11,
+        "avg_high_f": 74.5,
+        "avg_low_f": 47.4,
+        "avg_wind_mph": 4.9,
+        "avg_humidity": 46,
+        "precip_days": 1.5
+      },
+      {
+        "month": 12,
+        "avg_high_f": 66.8,
+        "avg_low_f": 42.8,
+        "avg_wind_mph": 4.5,
+        "avg_humidity": 56,
+        "precip_days": 3
+      }
+    ]
+  },
+  "sacramento-ca": {
+    "station": {
+      "id": "USW00023271",
+      "name": "SACRAMENTO 5 ESE, CA",
+      "latitude": 38.5556,
+      "longitude": -121.4169,
+      "distance_mi": 4.6
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 56.5,
+        "avg_low_f": 41.1,
+        "avg_wind_mph": 5.7,
+        "avg_humidity": 83,
+        "precip_days": 6.6
+      },
+      {
+        "month": 2,
+        "avg_high_f": 62.2,
+        "avg_low_f": 43.7,
+        "avg_wind_mph": 6,
+        "avg_humidity": 73,
+        "precip_days": 6.9
+      },
+      {
+        "month": 3,
+        "avg_high_f": 67.8,
+        "avg_low_f": 46.7,
+        "avg_wind_mph": 5.9,
+        "avg_humidity": 71,
+        "precip_days": 6
+      },
+      {
+        "month": 4,
+        "avg_high_f": 73.5,
+        "avg_low_f": 49.3,
+        "avg_wind_mph": 5.9,
+        "avg_humidity": 61,
+        "precip_days": 3.1
+      },
+      {
+        "month": 5,
+        "avg_high_f": 81.3,
+        "avg_low_f": 54,
+        "avg_wind_mph": 6.7,
+        "avg_humidity": 52,
+        "precip_days": 2.2
+      },
+      {
+        "month": 6,
+        "avg_high_f": 89,
+        "avg_low_f": 58.7,
+        "avg_wind_mph": 6.6,
+        "avg_humidity": 45,
+        "precip_days": 0.7
+      },
+      {
+        "month": 7,
+        "avg_high_f": 94.4,
+        "avg_low_f": 61.4,
+        "avg_wind_mph": 6.7,
+        "avg_humidity": 45,
+        "precip_days": 0
+      },
+      {
+        "month": 8,
+        "avg_high_f": 93.5,
+        "avg_low_f": 61,
+        "avg_wind_mph": 6.1,
+        "avg_humidity": 49,
+        "precip_days": 0.1
+      },
+      {
+        "month": 9,
+        "avg_high_f": 89.3,
+        "avg_low_f": 58.8,
+        "avg_wind_mph": 5.3,
+        "avg_humidity": 49,
+        "precip_days": 0.3
+      },
+      {
+        "month": 10,
+        "avg_high_f": 78.9,
+        "avg_low_f": 52.9,
+        "avg_wind_mph": 5.1,
+        "avg_humidity": 51,
+        "precip_days": 1.9
+      },
+      {
+        "month": 11,
+        "avg_high_f": 65.3,
+        "avg_low_f": 45.3,
+        "avg_wind_mph": 4.8,
+        "avg_humidity": 70,
+        "precip_days": 4.1
+      },
+      {
+        "month": 12,
+        "avg_high_f": 56.4,
+        "avg_low_f": 40.7,
+        "avg_wind_mph": 5.2,
+        "avg_humidity": 81,
+        "precip_days": 6.1
+      }
+    ]
+  },
+  "salt-lake-city-ut": {
+    "station": {
+      "id": "USW00024127",
+      "name": "SALT LAKE CITY INTL AP, UT",
+      "latitude": 40.7781,
+      "longitude": -111.9694,
+      "distance_mi": 4.3
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 38.6,
+        "avg_low_f": 24.2,
+        "avg_wind_mph": 5.4,
+        "avg_humidity": 71,
+        "precip_days": 4.5
+      },
+      {
+        "month": 2,
+        "avg_high_f": 44.7,
+        "avg_low_f": 28.6,
+        "avg_wind_mph": 6.5,
+        "avg_humidity": 60,
+        "precip_days": 4.3
+      },
+      {
+        "month": 3,
+        "avg_high_f": 55.3,
+        "avg_low_f": 36.3,
+        "avg_wind_mph": 6.7,
+        "avg_humidity": 57,
+        "precip_days": 5.1
+      },
+      {
+        "month": 4,
+        "avg_high_f": 61.9,
+        "avg_low_f": 41.8,
+        "avg_wind_mph": 6.5,
+        "avg_humidity": 52,
+        "precip_days": 6.1
+      },
+      {
+        "month": 5,
+        "avg_high_f": 72.6,
+        "avg_low_f": 50.4,
+        "avg_wind_mph": 6.1,
+        "avg_humidity": 48,
+        "precip_days": 5
+      },
+      {
+        "month": 6,
+        "avg_high_f": 84.1,
+        "avg_low_f": 59.1,
+        "avg_wind_mph": 6.6,
+        "avg_humidity": 36,
+        "precip_days": 2.6
+      },
+      {
+        "month": 7,
+        "avg_high_f": 94,
+        "avg_low_f": 68.2,
+        "avg_wind_mph": 6.6,
+        "avg_humidity": 28,
+        "precip_days": 1.5
+      },
+      {
+        "month": 8,
+        "avg_high_f": 91.7,
+        "avg_low_f": 66.6,
+        "avg_wind_mph": 6.4,
+        "avg_humidity": 33,
+        "precip_days": 1.6
+      },
+      {
+        "month": 9,
+        "avg_high_f": 80.6,
+        "avg_low_f": 56.3,
+        "avg_wind_mph": 6.5,
+        "avg_humidity": 38,
+        "precip_days": 2.6
+      },
+      {
+        "month": 10,
+        "avg_high_f": 65.5,
+        "avg_low_f": 43.6,
+        "avg_wind_mph": 5.8,
+        "avg_humidity": 50,
+        "precip_days": 3.8
+      },
+      {
+        "month": 11,
+        "avg_high_f": 50.7,
+        "avg_low_f": 32.8,
+        "avg_wind_mph": 5.4,
+        "avg_humidity": 61,
+        "precip_days": 3.8
+      },
+      {
+        "month": 12,
+        "avg_high_f": 39,
+        "avg_low_f": 25.3,
+        "avg_wind_mph": 5.3,
+        "avg_humidity": 70,
+        "precip_days": 4.5
+      }
+    ]
+  },
+  "san-antonio-tx": {
+    "station": {
+      "id": "USW00012970",
+      "name": "SAN ANTONIO STINSON AP, TX",
+      "latitude": 29.3389,
+      "longitude": -98.4719,
+      "distance_mi": 6
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 64.7,
+        "avg_low_f": 42.3,
+        "avg_wind_mph": 7.5,
+        "avg_humidity": 65,
+        "precip_days": 2.8
+      },
+      {
+        "month": 2,
+        "avg_high_f": 69.2,
+        "avg_low_f": 46.8,
+        "avg_wind_mph": 8,
+        "avg_humidity": 67,
+        "precip_days": 2.2
+      },
+      {
+        "month": 3,
+        "avg_high_f": 75.3,
+        "avg_low_f": 53.6,
+        "avg_wind_mph": 8.4,
+        "avg_humidity": 66,
+        "precip_days": 3.6
+      },
+      {
+        "month": 4,
+        "avg_high_f": 81.9,
+        "avg_low_f": 60.3,
+        "avg_wind_mph": 8.9,
+        "avg_humidity": 67,
+        "precip_days": 3.2
+      },
+      {
+        "month": 5,
+        "avg_high_f": 88.1,
+        "avg_low_f": 68.2,
+        "avg_wind_mph": 8.6,
+        "avg_humidity": 74,
+        "precip_days": 3.9
+      },
+      {
+        "month": 6,
+        "avg_high_f": 93.6,
+        "avg_low_f": 74,
+        "avg_wind_mph": 7.7,
+        "avg_humidity": 69,
+        "precip_days": 3.7
+      },
+      {
+        "month": 7,
+        "avg_high_f": 96.2,
+        "avg_low_f": 75.3,
+        "avg_wind_mph": 7.6,
+        "avg_humidity": 64,
+        "precip_days": 3.3
+      },
+      {
+        "month": 8,
+        "avg_high_f": 97.5,
+        "avg_low_f": 75.6,
+        "avg_wind_mph": 7.1,
+        "avg_humidity": 62,
+        "precip_days": 2.8
+      },
+      {
+        "month": 9,
+        "avg_high_f": 91.3,
+        "avg_low_f": 71.2,
+        "avg_wind_mph": 6.7,
+        "avg_humidity": 66,
+        "precip_days": 4.3
+      },
+      {
+        "month": 10,
+        "avg_high_f": 83.7,
+        "avg_low_f": 61.8,
+        "avg_wind_mph": 7.2,
+        "avg_humidity": 63,
+        "precip_days": 3.7
+      },
+      {
+        "month": 11,
+        "avg_high_f": 73.3,
+        "avg_low_f": 51.1,
+        "avg_wind_mph": 7.1,
+        "avg_humidity": 70,
+        "precip_days": 2.9
+      },
+      {
+        "month": 12,
+        "avg_high_f": 66.3,
+        "avg_low_f": 43.9,
+        "avg_wind_mph": 7,
+        "avg_humidity": 69,
+        "precip_days": 2.9
+      }
+    ]
+  },
+  "san-diego-ca": {
+    "station": {
+      "id": "USW00023188",
+      "name": "SAN DIEGO LINDBERGH FLD, CA",
+      "latitude": 32.7336,
+      "longitude": -117.1831,
+      "distance_mi": 1.6
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 66.4,
+        "avg_low_f": 50.3,
+        "avg_wind_mph": 6.2,
+        "avg_humidity": 74,
+        "precip_days": 4
+      },
+      {
+        "month": 2,
+        "avg_high_f": 66.2,
+        "avg_low_f": 51.8,
+        "avg_wind_mph": 6.7,
+        "avg_humidity": 70,
+        "precip_days": 4.1
+      },
+      {
+        "month": 3,
+        "avg_high_f": 67,
+        "avg_low_f": 54.5,
+        "avg_wind_mph": 6.5,
+        "avg_humidity": 75,
+        "precip_days": 3.1
+      },
+      {
+        "month": 4,
+        "avg_high_f": 68.8,
+        "avg_low_f": 57.1,
+        "avg_wind_mph": 6.5,
+        "avg_humidity": 73,
+        "precip_days": 1.7
+      },
+      {
+        "month": 5,
+        "avg_high_f": 69.5,
+        "avg_low_f": 60,
+        "avg_wind_mph": 6.6,
+        "avg_humidity": 75,
+        "precip_days": 0.7
+      },
+      {
+        "month": 6,
+        "avg_high_f": 71.7,
+        "avg_low_f": 62.6,
+        "avg_wind_mph": 6,
+        "avg_humidity": 76,
+        "precip_days": 0.1
+      },
+      {
+        "month": 7,
+        "avg_high_f": 75.3,
+        "avg_low_f": 66.1,
+        "avg_wind_mph": 5.8,
+        "avg_humidity": 78,
+        "precip_days": 0.1
+      },
+      {
+        "month": 8,
+        "avg_high_f": 77.3,
+        "avg_low_f": 67.5,
+        "avg_wind_mph": 5.8,
+        "avg_humidity": 78,
+        "precip_days": 0
+      },
+      {
+        "month": 9,
+        "avg_high_f": 77.2,
+        "avg_low_f": 66.2,
+        "avg_wind_mph": 5.8,
+        "avg_humidity": 77,
+        "precip_days": 0.2
+      },
+      {
+        "month": 10,
+        "avg_high_f": 74.6,
+        "avg_low_f": 61.5,
+        "avg_wind_mph": 5.4,
+        "avg_humidity": 72,
+        "precip_days": 1.1
+      },
+      {
+        "month": 11,
+        "avg_high_f": 70.7,
+        "avg_low_f": 54.8,
+        "avg_wind_mph": 5.8,
+        "avg_humidity": 65,
+        "precip_days": 1.9
+      },
+      {
+        "month": 12,
+        "avg_high_f": 66,
+        "avg_low_f": 49.8,
+        "avg_wind_mph": 5.6,
+        "avg_humidity": 70,
+        "precip_days": 3.1
+      }
+    ]
+  },
+  "san-francisco-ca": {
+    "station": {
+      "id": "USW00023272",
+      "name": "SAN FRANCISCO DWTN, CA",
+      "latitude": 37.7706,
+      "longitude": -122.4269,
+      "distance_mi": 0.7
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 57.8,
+        "avg_low_f": 46.6,
+        "avg_wind_mph": 7.8,
+        "avg_humidity": 83,
+        "precip_days": 8
+      },
+      {
+        "month": 2,
+        "avg_high_f": 60.4,
+        "avg_low_f": 47.9,
+        "avg_wind_mph": 8.6,
+        "avg_humidity": 78,
+        "precip_days": 7.9
+      },
+      {
+        "month": 3,
+        "avg_high_f": 62.1,
+        "avg_low_f": 48.9,
+        "avg_wind_mph": 9,
+        "avg_humidity": 78,
+        "precip_days": 6.7
+      },
+      {
+        "month": 4,
+        "avg_high_f": 63,
+        "avg_low_f": 49.7,
+        "avg_wind_mph": 10.2,
+        "avg_humidity": 78,
+        "precip_days": 4.2
+      },
+      {
+        "month": 5,
+        "avg_high_f": 64.1,
+        "avg_low_f": 51.4,
+        "avg_wind_mph": 11.8,
+        "avg_humidity": 77,
+        "precip_days": 2.1
+      },
+      {
+        "month": 6,
+        "avg_high_f": 66.5,
+        "avg_low_f": 53,
+        "avg_wind_mph": 12.1,
+        "avg_humidity": 76,
+        "precip_days": 0.6
+      },
+      {
+        "month": 7,
+        "avg_high_f": 66.3,
+        "avg_low_f": 54.4,
+        "avg_wind_mph": 12.3,
+        "avg_humidity": 80,
+        "precip_days": 0
+      },
+      {
+        "month": 8,
+        "avg_high_f": 67.9,
+        "avg_low_f": 55.5,
+        "avg_wind_mph": 11.4,
+        "avg_humidity": 81,
+        "precip_days": 0.1
+      },
+      {
+        "month": 9,
+        "avg_high_f": 70.2,
+        "avg_low_f": 55.6,
+        "avg_wind_mph": 9.7,
+        "avg_humidity": 77,
+        "precip_days": 0.3
+      },
+      {
+        "month": 10,
+        "avg_high_f": 69.8,
+        "avg_low_f": 54.4,
+        "avg_wind_mph": 7.8,
+        "avg_humidity": 74,
+        "precip_days": 2
+      },
+      {
+        "month": 11,
+        "avg_high_f": 63.7,
+        "avg_low_f": 50.7,
+        "avg_wind_mph": 6.9,
+        "avg_humidity": 77,
+        "precip_days": 4.8
+      },
+      {
+        "month": 12,
+        "avg_high_f": 57.9,
+        "avg_low_f": 47,
+        "avg_wind_mph": 7.6,
+        "avg_humidity": 81,
+        "precip_days": 8
+      }
+    ]
+  },
+  "seattle-wa": {
+    "station": {
+      "id": "USW00024234",
+      "name": "SEATTLE BOEING FLD, WA",
+      "latitude": 47.5303,
+      "longitude": -122.3008,
+      "distance_mi": 5.7
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 48.6,
+        "avg_low_f": 36.8,
+        "avg_wind_mph": 7.3,
+        "avg_humidity": 84,
+        "precip_days": 12.1
+      },
+      {
+        "month": 2,
+        "avg_high_f": 50.7,
+        "avg_low_f": 36.8,
+        "avg_wind_mph": 7.4,
+        "avg_humidity": 82,
+        "precip_days": 9
+      },
+      {
+        "month": 3,
+        "avg_high_f": 54.8,
+        "avg_low_f": 39.4,
+        "avg_wind_mph": 7.3,
+        "avg_humidity": 80,
+        "precip_days": 10.5
+      },
+      {
+        "month": 4,
+        "avg_high_f": 59.8,
+        "avg_low_f": 43.6,
+        "avg_wind_mph": 7.3,
+        "avg_humidity": 77,
+        "precip_days": 8
+      },
+      {
+        "month": 5,
+        "avg_high_f": 66.5,
+        "avg_low_f": 49.3,
+        "avg_wind_mph": 6.2,
+        "avg_humidity": 74,
+        "precip_days": 5.6
+      },
+      {
+        "month": 6,
+        "avg_high_f": 71.2,
+        "avg_low_f": 54,
+        "avg_wind_mph": 6.3,
+        "avg_humidity": 70,
+        "precip_days": 3.6
+      },
+      {
+        "month": 7,
+        "avg_high_f": 77.3,
+        "avg_low_f": 57.5,
+        "avg_wind_mph": 5.9,
+        "avg_humidity": 66,
+        "precip_days": 1.3
+      },
+      {
+        "month": 8,
+        "avg_high_f": 77.4,
+        "avg_low_f": 58.1,
+        "avg_wind_mph": 6,
+        "avg_humidity": 68,
+        "precip_days": 1.8
+      },
+      {
+        "month": 9,
+        "avg_high_f": 71.7,
+        "avg_low_f": 53.9,
+        "avg_wind_mph": 6.3,
+        "avg_humidity": 76,
+        "precip_days": 3.8
+      },
+      {
+        "month": 10,
+        "avg_high_f": 61,
+        "avg_low_f": 46.4,
+        "avg_wind_mph": 6.9,
+        "avg_humidity": 82,
+        "precip_days": 7.8
+      },
+      {
+        "month": 11,
+        "avg_high_f": 53,
+        "avg_low_f": 39.9,
+        "avg_wind_mph": 7.7,
+        "avg_humidity": 83,
+        "precip_days": 11.3
+      },
+      {
+        "month": 12,
+        "avg_high_f": 47.8,
+        "avg_low_f": 36.2,
+        "avg_wind_mph": 7.6,
+        "avg_humidity": 84,
+        "precip_days": 11.4
+      }
+    ]
+  },
+  "st-louis-mo": {
+    "station": {
+      "id": "USW00003960",
+      "name": "CAHOKIA ST LOUIS AP, IL",
+      "latitude": 38.5714,
+      "longitude": -90.1572,
+      "distance_mi": 4.4
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 40.2,
+        "avg_low_f": 24.1,
+        "avg_wind_mph": 8.1,
+        "avg_humidity": 69,
+        "precip_days": 4.3
+      },
+      {
+        "month": 2,
+        "avg_high_f": 45.6,
+        "avg_low_f": 27.6,
+        "avg_wind_mph": 8.3,
+        "avg_humidity": 66,
+        "precip_days": 4.4
+      },
+      {
+        "month": 3,
+        "avg_high_f": 56.3,
+        "avg_low_f": 36,
+        "avg_wind_mph": 8.5,
+        "avg_humidity": 67,
+        "precip_days": 6.4
+      },
+      {
+        "month": 4,
+        "avg_high_f": 67.5,
+        "avg_low_f": 45.5,
+        "avg_wind_mph": 8.6,
+        "avg_humidity": 65,
+        "precip_days": 7.3
+      },
+      {
+        "month": 5,
+        "avg_high_f": 76.7,
+        "avg_low_f": 56.5,
+        "avg_wind_mph": 7.4,
+        "avg_humidity": 71,
+        "precip_days": 8.6
+      },
+      {
+        "month": 6,
+        "avg_high_f": 85.7,
+        "avg_low_f": 64.7,
+        "avg_wind_mph": 6.4,
+        "avg_humidity": 68,
+        "precip_days": 6.5
+      },
+      {
+        "month": 7,
+        "avg_high_f": 89,
+        "avg_low_f": 68.8,
+        "avg_wind_mph": 5.5,
+        "avg_humidity": 73,
+        "precip_days": 6
+      },
+      {
+        "month": 8,
+        "avg_high_f": 87.8,
+        "avg_low_f": 66.1,
+        "avg_wind_mph": 5.5,
+        "avg_humidity": 74,
+        "precip_days": 4.9
+      },
+      {
+        "month": 9,
+        "avg_high_f": 80.7,
+        "avg_low_f": 57.1,
+        "avg_wind_mph": 6.1,
+        "avg_humidity": 70,
+        "precip_days": 4.3
+      },
+      {
+        "month": 10,
+        "avg_high_f": 69.4,
+        "avg_low_f": 46.1,
+        "avg_wind_mph": 7.7,
+        "avg_humidity": 67,
+        "precip_days": 5.4
+      },
+      {
+        "month": 11,
+        "avg_high_f": 55.3,
+        "avg_low_f": 35.9,
+        "avg_wind_mph": 7.8,
+        "avg_humidity": 69,
+        "precip_days": 5.3
+      },
+      {
+        "month": 12,
+        "avg_high_f": 44.3,
+        "avg_low_f": 28.6,
+        "avg_wind_mph": 7.8,
+        "avg_humidity": 71,
+        "precip_days": 5.2
+      }
+    ]
+  },
+  "tampa-fl": {
+    "station": {
+      "id": "USW00012842",
+      "name": "TAMPA INTL AP, FL",
+      "latitude": 27.9619,
+      "longitude": -82.5403,
+      "distance_mi": 5.1
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 71.3,
+        "avg_low_f": 52.8,
+        "avg_wind_mph": 8.6,
+        "avg_humidity": 76,
+        "precip_days": 4.4
+      },
+      {
+        "month": 2,
+        "avg_high_f": 74,
+        "avg_low_f": 55.5,
+        "avg_wind_mph": 8.3,
+        "avg_humidity": 77,
+        "precip_days": 3.6
+      },
+      {
+        "month": 3,
+        "avg_high_f": 77.8,
+        "avg_low_f": 59.3,
+        "avg_wind_mph": 8.4,
+        "avg_humidity": 73,
+        "precip_days": 3.4
+      },
+      {
+        "month": 4,
+        "avg_high_f": 83,
+        "avg_low_f": 64.8,
+        "avg_wind_mph": 8.4,
+        "avg_humidity": 70,
+        "precip_days": 3.4
+      },
+      {
+        "month": 5,
+        "avg_high_f": 88.3,
+        "avg_low_f": 70.6,
+        "avg_wind_mph": 7.5,
+        "avg_humidity": 70,
+        "precip_days": 3.9
+      },
+      {
+        "month": 6,
+        "avg_high_f": 90.5,
+        "avg_low_f": 75.4,
+        "avg_wind_mph": 6.1,
+        "avg_humidity": 79,
+        "precip_days": 9.5
+      },
+      {
+        "month": 7,
+        "avg_high_f": 91,
+        "avg_low_f": 76.6,
+        "avg_wind_mph": 5.3,
+        "avg_humidity": 81,
+        "precip_days": 11.2
+      },
+      {
+        "month": 8,
+        "avg_high_f": 91.2,
+        "avg_low_f": 76.8,
+        "avg_wind_mph": 5.9,
+        "avg_humidity": 82,
+        "precip_days": 11.2
+      },
+      {
+        "month": 9,
+        "avg_high_f": 90.2,
+        "avg_low_f": 75.3,
+        "avg_wind_mph": 6.6,
+        "avg_humidity": 83,
+        "precip_days": 8.2
+      },
+      {
+        "month": 10,
+        "avg_high_f": 85.6,
+        "avg_low_f": 69.2,
+        "avg_wind_mph": 8.3,
+        "avg_humidity": 77,
+        "precip_days": 4.4
+      },
+      {
+        "month": 11,
+        "avg_high_f": 78.9,
+        "avg_low_f": 60.7,
+        "avg_wind_mph": 8.1,
+        "avg_humidity": 76,
+        "precip_days": 2.3
+      },
+      {
+        "month": 12,
+        "avg_high_f": 73.9,
+        "avg_low_f": 55.9,
+        "avg_wind_mph": 8,
+        "avg_humidity": 78,
+        "precip_days": 3.6
+      }
+    ]
+  },
+  "tulsa-ok": {
+    "station": {
+      "id": "USW00013968",
+      "name": "TULSA INTL AP, OK",
+      "latitude": 36.1994,
+      "longitude": -95.8872,
+      "distance_mi": 6.7
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 48.9,
+        "avg_low_f": 28,
+        "avg_wind_mph": 8.2,
+        "avg_humidity": 67,
+        "precip_days": 3.2
+      },
+      {
+        "month": 2,
+        "avg_high_f": 54,
+        "avg_low_f": 31.7,
+        "avg_wind_mph": 8.8,
+        "avg_humidity": 65,
+        "precip_days": 3.7
+      },
+      {
+        "month": 3,
+        "avg_high_f": 63.3,
+        "avg_low_f": 40.7,
+        "avg_wind_mph": 9.1,
+        "avg_humidity": 65,
+        "precip_days": 5.1
+      },
+      {
+        "month": 4,
+        "avg_high_f": 72.1,
+        "avg_low_f": 49.5,
+        "avg_wind_mph": 9.6,
+        "avg_humidity": 64,
+        "precip_days": 6.2
+      },
+      {
+        "month": 5,
+        "avg_high_f": 79.7,
+        "avg_low_f": 59.5,
+        "avg_wind_mph": 8.2,
+        "avg_humidity": 72,
+        "precip_days": 7.4
+      },
+      {
+        "month": 6,
+        "avg_high_f": 88.4,
+        "avg_low_f": 68.7,
+        "avg_wind_mph": 7.4,
+        "avg_humidity": 67,
+        "precip_days": 6.6
+      },
+      {
+        "month": 7,
+        "avg_high_f": 93.6,
+        "avg_low_f": 73.1,
+        "avg_wind_mph": 6.5,
+        "avg_humidity": 67,
+        "precip_days": 4.9
+      },
+      {
+        "month": 8,
+        "avg_high_f": 93,
+        "avg_low_f": 71.5,
+        "avg_wind_mph": 6.4,
+        "avg_humidity": 67,
+        "precip_days": 4.5
+      },
+      {
+        "month": 9,
+        "avg_high_f": 84.8,
+        "avg_low_f": 62.8,
+        "avg_wind_mph": 6.9,
+        "avg_humidity": 65,
+        "precip_days": 5.5
+      },
+      {
+        "month": 10,
+        "avg_high_f": 73.6,
+        "avg_low_f": 50.9,
+        "avg_wind_mph": 8.3,
+        "avg_humidity": 64,
+        "precip_days": 5
+      },
+      {
+        "month": 11,
+        "avg_high_f": 61.4,
+        "avg_low_f": 39.4,
+        "avg_wind_mph": 8.3,
+        "avg_humidity": 69,
+        "precip_days": 4.2
+      },
+      {
+        "month": 12,
+        "avg_high_f": 50.9,
+        "avg_low_f": 31.1,
+        "avg_wind_mph": 8,
+        "avg_humidity": 69,
+        "precip_days": 3.9
+      }
+    ]
+  },
+  "virginia-beach-va": {
+    "station": {
+      "id": "USW00013769",
+      "name": "OCEANA NAS, VA",
+      "latitude": 36.8167,
+      "longitude": -76.0333,
+      "distance_mi": 4
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 50.3,
+        "avg_low_f": 31.6,
+        "avg_wind_mph": 11.7,
+        "avg_humidity": 72,
+        "precip_days": 6.3
+      },
+      {
+        "month": 2,
+        "avg_high_f": 52.6,
+        "avg_low_f": 33.2,
+        "avg_wind_mph": 11.7,
+        "avg_humidity": 73,
+        "precip_days": 6.3
+      },
+      {
+        "month": 3,
+        "avg_high_f": 58.6,
+        "avg_low_f": 38.9,
+        "avg_wind_mph": 11.9,
+        "avg_humidity": 71,
+        "precip_days": 7.3
+      },
+      {
+        "month": 4,
+        "avg_high_f": 68.6,
+        "avg_low_f": 47.7,
+        "avg_wind_mph": 11.6,
+        "avg_humidity": 71,
+        "precip_days": 6.6
+      },
+      {
+        "month": 5,
+        "avg_high_f": 75.5,
+        "avg_low_f": 56.3,
+        "avg_wind_mph": 10.4,
+        "avg_humidity": 77,
+        "precip_days": 6.6
+      },
+      {
+        "month": 6,
+        "avg_high_f": 83.3,
+        "avg_low_f": 65.5,
+        "avg_wind_mph": 9,
+        "avg_humidity": 77,
+        "precip_days": 6.6
+      },
+      {
+        "month": 7,
+        "avg_high_f": 87.4,
+        "avg_low_f": 70.3,
+        "avg_wind_mph": 8.3,
+        "avg_humidity": 79,
+        "precip_days": 7.7
+      },
+      {
+        "month": 8,
+        "avg_high_f": 85.4,
+        "avg_low_f": 69.1,
+        "avg_wind_mph": 7.7,
+        "avg_humidity": 80,
+        "precip_days": 7.3
+      },
+      {
+        "month": 9,
+        "avg_high_f": 79.9,
+        "avg_low_f": 64,
+        "avg_wind_mph": 9.9,
+        "avg_humidity": 78,
+        "precip_days": 5.5
+      },
+      {
+        "month": 10,
+        "avg_high_f": 71.2,
+        "avg_low_f": 52.7,
+        "avg_wind_mph": 10,
+        "avg_humidity": 76,
+        "precip_days": 5
+      },
+      {
+        "month": 11,
+        "avg_high_f": 61.3,
+        "avg_low_f": 41.5,
+        "avg_wind_mph": 10.5,
+        "avg_humidity": 72,
+        "precip_days": 5.4
+      },
+      {
+        "month": 12,
+        "avg_high_f": 54,
+        "avg_low_f": 35.4,
+        "avg_wind_mph": 10.3,
+        "avg_humidity": 75,
+        "precip_days": 6
+      }
+    ]
+  },
+  "washington-dc": {
+    "station": {
+      "id": "USW00013743",
+      "name": "WASHINGTON REAGAN AP, VA",
+      "latitude": 38.8483,
+      "longitude": -77.0342,
+      "distance_mi": 4
+    },
+    "sources": {
+      "temperature_precip": {
+        "provider": "NOAA NCEI U.S. Climate Normals",
+        "period": "1991-2020"
+      },
+      "wind_humidity": {
+        "provider": "Open-Meteo historical archive (ERA5)",
+        "period": "2015-2024"
+      }
+    },
+    "months": [
+      {
+        "month": 1,
+        "avg_high_f": 44.8,
+        "avg_low_f": 30.1,
+        "avg_wind_mph": 7.5,
+        "avg_humidity": 68,
+        "precip_days": 5.7
+      },
+      {
+        "month": 2,
+        "avg_high_f": 48.3,
+        "avg_low_f": 31.8,
+        "avg_wind_mph": 7.4,
+        "avg_humidity": 66,
+        "precip_days": 5.4
+      },
+      {
+        "month": 3,
+        "avg_high_f": 56.5,
+        "avg_low_f": 38.6,
+        "avg_wind_mph": 7.8,
+        "avg_humidity": 64,
+        "precip_days": 6.5
+      },
+      {
+        "month": 4,
+        "avg_high_f": 68,
+        "avg_low_f": 48.4,
+        "avg_wind_mph": 7.6,
+        "avg_humidity": 64,
+        "precip_days": 6.4
+      },
+      {
+        "month": 5,
+        "avg_high_f": 76.5,
+        "avg_low_f": 58,
+        "avg_wind_mph": 6.4,
+        "avg_humidity": 71,
+        "precip_days": 7.3
+      },
+      {
+        "month": 6,
+        "avg_high_f": 85.1,
+        "avg_low_f": 67.5,
+        "avg_wind_mph": 6.1,
+        "avg_humidity": 69,
+        "precip_days": 6.5
+      },
+      {
+        "month": 7,
+        "avg_high_f": 89.6,
+        "avg_low_f": 72.4,
+        "avg_wind_mph": 5,
+        "avg_humidity": 72,
+        "precip_days": 6.7
+      },
+      {
+        "month": 8,
+        "avg_high_f": 87.8,
+        "avg_low_f": 71,
+        "avg_wind_mph": 5,
+        "avg_humidity": 75,
+        "precip_days": 5.6
+      },
+      {
+        "month": 9,
+        "avg_high_f": 80.7,
+        "avg_low_f": 64.1,
+        "avg_wind_mph": 5.8,
+        "avg_humidity": 74,
+        "precip_days": 5.8
+      },
+      {
+        "month": 10,
+        "avg_high_f": 69.4,
+        "avg_low_f": 52.2,
+        "avg_wind_mph": 6.4,
+        "avg_humidity": 74,
+        "precip_days": 4.9
+      },
+      {
+        "month": 11,
+        "avg_high_f": 58.2,
+        "avg_low_f": 41.6,
+        "avg_wind_mph": 6.8,
+        "avg_humidity": 69,
+        "precip_days": 5
+      },
+      {
+        "month": 12,
+        "avg_high_f": 48.8,
+        "avg_low_f": 34.5,
+        "avg_wind_mph": 6.6,
+        "avg_humidity": 72,
+        "precip_days": 6.4
+      }
+    ]
+  }
+}

@@ -29,6 +29,33 @@ const GENERATED_MARKER = '<!-- generated:best-smoke-days-metro -->';
 // from /api/metros. Emitted alongside the per-metro pages so the source
 // of truth for both stays the same METROS array.
 const LIST_PARTIAL_OUT = path.join('_partials', 'metros-list.html');
+// Per-metro climate-normals distribution files (the Dataset JSON-LD's
+// DataDownload). Generated here at build time and copied to dist/ by build.js
+// (public/ → dist/). Gitignored — a pure build artifact derived from the
+// committed data/metro-normals.json.
+const NORMALS_DIST_DIR = path.join('public', 'smoke-weather');
+
+// ── Climate normals (data-rich metro pages) ─────────────────────────────────
+// data/metro-normals.json is produced offline by scripts/generate-normals.mjs
+// (NOAA 1991-2020 temperature/precip + Open-Meteo 2015-2024 reanalysis wind/
+// humidity). The per-month 0-100 smoke score is derived HERE via the shared
+// scoring engine — never frozen into the data file — so it always tracks the
+// live model. Requiring the browser mirror runs its IIFE, attaching the scorer
+// to globalThis (no module loader needed; same engine the page uses client-side
+// and the worker uses server-side, pinned identical by scoring-parity tests).
+const METRO_NORMALS = require('../data/metro-normals.json');
+require('../_partials/weather-score-shared.js');
+const NORMAL_SCORER = globalThis.WeatherScore;
+
+const MONTH_NAMES = ['', 'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'];
+const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+// The default cut/cooker the metro page scores at: a packer brisket on an
+// offset stick burner — the most weather-sensitive low-and-slow combination,
+// matching handleMetroPage's SSR defaults.
+const NORMALS_CUT = 'brisket-packer';
+const NORMALS_COOKER = 'offset';
 
 const METROS = [
   { slug: 'new-york-ny',          name: 'New York',          state: 'NY', zip: '10001', latitude: 40.7506, longitude: -73.9971,  timezone: 'America/New_York',    population: 19867000 },
@@ -498,6 +525,172 @@ function cookerTipFor(metro) {
   return COOKER_TIP_BY_METRO[metro.slug] || REGION_COOKER_TIP[regionOf(metro.state)];
 }
 
+// Look up a metro's committed normals; hard-fail (like the METRO_NOTE guard)
+// so a thin, data-less page can never ship.
+function metroNormals(slug) {
+  const n = METRO_NORMALS[slug];
+  if (!n || !Array.isArray(n.months) || n.months.length !== 12) {
+    throw new Error('generate-metros: missing or incomplete climate normals for ' +
+      slug + ' — run `node scripts/generate-normals.mjs`');
+  }
+  return n;
+}
+
+// Derive a month's 0-100 smoke score by scoring a representative "typical day"
+// through the shared engine. precipProbPct is the share of the month's days
+// that see >= 0.1" rain; gustMphMax 0 lets the engine apply its sustained-wind
+// gust estimate; dewPoint is unused by scoreDay (stall risk derives from rhMean).
+function monthlyNormalScore(m) {
+  const day = {
+    tempHighF: m.avg_high_f,
+    tempLowF: m.avg_low_f,
+    rhMean: m.avg_humidity == null ? 0 : m.avg_humidity,
+    windMphMean: m.avg_wind_mph == null ? 0 : m.avg_wind_mph,
+    gustMphMax: 0,
+    precipProbPct: m.precip_days == null ? 0
+      : Math.min(100, (m.precip_days / DAYS_IN_MONTH[m.month - 1]) * 100),
+    precipIn: 0,
+    dewPointMeanF: 0,
+    confidence: 'high',
+  };
+  return NORMAL_SCORER.scoreDay({ cut: NORMALS_CUT, cooker: NORMALS_COOKER, day }).score;
+}
+
+// rows (each month + derived score), best 3 months by score, windiest month.
+function normalsDerived(entry) {
+  const rows = entry.months.map((m) => Object.assign({}, m, { smoke_score: monthlyNormalScore(m) }));
+  const best = rows.slice().sort((a, b) => b.smoke_score - a.smoke_score).slice(0, 3).map((r) => r.month);
+  const windiest = rows.slice().sort((a, b) => (b.avg_wind_mph || 0) - (a.avg_wind_mph || 0))[0];
+  return { rows: rows, best: best, windiest: windiest };
+}
+
+function fmtNum(v, places) {
+  if (v == null || !isFinite(v)) return '—';
+  return places ? v.toFixed(places) : String(Math.round(v));
+}
+
+// The visible climate-normals section: a 12-row monthly table + one derived
+// sentence. Every value here is mirrored by the Dataset JSON-LD (parity rule).
+function climateNormalsSection(metro, derived) {
+  const name = metro.name;
+  const lines = [
+    '  <section class="editorial-section climate-normals" aria-labelledby="normals-title">',
+    '    <h2 id="normals-title">' + escapeHtml(name) + ' climate normals by month</h2>',
+    '    <p>Typical conditions for each month, scored 0-100 for a packer brisket on an offset — the most weather-sensitive low-and-slow cook. Temperature and rain days are NOAA 1991-2020 climate normals; wind and humidity are 2015-2024 reanalysis averages.</p>',
+    '    <div class="normals-scroll">',
+    '      <table class="normals-table">',
+    '        <thead><tr>' +
+      '<th scope="col">Month</th>' +
+      '<th scope="col">Avg High</th>' +
+      '<th scope="col">Avg Low</th>' +
+      '<th scope="col">Avg Wind</th>' +
+      '<th scope="col">Humidity</th>' +
+      '<th scope="col">Rain Days</th>' +
+      '<th scope="col">Smoke Score</th>' +
+      '</tr></thead>',
+    '        <tbody>',
+  ];
+  for (const r of derived.rows) {
+    lines.push(
+      '          <tr>' +
+        '<th scope="row">' + escapeHtml(MONTH_NAMES[r.month]) + '</th>' +
+        '<td>' + escapeHtml(fmtNum(r.avg_high_f)) + '&deg;F</td>' +
+        '<td>' + escapeHtml(fmtNum(r.avg_low_f)) + '&deg;F</td>' +
+        '<td>' + escapeHtml(fmtNum(r.avg_wind_mph)) + ' mph</td>' +
+        '<td>' + escapeHtml(fmtNum(r.avg_humidity)) + '%</td>' +
+        '<td>' + escapeHtml(fmtNum(r.precip_days, 1)) + '</td>' +
+        '<td>' + escapeHtml(fmtNum(r.smoke_score)) + '</td>' +
+      '</tr>'
+    );
+  }
+  const bestNames = derived.best.map((mo) => MONTH_NAMES[mo]);
+  const bestStr = bestNames.length === 3
+    ? bestNames[0] + ', ' + bestNames[1] + ', and ' + bestNames[2]
+    : bestNames.join(', ');
+  const w = derived.windiest;
+  lines.push(
+    '        </tbody>',
+    '      </table>',
+    '    </div>',
+    '    <p>Historically, the best months to smoke in ' + escapeHtml(name) + ' are <strong>' +
+      escapeHtml(bestStr) + '</strong>. ' + escapeHtml(MONTH_NAMES[w.month]) +
+      ' is the windiest month (avg ' + escapeHtml(fmtNum(w.avg_wind_mph)) + ' mph) — the one to plan around.</p>',
+    '  </section>',
+    ''
+  );
+  return lines;
+}
+
+// The Dataset JSON-LD describing the monthly normals. Static (yearly) data, so
+// no staleness. Every variableMeasured / spatialCoverage value is visible in
+// the rendered table + page above.
+function normalsDataset(metro, canonical, entry) {
+  const base = 'https://pitmaster.tools';
+  const name = metro.name;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Dataset',
+    '@id': canonical + '#climate-normals',
+    'name': name + ', ' + metro.state + ' Monthly Climate Normals for Barbecue',
+    'description': 'Monthly climate normals for ' + name + ', ' + metro.state +
+      ' — average high and low temperature, wind speed, relative humidity, and rainy ' +
+      'days, each scored 0-100 for low-and-slow barbecue suitability. Temperature and ' +
+      'rain days from NOAA 1991-2020 U.S. Climate Normals (station ' + entry.station.name +
+      '); wind and humidity from Open-Meteo historical reanalysis, 2015-2024.',
+    'url': canonical,
+    'temporalCoverage': '1991/2020',
+    'spatialCoverage': {
+      '@type': 'Place',
+      'name': name + ', ' + metro.state,
+      'geo': { '@type': 'GeoCoordinates', 'latitude': metro.latitude, 'longitude': metro.longitude },
+    },
+    'variableMeasured': [
+      { '@type': 'PropertyValue', 'name': 'Average high temperature', 'unitText': 'degree Fahrenheit' },
+      { '@type': 'PropertyValue', 'name': 'Average low temperature', 'unitText': 'degree Fahrenheit' },
+      { '@type': 'PropertyValue', 'name': 'Average wind speed', 'unitText': 'mile per hour' },
+      { '@type': 'PropertyValue', 'name': 'Relative humidity', 'unitText': 'percent', 'minValue': 0, 'maxValue': 100 },
+      { '@type': 'PropertyValue', 'name': 'Rainy days (at least 0.1 inch)', 'unitText': 'days per month' },
+      { '@type': 'PropertyValue', 'name': 'Smoke-day score', 'description': '0-100 suitability for low-and-slow barbecue', 'minValue': 0, 'maxValue': 100 },
+    ],
+    'distribution': {
+      '@type': 'DataDownload',
+      'encodingFormat': 'application/json',
+      'contentUrl': base + '/smoke-weather/' + metro.slug + '-normals.json',
+    },
+    'isBasedOn': [
+      'https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals',
+      'https://open-meteo.com/',
+    ],
+    'creator': { '@type': 'Organization', 'name': 'Pitmaster Tools', 'url': base },
+    'license': base + '/terms-of-service',
+    'dateModified': LAST_MODIFIED,
+  };
+}
+
+// The DataDownload payload: the per-metro distribution file the Dataset points
+// to. Carries the measured normals + the derived score + station provenance.
+function normalsDistribution(metro, entry, derived) {
+  return {
+    metro: metro.slug,
+    city: metro.name,
+    state: metro.state,
+    coordinates: { latitude: metro.latitude, longitude: metro.longitude },
+    station: entry.station,
+    sources: entry.sources,
+    score_basis: { cut: NORMALS_CUT, cooker: NORMALS_COOKER },
+    months: derived.rows.map((r) => ({
+      month: r.month,
+      month_name: MONTH_NAMES[r.month],
+      avg_high_f: r.avg_high_f,
+      avg_low_f: r.avg_low_f,
+      avg_wind_mph: r.avg_wind_mph,
+      avg_humidity: r.avg_humidity,
+      precip_days: r.precip_days,
+      smoke_score: r.smoke_score,
+    })),
+  };
+}
+
 function renderMetro(metro) {
   const region   = regionOf(metro.state);
   const stateNm  = STATE_NAME[metro.state] || metro.state;
@@ -602,6 +795,13 @@ function renderMetro(metro) {
     'offers': { '@type': 'Offer', 'price': '0', 'priceCurrency': 'USD' },
   };
 
+  // Climate normals: hard-fail if a metro has no data, derive the per-month
+  // scores, and build the visible table + Dataset schema (parity-matched).
+  const normalsEntry = metroNormals(slug);
+  const normalsDerivedData = normalsDerived(normalsEntry);
+  const normalsLines = climateNormalsSection(metro, normalsDerivedData);
+  const datasetJson = normalsDataset(metro, canonical, normalsEntry);
+
   return [
     GENERATED_MARKER,
     '<!-- meta:',
@@ -626,6 +826,9 @@ function renderMetro(metro) {
     '</script>',
     '<script type="application/ld+json">',
     JSON.stringify(breadcrumbJson, null, 2),
+    '</script>',
+    '<script type="application/ld+json">',
+    JSON.stringify(datasetJson, null, 2),
     '</script>',
     '<!-- INJECT:site-header.css -->',
     '<!-- INJECT:site-base.css -->',
@@ -723,6 +926,7 @@ function renderMetro(metro) {
     '  <!-- INJECT:subscribe-form.html -->',
     '',
     ...localGuideLines,
+    ...normalsLines,
     '  <section class="editorial-section" aria-label="' + escapeHtml(name) + ' BBQ context">',
     '    <h2>Barbecue heritage</h2>',
     '    <p>' + escapeHtml(heritage) + '</p>',
@@ -850,6 +1054,29 @@ function run(opts) {
   }
   console.log('generate-metros: wrote ' + written + ' metro pages → ' + outDir + '/');
 
+  // Emit the per-metro climate-normals distribution files (the Dataset
+  // DataDownload targets). Default dir is public/smoke-weather/ (copied to
+  // dist/ by build.js); a custom outDir (the test shape) opts out unless an
+  // explicit normalsDir is passed, mirroring the listPartialOut convention.
+  const normalsDir =
+    opts && Object.prototype.hasOwnProperty.call(opts, 'normalsDir')
+      ? opts.normalsDir
+      : (opts && opts.outDir ? null : NORMALS_DIST_DIR);
+  if (normalsDir) {
+    fs.mkdirSync(normalsDir, { recursive: true });
+    let nd = 0;
+    for (const metro of metros) {
+      const entry = metroNormals(metro.slug);
+      const derived = normalsDerived(entry);
+      fs.writeFileSync(
+        path.join(normalsDir, metro.slug + '-normals.json'),
+        JSON.stringify(normalsDistribution(metro, entry, derived), null, 2) + '\n'
+      );
+      nd++;
+    }
+    console.log('generate-metros: wrote ' + nd + ' normals distribution files → ' + normalsDir + '/');
+  }
+
   // Emit the chooser-page tile partial. Default path is
   // _partials/metros-list.html; tests can override via opts.listPartialOut
   // or opt out entirely with opts.listPartialOut = null. We default to
@@ -883,6 +1110,16 @@ module.exports = {
   METRO_LOCAL,
   GENERATED_MARKER,
   LAST_MODIFIED,
+  METRO_NORMALS,
+  NORMALS_CUT,
+  NORMALS_COOKER,
+  NORMALS_DIST_DIR,
+  metroNormals,
+  monthlyNormalScore,
+  normalsDerived,
+  climateNormalsSection,
+  normalsDataset,
+  normalsDistribution,
   renderMetro,
   renderMetrosListPartial,
   regionOf,

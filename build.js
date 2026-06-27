@@ -447,6 +447,13 @@ async function runBuild() {
   var ogCopied = copyDir('og', path.join(DIST, 'og'));
   if (ogCopied) console.log('Copied ' + ogCopied + ' og/ images → ' + DIST + '/og/');
 
+  // Copy the generated passthrough tree (public/ → dist/), if present. Holds
+  // the per-metro climate-normals distribution JSON emitted by
+  // scripts/generate-metros.js (the Dataset DataDownload targets). A checkout
+  // that hasn't run build:metros yet simply copies nothing.
+  var publicCopied = copyDir('public', DIST);
+  if (publicCopied) console.log('Copied ' + publicCopied + ' public/ files → ' + DIST + '/');
+
   console.log('Build complete.');
 }
 

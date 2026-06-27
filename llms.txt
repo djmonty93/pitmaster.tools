@@ -31,6 +31,7 @@ Pitmaster Tools provides browser-based calculators for low-and-slow BBQ cooking.
 - Minimum brisket rest: 90 minutes; ideal rest: 2–4 hours
 - Safe minimum internal temperature for poultry: 165°F (USDA)
 - Safe minimum for pork: 145°F with 3-minute rest (USDA)
+- Each metro forecast page (/smoke-weather/<city>) includes monthly climate normals — average high/low, wind, humidity, and rainy days — with a 0-100 smoke-day score per month. Temperature and rain days are NOAA 1991-2020 U.S. Climate Normals; wind and humidity are 2015-2024 reanalysis averages. Per-metro data is downloadable at /smoke-weather/<city>-normals.json
 
 ## Contact
 
