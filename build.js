@@ -319,15 +319,27 @@ function derivePinVars(distRel, vars, ogImageExists) {
 // og/ and must mirror into dist/og/. Returns the number of files copied (0 if
 // the source directory is absent, so a checkout without rendered pins still
 // builds cleanly).
-function copyDir(srcDir, destDir) {
+// `opts.noClobber` makes the copy refuse to overwrite an existing dist file —
+// used for the public/ passthrough so a stale or misplaced file there can never
+// silently replace HTML-build output (the file names are disjoint today; this
+// keeps it that way loudly).
+function copyDir(srcDir, destDir, opts) {
   if (!fs.existsSync(srcDir)) return 0;
   fs.mkdirSync(destDir, { recursive: true });
+  var noClobber = opts && opts.noClobber;
   var n = 0;
   fs.readdirSync(srcDir, { withFileTypes: true }).forEach(function(entry) {
     var s = path.join(srcDir, entry.name);
     var d = path.join(destDir, entry.name);
-    if (entry.isDirectory()) n += copyDir(s, d);
-    else if (entry.isFile()) { fs.copyFileSync(s, d); n++; }
+    if (entry.isDirectory()) n += copyDir(s, d, opts);
+    else if (entry.isFile()) {
+      if (noClobber && fs.existsSync(d)) {
+        throw new Error('public/ copy would overwrite build output: ' + d +
+          ' (rename the public/ source or the conflicting page)');
+      }
+      fs.copyFileSync(s, d);
+      n++;
+    }
   });
   return n;
 }
@@ -451,7 +463,7 @@ async function runBuild() {
   // the per-metro climate-normals distribution JSON emitted by
   // scripts/generate-metros.js (the Dataset DataDownload targets). A checkout
   // that hasn't run build:metros yet simply copies nothing.
-  var publicCopied = copyDir('public', DIST);
+  var publicCopied = copyDir('public', DIST, { noClobber: true });
   if (publicCopied) console.log('Copied ' + publicCopied + ' public/ files → ' + DIST + '/');
 
   console.log('Build complete.');

@@ -55,8 +55,6 @@ const OM_START = '2015-01-01';
 const OM_END = '2024-12-31';
 const NOAA_PERIOD = '1991-2020';
 
-const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
 // ── tiny helpers ─────────────────────────────────────────────────────────
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -110,22 +108,29 @@ const NCEI = 'https://www.ncei.noaa.gov/access/services';
 // by distance, airport (USW) stations first. Widens the search box until it
 // finds candidates.
 async function findStationCandidates(slug, lat, lon) {
+  // Accumulate across widening boxes (deduped by id) rather than returning the
+  // first non-empty box. A station with complete precip normals can sit just
+  // beyond the nearest temperature-only one; buildMetro must see both to prefer
+  // the complete station. 1.8 deg (~125 mi) is a generous neighborhood; the
+  // 3.0 deg box is a last resort for sparse regions.
+  const byId = new Map();
   for (const halfDeg of [0.9, 1.8, 3.0]) {
+    // Skip the far 3.0 deg box once nearer boxes have built a healthy pool.
+    if (halfDeg === 3.0 && byId.size >= 4) break;
     const bbox = `${(lat + halfDeg).toFixed(4)},${(lon - halfDeg).toFixed(4)},${(lat - halfDeg).toFixed(4)},${(lon + halfDeg).toFixed(4)}`;
     const url =
       `${NCEI}/search/v1/data?dataset=normals-monthly-1991-2020` +
       `&bbox=${encodeURIComponent(bbox)}&dataTypes=MLY-TMAX-NORMAL&limit=1000`;
     const data = await getJson(url, `search_${slug}_${halfDeg}`);
     const results = (data && data.results) || [];
-    const cands = [];
     for (const r of results) {
       const coords = r.location && r.location.coordinates; // [lon, lat]
       // r.id is the archive-member path; the clean GHCN id lives on the
       // nested station record.
       const id = r.stations && r.stations[0] && r.stations[0].id;
-      if (!id || !coords || !/^US\w\d+$/.test(id)) continue;
+      if (!id || !coords || !/^US\w\d+$/.test(id) || byId.has(id)) continue;
       const [slon, slat] = coords;
-      cands.push({
+      byId.set(id, {
         id,
         name: (r.stations[0].name || id).replace(/\s+US$/, ''),
         lat: slat,
@@ -134,13 +139,9 @@ async function findStationCandidates(slug, lat, lon) {
         airport: id.startsWith('USW'),
       });
     }
-    if (cands.length) {
-      // Airport stations first, then by distance.
-      cands.sort((a, b) => (b.airport - a.airport) || (a.distMi - b.distMi));
-      return cands;
-    }
   }
-  return [];
+  // Airport stations first, then by distance.
+  return [...byId.values()].sort((a, b) => (b.airport - a.airport) || (a.distMi - b.distMi));
 }
 
 // Pull the 12-month TMAX/TMIN/precip-days normals for one station. Returns
@@ -190,8 +191,14 @@ async function fetchWindHumidity(slug, lat, lon) {
     `&wind_speed_unit=mph&timezone=UTC`;
   const data = await getJson(url, `openmeteo_${slug}`);
   const daily = data && data.daily;
-  if (!daily || !Array.isArray(daily.time)) {
+  if (!daily || !Array.isArray(daily.time) || daily.time.length === 0) {
     throw new Error(`Open-Meteo returned no daily data for ${slug}`);
+  }
+  const wind = daily.wind_speed_10m_mean;
+  const rh = daily.relative_humidity_2m_mean;
+  if (!Array.isArray(wind) || wind.length !== daily.time.length ||
+      !Array.isArray(rh) || rh.length !== daily.time.length) {
+    throw new Error(`Open-Meteo wind/humidity arrays missing or misaligned for ${slug}`);
   }
   const windSum = Array(13).fill(0);
   const windN = Array(13).fill(0);
@@ -199,17 +206,18 @@ async function fetchWindHumidity(slug, lat, lon) {
   const rhN = Array(13).fill(0);
   for (let i = 0; i < daily.time.length; i++) {
     const m = Number.parseInt(daily.time[i].slice(5, 7), 10);
-    const w = daily.wind_speed_10m_mean[i];
-    const h = daily.relative_humidity_2m_mean[i];
-    if (Number.isFinite(w)) { windSum[m] += w; windN[m]++; }
-    if (Number.isFinite(h)) { rhSum[m] += h; rhN[m]++; }
+    if (!(m >= 1 && m <= 12)) continue;
+    if (Number.isFinite(wind[i])) { windSum[m] += wind[i]; windN[m]++; }
+    if (Number.isFinite(rh[i])) { rhSum[m] += rh[i]; rhN[m]++; }
   }
   const out = new Map();
   for (let m = 1; m <= 12; m++) {
-    out.set(m, {
-      wind: windN[m] ? windSum[m] / windN[m] : null,
-      rh: rhN[m] ? rhSum[m] / rhN[m] : null,
-    });
+    // Every month must have samples — a coverage gap would silently null out a
+    // table cell and skew the derived smoke score, so fail loudly instead.
+    if (!windN[m] || !rhN[m]) {
+      throw new Error(`Open-Meteo coverage gap for ${slug}: month ${m} has no wind/humidity samples`);
+    }
+    out.set(m, { wind: windSum[m] / windN[m], rh: rhSum[m] / rhN[m] });
   }
   return out;
 }
@@ -226,7 +234,7 @@ async function buildMetro(metro) {
   let station = null;
   let monthly = null;
   let fallback = null;
-  for (const cand of candidates.slice(0, 8)) {
+  for (const cand of candidates.slice(0, 12)) {
     const m = await fetchMonthlyNormals(cand);
     if (!m) continue;
     if (m.hasPrecip) { station = cand; monthly = m.byMonth; break; }

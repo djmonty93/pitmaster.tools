@@ -258,6 +258,15 @@ test('renderMetro embeds four JSON-LD blocks (WebApplication + FAQPage + Breadcr
   assert.ok(html.includes('"@type": "Dataset"'));
 });
 
+test('ldJson escapes script-breaking characters in JSON-LD', () => {
+  const out = gen.ldJson({ evil: '</script><img src=x onerror=alert(1)>', amp: 'a & b' });
+  // No raw <, >, or & may survive into the <script> body.
+  assert.ok(!/[<>&]/.test(out), 'ldJson left a raw <, >, or & in the output');
+  assert.ok(out.includes('\\u003c') && out.includes('\\u003e') && out.includes('\\u0026'));
+  // Still valid JSON that round-trips to the original values.
+  assert.deepEqual(JSON.parse(out), { evil: '</script><img src=x onerror=alert(1)>', amp: 'a & b' });
+});
+
 test('every metro emits a 3-level BreadcrumbList (Home → Best Smoke Days → metro)', () => {
   for (const metro of gen.METROS) {
     const html = gen.renderMetro(metro);
@@ -568,11 +577,12 @@ test('every metro has committed climate normals with 12 complete months', () => 
     const e = gen.METRO_NORMALS[m.slug];
     assert.ok(e, 'no climate normals for ' + m.slug + ' — run scripts/generate-normals.mjs');
     assert.equal(e.months.length, 12, m.slug + ' must have 12 months');
-    for (const mo of e.months) {
-      for (const k of ['avg_high_f', 'avg_low_f', 'avg_wind_mph', 'avg_humidity']) {
+    e.months.forEach((mo, i) => {
+      assert.equal(mo.month, i + 1, m.slug + ' months must be ordered 1..12');
+      for (const k of ['avg_high_f', 'avg_low_f', 'avg_wind_mph', 'avg_humidity', 'precip_days']) {
         assert.ok(Number.isFinite(mo[k]), m.slug + ' month ' + mo.month + ' missing ' + k);
       }
-    }
+    });
     assert.ok(e.station && typeof e.station.id === 'string', m.slug + ' missing station provenance');
   }
 });

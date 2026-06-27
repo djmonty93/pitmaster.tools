@@ -525,6 +525,25 @@ function cookerTipFor(metro) {
   return COOKER_TIP_BY_METRO[metro.slug] || REGION_COOKER_TIP[regionOf(metro.state)];
 }
 
+// Serialize an object as JSON for embedding inside a <script> tag. Escapes the
+// characters that could otherwise terminate the script element or break JSON-LD
+// parsing — `<`, `>`, `&`, and the U+2028/U+2029 line separators (valid in JSON
+// strings but illegal in JS source). A defensive measure: today's values are
+// all safe, but this future-proofs against any string (e.g. a station name)
+// that later carries one of these characters.
+function ldJson(obj) {
+  // Build every escape from code points so this source carries no literal
+  // backslash or separator characters of its own.
+  var bs = String.fromCharCode(92);
+  var u = function (cp) { return bs + 'u' + ('000' + cp.toString(16)).slice(-4); };
+  return JSON.stringify(obj, null, 2)
+    .split('<').join(u(0x3c))
+    .split('>').join(u(0x3e))
+    .split('&').join(u(0x26))
+    .split(String.fromCharCode(0x2028)).join(u(0x2028))
+    .split(String.fromCharCode(0x2029)).join(u(0x2029));
+}
+
 // Look up a metro's committed normals; hard-fail (like the METRO_NOTE guard)
 // so a thin, data-less page can never ship.
 function metroNormals(slug) {
@@ -594,9 +613,9 @@ function climateNormalsSection(metro, derived) {
     lines.push(
       '          <tr>' +
         '<th scope="row">' + escapeHtml(MONTH_NAMES[r.month]) + '</th>' +
-        '<td>' + escapeHtml(fmtNum(r.avg_high_f)) + '&deg;F</td>' +
-        '<td>' + escapeHtml(fmtNum(r.avg_low_f)) + '&deg;F</td>' +
-        '<td>' + escapeHtml(fmtNum(r.avg_wind_mph)) + ' mph</td>' +
+        '<td>' + escapeHtml(fmtNum(r.avg_high_f, 1)) + '&deg;F</td>' +
+        '<td>' + escapeHtml(fmtNum(r.avg_low_f, 1)) + '&deg;F</td>' +
+        '<td>' + escapeHtml(fmtNum(r.avg_wind_mph, 1)) + ' mph</td>' +
         '<td>' + escapeHtml(fmtNum(r.avg_humidity)) + '%</td>' +
         '<td>' + escapeHtml(fmtNum(r.precip_days, 1)) + '</td>' +
         '<td>' + escapeHtml(fmtNum(r.smoke_score)) + '</td>' +
@@ -614,7 +633,7 @@ function climateNormalsSection(metro, derived) {
     '    </div>',
     '    <p>Historically, the best months to smoke in ' + escapeHtml(name) + ' are <strong>' +
       escapeHtml(bestStr) + '</strong>. ' + escapeHtml(MONTH_NAMES[w.month]) +
-      ' is the windiest month (avg ' + escapeHtml(fmtNum(w.avg_wind_mph)) + ' mph) — the one to plan around.</p>',
+      ' is the windiest month (avg ' + escapeHtml(fmtNum(w.avg_wind_mph, 1)) + ' mph) — the one to plan around.</p>',
     '  </section>',
     ''
   );
@@ -638,7 +657,7 @@ function normalsDataset(metro, canonical, entry) {
       'rain days from NOAA 1991-2020 U.S. Climate Normals (station ' + entry.station.name +
       '); wind and humidity from Open-Meteo historical reanalysis, 2015-2024.',
     'url': canonical,
-    'temporalCoverage': '1991/2020',
+    'temporalCoverage': ['1991/2020', '2015/2024'],
     'spatialCoverage': {
       '@type': 'Place',
       'name': name + ', ' + metro.state,
@@ -819,16 +838,16 @@ function renderMetro(metro) {
     '<!-- INJECT:head-favicons.html -->',
     '<!-- INJECT:consent-init.html -->',
     '<script type="application/ld+json">',
-    JSON.stringify(appJson, null, 2),
+    ldJson(appJson),
     '</script>',
     '<script type="application/ld+json">',
-    JSON.stringify(faqJson, null, 2),
+    ldJson(faqJson),
     '</script>',
     '<script type="application/ld+json">',
-    JSON.stringify(breadcrumbJson, null, 2),
+    ldJson(breadcrumbJson),
     '</script>',
     '<script type="application/ld+json">',
-    JSON.stringify(datasetJson, null, 2),
+    ldJson(datasetJson),
     '</script>',
     '<!-- INJECT:site-header.css -->',
     '<!-- INJECT:site-base.css -->',
@@ -1064,6 +1083,9 @@ function run(opts) {
       : (opts && opts.outDir ? null : NORMALS_DIST_DIR);
   if (normalsDir) {
     fs.mkdirSync(normalsDir, { recursive: true });
+    for (const stale of fs.readdirSync(normalsDir)) {
+      if (stale.endsWith('-normals.json')) fs.unlinkSync(path.join(normalsDir, stale));
+    }
     let nd = 0;
     for (const metro of metros) {
       const entry = metroNormals(metro.slug);
@@ -1110,6 +1132,7 @@ module.exports = {
   METRO_LOCAL,
   GENERATED_MARKER,
   LAST_MODIFIED,
+  ldJson,
   METRO_NORMALS,
   NORMALS_CUT,
   NORMALS_COOKER,
