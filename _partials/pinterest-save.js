@@ -40,7 +40,6 @@
     muted: '#9A8D74'
   };
   var MONO = 'ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace';
-  var SANS = '"Public Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
 
   function ready(fn) {
     if (document.readyState === 'loading') {
