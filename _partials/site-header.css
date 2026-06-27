@@ -178,7 +178,12 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: .1rem 1.25rem;
-  width: min(720px, calc(100vw - 1.5rem));
+  /* Right-anchored (base rule sets right:0), so the panel grows leftward from
+     the Tools trigger. The reserve must exceed the header's 1.5rem right
+     padding so the panel keeps a positive left margin and never overflows the
+     left viewport edge (3rem also absorbs the scrollbar width that 100vw
+     includes). Caps at 720px on wide screens for the 4-column grid. */
+  width: min(720px, calc(100vw - 3rem));
   padding: .5rem 1.1rem 1rem;
 }
 
