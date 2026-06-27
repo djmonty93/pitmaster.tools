@@ -633,6 +633,112 @@ test('Dataset JSON-LD parses and every variableMeasured is visible in the table 
   assert.ok(dataset.variableMeasured.length >= 6, 'expected >= 6 measured variables');
 });
 
+// ── Smoke-window narrative (data-derived unique content) ─────────────────────
+
+// Extract the inner text of a named editorial-section from rendered HTML.
+function sectionText(html, cls) {
+  const re = new RegExp(
+    '<section class="editorial-section ' + cls + '"[^>]*>([\\s\\S]*?)</section>'
+  );
+  const m = html.match(re);
+  if (!m) return null;
+  return m[1]
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&[a-zA-Z]+;/g, ' ')
+    .replace(/&#\d+;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+test('every metro renders a smoke-windows section with a name heading and real numbers', () => {
+  for (const m of gen.METROS) {
+    const html = gen.renderMetro(m);
+    assert.ok(html.includes('class="editorial-section smoke-windows"'),
+      m.slug + ' missing smoke-windows section');
+    assert.ok(html.includes(gen.escapeHtml(m.name) + '’s smoke season, month by month'),
+      m.slug + ' missing smoke-windows heading');
+    const text = sectionText(html, 'smoke-windows');
+    assert.ok(text, m.slug + ' smoke-windows section not extractable');
+    assert.ok(/\d/.test(text), m.slug + ' smoke-windows has no interpolated number');
+  }
+});
+
+test('every metro smoke-windows section carries at least 90 words of prose', () => {
+  for (const m of gen.METROS) {
+    const text = sectionText(gen.renderMetro(m), 'smoke-windows');
+    const count = wordCount(text);
+    assert.ok(count >= 90, m.slug + ' smoke-windows has only ' + count + ' words (needs >=90)');
+  }
+});
+
+test('smoke-windows sections are not near-duplicates across metros', () => {
+  const entries = gen.METROS.map((m) => ({
+    slug: m.slug, sh: shingles(sectionText(gen.renderMetro(m), 'smoke-windows')),
+  }));
+  for (let i = 0; i < entries.length; i++) {
+    for (let j = i + 1; j < entries.length; j++) {
+      const ov = shingleOverlap(entries[i].sh, entries[j].sh);
+      assert.ok(ov < 0.45,
+        'near-duplicate smoke-windows prose: ' + entries[i].slug + ' vs ' + entries[j].slug +
+        ' (5-gram overlap ' + ov.toFixed(2) + ')');
+    }
+  }
+});
+
+test('dominantFactor labels each season driving variable from the climate data', () => {
+  const driverOf = (slug, key) => {
+    const derived = gen.normalsDerived(gen.metroNormals(slug));
+    const season = gen.seasonStats(derived).find((s) => s.key === key);
+    assert.ok(season, slug + ' missing ' + key + ' season');
+    return season.driver.key;
+  };
+  // Unambiguous climate signatures — guard the thresholds against drift.
+  assert.equal(driverOf('phoenix-az', 'summer'), 'heat', 'Phoenix summer is heat-driven');
+  assert.equal(driverOf('minneapolis-mn', 'winter'), 'cold', 'Minneapolis winter is cold-driven');
+  assert.equal(driverOf('houston-tx', 'summer'), 'humidity', 'Houston summer is stall/humidity-driven');
+});
+
+// ── Per-metro BBQ heritage (de-duplicated editorial) ─────────────────────────
+
+test('every metro has a unique, substantial METRO_HERITAGE entry', () => {
+  const seen = new Set();
+  for (const m of gen.METROS) {
+    const h = gen.METRO_HERITAGE[m.slug];
+    assert.ok(typeof h === 'string' && h.trim().length > 0, m.slug + ' missing METRO_HERITAGE');
+    const count = wordCount(h);
+    assert.ok(count >= 45, m.slug + ' heritage too short (' + count + ' words)');
+    assert.equal(seen.has(h), false, m.slug + ' duplicate heritage text');
+    seen.add(h);
+    assert.ok(gen.renderMetro(m).includes(gen.escapeHtml(h)),
+      m.slug + ' heritage not rendered in body');
+  }
+});
+
+test('same-state metros have distinct heritage (no near-duplicate SEO pages)', () => {
+  const byState = new Map();
+  for (const m of gen.METROS) {
+    if (!byState.has(m.state)) byState.set(m.state, []);
+    byState.get(m.state).push(m);
+  }
+  for (const [state, metros] of byState) {
+    if (metros.length < 2) continue;
+    const hs = metros.map((m) => gen.METRO_HERITAGE[m.slug]);
+    assert.equal(new Set(hs).size, hs.length, state + ' has duplicate heritage across metros');
+  }
+});
+
+test('METRO_HERITAGE entries are not near-duplicates of one another', () => {
+  const entries = gen.METROS.map((m) => ({ slug: m.slug, sh: shingles(gen.METRO_HERITAGE[m.slug]) }));
+  for (let i = 0; i < entries.length; i++) {
+    for (let j = i + 1; j < entries.length; j++) {
+      const ov = shingleOverlap(entries[i].sh, entries[j].sh);
+      assert.ok(ov < 0.25,
+        'near-duplicate heritage: ' + entries[i].slug + ' vs ' + entries[j].slug +
+        ' (5-gram overlap ' + ov.toFixed(2) + ')');
+    }
+  }
+});
+
 test('run() emits one normals distribution file per metro with derived scores', () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'metros-test-'));
   const tmpNormals = fs.mkdtempSync(path.join(os.tmpdir(), 'normals-test-'));
