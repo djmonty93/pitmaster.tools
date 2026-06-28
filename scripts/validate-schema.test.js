@@ -66,7 +66,21 @@ const EXEMPT_PAGES = new Set([
   // /api/status, surfaces Sender.net retry queue and recent errors. Not a
   // tool placement; no JSON-LD value for an operational dashboard.
   '_src/smoke-weather/status.html',
+  // Site-wide affiliate disclosure (guides + tools + smoke-weather).
+  // `noindex, follow`, omitted from sitemap.xml, no tool functionality.
+  '_src/legal/disclosures.html',
 ]);
+
+// Guide section pages carry an editorial schema graph rather than the
+// tool-page WebApplication + FAQPage pattern:
+//   - leaf guides (_src/guides/<cat>/<slug>.html): Article + BreadcrumbList
+//   - hubs (_src/guides/**/index.html):            CollectionPage + BreadcrumbList
+// (FAQPage is allowed but optional on guides — only when the body has a real
+// FAQ.) This is checked inline in the main loop, not via EXEMPT_PAGES, so the
+// guide schema requirement is enforced rather than merely skipped.
+function isGuidePage(file) {
+  return file.startsWith('_src/guides/');
+}
 
 function listHtmlRecursive(dir) {
   const out = [];
@@ -157,6 +171,21 @@ test('every non-exempt _src/**.html carries the CLAUDE.md JSON-LD shape', () => 
     for (const parsed of parseLdBlocks(file, html)) {
       collectTypes(parsed, types);
     }
+    // Guides use the editorial schema graph, not the tool pattern.
+    if (isGuidePage(file)) {
+      const isHub = path.basename(file) === 'index.html';
+      assert.ok(
+        types.has('BreadcrumbList'),
+        file + ' guide page is missing BreadcrumbList JSON-LD. ' +
+          'Got @types: [' + [...types].join(', ') + ']'
+      );
+      assert.ok(
+        types.has(isHub ? 'CollectionPage' : 'Article'),
+        file + ' is missing ' + (isHub ? 'CollectionPage' : 'Article') +
+          ' JSON-LD. Got @types: [' + [...types].join(', ') + ']'
+      );
+      continue;
+    }
     assert.ok(
       types.has('WebApplication'),
       file + ' is missing WebApplication JSON-LD (CLAUDE.md requirement). ' +
@@ -173,11 +202,12 @@ test('every non-exempt _src/**.html carries the CLAUDE.md JSON-LD shape', () => 
 test('exempt-page set matches the documented allowlist (no silent drift)', () => {
   // Pin the exemption count + names so an accidental addition stands out
   // in code review.
-  assert.equal(EXEMPT_PAGES.size, 7);
+  assert.equal(EXEMPT_PAGES.size, 8);
   assert.ok(EXEMPT_PAGES.has('_src/pages/404.html'));
   assert.ok(EXEMPT_PAGES.has('_src/legal/privacy-policy.html'));
   assert.ok(EXEMPT_PAGES.has('_src/legal/terms-of-service.html'));
   assert.ok(EXEMPT_PAGES.has('_src/smoke-weather/disclosures.html'));
+  assert.ok(EXEMPT_PAGES.has('_src/legal/disclosures.html'));
   assert.ok(EXEMPT_PAGES.has('_src/pages/about.html'));
   assert.ok(EXEMPT_PAGES.has('_src/pages/tools.html'));
   assert.ok(EXEMPT_PAGES.has('_src/smoke-weather/status.html'));

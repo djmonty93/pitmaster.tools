@@ -22,6 +22,12 @@ Pitmaster Tools provides browser-based calculators for low-and-slow BBQ cooking.
 - [Best Cities to Smoke Meat Today](https://pitmaster.tools/smoke-weather/best-cities) — all 50 U.S. metros ranked by today's smoke score, updated daily
 - [Smoking Times & Temperatures Chart](https://pitmaster.tools/smoking-times-and-temps) — free printable cook times, smoker and pull temps, rest, and USDA safe minimums
 
+<!-- GUIDES:START -->
+## Guides
+
+- [How to Manage the Brisket Stall (Without Panicking)](https://pitmaster.tools/guides/techniques/managing-the-stall) — The stall is where most first briskets fall apart. Here's what it actually is, why it happens, and the three ways to get through it without ruining the cook.
+<!-- GUIDES:END -->
+
 ## Key Facts
 
 - Brisket cooks at ~1.25–1.5 hrs/lb at 225°F; pull at 195°F (sliced) or 205°F (pulled)

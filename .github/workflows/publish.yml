@@ -1,0 +1,50 @@
+# publish.yml — scheduled rebuild + deploy that flips date-gated guides live.
+#
+# Why this exists: the site is a static build deployed to Cloudflare Workers
+# Assets, and deploys normally happen via Workers Builds on push. Guides are
+# withheld from the build until their `published` date (see scripts/guides-lib.js
+# + build.js), so a guide authored and merged today only goes live once a build
+# runs ON or AFTER that date. Cloudflare Worker cron triggers can't rebuild
+# static assets, so this GitHub Actions job does the daily rebuild+deploy.
+#
+# Cadence: 14:00 UTC daily. With guides dated Mon/Wed/Fri this drips ~3/week
+# live automatically. `workflow_dispatch` lets an operator publish on demand.
+#
+# OPERATOR PRE-FLIGHT (one time): add two repo secrets so `wrangler deploy`
+# can authenticate —
+#   1. CLOUDFLARE_API_TOKEN — a scoped token with Workers Scripts:Edit (and
+#      Workers R2 / KV read as the worker bindings require).
+#   2. CLOUDFLARE_ACCOUNT_ID — the Cloudflare account id.
+# Until both are set, this workflow's deploy step will fail (the build step
+# still proves out on every run).
+
+name: Publish (scheduled)
+
+on:
+  schedule:
+    - cron: '0 14 * * *'
+  workflow_dispatch:
+
+# Avoid overlapping deploys if a manual run coincides with the schedule.
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Build gates guides by today's UTC date, then validate before deploying
+      # so a broken build never ships.
+      - run: npm run validate
+      - name: Deploy to Cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler deploy
