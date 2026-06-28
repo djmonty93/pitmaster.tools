@@ -78,16 +78,24 @@ Title. `Article.image` must match the hero `<img>` and be a real file (see §6).
 
 ## 6. Images — responsive, ≥1 per guide
 
-- Location: committed tree `img/guides/<slug>.jpg` (hero), `img/guides/<slug>-<n>.jpg` (inline figures),
-  `img/guides/products/<name>.jpg` (card thumbnails). `build.js` copies `img/` → `dist/img/`. **Do not
-  use `public/`** for guide images — it's gitignored.
-- **Every `<img>` must exist as a real file** or `validate.mjs` fails the build (it checks `src`
-  resolution). If the final art isn't ready, commit a valid placeholder and record the prompt/spec in
-  `img/guides/README.md`; the owner generates the real image from that prompt.
-- Specs: hero/figure 1200×675 (16:9) JPG ~80%; product 480×480. Always set explicit `width`/`height`
-  attributes. Hero `loading="eager" fetchpriority="high"`; everything below the fold `loading="lazy"`.
-- Wrap in `<figure class="guide-hero">` / `<figure class="guide-figure">`; the CSS holds the box via
-  `aspect-ratio` for zero CLS. Alt text: specific, no "image of", ≤125 chars.
+Two sources, do not mix them up:
+
+- **Heroes & inline figures are owner-supplied** (AI-generated or stock). Location: committed tree
+  `img/guides/<slug>.jpg` (hero), `img/guides/<slug>-<n>.jpg` (figures). `build.js` copies `img/` →
+  `dist/img/`. **Do not use `public/`** (gitignored). **Every owner `<img>` must resolve to a real
+  file** or `validate.mjs` fails (it checks `src`). If final art isn't ready, commit a valid placeholder
+  and record the prompt/spec in `img/guides/README.md`.
+- **Product-card photos come from Amazon by ASIN — never created by the owner.** They are pulled from the
+  **Amazon Creators API** for the card's ASIN and resolved at build time (server-side auth, so not
+  client JS). Write the card thumbnail as
+  `<img class="product-card__img" data-asin="<ASIN>" src="/img/guides/products/_pending.svg" width="120" height="120" loading="lazy" alt="…">`.
+  Until Creators API access is available, leave the shared `_pending.svg` placeholder; the build
+  pipeline / `window.__pmProductImages` hook in `_partials/guide-affiliate.js` swaps in the real Amazon
+  image once live. Do **not** commit per-product photo files.
+- Specs (owner images): hero/figure 1200×675 (16:9) JPG ~80%. Always set explicit `width`/`height`.
+  Hero `loading="eager" fetchpriority="high"`; everything below the fold `loading="lazy"`.
+- Wrap heroes/figures in `<figure class="guide-hero">` / `<figure class="guide-figure">`; the CSS holds
+  the box via `aspect-ratio` for zero CLS. Alt text: specific, no "image of", ≤125 chars.
 
 ## 7. Body structure & affiliate placements
 
@@ -114,7 +122,7 @@ pattern:
 ```html
 <aside class="product-grid">
   <div class="product-card">
-    <img src="/img/guides/products/<name>.jpg" width="120" height="120" loading="lazy" alt="…">
+    <img class="product-card__img" data-asin="<ASIN>" src="/img/guides/products/_pending.svg" width="120" height="120" loading="lazy" alt="…">
     <div class="product-card__body">
       <h3 class="product-card__name">…</h3>
       <p class="product-card__why">…</p>
