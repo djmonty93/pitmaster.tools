@@ -408,14 +408,28 @@ async function runBuild() {
   // "foo.html" pass the exact-match map and clobber on disk while emitting
   // two distinct files on Linux CI — break dist parity across platforms.
   // A secondary lowercase key catches that.
+  // Lazy require (see guides-lib.js header): by now this module's exports are
+  // populated, so guides-lib's `require('../build.js')` resolves cleanly.
+  var guidesLib = require('./scripts/guides-lib.js');
+  var today = process.env.GUIDES_TODAY || guidesLib.todayUTC();
+
   var htmlFiles = listHtml(SRC);
   var emitted = Object.create(null);
   var emittedCi = Object.create(null);
   var built = 0;
+  var skipped = 0;
   htmlFiles.forEach(function(srcPath) {
     var rel      = path.relative(SRC, srcPath);
     var source   = fs.readFileSync(srcPath, 'utf8');
     var fm       = parseFrontmatter(source);
+    // Publish-date gate: withhold future-dated guide leaf pages from dist so a
+    // guide can be authored/merged now and go live on its `published` date via
+    // a scheduled rebuild. Hubs (index.html) always build.
+    var relFwd = rel.split(path.sep).join('/');
+    if (guidesLib.isGuideLeaf(relFwd) && !guidesLib.isLive(fm.vars.published, today)) {
+      skipped++;
+      return;
+    }
     var distRel  = resolvePermalink(rel, fm.vars, rel);
     if (emitted[distRel] != null) {
       throw new Error(
@@ -443,7 +457,8 @@ async function runBuild() {
     fs.writeFileSync(distPath, output);
     built++;
   });
-  console.log('Built ' + built + ' HTML files → ' + DIST + '/');
+  console.log('Built ' + built + ' HTML files → ' + DIST + '/' +
+    (skipped ? ' (' + skipped + ' scheduled guide(s) withheld until their publish date)' : ''));
 
   // Copy static assets
   var copied = 0;
@@ -458,6 +473,13 @@ async function runBuild() {
   // Copy the per-calculator Pinterest image tree (og/ → dist/og/), if present.
   var ogCopied = copyDir('og', path.join(DIST, 'og'));
   if (ogCopied) console.log('Copied ' + ogCopied + ' og/ images → ' + DIST + '/og/');
+
+  // Copy the committed guide image tree (img/ → dist/img/), if present. Guide
+  // heroes/figures and product-card thumbnails are owner-supplied static
+  // assets (not regenerated), so they live in a committed tree — unlike the
+  // gitignored public/ passthrough.
+  var imgCopied = copyDir('img', path.join(DIST, 'img'));
+  if (imgCopied) console.log('Copied ' + imgCopied + ' img/ files → ' + DIST + '/img/');
 
   // Copy the generated passthrough tree (public/ → dist/), if present. Holds
   // the per-metro climate-normals distribution JSON emitted by

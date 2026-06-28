@@ -1,0 +1,260 @@
+/* ============================================================
+   Guides — article layout, responsive media, affiliate UI.
+   Loaded after site-base.css on guide + guide-hub pages.
+   Relies on the palette tokens defined in site-base.css
+   (--amber, --amber-dark, --charcoal, --muted, --shadow);
+   fallbacks are inlined so the partial is safe in isolation.
+   ============================================================ */
+
+/* ----- Responsive media: every image is fluid, never overflows ----- */
+.guide-prose img,
+.guide-figure img,
+.guide-hero img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Hero + inline figures reserve their box via aspect-ratio so layout never
+   shifts while the image loads (zero CLS), at any viewport width. The explicit
+   width/height attributes on the <img> are the fallback for that reservation. */
+.guide-hero {
+  margin: 0 0 1.6rem;
+}
+.guide-hero img,
+.guide-figure img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 1px solid rgba(213, 204, 189, .9);
+}
+.guide-figure {
+  margin: 1.8rem 0;
+}
+.guide-figure figcaption {
+  margin-top: .55rem;
+  font-size: .86rem;
+  color: var(--muted, #6a635a);
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* ----- Prose column ----- */
+.guide-prose {
+  max-width: 760px;
+}
+.guide-prose h2 {
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 1.5rem;
+  margin: 2.2rem 0 .8rem;
+}
+.guide-prose h3 {
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 1.18rem;
+  margin: 1.6rem 0 .6rem;
+}
+.guide-prose p,
+.guide-prose li {
+  line-height: 1.75;
+}
+.guide-prose ul,
+.guide-prose ol {
+  padding-left: 1.3rem;
+  margin: .8rem 0 1.1rem;
+}
+.guide-prose li {
+  margin-bottom: .4rem;
+}
+
+/* ----- Prominent page-level affiliate disclaimer (Amazon-required) ----- */
+.affiliate-notice {
+  display: flex;
+  gap: .65rem;
+  align-items: flex-start;
+  max-width: 760px;
+  margin: 1.4rem 0 2rem;
+  padding: .85rem 1.05rem;
+  background: rgba(237, 120, 24, .08);
+  border: 1px solid rgba(237, 120, 24, .35);
+  border-left: 4px solid var(--amber, #ED7818);
+  border-radius: 10px;
+  font-size: .9rem;
+  line-height: 1.6;
+  color: var(--charcoal, #26231F);
+}
+.affiliate-notice a {
+  color: var(--link-text, #9A4310);
+  font-weight: 700;
+}
+
+/* ----- Product recommendation cards ----- */
+.product-grid {
+  margin: 1.8rem 0;
+}
+.product-card {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 1.1rem;
+  align-items: center;
+  max-width: 760px;
+  padding: 1.1rem 1.2rem;
+  background: var(--card-bg, #FFFBF3);
+  border: 1px solid rgba(213, 204, 189, .9);
+  border-radius: 14px;
+  box-shadow: var(--shadow, 0 8px 24px rgba(24, 23, 20, .06));
+  margin-bottom: 1rem;
+}
+.product-card img {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #fff;
+}
+.product-card__name {
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 1.12rem;
+  font-weight: 700;
+  margin: 0 0 .35rem;
+  color: var(--charcoal, #26231F);
+}
+.product-card__why {
+  font-size: .92rem;
+  line-height: 1.6;
+  color: #514b44;
+  margin: 0 0 .8rem;
+}
+.product-card__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .6rem 1.1rem;
+  background: #181714;
+  color: #fff;
+  font-family: var(--font-util, sans-serif);
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: box-shadow .15s, transform .15s;
+}
+.product-card__cta:hover,
+.product-card__cta:focus-visible {
+  box-shadow: 0 12px 22px rgba(24, 23, 20, .16);
+  transform: translateY(-1px);
+}
+
+/* Per-placement FTC disclosure, sits adjacent to the card/link. */
+.affiliate-disclosure {
+  max-width: 760px;
+  margin: .4rem 0 1.4rem;
+  font-size: .82rem;
+  line-height: 1.55;
+  color: var(--muted, #6a635a);
+}
+.affiliate-disclosure a {
+  color: var(--link-text, #9A4310);
+}
+
+/* ----- Hub + category card grids (reused for /guides/ and /guides/<cat>/) ----- */
+.guides-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 1.15rem;
+  margin: 1.4rem 0 .8rem;
+}
+.guide-card {
+  display: flex;
+  flex-direction: column;
+  gap: .7rem;
+  padding: 1.35rem 1.3rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .94) 0%, rgba(248, 244, 237, .92) 100%);
+  border: 1px solid rgba(213, 204, 189, .9);
+  border-radius: 18px;
+  transition: box-shadow .15s, transform .15s, border-color .15s;
+}
+.guide-card:hover {
+  box-shadow: 0 22px 44px rgba(24, 23, 20, .1);
+  transform: translateY(-3px);
+  border-color: #d8b475;
+}
+.guide-card__name {
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 1.14rem;
+  font-weight: 700;
+  color: var(--charcoal, #26231F);
+  text-decoration: none;
+  line-height: 1.25;
+}
+.guide-card__name:hover { color: var(--amber-dark, #b8560f); }
+.guide-card__desc {
+  font-size: .92rem;
+  color: #5a534b;
+  line-height: 1.6;
+  flex: 1;
+}
+.guide-card__link {
+  width: fit-content;
+  margin-top: auto;
+  padding: .55rem 1rem;
+  background: #181714;
+  color: #fff;
+  font-family: var(--font-util, sans-serif);
+  font-size: .76rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  text-decoration: none;
+}
+.guides-empty {
+  max-width: 760px;
+  color: var(--muted, #6a635a);
+  font-style: italic;
+}
+
+/* ----- Related links block ----- */
+.guide-related {
+  max-width: 760px;
+  margin-top: 2.4rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid rgba(213, 204, 189, .9);
+}
+.guide-related h2 {
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 1.25rem;
+  margin-bottom: .7rem;
+}
+.guide-related ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+}
+.guide-related a {
+  display: inline-block;
+  padding: .45rem .9rem;
+  border: 1px solid rgba(213, 204, 189, .9);
+  border-radius: 999px;
+  font-size: .85rem;
+  color: var(--link-text, #9A4310);
+  text-decoration: none;
+  background: rgba(255, 255, 255, .6);
+}
+.guide-related a:hover { border-color: #d8b475; }
+
+/* ----- Mobile: cards stack 1-up, product card goes vertical ----- */
+@media (max-width: 600px) {
+  .product-card {
+    grid-template-columns: 1fr;
+    justify-items: start;
+    text-align: left;
+  }
+  .product-card img { width: 100px; height: 100px; }
+  .guides-grid { grid-template-columns: 1fr; }
+}
