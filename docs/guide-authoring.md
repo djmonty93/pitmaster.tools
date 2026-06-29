@@ -153,6 +153,10 @@ Hard rules and judgment:
 
 ## 9. SEO conventions (also see CLAUDE.md)
 
+- **Target ~900 words of editorial prose** per guide (the H1, lede, headings, and body paragraphs —
+  *not* counting the breadcrumb, product cards, affiliate disclosures, or related-links block). Aim for
+  ~880–950; go shorter only for genuinely narrow questions. Depth and original value matter more than
+  the number, but 900 is the working floor so guides don't read as thin affiliate content.
 - `<title>` ≤60 rendered chars, end with ` | Pitmaster Tools`. `<meta description>` ≤160.
 - Link out to 1–2 relevant calculators/tools and 1–2 related guides (only **live** ones).
 - `generate-guides.js` handles sitemap/llms entries — don't hand-edit the `<!-- GUIDES:START/END -->`
