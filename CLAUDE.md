@@ -103,6 +103,7 @@ Every HTML file must include **all** of the following in `<head>`, in this order
 - Affiliate links use `<a class="amz" data-asin="…">` (no `href`); the Amazon Associates tag lives in exactly one place, `_partials/guide-affiliate.js`. Every page with affiliate links must carry the prominent `guide-affiliate-notice.html` banner **and** per-card disclosures linking to `/disclosures`.
 - Guide hero/figure images are owner-supplied and live in the committed `img/` tree (copied to `dist/img/`), **not** the gitignored `public/`; every referenced file must exist or `npm run validate` fails. **Product-card photos are different: they come from the Amazon Creators API by ASIN — never created by the owner.** Cards use `<img class="product-card__img" data-asin="…" src="/img/guides/products/_pending.svg">`; until Creators API access is available the shared placeholder shows, and the `window.__pmProductImages` hook in `_partials/guide-affiliate.js` swaps in real Amazon images at build time once live.
 - The prose **humanization gate** (humanize skill + independent Codex review, then Claude rewrites) is a hard prerequisite to the code-review gate.
+- **Target ~900 words of editorial prose per guide** (H1 + lede + headings + body paragraphs, excluding breadcrumb, product cards, disclosures, and related links); shorter only for genuinely narrow topics. This keeps guides from reading as thin affiliate content.
 
 ## Validation
 
