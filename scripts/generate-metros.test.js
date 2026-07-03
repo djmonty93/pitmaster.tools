@@ -404,6 +404,24 @@ test('renderMetro emits scripts in the expected load order', () => {
     'smoke-weather-app.js must follow weather-score-shared.js');
 });
 
+test('metros chooser page injects site-utils.js before metros-chooser.js', () => {
+  // metros-chooser.js has no local escapeHtml — it calls the global from
+  // _partials/site-utils.js. That global is only defined if
+  // site-footer-smoke.html (which injects site-utils.js) is expanded
+  // BEFORE metros-chooser.js on the page. This static source-order check
+  // guards that invariant so a future reorder can't leave escapeHtml
+  // undefined at runtime on /smoke-weather/metros/.
+  const page = fs.readFileSync(
+    path.join('_src', 'smoke-weather', 'metros', 'index.html'), 'utf8');
+  const footerIdx  = page.indexOf('<!-- INJECT:site-footer-smoke.html -->');
+  const chooserIdx = page.indexOf('<!-- INJECT:metros-chooser.js:script -->');
+  assert.ok(footerIdx > 0, 'site-footer-smoke.html INJECT missing from metros page');
+  assert.ok(chooserIdx > 0, 'metros-chooser.js INJECT missing from metros page');
+  assert.ok(footerIdx < chooserIdx,
+    'metros-chooser.js must follow site-footer-smoke.html (which loads the '
+      + 'site-utils.js escapeHtml global)');
+});
+
 test('LAST_MODIFIED ISO date in the generator matches site-footer-smoke.html display string', () => {
   // The metro JSON-LD dateModified uses LAST_MODIFIED in ISO form (e.g.
   // "2026-05-15"). site-footer-smoke.html hardcodes the same date as a

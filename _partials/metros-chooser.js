@@ -22,11 +22,12 @@
 
   function $(id) { return document.getElementById(id); }
 
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
-  }
+  // escapeHtml() is the global defined in _partials/site-utils.js.
+  // site-footer-smoke.html injects site-utils.js ahead of this script on
+  // the /smoke-weather/metros/ page, so the global is defined before any
+  // call here runs (load order pinned by a test in
+  // scripts/generate-metros.test.js). Kept as one source instead of a
+  // local copy — same pattern smoke-weather-app.js already uses.
 
   // Quality labels — byte-identical to the server chooser bandLabel in
   // worker/src/handlers/metrosChooser.ts (and the shared/client copies).
