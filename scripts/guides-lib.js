@@ -31,6 +31,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { escapeHtml: escapeHtmlShared } = require('./lib/text.js');
 const { parseFrontmatter } = require('../build.js');
 
 const ORIGIN = 'https://pitmaster.tools';
@@ -51,9 +52,12 @@ function categoryTitle(slug) {
 }
 
 // ── HTML / XML escaping ─────────────────────────────────────────────────────
-const HTML_ESCAPE_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+// Escaping logic is single-sourced in scripts/lib/text.js. Guide frontmatter
+// fields (ogTitle, description, blurb) may be absent, so coalesce null/undefined
+// to '' here before escaping; build.js/generate-metros.js guard at their call
+// sites instead, so text.js itself stays a plain String(s) escaper.
 function escapeHtml(s) {
-  return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => HTML_ESCAPE_MAP[c]);
+  return escapeHtmlShared(s == null ? '' : s);
 }
 
 // ── Date gate ───────────────────────────────────────────────────────────────
