@@ -48,6 +48,7 @@
 
 const fs   = require('fs');
 const path = require('path');
+const { escapeHtml } = require('./scripts/lib/text.js');
 
 const SRC      = '_src';
 const PARTIALS = '_partials';
@@ -150,14 +151,6 @@ function parseFrontmatter(html) {
 // escaping defends against simple punctuation in titles and against any future
 // caller that pipes less-trusted data through these functions.
 const TOKEN_RE = /\{\{([A-Z_]+)\}\}/g;
-const HTML_ESCAPE_RE = /[&<>"']/g;
-const HTML_ESCAPE_MAP = {
-  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-};
-
-function escapeHtml(s) {
-  return String(s).replace(HTML_ESCAPE_RE, function(c) { return HTML_ESCAPE_MAP[c]; });
-}
 
 function resolveVar(key, vars) {
   if (vars[key] != null) return vars[key];

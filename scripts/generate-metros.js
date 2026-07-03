@@ -20,6 +20,7 @@
 
 const fs   = require('fs');
 const path = require('path');
+const { escapeHtml } = require('./lib/text.js');
 
 const OUT_DIR = path.join('_src', 'smoke-weather');
 const GENERATED_MARKER = '<!-- generated:best-smoke-days-metro -->';
@@ -559,12 +560,6 @@ const METRO_LOCAL = {
 // Last-modified date emitted in og/twitter/json-ld. Bump when the template
 // changes materially; metro-list changes alone don't require it.
 const LAST_MODIFIED = '2026-06-27';
-
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, function (ch) {
-    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
-  });
-}
 
 function regionOf(state) {
   const r = REGION_BY_STATE[state];
