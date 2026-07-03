@@ -20,6 +20,7 @@
 // to invoke manually for backfills.
 
 import type { Env } from '../index.js';
+import { escapeHtml } from '../lib/html.js';
 
 export interface IsoWeekParts {
   /** ISO year — the year of the Thursday in the same week. */
@@ -87,15 +88,6 @@ function heroBandForMonth(month0: number): 'red' | 'yellow' | 'green' | 'ideal' 
   if (month0 === 3 || month0 === 4 || month0 === 8 || month0 === 9) return 'green';
   if (month0 === 2 || month0 === 10) return 'yellow';
   return 'red';
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
 }
 
 function formatLongDate(d: Date): string {

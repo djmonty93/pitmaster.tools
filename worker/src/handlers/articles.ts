@@ -9,6 +9,7 @@
 // shell when the actual templates land.
 
 import { html, type RouteContext } from '../router.js';
+import { escapeHtml } from '../lib/html.js';
 
 interface ArticleRow {
   slug: string;
@@ -96,15 +97,6 @@ function sanitizeBodyHtml(input: string): string {
     out = next;
   }
   return out;
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
 }
 
 // U+2028 (LINE SEPARATOR) and U+2029 (PARAGRAPH SEPARATOR) are valid
