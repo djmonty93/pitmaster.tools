@@ -22,6 +22,7 @@
 import { chromium } from "playwright";
 import { readFile, mkdir } from "node:fs/promises";
 import path from "node:path";
+import { escapeHtml as esc } from "./lib/text.js";
 
 const args = Object.fromEntries(
   process.argv.slice(2).map((a) => {
@@ -47,11 +48,6 @@ const C = {
   lineCream: "#E4D3B4",
 };
 
-const esc = (s) =>
-  String(s)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
 const headLines = (s) => esc(s).replace(/\n/g, "<br>");
 
 async function fontFaceCss() {
@@ -293,10 +289,10 @@ function artPorkEquation() {
   </style>
   <div class="pqr">
     ${chip("8 LB", "raw butt", false)}<span class="pqa">→</span>
-    ${chip("4 LB", "pulled pork", false)}<span class="pqa">→</span>
+    ${chip("≈5 LB", "pulled pork", false)}<span class="pqa">→</span>
     ${chip("12", "sandwiches", true)}
   </div>
-  <div class="pqcap">12–16 hours at 225°F — the calculator sets your start time</div>`;
+  <div class="pqcap">10–12 hours at 225°F — the calculator sets your start time</div>`;
 }
 
 function artCateringBreakdown() {
@@ -527,7 +523,7 @@ const PINS = [
     slug: "d18-stall", theme: "cream",
     eyebrow: "Don't panic", head: "Stuck at\n165°F?",
     art: artStallChart,
-    cta: "Read: the stall, explained →", foot: "PITMASTER.TOOLS/GUIDES",
+    cta: "Read: the stall, explained →", foot: "FREE BBQ GUIDES",
   },
   {
     slug: "d19-rub2", theme: "cream",
@@ -545,7 +541,7 @@ const PINS = [
     slug: "d21-summer", theme: "warm",
     eyebrow: "National grilling month", head: "Summer\nsmoking\nguide",
     art: artSummerSun,
-    cta: "Heat, humidity & your smoker →", foot: "PITMASTER.TOOLS/SEASONAL",
+    cta: "Heat, humidity & your smoker →", foot: "SEASONAL SMOKING GUIDES",
   },
   {
     slug: "d22-porkbutt2", theme: "cream",
@@ -657,38 +653,54 @@ function buildPinHTML(p, faces) {
 }
 
 async function run() {
-  const only = args.only ? String(args.only).split(",") : null;
-  const pins = only ? PINS.filter((p) => only.includes(p.slug)) : PINS;
-  if (!pins.length) {
-    console.error("No pins matched --only=", args.only);
-    process.exit(1);
+  let pins = PINS;
+  if (args.only != null) {
+    // Strict matching: a typo'd or empty slug must error, not silently render
+    // a different set than the operator asked for.
+    const only = String(args.only).split(",").filter(Boolean);
+    const known = new Set(PINS.map((p) => p.slug));
+    const unknown = only.filter((s) => !known.has(s));
+    if (!only.length || unknown.length) {
+      console.error("Unknown --only slug(s):", unknown.join(", ") || "(empty)");
+      console.error("Valid slugs:", PINS.map((p) => p.slug).join(", "));
+      process.exit(1);
+    }
+    pins = PINS.filter((p) => only.includes(p.slug));
   }
 
   await mkdir(OUT, { recursive: true });
   const faces = await fontFaceCss();
   const browser = await chromium.launch();
-  const page = await browser.newPage({
-    viewport: { width: PIN_W, height: PIN_H },
-    deviceScaleFactor: SCALE,
-  });
-
   let failed = 0;
-  for (const p of pins) {
-    try {
-      await page.setContent(buildPinHTML(p, faces), { waitUntil: "networkidle" });
-      await page.evaluate(() => document.fonts.ready);
-      const file = path.join(OUT, `${p.slug}.png`);
-      await page.screenshot({ path: file, clip: { x: 0, y: 0, width: PIN_W, height: PIN_H } });
-      console.log("rendered", file);
-    } catch (e) {
-      failed++;
-      console.error("failed", p.slug, e.message);
+  try {
+    const page = await browser.newPage({
+      viewport: { width: PIN_W, height: PIN_H },
+      deviceScaleFactor: SCALE,
+    });
+
+    for (const p of pins) {
+      try {
+        await page.setContent(buildPinHTML(p, faces), { waitUntil: "networkidle" });
+        await page.evaluate(() => document.fonts.ready);
+        const file = path.join(OUT, `${p.slug}.png`);
+        await page.screenshot({ path: file, clip: { x: 0, y: 0, width: PIN_W, height: PIN_H } });
+        console.log("rendered", file);
+      } catch (e) {
+        failed++;
+        console.error("failed", p.slug, e.message);
+      }
     }
+  } finally {
+    await browser.close();
   }
 
-  await browser.close();
   console.log(`\nDone. ${pins.length - failed}/${pins.length} pin(s) in ./${OUT} at ${PIN_W * SCALE}x${PIN_H * SCALE}.`);
-  if (failed > 0) process.exitCode = 1;
+  // Fail loudly so a partial render (stale og/pins/<slug>.png) can't pass
+  // silently — same contract as render-pins.mjs.
+  if (failed > 0) {
+    console.error(`${failed} pin(s) failed to render.`);
+    process.exitCode = 1;
+  }
 }
 
 run();

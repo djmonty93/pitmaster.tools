@@ -47,15 +47,16 @@ SEO-safe.
 ## 3. Image system
 
 - **Existing creatives (Days 1–12, 14):** the committed `og/<slug>.png` files (1000×1500,
-  brand style: charcoal `#1c140d`, cream `#f3ead8`, ember `#d9542e`, Anton headline).
-  Upload these directly as the pin image — no new work needed.
-- **Fresh creatives (17 images, Days 13, 15–30):** photo-led pins with a text overlay —
-  a deliberately different look from the graphic cheat-sheet set, so each URL's second
-  pin reads as new content. Each pin's entry below includes an **image prompt** (for AI
-  generation or a stock/own photo brief) plus the exact overlay text. Production spec for
-  all 17: **1000×1500 (2:3)**, photo top ~60%, solid `#1c140d` band bottom ~40% carrying
-  the overlay headline in Anton (cream) with one ember accent line, small
-  `pitmaster.tools` wordmark bottom-center. Batch-produce in Canva from one template.
+  current brand style: Zilla Slab/Oswald, charcoal/cream/ember). Upload these directly as
+  the pin image — no new work needed.
+- **Fresh creatives (17 images, Days 13, 15–30): DONE — committed at `og/pins/<slug>.png`**
+  (1000×1500 at 2x) and served at `https://pitmaster.tools/og/pins/<slug>.png` once
+  deployed; these are the Media URLs in `docs/pinterest-30-day-pins.csv`. They are
+  illustrated brand-palette compositions (not photos), rendered locally by
+  `scripts/render-campaign-pins.mjs` (`npm run pins:campaign`, same offline-only rules as
+  `pins:render`). The per-pin "Prompt" lines below were the original creative briefs and
+  are kept for context — the committed PNG is the source of truth; edit the script and
+  re-render to change a creative.
 
 ---
 
@@ -197,9 +198,9 @@ SEO-safe.
 
 **Day 22 · Fri Jul 31 · 8:30 PM · Ribs & Pulled Pork**
 - Link: `/pork-shoulder-calculator` `?pin30&utm_content=d22-porkbutt2`
-- Image (fresh): **Prompt:** two forks pulling apart a steaming smoked pork butt on a wooden board, visible smoke ring and bark, rustic table. Overlay: `PULLED PORK FOR A CROWD` · accent: `8 lb butt = 4 lb pork = 12 sandwiches` · footer: `FREE PORK CALCULATOR`
+- Image (fresh): **Prompt:** two forks pulling apart a steaming smoked pork butt on a wooden board, visible smoke ring and bark, rustic table. Overlay: `PULLED PORK FOR A CROWD` · accent: `8 lb butt = ~5 lb pork = 12 sandwiches` · footer: `FREE PORK CALCULATOR`
 - Title: `Pulled Pork Math: One 8 lb Butt Feeds 12 — Here's the Timing`
-- Description: `An 8 lb pork butt yields about 4 lb of pulled pork — a dozen good sandwiches — and needs 12–16 hours at 225°F. This free calculator gives your exact cook time and start time by weight and temp, so the buns and the butt are ready together.`
+- Description: `An 8 lb pork butt yields about 5 lb of pulled pork — a dozen generous sandwiches — and needs 10–12 hours at 225°F. This free calculator gives your exact cook time and start time by weight and temp, so the buns and the butt are ready together.`
 
 **Day 23 · Sat Aug 1 · 2:00 PM · BBQ for a Crowd**
 - Link: `/catering-calculator` `?pin30&utm_content=d23-catering2`
@@ -255,10 +256,12 @@ SEO-safe.
 
 ## 5. Production checklist
 
-- [ ] Days 1–12, 14: upload existing `og/<slug>.png` files (13 already committed — zero new work).
-- [ ] Days 13, 15–30: produce the 17 photo/graphic creatives from the prompts above (one Canva template: photo top 60%, `#1c140d` band bottom 40%, Anton headline in `#f3ead8`, accent line in `#d9542e`, wordmark footer). Days 25 & 29 are pure brand graphics, not photos.
-- [ ] Queue all 30 pins in Pinterest's native scheduler with the exact dates/times/boards above.
-- [ ] Expand each shorthand link to the full UTM pattern from §2.
+- [x] Days 13, 15–30: 17 campaign creatives rendered and committed at `og/pins/` (`npm run pins:campaign`).
+- [x] Bulk-upload CSV with full UTM links and UTC publish dates: `docs/pinterest-30-day-pins.csv`.
+- [ ] Merge + deploy this branch **before** uploading the CSV — Pinterest fetches Media URLs at upload time.
+- [ ] Upload `docs/pinterest-30-day-pins.csv` via Pinterest bulk upload (Business Hub → Create → Bulk create pins).
+- [ ] **Timezone check:** publish dates are UTC per Pinterest's documented format (no `Z` suffix accepted). After upload, confirm the first scheduled pin shows 8:30 PM ET / Jul 10 in the scheduler; if Pinterest displays it ~4 h off, it parsed the dates as account-local time — delete and re-upload with times shifted accordingly.
+- [ ] **Day 18 gate (Jul 27 post):** the pin links to `/guides/techniques/managing-the-stall`, which ships with the unmerged guides branch (`feat/guides-content-system`). Verify the guide is live before Jul 27; if the guides branch won't land in time, edit that scheduled pin's link to `/smoking-times-and-temps` (or delete the row before upload).
 
 ## 6. Measurement & what happens on Day 31
 

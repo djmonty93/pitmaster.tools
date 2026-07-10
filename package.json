@@ -5,6 +5,7 @@
     "build:metros": "node scripts/generate-metros.js",
     "build": "npm run build:metros && node build.js",
     "pins:render": "node scripts/render-pins.mjs",
+    "pins:campaign": "node scripts/render-campaign-pins.mjs",
     "normals:render": "node scripts/generate-normals.mjs",
     "validate": "npm run build && node scripts/validate.mjs",
     "dev:worker": "wrangler dev",
