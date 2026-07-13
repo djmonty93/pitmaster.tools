@@ -85,6 +85,13 @@ async function dismissCookieBanner(page) {
   }
 }
 
+async function openHomepageAdvancedSettings(page) {
+  const details = page.locator('#advancedSettings');
+  if (!(await details.evaluate((element) => element.open))) {
+    await details.locator('summary').click();
+  }
+}
+
 async function getTimelineLabels(page, containerSelector) {
   return (await page.locator(`${containerSelector} .tl-label`).allTextContents())
     .map((text) => text.replace(/\s+/g, ' ').trim());
@@ -101,6 +108,7 @@ test('homepage loads, nav opens, and calculator shows results', async ({ page })
   await trigger.click();
   await expect(page.locator('.nav-dropdown__menu').getByRole('link', { name: 'All Tools' })).toBeVisible();
   await page.keyboard.press('Escape');
+  await expect(trigger).toBeFocused();
 
   await page.locator('#meatType').selectOption('brisket-sliced');
   await page.locator('#weight').fill('12');
@@ -147,15 +155,20 @@ test('rib calculator loads with working navigation and responsive header control
   await page.goto('/rib-calculator.html');
   await expect(page.getByRole('heading', { level: 1, name: /rib smoking calculator/i })).toBeVisible();
   await expect(page.locator('.menu-toggle')).toBeVisible();
-  await expect(page.getByRole('group', { name: /temperature unit/i })).toBeVisible();
-  await expect(page.getByRole('group', { name: /weight unit/i })).toBeVisible();
+  await expect(page.getByRole('group', { name: /temperature unit/i })).not.toBeVisible();
+  await expect(page.getByRole('group', { name: /weight unit/i })).not.toBeVisible();
 
   await page.locator('.menu-toggle').click();
   await expect(page.locator('.header-nav')).toBeVisible();
+  await expect(page.getByRole('group', { name: /temperature unit/i })).toBeVisible();
+  await expect(page.getByRole('group', { name: /weight unit/i })).toBeVisible();
   const trigger = page.locator('.nav-dropdown__trigger').first();
   await trigger.click();
   await expect(page.locator('.nav-dropdown__menu').getByRole('link', { name: 'All Tools' })).toBeVisible();
   await page.keyboard.press('Escape');
+  await expect(page.locator('.menu-toggle')).toBeFocused();
+  await expect(page.locator('.menu-toggle')).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.locator('.header-nav')).not.toBeVisible();
 
   expect(errors).toEqual([]);
 });
@@ -196,11 +209,7 @@ test('accepted consent loads each third-party script once', async ({ browser }) 
   await context.close();
 });
 
-test('no-consent visitor loads analytics by default but not ads', async ({ browser }) => {
-  // Region-scoped Consent Mode v2: gtag.js loads on every non-rejected page view
-  // (cookieless inside the EEA/UK/CH, full measurement elsewhere) to close the
-  // GSC→GA4 gap; AdSense stays withheld until explicit accept. The banner is
-  // still shown so the visitor can accept/reject.
+test('no-consent visitor keeps the cold path first-party only', async ({ browser }) => {
   const context = await browser.newContext();
   const page = await context.newPage();
   const errors = [];
@@ -208,11 +217,127 @@ test('no-consent visitor loads analytics by default but not ads', async ({ brows
 
   await page.goto('/');
   await expect(page.locator('#cookieBanner.visible')).toBeVisible();
-  await expect.poll(async () => (await getThirdPartyScriptCounts(page)).ga).toBe(1);
-  expect((await getThirdPartyScriptCounts(page)).ads).toBe(0);
+  expect(await getThirdPartyScriptCounts(page)).toEqual({ ga: 0, ads: 0 });
   expect(errors).toEqual([]);
 
   await context.close();
+});
+
+test('accepting consent upgrades the current page and stores the choice', async ({ browser }) => {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.route(/^https:\/\//, (route) => route.abort());
+
+  await page.goto('/');
+  await expect(page.locator('#cookieBanner.visible')).toBeVisible();
+  expect(await getThirdPartyScriptCounts(page)).toEqual({ ga: 0, ads: 0 });
+
+  await page.locator('#cookieAccept').click();
+
+  await expect(page.locator('#cookieBanner')).not.toBeVisible();
+  await expect.poll(async () => getThirdPartyScriptCounts(page)).toEqual({ ga: 1, ads: 1 });
+  const consentCookie = (await context.cookies()).find((cookie) => cookie.name === 'pitmaster_consent');
+  expect(consentCookie?.value).toBe('accepted');
+
+  await context.close();
+});
+
+test('mobile pages have no horizontal overflow and keep the primary task in view', async ({ browser }) => {
+  const context = await newRejectedConsentContext(browser);
+  const page = await context.newPage();
+
+  for (const viewport of [{ width: 320, height: 800 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    for (const path of ['/', '/brisket-calculator', '/smoke-weather/', '/tools']) {
+      await page.goto(path);
+      const widths = await page.evaluate(() => ({
+        viewport: document.documentElement.clientWidth,
+        content: document.documentElement.scrollWidth
+      }));
+      expect(widths.content, `${path} should not overflow at ${viewport.width}px`).toBe(widths.viewport);
+    }
+
+    await page.goto('/');
+    const calculatorTop = await page.locator('#calculator').evaluate((el) => el.getBoundingClientRect().top);
+    expect(calculatorTop, `calculator should be visible at ${viewport.width}px`).toBeLessThan(viewport.height);
+  }
+  await context.close();
+});
+
+test('mobile consent panel stays compact', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await expect(page.locator('#cookieBanner.visible')).toBeVisible();
+  const height = await page.locator('.cookie-banner__inner').evaluate((el) => el.getBoundingClientRect().height);
+  expect(height).toBeLessThanOrEqual(220);
+});
+
+test('homepage upgrades the static Best Smoke Days gauge with live metro data', async ({ page }) => {
+  await page.route('**/api/metros', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        generatedAt: '2026-07-13T04:00:00.000Z',
+        etDate: '2026-07-13',
+        metros: [
+          { slug: 'austin-tx', name: 'Austin', state: 'TX', todayScore: 91, todayBand: 'ideal' },
+          { slug: 'denver-co', name: 'Denver', state: 'CO', todayScore: 84, todayBand: 'green' }
+        ]
+      })
+    });
+  });
+
+  await page.goto('/');
+
+  const gauge = page.locator('#heroGauge');
+  await expect(gauge).toHaveClass(/hero-gauge--live/);
+  await expect(gauge.locator('.hero-gauge__cell')).toHaveCount(2);
+  await expect(gauge.getByRole('link', { name: /Austin, TX/ })).toHaveAttribute('href', '/smoke-weather/austin-tx');
+  await expect(gauge.getByText(/91\/100.*Ideal/)).toBeVisible();
+  await expect(page.locator('#heroGaugeCaption')).toContainText(/Today.s top 2 smoke cities/);
+});
+
+test('homepage cold-load output stays within the frontend budget', async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__frontendPerformance = { lcp: 0, cls: 0 };
+    new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        window.__frontendPerformance.lcp = Math.max(window.__frontendPerformance.lcp, entry.startTime);
+      }
+    }).observe({ type: 'largest-contentful-paint', buffered: true });
+    new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        if (!entry.hadRecentInput) window.__frontendPerformance.cls += entry.value;
+      }
+    }).observe({ type: 'layout-shift', buffered: true });
+  });
+  const thirdPartyRequests = [];
+  page.on('request', (request) => {
+    if (!request.url().startsWith('http://127.0.0.1:4173')) thirdPartyRequests.push(request.url());
+  });
+  const response = await page.goto('/');
+  await page.waitForTimeout(500);
+  const documentBytes = (await response.body()).byteLength;
+  const metrics = await page.evaluate(() => ({
+    domNodes: document.getElementsByTagName('*').length,
+    inlineScriptBytes: Array.from(document.scripts).reduce((sum, el) => sum + (el.textContent || '').length, 0),
+    inlineStyleBytes: Array.from(document.querySelectorAll('style')).reduce((sum, el) => sum + (el.textContent || '').length, 0),
+    resourceTransferBytes: performance.getEntriesByType('resource')
+      .reduce((sum, entry) => sum + (entry.transferSize || entry.encodedBodySize || 0), 0),
+    lcp: window.__frontendPerformance.lcp,
+    cls: window.__frontendPerformance.cls
+  }));
+
+  expect(documentBytes).toBeLessThanOrEqual(200000);
+  expect(metrics.domNodes).toBeLessThanOrEqual(700);
+  expect(metrics.inlineScriptBytes).toBeLessThanOrEqual(100000);
+  expect(metrics.inlineStyleBytes).toBeLessThanOrEqual(45000);
+  expect(metrics.resourceTransferBytes).toBeLessThanOrEqual(150000);
+  expect(metrics.lcp).toBeGreaterThan(0);
+  expect(metrics.lcp).toBeLessThanOrEqual(2500);
+  expect(metrics.cls).toBeLessThanOrEqual(0.1);
+  expect(thirdPartyRequests).toEqual([]);
 });
 
 test('embed mode never loads third-party scripts even with accepted consent', async ({ browser }) => {
@@ -388,6 +513,7 @@ test('homepage keeps physics-backed control states honest', async ({ page }) => 
   trackPageErrors(page, errors);
 
   await page.goto('/');
+  await openHomepageAdvancedSettings(page);
 
   await page.locator('#meatType').selectOption('whole-turkey');
   await expect(page.locator('#wrapMethod')).not.toBeVisible();
@@ -418,6 +544,7 @@ test('homepage live resolve reflects bone-in scaling for physics-backed cuts', a
   trackPageErrors(page, errors);
 
   await page.goto('/');
+  await openHomepageAdvancedSettings(page);
   await page.locator('#meatType').selectOption('pork-butt-pulled');
   await page.locator('#weight').fill('8');
   await page.locator('#serveTime').fill('18:00');
@@ -446,6 +573,7 @@ test('homepage timeline distinguishes wrapped and unwrapped stall events', async
 
   await page.goto('/');
   await dismissCookieBanner(page);
+  await openHomepageAdvancedSettings(page);
   await page.locator('#meatType').selectOption('brisket-sliced');
   await page.locator('#weight').fill('12');
   await page.locator('#serveTime').fill('18:00');
