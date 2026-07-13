@@ -59,13 +59,8 @@ function getCookie(name) {
 }
 
 /* ----- Google services ----- */
-// Region-scoped Consent Mode v2 (advanced mode). The consent defaults in
-// consent-init.html grant analytics worldwide EXCEPT in the EEA/UK/CH, where it
-// stays denied until accept. So gtag.js loads on every non-rejected page view:
-// outside the EEA it measures full users; inside, it sends only cookieless
-// Consent Mode pings until the visitor accepts. Ads stay denied everywhere
-// until explicit accept. This closes the GSC↔GA4 gap while staying
-// GDPR-defensible. See docs/analytics-consent-playbook.md.
+// Consent Mode v2. consent-init.html denies analytics and advertising globally;
+// accepted visitors are upgraded immediately before Google services load.
 function updateConsentGranted() {
   gtag('consent', 'update', {
     'ad_storage': 'granted',
@@ -151,10 +146,7 @@ function loadAds() {
   if (getCookie(CONSENT_COOKIE_NAME) !== 'accepted') return;
   // Grant the ad signals before injecting AdSense so it never runs under a
   // denied ad-consent state. Idempotent with the caller's updateConsentGranted.
-  // NOTE: analytics_storage is intentionally NOT forced here — it is managed by
-  // the region-scoped Consent Mode defaults (granted outside the EEA/UK/CH,
-  // cookieless-until-accept inside), and forcing it would set cookies for EEA
-  // visitors before consent.
+  // analytics_storage is managed by updateConsentGranted before this runs.
   if (typeof gtag === 'function') {
     gtag('consent', 'update', {
       'ad_storage': 'granted',
@@ -205,8 +197,7 @@ function setConsentState(value) {
     updateConsentGranted();
     loadGoogleServices();
   } else if (value === 'rejected') {
-    // Fully honor reject: deny consent and purge any GA cookies already set
-    // (e.g. for a non-EEA visitor who was measured by default before clicking).
+    // Fully honor reject: deny consent and purge any stale GA cookies.
     updateConsentDenied();
   }
   hideCookieBanner();
@@ -240,11 +231,9 @@ function initConsentBanner() {
   if (storedConsent === 'rejected') { updateConsentDenied(); hideCookieBanner(); return; }
   if (storedConsent === 'accepted') updateConsentGranted();
 
-  // Every non-rejected page view loads analytics. Region-scoped consent defaults
-  // decide cookies vs cookieless pings (see loadAnalytics comment).
-  loadAnalytics();
-
-  if (storedConsent === 'accepted') { loadAds(); hideCookieBanner(); return; }
+  // Keep the cold path first-party only. Analytics and ads load only after the
+  // visitor has explicitly accepted them, including on later page views.
+  if (storedConsent === 'accepted') { loadGoogleServices(); hideCookieBanner(); return; }
   showCookieBanner();
 }
 /* Alias for rib-calculator.html which uses the old name */

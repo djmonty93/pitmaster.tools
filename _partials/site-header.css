@@ -264,6 +264,7 @@
 
   .header-right {
     position: static;
+    gap: .5rem;
   }
 
   .header-nav,
@@ -287,6 +288,14 @@
 
   .header-nav.is-open,
   .nav-links.is-open { display: flex; }
+
+  .header-nav > .unit-controls,
+  .nav-links > .unit-controls {
+    width: 100%;
+    justify-content: flex-start;
+    padding-bottom: .75rem;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+  }
 
   .header-nav a,
   .nav-links a,

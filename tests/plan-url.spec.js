@@ -1,5 +1,10 @@
 const { test, expect } = require('@playwright/test');
 
+async function openAdvancedSettings(page) {
+  const details = page.locator('#advancedSettings');
+  if (!(await details.evaluate((element) => element.open))) await details.locator('summary').click();
+}
+
 // Shareable cook-plan URLs (Milestone 3). Configuring the calculator mirrors
 // the inputs into the query string (history.replaceState); a shared/bookmarked
 // URL hydrates the inputs and renders the timeline on load. The pure
@@ -8,6 +13,7 @@ const { test, expect } = require('@playwright/test');
 
 test('homepage: calculating writes the plan to the URL', async ({ page }) => {
   await page.goto('/');
+  await openAdvancedSettings(page);
   await page.selectOption('#meatType', 'pork-butt-pulled');
   await page.fill('#weight', '8');
   await page.fill('#numPeople', '10');
@@ -30,6 +36,7 @@ test('homepage: calculating writes the plan to the URL', async ({ page }) => {
 test('homepage: Copy plan link copies the current plan URL', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.goto('/');
+  await openAdvancedSettings(page);
   await page.selectOption('#meatType', 'spare-ribs');
   await page.fill('#numPeople', '4');
   await page.locator('#calcBtn').click();
@@ -58,6 +65,7 @@ test('homepage: a shared plan URL hydrates inputs and renders the timeline on lo
 
 test('homepage: round trip through a fresh page yields identical inputs', async ({ page, context }) => {
   await page.goto('/');
+  await openAdvancedSettings(page);
   await page.selectOption('#meatType', 'whole-turkey');
   await page.fill('#weight', '16');
   await page.fill('#numPeople', '14');
@@ -98,6 +106,7 @@ test('homepage: an over-ceiling weight is rejected, not silently clamped into th
   // The calculator must refuse weights above the shareable schema max (999) so
   // a copied plan can never differ from the displayed calculation.
   await page.goto('/');
+  await openAdvancedSettings(page);
   await page.fill('#weight', '1500');
   await page.locator('#calcBtn').click();
   await expect(page.locator('#vmsg')).toContainText(/999/);
