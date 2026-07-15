@@ -1326,7 +1326,7 @@ function buildTL(cut, serve, hrs, wrap, grill, physicsResult){
       if(wrap==='none') ev.push({t:se, l:'Stall ends', s:'Temperature climbs again', c:'amber'});
     }
     var pull=new Date(serve-restMs);
-    ev.push({t:pull, l:'Pull from smoker (begin rest', s:'Target internal: '+dT(cut.pullTemp)+') rest '+cut.restMinutes+' min loosely tented', c:'amber'});
+    ev.push({t:pull, l:'Pull from smoker: begin rest', s:'Target internal: '+dT(cut.pullTemp)+' \u2014 rest '+cut.restMinutes+' min loosely tented', c:'amber'});
     ev.push({t:serve, l:'Serve', s:'', c:'green'});
 
   } else {
@@ -1349,7 +1349,7 @@ function buildTL(cut, serve, hrs, wrap, grill, physicsResult){
     ev.push({t:ls2, l:'Light smoker / preheat',         s:'Target: '+dT(stv), c:'blue'});
     ev.push({t:sOn, l:'Meat goes on (smoke phase)',      s:cut.sPhaseTemp?'Smoke to '+dT(cut.sPhaseTemp)+' internal':'', c:'amber'});
     ev.push({t:pfs, l:'Pull from smoker: begin sear', s:'Internal ~'+dT(cut.sPhaseTemp||cut.pullTemp-15)+' \u2014 '+gLbl+' at '+sTD+', '+Math.round(sds)+'s per side', c:'red'});
-    ev.push({t:sc,  l:'Sear complete (rest',       s:'Pull at '+dT(cut.pullTemp)+' internal) rest '+(cut.searRest||5)+' min', c:'gray'});
+    ev.push({t:sc,  l:'Sear complete: rest',       s:'Pull at '+dT(cut.pullTemp)+' internal \u2014 rest '+(cut.searRest||5)+' min', c:'gray'});
     ev.push({t:serve, l:'Serve', s:'', c:'green'});
   }
   return ev;

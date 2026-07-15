@@ -643,7 +643,7 @@ function calculate() {
     { dot: 'blue',  time: light,     day: dayLabel(serve, light),      label: 'Light smoker / preheat',          sub: 'Target: ' + escapeHtml(fmtSmokerTemp(tempF)) + ' stable before turkey goes on' },
     { dot: 'amber', time: meatOn,    day: dayLabel(serve, meatOn),     label: 'Turkey goes on smoker',            sub: weightStr },
     { dot: 'amber', time: wrapCheck, day: dayLabel(serve, wrapCheck),  label: 'Wrap check (60% done)',            sub: 'Check internal temp. If browning too fast, tent loosely with foil.' },
-    { dot: 'red',   time: pull,      day: dayLabel(serve, pull),       label: 'Pull from smoker (begin rest', sub: 'Target internal: ' + escapeHtml(fmtTemp(cut.pullTemp)) + ') rest ' + cut.restMinutes + ' min loosely tented' },
+    { dot: 'red',   time: pull,      day: dayLabel(serve, pull),       label: 'Pull from smoker: begin rest', sub: 'Target internal: ' + escapeHtml(fmtTemp(cut.pullTemp)) + ' \u2014 rest ' + cut.restMinutes + ' min loosely tented' },
     { dot: 'green', time: serve,     day: '',                          label: 'Serve',                            sub: 'Slice against the grain and enjoy' }
   ];
 

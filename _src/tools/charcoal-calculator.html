@@ -572,8 +572,8 @@ function updateTempOptions() {
   var curVal = sel.value;
   var temps = [225, 250, 275, 300, 350];
   var labels = {
-    F: { 225: '225\u00B0F (Low & Slow', 250: '250\u00B0F) Standard Smoke', 275: '275\u00B0F (Hot & Fast', 300: '300\u00B0F) High Smoke', 350: '350\u00B0F, Direct / Grilling' },
-    C: { 225: '107\u00B0C (Low & Slow', 250: '121\u00B0C) Standard Smoke', 275: '135\u00B0C (Hot & Fast', 300: '149\u00B0C) High Smoke', 350: '177\u00B0C, Direct / Grilling' }
+    F: { 225: '225\u00B0F \u2014 Low & Slow', 250: '250\u00B0F \u2014 Standard Smoke', 275: '275\u00B0F \u2014 Hot & Fast', 300: '300\u00B0F \u2014 High Smoke', 350: '350\u00B0F \u2014 Direct / Grilling' },
+    C: { 225: '107\u00B0C \u2014 Low & Slow', 250: '121\u00B0C \u2014 Standard Smoke', 275: '135\u00B0C \u2014 Hot & Fast', 300: '149\u00B0C \u2014 High Smoke', 350: '177\u00B0C \u2014 Direct / Grilling' }
   };
   for (var i = 0; i < sel.options.length; i++) {
     var v = parseInt(sel.options[i].value, 10);

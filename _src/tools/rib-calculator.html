@@ -952,10 +952,10 @@
       tlEl.innerHTML = '';
       var events = [
         { color: 'blue',  time: lightSmoker, label: 'Light smoker / preheat',    sub: 'Get smoker up to temp and running clean' },
-        { color: 'blue',  time: phase1Start, label: 'Ribs go on (Phase 1',       sub: spFmtHrs(p1h) + ' unwrapped) smoke penetration and bark formation' },
+        { color: 'blue',  time: phase1Start, label: 'Ribs go on: Phase 1',       sub: spFmtHrs(p1h) + ' unwrapped — smoke penetration and bark formation' },
         { color: 'amber', time: phase2Start, label: 'Wrap in foil: Phase 2',     sub: spFmtHrs(p2h) + ' tightly wrapped with butter, brown sugar, and apple juice' },
-        { color: 'red',   time: phase3Start, label: 'Unwrap (Phase 3',           sub: spFmtHrs(p3h) + ' back on smoker) firm up bark, optional sauce glaze last 15 min' },
-        { color: 'amber', time: phase3End,   label: 'Pull from smoker (rest ' + rib.restMinutes + ' min', sub: 'Target internal: ' + fmtTemp(rib.pullTemp) + ') probe between bones' },
+        { color: 'red',   time: phase3Start, label: 'Unwrap: Phase 3',           sub: spFmtHrs(p3h) + ' back on smoker — firm up bark, optional sauce glaze last 15 min' },
+        { color: 'amber', time: phase3End,   label: 'Pull from smoker: rest ' + rib.restMinutes + ' min', sub: 'Target internal: ' + fmtTemp(rib.pullTemp) + ' — probe between bones' },
         { color: 'green', time: serve,       label: 'Serve',                      sub: rib.name + ' — ' + methodName + ' method' }
       ];
       events.forEach(function(ev, i) { tlEl.appendChild(tlItem(ev.color, ev.time, ev.label, ev.sub, i)); });
@@ -1005,7 +1005,7 @@
       } else {
         evs.push({ color: 'amber', time: stallStartT, label: 'Bend test / wrap check', sub: 'Check for 45\u00B0 bend test and pullback from bone' });
       }
-      evs.push({ color: 'amber', time: pull,  label: 'Pull from smoker (rest ' + rib.restMinutes + ' min', sub: 'Target internal: ' + fmtTemp(rib.pullTemp) + ') probe between bones' });
+      evs.push({ color: 'amber', time: pull,  label: 'Pull from smoker: rest ' + rib.restMinutes + ' min', sub: 'Target internal: ' + fmtTemp(rib.pullTemp) + ' — probe between bones' });
       evs.push({ color: 'green', time: serve, label: 'Serve', sub: rib.name });
       evs.forEach(function(ev, i) { tlEl.appendChild(tlItem(ev.color, ev.time, ev.label, ev.sub, i)); });
     }

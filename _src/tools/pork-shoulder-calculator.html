@@ -838,7 +838,7 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
       { dot: 'amber', time: meatOn,     label: 'Meat goes on smoker', sub: rawW.toFixed(1) + ' ' + weightUnit + ' ' + (boneIn ? 'bone-in' : 'boneless') + ': fat side up or down per your preference' },
       { dot: 'red',   time: stallStart, label: wrap !== 'none' ? 'Stall: wrap now' : 'Stall begins', sub: 'Internal reaches ' + fmtTemp(150) + '\u2013' + fmtTemp(165) + ' \u2014 ' + wrapNote },
       wrap === 'none' ? { dot: 'amber', time: stallEnd, label: 'Stall ends', sub: 'Temperature climbs again toward target' } : null,
-      { dot: 'amber', time: pull,       label: 'Pull from smoker (begin rest', sub: 'Target internal: ' + fmtTemp(style.pullTemp) + ') rest ' + style.restMinutes + ' min minimum (faux Cambro holds up to 4 hrs)' },
+      { dot: 'amber', time: pull,       label: 'Pull from smoker: begin rest', sub: 'Target internal: ' + fmtTemp(style.pullTemp) + ' \u2014 rest ' + style.restMinutes + ' min minimum (faux Cambro holds up to 4 hrs)' },
       { dot: 'green', time: serve,      label: 'Serve', sub: 'Pull, slice, or chop to order' }
     ].filter(Boolean);
 
