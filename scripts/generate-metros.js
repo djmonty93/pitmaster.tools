@@ -559,7 +559,7 @@ const METRO_LOCAL = {
 
 // Last-modified date emitted in og/twitter/json-ld. Bump when the template
 // changes materially; metro-list changes alone don't require it.
-const LAST_MODIFIED = '2026-06-27';
+const LAST_MODIFIED = '2026-07-15';
 
 function regionOf(state) {
   const r = REGION_BY_STATE[state];
