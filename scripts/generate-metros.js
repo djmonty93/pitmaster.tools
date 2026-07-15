@@ -441,7 +441,7 @@ const METRO_LOCAL = {
   ],
   'charlotte-nc': [
     'Charlotte sits in the Carolina Piedmont, where humid subtropical summers meet mild, workable winters. The long shoulder seasons are the prize, March into May and September into November bring comfortable highs and dew points well below the swampy midsummer peak. June through August is hot and humid with frequent afternoon thunderstorms, so summer cooks live by the radar. Winters stay mild enough that cookable weekends show up all year, and hard freezes are brief.',
-    'Summer humidity pushes the wet-bulb temperature up and lengthens the stall, which actually suits the region’s long pork cooks, whole hog and shoulder both reward patience over speed. For the muggy stretch, a sealed kamado holds a tight, fuel-efficient fire and a pellet rig rides it out hands-off; save the open stick burner for the settled, low-humidity days. Charlotte straddles two Carolina traditions, Eastern whole-hog dressed in thin vinegar sauce and Lexington-style shoulder with a tomato edge, and both are forgiving cuts. Get the meat on before sunrise so the stall breaks ahead of the afternoon storms.',
+    'Summer humidity pushes the wet-bulb temperature up and lengthens the stall, which actually suits the region’s long pork cooks: whole hog and shoulder both reward patience over speed. For the muggy stretch, a sealed kamado holds a tight, fuel-efficient fire and a pellet rig rides it out hands-off; save the open stick burner for the settled, low-humidity days. Charlotte straddles two Carolina traditions, Eastern whole-hog dressed in thin vinegar sauce and Lexington-style shoulder with a tomato edge, and both are forgiving cuts. Get the meat on before sunrise so the stall breaks ahead of the afternoon storms.',
   ],
   'orlando-fl': [
     'Orlando sits inland in Central Florida, in the stretch nicknamed Lightning Alley for good reason. From June through September, sea breezes off both coasts collide over the peninsula’s middle and fire daily afternoon thunderstorms: often violent, usually between two and six o’clock. The flip side is the drier season, roughly November through April, which is warm, lower-humidity, and reliably cookable weekend to weekend, with May and October as transition months. Hurricane season runs June into November, and even an inland metro feels the bigger systems, so summer plans need flexibility.',
@@ -449,7 +449,7 @@ const METRO_LOCAL = {
   ],
   'san-antonio-tx': [
     'San Antonio anchors South Texas, where hot summers and mild winters make for a long cook calendar. July and August run genuinely hot, highs in the 90s and beyond, with enough Gulf moisture to keep the air humid without the relentless saturation of the coast. Spring brings the region’s strongest storms and gusty frontal passages, while fall and winter settle into some of the best smoking weather in the state: mild, often dry, and rarely cold enough to stop a cook.',
-    'Moderate humidity means stalls that run longer than the desert but shorter than Houston’s Gulf air, so a brisket here lands somewhere in between on the clock. Wind is less punishing than out on the open plains, which keeps the region’s offset stick-burner tradition comfortable most of the year, a modest wind break covers the spring fronts. San Antonio’s pit history runs deeper into barbacoa than brisket: pit-steamed beef head and cheek, cooked overnight, predate the modern brisket boom. For barbacoa or brisket alike, the long fall and winter windows are prime, so save the all-day cooks for the calm stretches the score marks green.',
+    'Moderate humidity means stalls that run longer than the desert but shorter than Houston’s Gulf air, so a brisket here lands somewhere in between on the clock. Wind is less punishing than out on the open plains, which keeps the region’s offset stick-burner tradition comfortable most of the year: a modest wind break covers the spring fronts. San Antonio’s pit history runs deeper into barbacoa than brisket: pit-steamed beef head and cheek, cooked overnight, predate the modern brisket boom. For barbacoa or brisket alike, the long fall and winter windows are prime, so save the all-day cooks for the calm stretches the score marks green.',
   ],
   'portland-or': [
     'Portland’s smoke season is a tale of two halves. The dry window (July and August, often stretching into September) is glorious: warm, low-humidity weekends that rank among the best cooking weather in the country. The wettest stretch runs roughly November through March, and the broader gray, drizzly Pacific Northwest damp lingers from October into June. It rarely freezes hard, but the persistent moisture, not cold or wind, is the variable that shapes a Portland cook.',
@@ -533,7 +533,7 @@ const METRO_LOCAL = {
   ],
   'new-orleans-la': [
     'New Orleans cooks in some of the most humid air in the country. Sitting on the Gulf Coast near sea level, the city runs hot and saturated from late spring through early fall, with daily afternoon thunderstorms and a hurricane season that peaks from August into October. Dew points stay high well into the night, so even an evening cook fights the moisture. The mild, drier winter, roughly November through March, is the prime smoking stretch, with comfortable temperatures and far calmer skies.',
-    'This saturated air is the textbook case for the score’s wet-bulb weighting: a packer brisket can stall for hours in a Louisiana summer. A well-insulated kamado is the natural answer, running tight stalls and sipping fuel; a kettle or pellet cooker copes with the heat well too. New Orleans threads Creole and Cajun flavor through its smoke, andouille and tasso share the pit with brisket and ribs. Cook in the cool of the morning, give the long cuts generous time in the humidity, and treat the dry winter months as the season for your most ambitious briskets.',
+    'This saturated air is the textbook case for the score’s wet-bulb weighting: a packer brisket can stall for hours in a Louisiana summer. A well-insulated kamado is the natural answer, running tight stalls and sipping fuel; a kettle or pellet cooker copes with the heat well too. New Orleans threads Creole and Cajun flavor through its smoke: andouille and tasso share the pit with brisket and ribs. Cook in the cool of the morning, give the long cuts generous time in the humidity, and treat the dry winter months as the season for your most ambitious briskets.',
   ],
   'hartford-ct': [
     'Hartford sits in the Connecticut River valley, with a four-season New England climate. Summers are warm and humid with afternoon storms, and the valley can trap heat and moisture, making July feel heavier than the nearby coast. Winters are cold and snowy, with long stretches that shut down an open firebox. The strong cooking windows are the May–June and September–October shoulders, when the air is mild and settled; the deep winter belongs to insulated cookers.',
@@ -868,7 +868,7 @@ function cutGuidance(name, derived, seasons, seed) {
     candidates.push({ sev: 3, text: pickAxis([
       'A summer ' + summerScore + ' on stall risk means brisket and pork butt want extra hours in ' +
         name + '; keep a wrap handy and let a kamado run the stall.',
-      name + '’s ' + summerScore + '-grade summer holds the plateau flat, budget long for the big ' +
+      name + '’s ' + summerScore + '-grade summer holds the plateau flat; budget long for the big ' +
         'cuts and lean on a sealed pellet rig or kamado.',
       'With a ' + summerScore + ' summer in ' + name + ', the stall sticks; paper-wrap the long ' +
         'cuts early and a kamado pays back the fuel.',
@@ -877,18 +877,18 @@ function cutGuidance(name, derived, seasons, seed) {
   // Windy: offset fire-tending.
   if (derived.windiest && derived.windiest.avg_wind_mph >= 11) {
     candidates.push({ sev: 2.5, text: pickAxis([
-      'Wind is the offset hazard in ' + name + ', ' + wMonth + ' averages ' + wMph +
+      'Wind is the offset hazard in ' + name + ': ' + wMonth + ' averages ' + wMph +
         ' mph, so build a break and burn dense post oak.',
       'Watch the gusts on ' + name + ' offset days; ' + wMonth + ' runs ' + wMph +
         ' mph, where a kamado holds steadier than an open fire.',
-      name + ' breezes peak in ' + wMonth + ' at ' + wMph + ' mph, shelter the firebox and reach ' +
+      name + ' breezes peak in ' + wMonth + ' at ' + wMph + ' mph; shelter the firebox and reach ' +
         'for heavier wood to keep smoke on the meat.',
     ], seed, 7, 0) });
   }
   // Cold-winter: insulated rig.
   if (coldest.avg_low_f < 30) {
     candidates.push({ sev: 2.4, text: pickAxis([
-      'From ' + cMonth + ', ' + name + ' lows near ' + cLow + '°F starve an open fire, a sealed ' +
+      'From ' + cMonth + ', ' + name + ' lows near ' + cLow + '°F starve an open fire; a sealed ' +
         'kamado or pellet cooker is the practical winter long-cook.',
       name + ' winters bite (' + cMonth + ' near ' + cLow + '°F); only an insulated rig holds ' +
         'temperature where an offset bleeds heat.',
@@ -899,11 +899,11 @@ function cutGuidance(name, derived, seasons, seed) {
   // Hot-dry: bark + moisture loss.
   if (summer && summer.driver.key === 'heat') {
     candidates.push({ sev: 2.2, text: pickAxis([
-      name + ' summer highs near ' + summerHi + '°F set bark fast but dry the cook, run a water ' +
+      name + ' summer highs near ' + summerHi + '°F set bark fast but dry the cook; run a water ' +
         'pan and paper-wrap the long cuts.',
       'Hot ' + summerHi + '°F afternoons in ' + name + ' shorten the stall; guard moisture with a ' +
         'pan and a paper wrap on brisket and ribs.',
-      'With ' + name + ' near ' + summerHi + '°F, bark forms early, fight dry-out with foil-free ' +
+      'With ' + name + ' near ' + summerHi + '°F, bark forms early; fight dry-out with foil-free ' +
         'wraps and a water pan.',
     ], seed, 7, 0) });
   }
