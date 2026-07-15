@@ -17,7 +17,7 @@
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "Pitmaster Tools — Best Smoke Days in San Francisco, CA",
+  "name": "Pitmaster Tools: Best Smoke Days in San Francisco, CA",
   "url": "https://pitmaster.tools/smoke-weather/san-francisco-ca",
   "description": "Free 7-day smoke forecast for San Francisco, CA. Scores for brisket, ribs, pork, and chicken across all cooker types.",
   "applicationCategory": "UtilitiesApplication",
@@ -25,7 +25,7 @@
   "inLanguage": "en",
   "isAccessibleForFree": true,
   "browserRequirements": "Requires JavaScript enabled in a modern browser.",
-  "dateModified": "2026-06-27",
+  "dateModified": "2026-07-15",
   "featureList": [
     "7-day smoking weather forecast scored 0-100 for San Francisco",
     "Cut-aware stall-risk modeling using wet-bulb temperature",
@@ -66,7 +66,7 @@
       "name": "How accurate is the San Francisco forecast?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "We pull from Open-Meteo as the primary source with the US National Weather Service as failover. Each day in the San Francisco 7-day window carries a confidence label — high for the next 24-48 hours, dropping to medium and then low further out. Treat the 5-7 day end of the window as a planning signal, not a commitment."
+        "text": "We pull from Open-Meteo as the primary source with the US National Weather Service as failover. Each day in the San Francisco 7-day window carries a confidence label: high for the next 24-48 hours, dropping to medium and then low further out. Treat the 5-7 day end of the window as a planning signal, not a commitment."
       }
     }
   ]
@@ -104,7 +104,7 @@
   "@type": "Dataset",
   "@id": "https://pitmaster.tools/smoke-weather/san-francisco-ca#climate-normals",
   "name": "San Francisco, CA Monthly Climate Normals for Barbecue",
-  "description": "Monthly climate normals for San Francisco, CA — average high and low temperature, wind speed, relative humidity, and rainy days, each scored 0-100 for low-and-slow barbecue suitability. Temperature and rain days from NOAA 1991-2020 U.S. Climate Normals (station SAN FRANCISCO DWTN, CA); wind and humidity from Open-Meteo historical reanalysis, 2015-2024.",
+  "description": "Monthly climate normals for San Francisco, CA: average high and low temperature, wind speed, relative humidity, and rainy days, each scored 0-100 for low-and-slow barbecue suitability. Temperature and rain days from NOAA 1991-2020 U.S. Climate Normals (station SAN FRANCISCO DWTN, CA); wind and humidity from Open-Meteo historical reanalysis, 2015-2024.",
   "url": "https://pitmaster.tools/smoke-weather/san-francisco-ca",
   "temporalCoverage": [
     "1991/2020",
@@ -170,7 +170,7 @@
     "url": "https://pitmaster.tools"
   },
   "license": "https://pitmaster.tools/terms-of-service",
-  "dateModified": "2026-06-27"
+  "dateModified": "2026-07-15"
 }
 </script>
 <!-- INJECT:site-header.css -->
@@ -192,7 +192,7 @@
   </nav>
   <section class="page-hero" aria-label="Page introduction">
     <h1>Best Smoke Days in San Francisco, CA</h1>
-    <p>San Francisco, California sits in the Pacific barbecue region. San Francisco’s barbecue scene is small but precise — Texas-trained pitmasters operate compact restaurants in the East Bay and South Bay using offsets that benefit from the city’s mild marine climate. This page scores the next seven days for low-and-slow cooks in the San Francisco metro, weighing rain probability, sustained wind and gusts, daytime temperature, and the wet-bulb humidity that drives the stall — then weights the result for your cut and cooker so you can pick the day with the highest odds of a clean cook.</p>
+    <p>San Francisco, California sits in the Pacific barbecue region. San Francisco’s barbecue scene is small but precise: Texas-trained pitmasters operate compact restaurants in the East Bay and South Bay using offsets that benefit from the city’s mild marine climate. This page scores the next seven days for low-and-slow cooks in the San Francisco metro, weighing rain probability, sustained wind and gusts, daytime temperature, and the wet-bulb humidity that drives the stall. It then weights the result for your cut and cooker, so you can pick the day with the best odds of a clean cook.</p>
   </section>
 
   <form id="swForm" class="form-card" autocomplete="off" novalidate aria-label="Smoke forecast inputs">
@@ -258,10 +258,10 @@
   <aside class="score-explainer" aria-label="What the score means">
     <h3>What the 0-100 score means</h3>
     <ul class="score-legend">
-      <li><span class="score-legend__swatch band-ideal" aria-hidden="true"></span><strong>85-100 &middot; Ideal</strong> &mdash; light the fire</li>
-      <li><span class="score-legend__swatch band-green" aria-hidden="true"></span><strong>70-84 &middot; Good</strong> &mdash; solid smoke day</li>
-      <li><span class="score-legend__swatch band-yellow" aria-hidden="true"></span><strong>50-69 &middot; Average</strong> &mdash; workable, plan around the rough hours</li>
-      <li><span class="score-legend__swatch band-red" aria-hidden="true"></span><strong>0-49 &middot; Poor</strong> &mdash; tough conditions</li>
+      <li><span class="score-legend__swatch band-ideal" aria-hidden="true"></span><strong>85-100 &middot; Ideal</strong>: light the fire</li>
+      <li><span class="score-legend__swatch band-green" aria-hidden="true"></span><strong>70-84 &middot; Good</strong>: solid smoke day</li>
+      <li><span class="score-legend__swatch band-yellow" aria-hidden="true"></span><strong>50-69 &middot; Average</strong>: workable, plan around the rough hours</li>
+      <li><span class="score-legend__swatch band-red" aria-hidden="true"></span><strong>0-49 &middot; Poor</strong>: tough conditions</li>
     </ul>
     <p>Five weather signals subtract from a base of 100: rain probability + accumulation, wind &amp; gusts (weighted by your cooker), cold mornings, hot afternoons, and stall risk for long cuts. <a href="/smoke-weather/methodology">See full methodology &rarr;</a></p>
   </aside>
@@ -270,13 +270,13 @@
 
   <section class="editorial-section local-guide" aria-label="Smoking in San Francisco">
     <h2>Planning a weekend smoke in San Francisco</h2>
-    <p>San Francisco has the mildest, most stable smoking weather of any major US city, and the season essentially never closes. The marine climate keeps highs moderate year-round — rarely hot, rarely freezing — with moderate dew points and a mostly rain-free stretch from spring through fall. The wettest months are November through March, but even then cookable weekends are common. The one constant is the afternoon wind and fog off the Pacific, which is the real variable a Bay Area pitmaster plans around rather than heat or storms.</p>
-    <p>That marine wind drags an open offset’s pit temperature and can swing 15-to-20 mph as the fog rolls in, so a wind break earns its keep here. An inland yard a few miles back from the water — in the East Bay or South Bay — sees less of it and runs an offset comfortably most of the year. The moderate dew points mean shorter stalls than the humid East, so a brisket moves a touch faster, but the breezy marine air still pulls moisture, so favor butcher paper on the wrap. Pick a low-wind day off the score and the Bay Area calendar will give you a cook nearly any weekend.</p>
+    <p>San Francisco has the mildest, most stable smoking weather of any major US city, and the season essentially never closes. The marine climate keeps highs moderate year-round (rarely hot, rarely freezing) with moderate dew points and a mostly rain-free stretch from spring through fall. The wettest months are November through March, but even then cookable weekends are common. The one constant is the afternoon wind and fog off the Pacific, which is the real variable a Bay Area pitmaster plans around rather than heat or storms.</p>
+    <p>That marine wind drags an open offset’s pit temperature and can swing 15-to-20 mph as the fog rolls in, so a wind break earns its keep here. An inland yard a few miles back from the water, in the East Bay or South Bay, sees less of it and runs an offset comfortably most of the year. The moderate dew points mean shorter stalls than the humid East, so a brisket moves a touch faster, but the breezy marine air still pulls moisture, so favor butcher paper on the wrap. Pick a low-wind day off the score and the Bay Area calendar will give you a cook nearly any weekend.</p>
   </section>
 
   <section class="editorial-section climate-normals" aria-labelledby="normals-title">
     <h2 id="normals-title">San Francisco climate normals by month</h2>
-    <p>Typical conditions for each month, scored 0-100 for a packer brisket on an offset — the most weather-sensitive low-and-slow cook. Temperature and rain days are NOAA 1991-2020 climate normals; wind and humidity are 2015-2024 reanalysis averages.</p>
+    <p>Typical conditions for each month, scored 0-100 for a packer brisket on an offset, the most weather-sensitive low-and-slow cook. Temperature and rain days are NOAA 1991-2020 climate normals; wind and humidity are 2015-2024 reanalysis averages.</p>
     <div class="normals-scroll">
       <table class="normals-table">
         <thead><tr><th scope="col">Month</th><th scope="col">Avg High</th><th scope="col">Avg Low</th><th scope="col">Avg Wind</th><th scope="col">Humidity</th><th scope="col">Rain Days</th><th scope="col">Smoke Score</th></tr></thead>
@@ -296,27 +296,27 @@
         </tbody>
       </table>
     </div>
-    <p>Historically, the best months to smoke in San Francisco are <strong>October, September, and August</strong>. July is the windiest month (avg 12.3 mph) — the one to plan around.</p>
+    <p>Historically, the best months to smoke in San Francisco are <strong>October, September, and August</strong>. July is the windiest month (avg 12.3 mph): the one to plan around.</p>
   </section>
 
   <section class="editorial-section smoke-windows" aria-label="San Francisco smoke season">
     <h2>San Francisco’s smoke season, month by month</h2>
-    <p>San Francisco’s spring (March–May) is strong, scoring 73 on 63°F highs, 50°F lows and wind near 10.3 mph as the plateau runs long and flat. In summer (June–August), San Francisco rates 76/100 — a strong window with 67°F days, 54°F nights and 11.9 mph of wind as a stubborn stall settles over the cook. San Francisco in fall (September–November) grades strong at 79/100 — highs near 68°F, lows near 54°F, wind about 8.1 mph as the stall digs in and holds. Through winter (December–February), San Francisco runs strong: a 70 score off 59°F highs, 47°F lows, and 8.0-mph wind as the plateau runs long and flat.</p>
+    <p>San Francisco’s spring (March–May) is strong, scoring 73 on 63°F highs, 50°F lows and wind near 10.3 mph as the plateau runs long and flat. In summer (June–August), San Francisco rates 76/100, a strong window with 67°F days, 54°F nights and 11.9 mph of wind as a stubborn stall settles over the cook. San Francisco in fall (September–November) grades strong at 79/100: highs near 68°F, lows near 54°F, wind about 8.1 mph as the stall digs in and holds. Through winter (December–February), San Francisco runs strong: a 70 score off 59°F highs, 47°F lows, and 8.0-mph wind as the plateau runs long and flat.</p>
     <p>San Francisco’s calendar peaks in October (81) and bottoms out in February (68) where the stall digs in and holds.</p>
     <p>San Francisco books 11 Good-or-better months out of 12, topping out at 81 in October, though none crack the 85 Ideal mark.</p>
-    <p>With a 76 summer in San Francisco, the stall sticks; paper-wrap the long cuts early and a kamado pays back the fuel. San Francisco breezes peak in July at 12.3 mph — shelter the firebox and reach for heavier wood to keep smoke on the meat.</p>
+    <p>With a 76 summer in San Francisco, the stall sticks; paper-wrap the long cuts early and a kamado pays back the fuel. San Francisco breezes peak in July at 12.3 mph; shelter the firebox and reach for heavier wood to keep smoke on the meat.</p>
   </section>
 
   <section class="editorial-section" aria-label="San Francisco BBQ context">
     <h2>Barbecue heritage</h2>
-    <p>The Bay Area approaches barbecue through a craft-and-provenance lens that reflects Northern California’s broader food culture. California’s Santa Maria tri-tip tradition—red oak, salt, pepper, garlic, pinquito beans—informs the regional sensibility, and Bay Area pitmasters have adopted it alongside full Texas and Carolina operations. Heritage-breed pork, deliberate wood selection, and farm-direct sourcing are regular talking points, driven by a community where fine-dining technique and live-fire cooking share the same kitchen.</p>
+    <p>The Bay Area approaches barbecue through a craft-and-provenance lens that reflects Northern California’s broader food culture. California’s Santa Maria tri-tip tradition (red oak, salt, pepper, garlic, pinquito beans) informs the regional sensibility, and Bay Area pitmasters have adopted it alongside full Texas and Carolina operations. Heritage-breed pork, deliberate wood selection, and farm-direct sourcing are regular talking points, driven by a community where fine-dining technique and live-fire cooking share the same kitchen.</p>
     <h2>San Francisco climate</h2>
-    <p>The Pacific climate is mild and marine-influenced. Summer along the coast rarely climbs above 80 °F, dew points stay moderate, and the only persistent variable is afternoon wind off the water. Inland from the coast — eastern Oregon, central California — the picture shifts toward the dry, hot pattern of the Mountain region. Winters are wet, especially north of San Francisco, but rarely cold enough to shut down a well-insulated cooker. The cook calendar is the longest of any region; weekend windows survive year-round.</p>
+    <p>The Pacific climate is mild and marine-influenced. Summer along the coast rarely climbs above 80 °F, dew points stay moderate, and the only persistent variable is afternoon wind off the water. Inland from the coast (eastern Oregon, central California), the picture shifts toward the dry, hot pattern of the Mountain region. Winters are wet, especially north of San Francisco, but rarely cold enough to shut down a well-insulated cooker. The cook calendar is the longest of any region; weekend windows survive year-round.</p>
     <p>In San Francisco, the normals bear this out: July is the windiest month at 12.3 mph, while October scores highest for low-and-slow at 81 of 100.</p>
     <h2>Cooker fit for San Francisco</h2>
     <p>Pacific cooks have the easiest climate in the country and the widest cooker latitude. Offsets, pellets, kamados, kettles and electrics all work well most of the year. The variable to plan around is coastal wind in the afternoons; an inland yard a few miles back from the water sees less of it.</p>
     <p>San Francisco grades Good or better in 11 of 12 months; on the windiest weekends, plan for gusts near 17 mph and let an insulated cooker carry the long cuts.</p>
-    <p>Pick a day with a strong score, light the fire, and stop guessing whether Saturday in San Francisco will hold. The form lets you swap cut and cooker without leaving the page — your selection persists across visits via local storage. ZIP defaults to 94102 for the San Francisco metro; change it any time to score a different yard.</p>
+    <p>Pick a day with a strong score, light the fire, and stop guessing whether Saturday in San Francisco will hold. The form lets you swap cut and cooker without leaving the page, and your selection persists across visits via local storage. ZIP defaults to 94102 for the San Francisco metro; change it any time to score a different yard.</p>
   </section>
 
   <p class="sw-disclaimer">

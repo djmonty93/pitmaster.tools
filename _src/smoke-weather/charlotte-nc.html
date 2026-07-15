@@ -17,7 +17,7 @@
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "Pitmaster Tools — Best Smoke Days in Charlotte, NC",
+  "name": "Pitmaster Tools: Best Smoke Days in Charlotte, NC",
   "url": "https://pitmaster.tools/smoke-weather/charlotte-nc",
   "description": "Free 7-day smoke forecast for Charlotte, NC. Scores for brisket, ribs, pork, and chicken across all cooker types.",
   "applicationCategory": "UtilitiesApplication",
@@ -25,7 +25,7 @@
   "inLanguage": "en",
   "isAccessibleForFree": true,
   "browserRequirements": "Requires JavaScript enabled in a modern browser.",
-  "dateModified": "2026-06-27",
+  "dateModified": "2026-07-15",
   "featureList": [
     "7-day smoking weather forecast scored 0-100 for Charlotte",
     "Cut-aware stall-risk modeling using wet-bulb temperature",
@@ -58,7 +58,7 @@
       "name": "Which cooker works best in Charlotte?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "For Southeast cooks, the priority is humidity tolerance. A well-insulated kamado runs efficient stalls and conserves fuel through the long, hot summer. Pellet cookers handle the same conditions cleanly. An offset is rewarding when the weather behaves but the regional climate stacks the deck against it — high dew points and pop-up storms are constant variables."
+        "text": "For Southeast cooks, the priority is humidity tolerance. A well-insulated kamado runs efficient stalls and conserves fuel through the long, hot summer. Pellet cookers handle the same conditions cleanly. An offset is rewarding when the weather behaves but the regional climate stacks the deck against it: high dew points and pop-up storms are constant variables."
       }
     },
     {
@@ -66,7 +66,7 @@
       "name": "How accurate is the Charlotte forecast?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "We pull from Open-Meteo as the primary source with the US National Weather Service as failover. Each day in the Charlotte 7-day window carries a confidence label — high for the next 24-48 hours, dropping to medium and then low further out. Treat the 5-7 day end of the window as a planning signal, not a commitment."
+        "text": "We pull from Open-Meteo as the primary source with the US National Weather Service as failover. Each day in the Charlotte 7-day window carries a confidence label: high for the next 24-48 hours, dropping to medium and then low further out. Treat the 5-7 day end of the window as a planning signal, not a commitment."
       }
     }
   ]
@@ -104,7 +104,7 @@
   "@type": "Dataset",
   "@id": "https://pitmaster.tools/smoke-weather/charlotte-nc#climate-normals",
   "name": "Charlotte, NC Monthly Climate Normals for Barbecue",
-  "description": "Monthly climate normals for Charlotte, NC — average high and low temperature, wind speed, relative humidity, and rainy days, each scored 0-100 for low-and-slow barbecue suitability. Temperature and rain days from NOAA 1991-2020 U.S. Climate Normals (station CHARLOTTE DOUGLAS AP, NC); wind and humidity from Open-Meteo historical reanalysis, 2015-2024.",
+  "description": "Monthly climate normals for Charlotte, NC: average high and low temperature, wind speed, relative humidity, and rainy days, each scored 0-100 for low-and-slow barbecue suitability. Temperature and rain days from NOAA 1991-2020 U.S. Climate Normals (station CHARLOTTE DOUGLAS AP, NC); wind and humidity from Open-Meteo historical reanalysis, 2015-2024.",
   "url": "https://pitmaster.tools/smoke-weather/charlotte-nc",
   "temporalCoverage": [
     "1991/2020",
@@ -170,7 +170,7 @@
     "url": "https://pitmaster.tools"
   },
   "license": "https://pitmaster.tools/terms-of-service",
-  "dateModified": "2026-06-27"
+  "dateModified": "2026-07-15"
 }
 </script>
 <!-- INJECT:site-header.css -->
@@ -192,7 +192,7 @@
   </nav>
   <section class="page-hero" aria-label="Page introduction">
     <h1>Best Smoke Days in Charlotte, NC</h1>
-    <p>Charlotte, North Carolina sits in the Southeast barbecue region. Charlotte sits between Eastern Carolina’s whole-hog tradition and Lexington’s shoulder-and-tomato style — both menus appear across the metro, often in the same pit house. This page scores the next seven days for low-and-slow cooks in the Charlotte metro, weighing rain probability, sustained wind and gusts, daytime temperature, and the wet-bulb humidity that drives the stall — then weights the result for your cut and cooker so you can pick the day with the highest odds of a clean cook.</p>
+    <p>Charlotte, North Carolina sits in the Southeast barbecue region. Charlotte sits between Eastern Carolina’s whole-hog tradition and Lexington’s shoulder-and-tomato style: both menus appear across the metro, often in the same pit house. This page scores the next seven days for low-and-slow cooks in the Charlotte metro, weighing rain probability, sustained wind and gusts, daytime temperature, and the wet-bulb humidity that drives the stall. It then weights the result for your cut and cooker, so you can pick the day with the best odds of a clean cook.</p>
   </section>
 
   <form id="swForm" class="form-card" autocomplete="off" novalidate aria-label="Smoke forecast inputs">
@@ -258,10 +258,10 @@
   <aside class="score-explainer" aria-label="What the score means">
     <h3>What the 0-100 score means</h3>
     <ul class="score-legend">
-      <li><span class="score-legend__swatch band-ideal" aria-hidden="true"></span><strong>85-100 &middot; Ideal</strong> &mdash; light the fire</li>
-      <li><span class="score-legend__swatch band-green" aria-hidden="true"></span><strong>70-84 &middot; Good</strong> &mdash; solid smoke day</li>
-      <li><span class="score-legend__swatch band-yellow" aria-hidden="true"></span><strong>50-69 &middot; Average</strong> &mdash; workable, plan around the rough hours</li>
-      <li><span class="score-legend__swatch band-red" aria-hidden="true"></span><strong>0-49 &middot; Poor</strong> &mdash; tough conditions</li>
+      <li><span class="score-legend__swatch band-ideal" aria-hidden="true"></span><strong>85-100 &middot; Ideal</strong>: light the fire</li>
+      <li><span class="score-legend__swatch band-green" aria-hidden="true"></span><strong>70-84 &middot; Good</strong>: solid smoke day</li>
+      <li><span class="score-legend__swatch band-yellow" aria-hidden="true"></span><strong>50-69 &middot; Average</strong>: workable, plan around the rough hours</li>
+      <li><span class="score-legend__swatch band-red" aria-hidden="true"></span><strong>0-49 &middot; Poor</strong>: tough conditions</li>
     </ul>
     <p>Five weather signals subtract from a base of 100: rain probability + accumulation, wind &amp; gusts (weighted by your cooker), cold mornings, hot afternoons, and stall risk for long cuts. <a href="/smoke-weather/methodology">See full methodology &rarr;</a></p>
   </aside>
@@ -270,13 +270,13 @@
 
   <section class="editorial-section local-guide" aria-label="Smoking in Charlotte">
     <h2>Planning a weekend smoke in Charlotte</h2>
-    <p>Charlotte sits in the Carolina Piedmont, where humid subtropical summers meet mild, workable winters. The long shoulder seasons are the prize — March into May and September into November bring comfortable highs and dew points well below the swampy midsummer peak. June through August is hot and humid with frequent afternoon thunderstorms, so summer cooks live by the radar. Winters stay mild enough that cookable weekends show up all year, and hard freezes are brief.</p>
-    <p>Summer humidity pushes the wet-bulb temperature up and lengthens the stall, which actually suits the region’s long pork cooks — whole hog and shoulder both reward patience over speed. For the muggy stretch, a sealed kamado holds a tight, fuel-efficient fire and a pellet rig rides it out hands-off; save the open stick burner for the settled, low-humidity days. Charlotte straddles two Carolina traditions — Eastern whole-hog dressed in thin vinegar sauce and Lexington-style shoulder with a tomato edge — and both are forgiving cuts. Get the meat on before sunrise so the stall breaks ahead of the afternoon storms.</p>
+    <p>Charlotte sits in the Carolina Piedmont, where humid subtropical summers meet mild, workable winters. The long shoulder seasons are the prize, March into May and September into November bring comfortable highs and dew points well below the swampy midsummer peak. June through August is hot and humid with frequent afternoon thunderstorms, so summer cooks live by the radar. Winters stay mild enough that cookable weekends show up all year, and hard freezes are brief.</p>
+    <p>Summer humidity pushes the wet-bulb temperature up and lengthens the stall, which actually suits the region’s long pork cooks: whole hog and shoulder both reward patience over speed. For the muggy stretch, a sealed kamado holds a tight, fuel-efficient fire and a pellet rig rides it out hands-off; save the open stick burner for the settled, low-humidity days. Charlotte straddles two Carolina traditions, Eastern whole-hog dressed in thin vinegar sauce and Lexington-style shoulder with a tomato edge, and both are forgiving cuts. Get the meat on before sunrise so the stall breaks ahead of the afternoon storms.</p>
   </section>
 
   <section class="editorial-section climate-normals" aria-labelledby="normals-title">
     <h2 id="normals-title">Charlotte climate normals by month</h2>
-    <p>Typical conditions for each month, scored 0-100 for a packer brisket on an offset — the most weather-sensitive low-and-slow cook. Temperature and rain days are NOAA 1991-2020 climate normals; wind and humidity are 2015-2024 reanalysis averages.</p>
+    <p>Typical conditions for each month, scored 0-100 for a packer brisket on an offset, the most weather-sensitive low-and-slow cook. Temperature and rain days are NOAA 1991-2020 climate normals; wind and humidity are 2015-2024 reanalysis averages.</p>
     <div class="normals-scroll">
       <table class="normals-table">
         <thead><tr><th scope="col">Month</th><th scope="col">Avg High</th><th scope="col">Avg Low</th><th scope="col">Avg Wind</th><th scope="col">Humidity</th><th scope="col">Rain Days</th><th scope="col">Smoke Score</th></tr></thead>
@@ -296,27 +296,27 @@
         </tbody>
       </table>
     </div>
-    <p>Historically, the best months to smoke in Charlotte are <strong>October, May, and September</strong>. April is the windiest month (avg 7.9 mph) — the one to plan around.</p>
+    <p>Historically, the best months to smoke in Charlotte are <strong>October, May, and September</strong>. April is the windiest month (avg 7.9 mph): the one to plan around.</p>
   </section>
 
   <section class="editorial-section smoke-windows" aria-label="Charlotte smoke season">
     <h2>Charlotte’s smoke season, month by month</h2>
-    <p>Through spring (March–May), Charlotte runs strong: a 76 score off 73°F highs, 49°F lows, and 7.4-mph wind as the plateau runs long and flat. Charlotte’s summer (June–August) is strong, scoring 72 on 89°F highs, 68°F lows and wind near 5.5 mph as a stubborn stall settles over the cook. In fall (September–November), Charlotte rates 78/100 — a strong window with 73°F days, 51°F nights and 6.1 mph of wind as the stall digs in and holds. Charlotte in winter (December–February) grades strong at 70/100 — highs near 55°F, lows near 34°F, wind about 7.1 mph as the plateau runs long and flat.</p>
+    <p>Through spring (March–May), Charlotte runs strong: a 76 score off 73°F highs, 49°F lows, and 7.4-mph wind as the plateau runs long and flat. Charlotte’s summer (June–August) is strong, scoring 72 on 89°F highs, 68°F lows and wind near 5.5 mph as a stubborn stall settles over the cook. In fall (September–November), Charlotte rates 78/100, a strong window with 73°F days, 51°F nights and 6.1 mph of wind as the stall digs in and holds. Charlotte in winter (December–February) grades strong at 70/100: highs near 55°F, lows near 34°F, wind about 7.1 mph as the plateau runs long and flat.</p>
     <p>The numbers favor October (79) in Charlotte and warn off January (69) where the stall digs in and holds.</p>
     <p>Tallied across the year, 11 of 12 months clear the Good line in Charlotte, peaking at 79 in October, though none crack the 85 Ideal mark.</p>
-    <p>Charlotte’s 72-grade summer holds the plateau flat — budget long for the big cuts and lean on a sealed pellet rig or kamado.</p>
+    <p>Charlotte’s 72-grade summer holds the plateau flat; budget long for the big cuts and lean on a sealed pellet rig or kamado.</p>
   </section>
 
   <section class="editorial-section" aria-label="Charlotte BBQ context">
     <h2>Barbecue heritage</h2>
-    <p>Charlotte anchors the Piedmont, or Lexington, style of North Carolina barbecue—a tradition distinct from the state’s Eastern school. Where Eastern-style pitmasters smoke the whole hog, Piedmont pitmasters focus on the pork shoulder and finish with a dip that adds tomato or ketchup to the base vinegar. The result is a slightly sweeter, richer sauce and a shoulder-centric chopped pork that loyal partisans consider the more complex of North Carolina’s two great styles.</p>
+    <p>Charlotte anchors the Piedmont, or Lexington, style of North Carolina barbecue, a tradition distinct from the state’s Eastern school. Where Eastern-style pitmasters smoke the whole hog, Piedmont pitmasters focus on the pork shoulder and finish with a dip that adds tomato or ketchup to the base vinegar. The result is a slightly sweeter, richer sauce and a shoulder-centric chopped pork that loyal partisans consider the more complex of North Carolina’s two great styles.</p>
     <h2>Charlotte climate</h2>
-    <p>Charlotte’s humid-subtropical climate runs milder than the Gulf Coast. Summer highs average around 90 °F and dew points typically run in the mid-to-upper 60s, reaching the 70s only at the height of summer — stalls are a real factor but shorter than Florida’s. Pop-up afternoon thunderstorms are the warm-season variable to plan around. Winters are mild, with only brief cold snaps that rarely shut a cooker down, so the cook calendar is long. Spring and fall are excellent offset windows, and an insulated kamado or pellet cooker handles the humid stretch of summer cleanly.</p>
+    <p>Charlotte’s humid-subtropical climate runs milder than the Gulf Coast. Summer highs average around 90 °F and dew points typically run in the mid-to-upper 60s, reaching the 70s only at the height of summer: stalls are a real factor but shorter than Florida’s. Pop-up afternoon thunderstorms are the warm-season variable to plan around. Winters are mild, with only brief cold snaps that rarely shut a cooker down, so the cook calendar is long. Spring and fall are excellent offset windows, and an insulated kamado or pellet cooker handles the humid stretch of summer cleanly.</p>
     <p>In Charlotte, the normals bear this out: April is the windiest month at 7.9 mph, while October scores highest for low-and-slow at 79 of 100.</p>
     <h2>Cooker fit for Charlotte</h2>
-    <p>For Southeast cooks, the priority is humidity tolerance. A well-insulated kamado runs efficient stalls and conserves fuel through the long, hot summer. Pellet cookers handle the same conditions cleanly. An offset is rewarding when the weather behaves but the regional climate stacks the deck against it — high dew points and pop-up storms are constant variables.</p>
+    <p>For Southeast cooks, the priority is humidity tolerance. A well-insulated kamado runs efficient stalls and conserves fuel through the long, hot summer. Pellet cookers handle the same conditions cleanly. An offset is rewarding when the weather behaves but the regional climate stacks the deck against it: high dew points and pop-up storms are constant variables.</p>
     <p>Charlotte grades Good or better in 11 of 12 months; on the windiest weekends, plan for gusts near 11 mph and let an insulated cooker carry the long cuts.</p>
-    <p>Pick a day with a strong score, light the fire, and stop guessing whether Saturday in Charlotte will hold. The form lets you swap cut and cooker without leaving the page — your selection persists across visits via local storage. ZIP defaults to 28202 for the Charlotte metro; change it any time to score a different yard.</p>
+    <p>Pick a day with a strong score, light the fire, and stop guessing whether Saturday in Charlotte will hold. The form lets you swap cut and cooker without leaving the page, and your selection persists across visits via local storage. ZIP defaults to 28202 for the Charlotte metro; change it any time to score a different yard.</p>
   </section>
 
   <p class="sw-disclaimer">

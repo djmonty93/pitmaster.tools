@@ -17,7 +17,7 @@
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "Pitmaster Tools — Best Smoke Days in Buffalo, NY",
+  "name": "Pitmaster Tools: Best Smoke Days in Buffalo, NY",
   "url": "https://pitmaster.tools/smoke-weather/buffalo-ny",
   "description": "Free 7-day smoke forecast for Buffalo, NY. Scores for brisket, ribs, pork, and chicken across all cooker types.",
   "applicationCategory": "UtilitiesApplication",
@@ -25,7 +25,7 @@
   "inLanguage": "en",
   "isAccessibleForFree": true,
   "browserRequirements": "Requires JavaScript enabled in a modern browser.",
-  "dateModified": "2026-06-27",
+  "dateModified": "2026-07-15",
   "featureList": [
     "7-day smoking weather forecast scored 0-100 for Buffalo",
     "Cut-aware stall-risk modeling using wet-bulb temperature",
@@ -58,7 +58,7 @@
       "name": "Which cooker works best in Buffalo?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "For Northeast backyards, a pellet cooker or insulated kamado gives the widest weekend window — both shrug off the gradient winds that hit between November and April, and both hold steady temps when an open offset would fight back. An offset stick burner is still the standard for serious brisket cooks here, but plan it for May-October Saturdays and watch the gust forecast on the day."
+        "text": "For Northeast backyards, a pellet cooker or insulated kamado gives the widest weekend window: both shrug off the gradient winds that hit between November and April, and both hold steady temps when an open offset would fight back. An offset stick burner is still the standard for serious brisket cooks here, but plan it for May-October Saturdays and watch the gust forecast on the day."
       }
     },
     {
@@ -66,7 +66,7 @@
       "name": "How accurate is the Buffalo forecast?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "We pull from Open-Meteo as the primary source with the US National Weather Service as failover. Each day in the Buffalo 7-day window carries a confidence label — high for the next 24-48 hours, dropping to medium and then low further out. Treat the 5-7 day end of the window as a planning signal, not a commitment."
+        "text": "We pull from Open-Meteo as the primary source with the US National Weather Service as failover. Each day in the Buffalo 7-day window carries a confidence label: high for the next 24-48 hours, dropping to medium and then low further out. Treat the 5-7 day end of the window as a planning signal, not a commitment."
       }
     }
   ]
@@ -104,7 +104,7 @@
   "@type": "Dataset",
   "@id": "https://pitmaster.tools/smoke-weather/buffalo-ny#climate-normals",
   "name": "Buffalo, NY Monthly Climate Normals for Barbecue",
-  "description": "Monthly climate normals for Buffalo, NY — average high and low temperature, wind speed, relative humidity, and rainy days, each scored 0-100 for low-and-slow barbecue suitability. Temperature and rain days from NOAA 1991-2020 U.S. Climate Normals (station BUFFALO, NY); wind and humidity from Open-Meteo historical reanalysis, 2015-2024.",
+  "description": "Monthly climate normals for Buffalo, NY: average high and low temperature, wind speed, relative humidity, and rainy days, each scored 0-100 for low-and-slow barbecue suitability. Temperature and rain days from NOAA 1991-2020 U.S. Climate Normals (station BUFFALO, NY); wind and humidity from Open-Meteo historical reanalysis, 2015-2024.",
   "url": "https://pitmaster.tools/smoke-weather/buffalo-ny",
   "temporalCoverage": [
     "1991/2020",
@@ -170,7 +170,7 @@
     "url": "https://pitmaster.tools"
   },
   "license": "https://pitmaster.tools/terms-of-service",
-  "dateModified": "2026-06-27"
+  "dateModified": "2026-07-15"
 }
 </script>
 <!-- INJECT:site-header.css -->
@@ -192,7 +192,7 @@
   </nav>
   <section class="page-hero" aria-label="Page introduction">
     <h1>Best Smoke Days in Buffalo, NY</h1>
-    <p>Buffalo, New York sits in the Northeast barbecue region. Buffalo’s pit scene is small but local — beef-on-weck and chicken-wing traditions coexist with Carolina-style pulled pork and brisket, and lake-effect winters close most backyard cooks December-March. This page scores the next seven days for low-and-slow cooks in the Buffalo metro, weighing rain probability, sustained wind and gusts, daytime temperature, and the wet-bulb humidity that drives the stall — then weights the result for your cut and cooker so you can pick the day with the highest odds of a clean cook.</p>
+    <p>Buffalo, New York sits in the Northeast barbecue region. Buffalo’s pit scene is small but local: beef-on-weck and chicken-wing traditions coexist with Carolina-style pulled pork and brisket, and lake-effect winters close most backyard cooks December-March. This page scores the next seven days for low-and-slow cooks in the Buffalo metro, weighing rain probability, sustained wind and gusts, daytime temperature, and the wet-bulb humidity that drives the stall. It then weights the result for your cut and cooker, so you can pick the day with the best odds of a clean cook.</p>
   </section>
 
   <form id="swForm" class="form-card" autocomplete="off" novalidate aria-label="Smoke forecast inputs">
@@ -258,10 +258,10 @@
   <aside class="score-explainer" aria-label="What the score means">
     <h3>What the 0-100 score means</h3>
     <ul class="score-legend">
-      <li><span class="score-legend__swatch band-ideal" aria-hidden="true"></span><strong>85-100 &middot; Ideal</strong> &mdash; light the fire</li>
-      <li><span class="score-legend__swatch band-green" aria-hidden="true"></span><strong>70-84 &middot; Good</strong> &mdash; solid smoke day</li>
-      <li><span class="score-legend__swatch band-yellow" aria-hidden="true"></span><strong>50-69 &middot; Average</strong> &mdash; workable, plan around the rough hours</li>
-      <li><span class="score-legend__swatch band-red" aria-hidden="true"></span><strong>0-49 &middot; Poor</strong> &mdash; tough conditions</li>
+      <li><span class="score-legend__swatch band-ideal" aria-hidden="true"></span><strong>85-100 &middot; Ideal</strong>: light the fire</li>
+      <li><span class="score-legend__swatch band-green" aria-hidden="true"></span><strong>70-84 &middot; Good</strong>: solid smoke day</li>
+      <li><span class="score-legend__swatch band-yellow" aria-hidden="true"></span><strong>50-69 &middot; Average</strong>: workable, plan around the rough hours</li>
+      <li><span class="score-legend__swatch band-red" aria-hidden="true"></span><strong>0-49 &middot; Poor</strong>: tough conditions</li>
     </ul>
     <p>Five weather signals subtract from a base of 100: rain probability + accumulation, wind &amp; gusts (weighted by your cooker), cold mornings, hot afternoons, and stall risk for long cuts. <a href="/smoke-weather/methodology">See full methodology &rarr;</a></p>
   </aside>
@@ -270,13 +270,13 @@
 
   <section class="editorial-section local-guide" aria-label="Smoking in Buffalo">
     <h2>Planning a weekend smoke in Buffalo</h2>
-    <p>Buffalo’s winters are legendary, and they define the cooking calendar. Lake-effect snow off Lake Erie can bury the city under feet of snow in a single storm, and the cold, gray season runs long — December through March is no-go territory for an open firebox. The flip side is a genuinely pleasant summer: warm, not overly humid, with the lake breeze keeping the worst heat down. Late spring through early fall is the reliable window, and the summer months are the heart of it.</p>
-    <p>Because the cookable season is short, Buffalo pitmasters make the most of it, and an insulated kamado or pellet cooker stretches the margins, holding fire through the raw, windy shoulder weeks an open pit can’t. Summer humidity runs milder than the Southeast, so stalls are a touch shorter and the offset is comfortable on calm days. Buffalo’s own foods — beef on weck and chicken wings — share the backyard with Carolina-style pulled pork and brisket. Pack the long cooks into the dependable summer Saturdays, and don’t fight the lake-effect winter; that stretch belongs to the insulated cooker, if you cook at all.</p>
+    <p>Buffalo’s winters are legendary, and they define the cooking calendar. Lake-effect snow off Lake Erie can bury the city under feet of snow in a single storm, and the cold, gray season runs long: December through March is no-go territory for an open firebox. The flip side is a genuinely pleasant summer: warm, not overly humid, with the lake breeze keeping the worst heat down. Late spring through early fall is the reliable window, and the summer months are the heart of it.</p>
+    <p>Because the cookable season is short, Buffalo pitmasters make the most of it, and an insulated kamado or pellet cooker stretches the margins, holding fire through the raw, windy shoulder weeks an open pit can’t. Summer humidity runs milder than the Southeast, so stalls are a touch shorter and the offset is comfortable on calm days. Buffalo’s own foods, beef on weck and chicken wings, share the backyard with Carolina-style pulled pork and brisket. Pack the long cooks into the dependable summer Saturdays, and don’t fight the lake-effect winter; that stretch belongs to the insulated cooker, if you cook at all.</p>
   </section>
 
   <section class="editorial-section climate-normals" aria-labelledby="normals-title">
     <h2 id="normals-title">Buffalo climate normals by month</h2>
-    <p>Typical conditions for each month, scored 0-100 for a packer brisket on an offset — the most weather-sensitive low-and-slow cook. Temperature and rain days are NOAA 1991-2020 climate normals; wind and humidity are 2015-2024 reanalysis averages.</p>
+    <p>Typical conditions for each month, scored 0-100 for a packer brisket on an offset, the most weather-sensitive low-and-slow cook. Temperature and rain days are NOAA 1991-2020 climate normals; wind and humidity are 2015-2024 reanalysis averages.</p>
     <div class="normals-scroll">
       <table class="normals-table">
         <thead><tr><th scope="col">Month</th><th scope="col">Avg High</th><th scope="col">Avg Low</th><th scope="col">Avg Wind</th><th scope="col">Humidity</th><th scope="col">Rain Days</th><th scope="col">Smoke Score</th></tr></thead>
@@ -296,27 +296,27 @@
         </tbody>
       </table>
     </div>
-    <p>Historically, the best months to smoke in Buffalo are <strong>July, August, and September</strong>. February is the windiest month (avg 11.1 mph) — the one to plan around.</p>
+    <p>Historically, the best months to smoke in Buffalo are <strong>July, August, and September</strong>. February is the windiest month (avg 11.1 mph): the one to plan around.</p>
   </section>
 
   <section class="editorial-section smoke-windows" aria-label="Buffalo smoke season">
     <h2>Buffalo’s smoke season, month by month</h2>
-    <p>Buffalo in spring (March–May) grades workable at 66/100 — highs near 55°F, lows near 37°F, wind about 9.1 mph as the plateau runs long and flat. Through summer (June–August), Buffalo runs strong: a 74 score off 78°F highs, 61°F lows, and 7.6-mph wind as a stubborn stall settles over the cook. Buffalo’s fall (September–November) is workable, scoring 67 on 60°F highs, 44°F lows and wind near 9.2 mph as the stall digs in and holds. In winter (December–February), Buffalo rates 52/100 — a workable window with 34°F days, 21°F nights and 10.9 mph of wind as the plateau runs long and flat.</p>
+    <p>Buffalo in spring (March–May) grades workable at 66/100: highs near 55°F, lows near 37°F, wind about 9.1 mph as the plateau runs long and flat. Through summer (June–August), Buffalo runs strong: a 74 score off 78°F highs, 61°F lows, and 7.6-mph wind as a stubborn stall settles over the cook. Buffalo’s fall (September–November) is workable, scoring 67 on 60°F highs, 44°F lows and wind near 9.2 mph as the stall digs in and holds. In winter (December–February), Buffalo rates 52/100, a workable window with 34°F days, 21°F nights and 10.9 mph of wind as the plateau runs long and flat.</p>
     <p>The numbers favor July (75) in Buffalo and warn off January (50) where rain threatens the cook.</p>
     <p>Count it up and Buffalo lands 5 of 12 months at Good or better, best in July at 75, though none crack the 85 Ideal mark.</p>
-    <p>A summer 74 on stall risk means brisket and pork butt want extra hours in Buffalo; keep a wrap handy and let a kamado run the stall. Wind is the offset hazard in Buffalo — February averages 11.1 mph, so build a break and burn dense post oak.</p>
+    <p>A summer 74 on stall risk means brisket and pork butt want extra hours in Buffalo; keep a wrap handy and let a kamado run the stall. Wind is the offset hazard in Buffalo: February averages 11.1 mph, so build a break and burn dense post oak.</p>
   </section>
 
   <section class="editorial-section" aria-label="Buffalo BBQ context">
     <h2>Barbecue heritage</h2>
-    <p>Buffalo is best known for its chicken wings—a genuinely iconic contribution to American food culture—but the city’s smoked-meat tradition operates in a different register. Western New York draws on Midwestern, Appalachian, and Great Lakes influences without any single dominant barbecue style. Ribs and pulled pork are the backbone of the local scene, and the city’s Polish and Italian immigrant communities have contributed a robust sausage-smoking culture that runs alongside the Southern-influenced pit work.</p>
+    <p>Buffalo is best known for its chicken wings, but the city’s smoked-meat tradition operates in a different register. Western New York draws on Midwestern, Appalachian, and Great Lakes influences without any single dominant barbecue style. Ribs and pulled pork are the backbone of the local scene, and the city’s Polish and Italian immigrant communities have contributed a deep sausage-smoking culture that runs alongside the Southern-influenced pit work.</p>
     <h2>Buffalo climate</h2>
-    <p>The Northeast’s smoke calendar shifts dramatically with the season. Summers run warm and humid with frequent afternoon thunderstorms; winters bring cold, snow, and steady gradient winds that pull an offset fire hard. Spring and fall — when daytime highs sit between 50 and 75 °F and dew points drop — are the strongest windows for long cooks. A well-insulated kamado or pellet cooker buys back winter Saturdays the offset crowd has to skip. Watch the gust forecast in spring, when frontal passages can swing wind speeds 25 mph in a single afternoon.</p>
+    <p>The Northeast’s smoke calendar shifts dramatically with the season. Summers run warm and humid with frequent afternoon thunderstorms; winters bring cold, snow, and steady gradient winds that pull an offset fire hard. Spring and fall, when daytime highs sit between 50 and 75 °F and dew points drop, are the strongest windows for long cooks. A well-insulated kamado or pellet cooker buys back winter Saturdays the offset crowd has to skip. Watch the gust forecast in spring, when frontal passages can swing wind speeds 25 mph in a single afternoon.</p>
     <p>In Buffalo, the normals bear this out: February is the windiest month at 11.1 mph, while July scores highest for low-and-slow at 75 of 100.</p>
     <h2>Cooker fit for Buffalo</h2>
-    <p>For Northeast backyards, a pellet cooker or insulated kamado gives the widest weekend window — both shrug off the gradient winds that hit between November and April, and both hold steady temps when an open offset would fight back. An offset stick burner is still the standard for serious brisket cooks here, but plan it for May-October Saturdays and watch the gust forecast on the day.</p>
+    <p>For Northeast backyards, a pellet cooker or insulated kamado gives the widest weekend window: both shrug off the gradient winds that hit between November and April, and both hold steady temps when an open offset would fight back. An offset stick burner is still the standard for serious brisket cooks here, but plan it for May-October Saturdays and watch the gust forecast on the day.</p>
     <p>Buffalo grades Good or better in 5 of 12 months; on the windiest weekends, plan for gusts near 16 mph and let an insulated cooker carry the long cuts.</p>
-    <p>Pick a day with a strong score, light the fire, and stop guessing whether Saturday in Buffalo will hold. The form lets you swap cut and cooker without leaving the page — your selection persists across visits via local storage. ZIP defaults to 14202 for the Buffalo metro; change it any time to score a different yard.</p>
+    <p>Pick a day with a strong score, light the fire, and stop guessing whether Saturday in Buffalo will hold. The form lets you swap cut and cooker without leaving the page, and your selection persists across visits via local storage. ZIP defaults to 14202 for the Buffalo metro; change it any time to score a different yard.</p>
   </section>
 
   <p class="sw-disclaimer">

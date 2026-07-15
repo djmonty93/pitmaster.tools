@@ -17,7 +17,7 @@
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "Pitmaster Tools — Best Smoke Days in Nashville, TN",
+  "name": "Pitmaster Tools: Best Smoke Days in Nashville, TN",
   "url": "https://pitmaster.tools/smoke-weather/nashville-tn",
   "description": "Free 7-day smoke forecast for Nashville, TN. Scores for brisket, ribs, pork, and chicken across all cooker types.",
   "applicationCategory": "UtilitiesApplication",
@@ -25,7 +25,7 @@
   "inLanguage": "en",
   "isAccessibleForFree": true,
   "browserRequirements": "Requires JavaScript enabled in a modern browser.",
-  "dateModified": "2026-06-27",
+  "dateModified": "2026-07-15",
   "featureList": [
     "7-day smoking weather forecast scored 0-100 for Nashville",
     "Cut-aware stall-risk modeling using wet-bulb temperature",
@@ -58,7 +58,7 @@
       "name": "Which cooker works best in Nashville?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "For Southeast cooks, the priority is humidity tolerance. A well-insulated kamado runs efficient stalls and conserves fuel through the long, hot summer. Pellet cookers handle the same conditions cleanly. An offset is rewarding when the weather behaves but the regional climate stacks the deck against it — high dew points and pop-up storms are constant variables."
+        "text": "For Southeast cooks, the priority is humidity tolerance. A well-insulated kamado runs efficient stalls and conserves fuel through the long, hot summer. Pellet cookers handle the same conditions cleanly. An offset is rewarding when the weather behaves but the regional climate stacks the deck against it: high dew points and pop-up storms are constant variables."
       }
     },
     {
@@ -66,7 +66,7 @@
       "name": "How accurate is the Nashville forecast?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "We pull from Open-Meteo as the primary source with the US National Weather Service as failover. Each day in the Nashville 7-day window carries a confidence label — high for the next 24-48 hours, dropping to medium and then low further out. Treat the 5-7 day end of the window as a planning signal, not a commitment."
+        "text": "We pull from Open-Meteo as the primary source with the US National Weather Service as failover. Each day in the Nashville 7-day window carries a confidence label: high for the next 24-48 hours, dropping to medium and then low further out. Treat the 5-7 day end of the window as a planning signal, not a commitment."
       }
     }
   ]
@@ -104,7 +104,7 @@
   "@type": "Dataset",
   "@id": "https://pitmaster.tools/smoke-weather/nashville-tn#climate-normals",
   "name": "Nashville, TN Monthly Climate Normals for Barbecue",
-  "description": "Monthly climate normals for Nashville, TN — average high and low temperature, wind speed, relative humidity, and rainy days, each scored 0-100 for low-and-slow barbecue suitability. Temperature and rain days from NOAA 1991-2020 U.S. Climate Normals (station NASHVILLE INTL AP, TN); wind and humidity from Open-Meteo historical reanalysis, 2015-2024.",
+  "description": "Monthly climate normals for Nashville, TN: average high and low temperature, wind speed, relative humidity, and rainy days, each scored 0-100 for low-and-slow barbecue suitability. Temperature and rain days from NOAA 1991-2020 U.S. Climate Normals (station NASHVILLE INTL AP, TN); wind and humidity from Open-Meteo historical reanalysis, 2015-2024.",
   "url": "https://pitmaster.tools/smoke-weather/nashville-tn",
   "temporalCoverage": [
     "1991/2020",
@@ -170,7 +170,7 @@
     "url": "https://pitmaster.tools"
   },
   "license": "https://pitmaster.tools/terms-of-service",
-  "dateModified": "2026-06-27"
+  "dateModified": "2026-07-15"
 }
 </script>
 <!-- INJECT:site-header.css -->
@@ -192,7 +192,7 @@
   </nav>
   <section class="page-hero" aria-label="Page introduction">
     <h1>Best Smoke Days in Nashville, TN</h1>
-    <p>Nashville, Tennessee sits in the Southeast barbecue region. Nashville’s pit scene runs hot chicken alongside the regional pulled-pork and rib tradition — the city’s growing brisket scene over the last decade adds a Texas layer to the Mid-South playbook. This page scores the next seven days for low-and-slow cooks in the Nashville metro, weighing rain probability, sustained wind and gusts, daytime temperature, and the wet-bulb humidity that drives the stall — then weights the result for your cut and cooker so you can pick the day with the highest odds of a clean cook.</p>
+    <p>Nashville, Tennessee sits in the Southeast barbecue region. Nashville’s pit scene runs hot chicken alongside the regional pulled-pork and rib tradition: the city’s growing brisket scene over the last decade adds a Texas layer to the Mid-South playbook. This page scores the next seven days for low-and-slow cooks in the Nashville metro, weighing rain probability, sustained wind and gusts, daytime temperature, and the wet-bulb humidity that drives the stall. It then weights the result for your cut and cooker, so you can pick the day with the best odds of a clean cook.</p>
   </section>
 
   <form id="swForm" class="form-card" autocomplete="off" novalidate aria-label="Smoke forecast inputs">
@@ -258,10 +258,10 @@
   <aside class="score-explainer" aria-label="What the score means">
     <h3>What the 0-100 score means</h3>
     <ul class="score-legend">
-      <li><span class="score-legend__swatch band-ideal" aria-hidden="true"></span><strong>85-100 &middot; Ideal</strong> &mdash; light the fire</li>
-      <li><span class="score-legend__swatch band-green" aria-hidden="true"></span><strong>70-84 &middot; Good</strong> &mdash; solid smoke day</li>
-      <li><span class="score-legend__swatch band-yellow" aria-hidden="true"></span><strong>50-69 &middot; Average</strong> &mdash; workable, plan around the rough hours</li>
-      <li><span class="score-legend__swatch band-red" aria-hidden="true"></span><strong>0-49 &middot; Poor</strong> &mdash; tough conditions</li>
+      <li><span class="score-legend__swatch band-ideal" aria-hidden="true"></span><strong>85-100 &middot; Ideal</strong>: light the fire</li>
+      <li><span class="score-legend__swatch band-green" aria-hidden="true"></span><strong>70-84 &middot; Good</strong>: solid smoke day</li>
+      <li><span class="score-legend__swatch band-yellow" aria-hidden="true"></span><strong>50-69 &middot; Average</strong>: workable, plan around the rough hours</li>
+      <li><span class="score-legend__swatch band-red" aria-hidden="true"></span><strong>0-49 &middot; Poor</strong>: tough conditions</li>
     </ul>
     <p>Five weather signals subtract from a base of 100: rain probability + accumulation, wind &amp; gusts (weighted by your cooker), cold mornings, hot afternoons, and stall risk for long cuts. <a href="/smoke-weather/methodology">See full methodology &rarr;</a></p>
   </aside>
@@ -270,13 +270,13 @@
 
   <section class="editorial-section local-guide" aria-label="Smoking in Nashville">
     <h2>Planning a weekend smoke in Nashville</h2>
-    <p>Nashville sits in the humid Mid-South, where long, sticky summers meet short, mild winters. June through August is hot and humid with regular afternoon and evening thunderstorms; spring is the volatile season, with strong frontal systems and the occasional tornado watch sweeping the Cumberland Basin. The prime windows are the shoulders — April into May and September into October — when highs ease into the 70s and the dew point backs off the summer peak. Winters rarely shut the season down for long.</p>
-    <p>Summer humidity lengthens the stall on brisket and pork, so plan extra hours and keep a wrap close from June through September. A sealed kamado or pellet cooker rides out the muggy stretch and the damp winter weeks efficiently, while an offset rewards the calm, dry days. Nashville made its name on hot chicken, but the pit scene runs the full Mid-South catalog — pulled pork, dry-and-wet ribs, and a fast-growing brisket following. Smoked chicken is a forgiving, shorter cook for an unsettled Saturday; save the all-day briskets for the settled windows the score flags.</p>
+    <p>Nashville sits in the humid Mid-South, where long, sticky summers meet short, mild winters. June through August is hot and humid with regular afternoon and evening thunderstorms; spring is the volatile season, with strong frontal systems and the occasional tornado watch sweeping the Cumberland Basin. The prime windows are the shoulders, April into May and September into October, when highs ease into the 70s and the dew point backs off the summer peak. Winters rarely shut the season down for long.</p>
+    <p>Summer humidity lengthens the stall on brisket and pork, so plan extra hours and keep a wrap close from June through September. A sealed kamado or pellet cooker rides out the muggy stretch and the damp winter weeks efficiently, while an offset rewards the calm, dry days. Nashville made its name on hot chicken, but the pit scene runs the full Mid-South catalog: pulled pork, dry-and-wet ribs, and a fast-growing brisket following. Smoked chicken is a forgiving, shorter cook for an unsettled Saturday; save the all-day briskets for the settled windows the score flags.</p>
   </section>
 
   <section class="editorial-section climate-normals" aria-labelledby="normals-title">
     <h2 id="normals-title">Nashville climate normals by month</h2>
-    <p>Typical conditions for each month, scored 0-100 for a packer brisket on an offset — the most weather-sensitive low-and-slow cook. Temperature and rain days are NOAA 1991-2020 climate normals; wind and humidity are 2015-2024 reanalysis averages.</p>
+    <p>Typical conditions for each month, scored 0-100 for a packer brisket on an offset, the most weather-sensitive low-and-slow cook. Temperature and rain days are NOAA 1991-2020 climate normals; wind and humidity are 2015-2024 reanalysis averages.</p>
     <div class="normals-scroll">
       <table class="normals-table">
         <thead><tr><th scope="col">Month</th><th scope="col">Avg High</th><th scope="col">Avg Low</th><th scope="col">Avg Wind</th><th scope="col">Humidity</th><th scope="col">Rain Days</th><th scope="col">Smoke Score</th></tr></thead>
@@ -296,12 +296,12 @@
         </tbody>
       </table>
     </div>
-    <p>Historically, the best months to smoke in Nashville are <strong>September, October, and November</strong>. February is the windiest month (avg 7.4 mph) — the one to plan around.</p>
+    <p>Historically, the best months to smoke in Nashville are <strong>September, October, and November</strong>. February is the windiest month (avg 7.4 mph): the one to plan around.</p>
   </section>
 
   <section class="editorial-section smoke-windows" aria-label="Nashville smoke season">
     <h2>Nashville’s smoke season, month by month</h2>
-    <p>Through spring (March–May), Nashville runs strong: a 73 score off 72°F highs, 49°F lows, and 6.7-mph wind as the stall digs in and holds. Nashville’s summer (June–August) is strong, scoring 70 on 90°F highs, 69°F lows and wind near 4.7 mph as the plateau runs long and flat. In fall (September–November), Nashville rates 77/100 — a strong window with 73°F days, 50°F nights and 5.7 mph of wind as a stubborn stall settles over the cook. Nashville in winter (December–February) grades workable at 69/100 — highs near 52°F, lows near 32°F, wind about 7.1 mph as the stall digs in and holds.</p>
+    <p>Through spring (March–May), Nashville runs strong: a 73 score off 72°F highs, 49°F lows, and 6.7-mph wind as the stall digs in and holds. Nashville’s summer (June–August) is strong, scoring 70 on 90°F highs, 69°F lows and wind near 4.7 mph as the plateau runs long and flat. In fall (September–November), Nashville rates 77/100, a strong window with 73°F days, 50°F nights and 5.7 mph of wind as a stubborn stall settles over the cook. Nashville in winter (December–February) grades workable at 69/100: highs near 52°F, lows near 32°F, wind about 7.1 mph as the stall digs in and holds.</p>
     <p>The numbers favor September (77) in Nashville and warn off February (68) where a stubborn stall settles over the cook.</p>
     <p>Nashville books 8 Good-or-better months out of 12, topping out at 77 in September, though none crack the 85 Ideal mark.</p>
     <p>With a 70 summer in Nashville, the stall sticks; paper-wrap the long cuts early and a kamado pays back the fuel.</p>
@@ -309,14 +309,14 @@
 
   <section class="editorial-section" aria-label="Nashville BBQ context">
     <h2>Barbecue heritage</h2>
-    <p>Nashville occupies a different barbecue space than Memphis, 200 miles to the west. The city built its identity around smoked chicken—both in the deep-South smoking tradition and as a natural cousin to the hot-chicken phenomenon that put Nashville on the global food map. Brisket has grown sharply in prominence as Texas-trained pitmasters arrived during the city’s rapid expansion. The result is a scene that’s genuinely newer and less rigid than Memphis, and more willing to absorb outside influence.</p>
+    <p>Nashville occupies a different barbecue space than Memphis, 200 miles to the west. The city built its identity around smoked chicken, both in the deep-South smoking tradition and as a natural cousin to the hot-chicken phenomenon that put Nashville on the global food map. Brisket has grown sharply in prominence as Texas-trained pitmasters arrived during the city’s rapid expansion. The result is a scene that’s genuinely newer and less rigid than Memphis, and more willing to absorb outside influence.</p>
     <h2>Nashville climate</h2>
-    <p>The Southeast’s defining variable is humidity. Summer dew points routinely sit in the 70s, which translates directly into the wet-bulb temperature that drives evaporative cooling on a brisket or pork-butt cook. Long stalls are the norm from May through September. Winters are mild but increasingly damp and storm-prone, and tropical systems through autumn can erase a planned Saturday cook with no warning. The score weighs stall risk heavily for this region — a humid day on an offset asks a lot of the fire-tender.</p>
+    <p>The Southeast’s defining variable is humidity. Summer dew points routinely sit in the 70s, which translates directly into the wet-bulb temperature that drives evaporative cooling on a brisket or pork-butt cook. Long stalls are the norm from May through September. Winters are mild but increasingly damp and storm-prone, and tropical systems through autumn can erase a planned Saturday cook with no warning. The score weighs stall risk heavily for this region: a humid day on an offset asks a lot of the fire-tender.</p>
     <p>In Nashville, the normals bear this out: February is the windiest month at 7.4 mph, while September scores highest for low-and-slow at 77 of 100.</p>
     <h2>Cooker fit for Nashville</h2>
-    <p>For Southeast cooks, the priority is humidity tolerance. A well-insulated kamado runs efficient stalls and conserves fuel through the long, hot summer. Pellet cookers handle the same conditions cleanly. An offset is rewarding when the weather behaves but the regional climate stacks the deck against it — high dew points and pop-up storms are constant variables.</p>
+    <p>For Southeast cooks, the priority is humidity tolerance. A well-insulated kamado runs efficient stalls and conserves fuel through the long, hot summer. Pellet cookers handle the same conditions cleanly. An offset is rewarding when the weather behaves but the regional climate stacks the deck against it: high dew points and pop-up storms are constant variables.</p>
     <p>Nashville grades Good or better in 8 of 12 months; on the windiest weekends, plan for gusts near 10 mph and let an insulated cooker carry the long cuts.</p>
-    <p>Pick a day with a strong score, light the fire, and stop guessing whether Saturday in Nashville will hold. The form lets you swap cut and cooker without leaving the page — your selection persists across visits via local storage. ZIP defaults to 37203 for the Nashville metro; change it any time to score a different yard.</p>
+    <p>Pick a day with a strong score, light the fire, and stop guessing whether Saturday in Nashville will hold. The form lets you swap cut and cooker without leaving the page, and your selection persists across visits via local storage. ZIP defaults to 37203 for the Nashville metro; change it any time to score a different yard.</p>
   </section>
 
   <p class="sw-disclaimer">

@@ -17,7 +17,7 @@
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "Pitmaster Tools — Best Smoke Days in Washington, DC",
+  "name": "Pitmaster Tools: Best Smoke Days in Washington, DC",
   "url": "https://pitmaster.tools/smoke-weather/washington-dc",
   "description": "Free 7-day smoke forecast for Washington, DC. Scores for brisket, ribs, pork, and chicken across all cooker types.",
   "applicationCategory": "UtilitiesApplication",
@@ -25,7 +25,7 @@
   "inLanguage": "en",
   "isAccessibleForFree": true,
   "browserRequirements": "Requires JavaScript enabled in a modern browser.",
-  "dateModified": "2026-06-27",
+  "dateModified": "2026-07-15",
   "featureList": [
     "7-day smoking weather forecast scored 0-100 for Washington",
     "Cut-aware stall-risk modeling using wet-bulb temperature",
@@ -58,7 +58,7 @@
       "name": "Which cooker works best in Washington?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "For Southeast cooks, the priority is humidity tolerance. A well-insulated kamado runs efficient stalls and conserves fuel through the long, hot summer. Pellet cookers handle the same conditions cleanly. An offset is rewarding when the weather behaves but the regional climate stacks the deck against it — high dew points and pop-up storms are constant variables."
+        "text": "For Southeast cooks, the priority is humidity tolerance. A well-insulated kamado runs efficient stalls and conserves fuel through the long, hot summer. Pellet cookers handle the same conditions cleanly. An offset is rewarding when the weather behaves but the regional climate stacks the deck against it: high dew points and pop-up storms are constant variables."
       }
     },
     {
@@ -66,7 +66,7 @@
       "name": "How accurate is the Washington forecast?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "We pull from Open-Meteo as the primary source with the US National Weather Service as failover. Each day in the Washington 7-day window carries a confidence label — high for the next 24-48 hours, dropping to medium and then low further out. Treat the 5-7 day end of the window as a planning signal, not a commitment."
+        "text": "We pull from Open-Meteo as the primary source with the US National Weather Service as failover. Each day in the Washington 7-day window carries a confidence label: high for the next 24-48 hours, dropping to medium and then low further out. Treat the 5-7 day end of the window as a planning signal, not a commitment."
       }
     }
   ]
@@ -104,7 +104,7 @@
   "@type": "Dataset",
   "@id": "https://pitmaster.tools/smoke-weather/washington-dc#climate-normals",
   "name": "Washington, DC Monthly Climate Normals for Barbecue",
-  "description": "Monthly climate normals for Washington, DC — average high and low temperature, wind speed, relative humidity, and rainy days, each scored 0-100 for low-and-slow barbecue suitability. Temperature and rain days from NOAA 1991-2020 U.S. Climate Normals (station WASHINGTON REAGAN AP, VA); wind and humidity from Open-Meteo historical reanalysis, 2015-2024.",
+  "description": "Monthly climate normals for Washington, DC: average high and low temperature, wind speed, relative humidity, and rainy days, each scored 0-100 for low-and-slow barbecue suitability. Temperature and rain days from NOAA 1991-2020 U.S. Climate Normals (station WASHINGTON REAGAN AP, VA); wind and humidity from Open-Meteo historical reanalysis, 2015-2024.",
   "url": "https://pitmaster.tools/smoke-weather/washington-dc",
   "temporalCoverage": [
     "1991/2020",
@@ -170,7 +170,7 @@
     "url": "https://pitmaster.tools"
   },
   "license": "https://pitmaster.tools/terms-of-service",
-  "dateModified": "2026-06-27"
+  "dateModified": "2026-07-15"
 }
 </script>
 <!-- INJECT:site-header.css -->
@@ -192,7 +192,7 @@
   </nav>
   <section class="page-hero" aria-label="Page introduction">
     <h1>Best Smoke Days in Washington, DC</h1>
-    <p>Washington, the District of Columbia sits in the Southeast barbecue region. DC’s barbecue scene runs Carolina pulled pork alongside Texas brisket, with a small but steady set of restaurant pits in the Shaw and H Street corridors. This page scores the next seven days for low-and-slow cooks in the Washington metro, weighing rain probability, sustained wind and gusts, daytime temperature, and the wet-bulb humidity that drives the stall — then weights the result for your cut and cooker so you can pick the day with the highest odds of a clean cook.</p>
+    <p>Washington, the District of Columbia sits in the Southeast barbecue region. DC’s barbecue scene runs Carolina pulled pork alongside Texas brisket, with a small but steady set of restaurant pits in the Shaw and H Street corridors. This page scores the next seven days for low-and-slow cooks in the Washington metro, weighing rain probability, sustained wind and gusts, daytime temperature, and the wet-bulb humidity that drives the stall. It then weights the result for your cut and cooker, so you can pick the day with the best odds of a clean cook.</p>
   </section>
 
   <form id="swForm" class="form-card" autocomplete="off" novalidate aria-label="Smoke forecast inputs">
@@ -258,10 +258,10 @@
   <aside class="score-explainer" aria-label="What the score means">
     <h3>What the 0-100 score means</h3>
     <ul class="score-legend">
-      <li><span class="score-legend__swatch band-ideal" aria-hidden="true"></span><strong>85-100 &middot; Ideal</strong> &mdash; light the fire</li>
-      <li><span class="score-legend__swatch band-green" aria-hidden="true"></span><strong>70-84 &middot; Good</strong> &mdash; solid smoke day</li>
-      <li><span class="score-legend__swatch band-yellow" aria-hidden="true"></span><strong>50-69 &middot; Average</strong> &mdash; workable, plan around the rough hours</li>
-      <li><span class="score-legend__swatch band-red" aria-hidden="true"></span><strong>0-49 &middot; Poor</strong> &mdash; tough conditions</li>
+      <li><span class="score-legend__swatch band-ideal" aria-hidden="true"></span><strong>85-100 &middot; Ideal</strong>: light the fire</li>
+      <li><span class="score-legend__swatch band-green" aria-hidden="true"></span><strong>70-84 &middot; Good</strong>: solid smoke day</li>
+      <li><span class="score-legend__swatch band-yellow" aria-hidden="true"></span><strong>50-69 &middot; Average</strong>: workable, plan around the rough hours</li>
+      <li><span class="score-legend__swatch band-red" aria-hidden="true"></span><strong>0-49 &middot; Poor</strong>: tough conditions</li>
     </ul>
     <p>Five weather signals subtract from a base of 100: rain probability + accumulation, wind &amp; gusts (weighted by your cooker), cold mornings, hot afternoons, and stall risk for long cuts. <a href="/smoke-weather/methodology">See full methodology &rarr;</a></p>
   </aside>
@@ -270,13 +270,13 @@
 
   <section class="editorial-section local-guide" aria-label="Smoking in Washington">
     <h2>Planning a weekend smoke in Washington</h2>
-    <p>Washington’s smoke calendar runs warm and humid in summer and mild but damp in winter. The strongest backyard windows are spring and fall — April into June, then September into October — when highs sit in the 60s and 70s and the worst of the Mid-Atlantic humidity backs off. July and August are hot and sticky, with afternoon thunderstorms common enough that a long Saturday cook needs a radar check. Winter rarely shuts the season down entirely, but the damp cold and gusty days between December and February favor an insulated cooker over an open firebox.</p>
+    <p>Washington’s smoke calendar runs warm and humid in summer and mild but damp in winter. The strongest backyard windows are spring and fall (April into June, then September into October) when highs sit in the 60s and 70s and the worst of the Mid-Atlantic humidity backs off. July and August are hot and sticky, with afternoon thunderstorms common enough that a long Saturday cook needs a radar check. Winter rarely shuts the season down entirely, but the damp cold and gusty days between December and February favor an insulated cooker over an open firebox.</p>
     <p>DC’s blend of Carolina pulled pork and Texas brisket both reward planning around the humidity. Summer dew points push the wet-bulb temperature up and stretch the stall, so budget extra time for long cuts from June through September. A pellet cooker or insulated kamado handles the muggy stretch comfortably and keeps shoulder-season and winter Saturdays in play; an offset is rewarding on the calm, dry days the score flags green. Watch for pop-up storms on summer afternoons, and start early so the stall clears before evening.</p>
   </section>
 
   <section class="editorial-section climate-normals" aria-labelledby="normals-title">
     <h2 id="normals-title">Washington climate normals by month</h2>
-    <p>Typical conditions for each month, scored 0-100 for a packer brisket on an offset — the most weather-sensitive low-and-slow cook. Temperature and rain days are NOAA 1991-2020 climate normals; wind and humidity are 2015-2024 reanalysis averages.</p>
+    <p>Typical conditions for each month, scored 0-100 for a packer brisket on an offset, the most weather-sensitive low-and-slow cook. Temperature and rain days are NOAA 1991-2020 climate normals; wind and humidity are 2015-2024 reanalysis averages.</p>
     <div class="normals-scroll">
       <table class="normals-table">
         <thead><tr><th scope="col">Month</th><th scope="col">Avg High</th><th scope="col">Avg Low</th><th scope="col">Avg Wind</th><th scope="col">Humidity</th><th scope="col">Rain Days</th><th scope="col">Smoke Score</th></tr></thead>
@@ -296,27 +296,27 @@
         </tbody>
       </table>
     </div>
-    <p>Historically, the best months to smoke in Washington are <strong>October, November, and September</strong>. March is the windiest month (avg 7.8 mph) — the one to plan around.</p>
+    <p>Historically, the best months to smoke in Washington are <strong>October, November, and September</strong>. March is the windiest month (avg 7.8 mph): the one to plan around.</p>
   </section>
 
   <section class="editorial-section smoke-windows" aria-label="Washington smoke season">
     <h2>Washington’s smoke season, month by month</h2>
-    <p>In spring (March–May), Washington rates 74/100 — a strong window with 67°F days, 48°F nights and 7.3 mph of wind as a stubborn stall settles over the cook. Washington in summer (June–August) grades strong at 73/100 — highs near 88°F, lows near 70°F, wind about 5.4 mph as the stall digs in and holds. Through fall (September–November), Washington runs strong: a 77 score off 69°F highs, 53°F lows, and 6.3-mph wind as the plateau runs long and flat. Washington’s winter (December–February) is strong, scoring 71 on 47°F highs, 32°F lows and wind near 7.2 mph as a stubborn stall settles over the cook.</p>
+    <p>In spring (March–May), Washington rates 74/100, a strong window with 67°F days, 48°F nights and 7.3 mph of wind as a stubborn stall settles over the cook. Washington in summer (June–August) grades strong at 73/100: highs near 88°F, lows near 70°F, wind about 5.4 mph as the stall digs in and holds. Through fall (September–November), Washington runs strong: a 77 score off 69°F highs, 53°F lows, and 6.3-mph wind as the plateau runs long and flat. Washington’s winter (December–February) is strong, scoring 71 on 47°F highs, 32°F lows and wind near 7.2 mph as a stubborn stall settles over the cook.</p>
     <p>October is the prime month to smoke in Washington at 78/100; January is the hardest at 70 where the plateau runs long and flat.</p>
     <p>Washington books 12 Good-or-better months out of 12, topping out at 78 in October, though none crack the 85 Ideal mark.</p>
-    <p>Washington’s 73-grade summer holds the plateau flat — budget long for the big cuts and lean on a sealed pellet rig or kamado.</p>
+    <p>Washington’s 73-grade summer holds the plateau flat; budget long for the big cuts and lean on a sealed pellet rig or kamado.</p>
   </section>
 
   <section class="editorial-section" aria-label="Washington BBQ context">
     <h2>Barbecue heritage</h2>
     <p>Washington, D.C. sits at the crossroads of Virginia, Maryland, and the broader Mid-Atlantic, giving its barbecue scene a genuinely mixed regional character. Virginia-style chopped pork with sweet tomato-vinegar sauce, Carolina whole-hog, and Texas brisket all have serious followings in the metro area. The region lacks a single dominant native style, but that cultural crossroads has produced a competitive scene where multiple traditions are practiced with genuine care.</p>
     <h2>Washington climate</h2>
-    <p>The Southeast’s defining variable is humidity. Summer dew points routinely sit in the 70s, which translates directly into the wet-bulb temperature that drives evaporative cooling on a brisket or pork-butt cook. Long stalls are the norm from May through September. Winters are mild but increasingly damp and storm-prone, and tropical systems through autumn can erase a planned Saturday cook with no warning. The score weighs stall risk heavily for this region — a humid day on an offset asks a lot of the fire-tender.</p>
+    <p>The Southeast’s defining variable is humidity. Summer dew points routinely sit in the 70s, which translates directly into the wet-bulb temperature that drives evaporative cooling on a brisket or pork-butt cook. Long stalls are the norm from May through September. Winters are mild but increasingly damp and storm-prone, and tropical systems through autumn can erase a planned Saturday cook with no warning. The score weighs stall risk heavily for this region: a humid day on an offset asks a lot of the fire-tender.</p>
     <p>In Washington, the normals bear this out: March is the windiest month at 7.8 mph, while October scores highest for low-and-slow at 78 of 100.</p>
     <h2>Cooker fit for Washington</h2>
-    <p>For Southeast cooks, the priority is humidity tolerance. A well-insulated kamado runs efficient stalls and conserves fuel through the long, hot summer. Pellet cookers handle the same conditions cleanly. An offset is rewarding when the weather behaves but the regional climate stacks the deck against it — high dew points and pop-up storms are constant variables.</p>
+    <p>For Southeast cooks, the priority is humidity tolerance. A well-insulated kamado runs efficient stalls and conserves fuel through the long, hot summer. Pellet cookers handle the same conditions cleanly. An offset is rewarding when the weather behaves but the regional climate stacks the deck against it: high dew points and pop-up storms are constant variables.</p>
     <p>Washington grades Good or better in 12 of 12 months; on the windiest weekends, plan for gusts near 11 mph and let an insulated cooker carry the long cuts.</p>
-    <p>Pick a day with a strong score, light the fire, and stop guessing whether Saturday in Washington will hold. The form lets you swap cut and cooker without leaving the page — your selection persists across visits via local storage. ZIP defaults to 20001 for the Washington metro; change it any time to score a different yard.</p>
+    <p>Pick a day with a strong score, light the fire, and stop guessing whether Saturday in Washington will hold. The form lets you swap cut and cooker without leaving the page, and your selection persists across visits via local storage. ZIP defaults to 20001 for the Washington metro; change it any time to score a different yard.</p>
   </section>
 
   <p class="sw-disclaimer">

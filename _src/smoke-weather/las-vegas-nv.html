@@ -17,7 +17,7 @@
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "Pitmaster Tools — Best Smoke Days in Las Vegas, NV",
+  "name": "Pitmaster Tools: Best Smoke Days in Las Vegas, NV",
   "url": "https://pitmaster.tools/smoke-weather/las-vegas-nv",
   "description": "Free 7-day smoke forecast for Las Vegas, NV. Scores for brisket, ribs, pork, and chicken across all cooker types.",
   "applicationCategory": "UtilitiesApplication",
@@ -25,7 +25,7 @@
   "inLanguage": "en",
   "isAccessibleForFree": true,
   "browserRequirements": "Requires JavaScript enabled in a modern browser.",
-  "dateModified": "2026-06-27",
+  "dateModified": "2026-07-15",
   "featureList": [
     "7-day smoking weather forecast scored 0-100 for Las Vegas",
     "Cut-aware stall-risk modeling using wet-bulb temperature",
@@ -66,7 +66,7 @@
       "name": "How accurate is the Las Vegas forecast?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "We pull from Open-Meteo as the primary source with the US National Weather Service as failover. Each day in the Las Vegas 7-day window carries a confidence label — high for the next 24-48 hours, dropping to medium and then low further out. Treat the 5-7 day end of the window as a planning signal, not a commitment."
+        "text": "We pull from Open-Meteo as the primary source with the US National Weather Service as failover. Each day in the Las Vegas 7-day window carries a confidence label: high for the next 24-48 hours, dropping to medium and then low further out. Treat the 5-7 day end of the window as a planning signal, not a commitment."
       }
     }
   ]
@@ -104,7 +104,7 @@
   "@type": "Dataset",
   "@id": "https://pitmaster.tools/smoke-weather/las-vegas-nv#climate-normals",
   "name": "Las Vegas, NV Monthly Climate Normals for Barbecue",
-  "description": "Monthly climate normals for Las Vegas, NV — average high and low temperature, wind speed, relative humidity, and rainy days, each scored 0-100 for low-and-slow barbecue suitability. Temperature and rain days from NOAA 1991-2020 U.S. Climate Normals (station LAS VEGAS AIR TERMINAL, NV); wind and humidity from Open-Meteo historical reanalysis, 2015-2024.",
+  "description": "Monthly climate normals for Las Vegas, NV: average high and low temperature, wind speed, relative humidity, and rainy days, each scored 0-100 for low-and-slow barbecue suitability. Temperature and rain days from NOAA 1991-2020 U.S. Climate Normals (station LAS VEGAS AIR TERMINAL, NV); wind and humidity from Open-Meteo historical reanalysis, 2015-2024.",
   "url": "https://pitmaster.tools/smoke-weather/las-vegas-nv",
   "temporalCoverage": [
     "1991/2020",
@@ -170,7 +170,7 @@
     "url": "https://pitmaster.tools"
   },
   "license": "https://pitmaster.tools/terms-of-service",
-  "dateModified": "2026-06-27"
+  "dateModified": "2026-07-15"
 }
 </script>
 <!-- INJECT:site-header.css -->
@@ -192,7 +192,7 @@
   </nav>
   <section class="page-hero" aria-label="Page introduction">
     <h1>Best Smoke Days in Las Vegas, NV</h1>
-    <p>Las Vegas, Nevada sits in the Mountain barbecue region. Las Vegas brings every regional barbecue style under one roof in resort-and-restaurant menus, but the city’s backyard pit scene is real too — desert summers reward insulated cookers and shorter rest windows. This page scores the next seven days for low-and-slow cooks in the Las Vegas metro, weighing rain probability, sustained wind and gusts, daytime temperature, and the wet-bulb humidity that drives the stall — then weights the result for your cut and cooker so you can pick the day with the highest odds of a clean cook.</p>
+    <p>Las Vegas, Nevada sits in the Mountain barbecue region. Las Vegas brings every regional barbecue style under one roof in resort-and-restaurant menus, but the city’s backyard pit scene is real too: desert summers reward insulated cookers and shorter rest windows. This page scores the next seven days for low-and-slow cooks in the Las Vegas metro, weighing rain probability, sustained wind and gusts, daytime temperature, and the wet-bulb humidity that drives the stall. It then weights the result for your cut and cooker, so you can pick the day with the best odds of a clean cook.</p>
   </section>
 
   <form id="swForm" class="form-card" autocomplete="off" novalidate aria-label="Smoke forecast inputs">
@@ -258,10 +258,10 @@
   <aside class="score-explainer" aria-label="What the score means">
     <h3>What the 0-100 score means</h3>
     <ul class="score-legend">
-      <li><span class="score-legend__swatch band-ideal" aria-hidden="true"></span><strong>85-100 &middot; Ideal</strong> &mdash; light the fire</li>
-      <li><span class="score-legend__swatch band-green" aria-hidden="true"></span><strong>70-84 &middot; Good</strong> &mdash; solid smoke day</li>
-      <li><span class="score-legend__swatch band-yellow" aria-hidden="true"></span><strong>50-69 &middot; Average</strong> &mdash; workable, plan around the rough hours</li>
-      <li><span class="score-legend__swatch band-red" aria-hidden="true"></span><strong>0-49 &middot; Poor</strong> &mdash; tough conditions</li>
+      <li><span class="score-legend__swatch band-ideal" aria-hidden="true"></span><strong>85-100 &middot; Ideal</strong>: light the fire</li>
+      <li><span class="score-legend__swatch band-green" aria-hidden="true"></span><strong>70-84 &middot; Good</strong>: solid smoke day</li>
+      <li><span class="score-legend__swatch band-yellow" aria-hidden="true"></span><strong>50-69 &middot; Average</strong>: workable, plan around the rough hours</li>
+      <li><span class="score-legend__swatch band-red" aria-hidden="true"></span><strong>0-49 &middot; Poor</strong>: tough conditions</li>
     </ul>
     <p>Five weather signals subtract from a base of 100: rain probability + accumulation, wind &amp; gusts (weighted by your cooker), cold mornings, hot afternoons, and stall risk for long cuts. <a href="/smoke-weather/methodology">See full methodology &rarr;</a></p>
   </aside>
@@ -270,13 +270,13 @@
 
   <section class="editorial-section local-guide" aria-label="Smoking in Las Vegas">
     <h2>Planning a weekend smoke in Las Vegas</h2>
-    <p>Las Vegas cooks in the Mojave Desert, where summer heat is the headline. June through August routinely tops 100°F and can push past 110, punishing for both the cook and anyone tending a fire, so the prime windows are the long, mild shoulder seasons and winter — roughly October through April, when the desert delivers dry, sunny, dependable Saturdays. A brief summer monsoon can stir up dust and a stray thunderstorm in July and August, but most days the variable is heat, not rain.</p>
-    <p>Bone-dry air keeps dew points low, so stalls are short and bark sets quickly — but that same dryness wicks moisture from the meat, the standard desert tax. Wrapping in butcher paper guards the bark, and a foil pan of water steadies a stick burner against the arid heat. Vegas also swings hard from day to night, and a pit can bleed heat fast after sundown, so overnight cooks want extra fuel and a closer watch. Insulated cookers — kamados and pellet rigs — shrug off the summer extremes that bake an exposed offset; reserve the open-fire brisket sessions for the temperate October-through-April calendar.</p>
+    <p>Las Vegas cooks in the Mojave Desert, where summer heat is the headline. June through August routinely tops 100°F and can push past 110, punishing for both the cook and anyone tending a fire, so the prime windows are the long, mild shoulder seasons and winter: roughly October through April, when the desert delivers dry, sunny, dependable Saturdays. A brief summer monsoon can stir up dust and a stray thunderstorm in July and August, but most days the variable is heat, not rain.</p>
+    <p>Bone-dry air keeps dew points low, so stalls are short and bark sets quickly, but that same dryness wicks moisture from the meat, the standard desert tax. Wrapping in butcher paper guards the bark, and a foil pan of water steadies a stick burner against the arid heat. Vegas also swings hard from day to night, and a pit can bleed heat fast after sundown, so overnight cooks want extra fuel and a closer watch. Insulated cookers, kamados and pellet rigs, shrug off the summer extremes that bake an exposed offset; reserve the open-fire brisket sessions for the temperate October-through-April calendar.</p>
   </section>
 
   <section class="editorial-section climate-normals" aria-labelledby="normals-title">
     <h2 id="normals-title">Las Vegas climate normals by month</h2>
-    <p>Typical conditions for each month, scored 0-100 for a packer brisket on an offset — the most weather-sensitive low-and-slow cook. Temperature and rain days are NOAA 1991-2020 climate normals; wind and humidity are 2015-2024 reanalysis averages.</p>
+    <p>Typical conditions for each month, scored 0-100 for a packer brisket on an offset, the most weather-sensitive low-and-slow cook. Temperature and rain days are NOAA 1991-2020 climate normals; wind and humidity are 2015-2024 reanalysis averages.</p>
     <div class="normals-scroll">
       <table class="normals-table">
         <thead><tr><th scope="col">Month</th><th scope="col">Avg High</th><th scope="col">Avg Low</th><th scope="col">Avg Wind</th><th scope="col">Humidity</th><th scope="col">Rain Days</th><th scope="col">Smoke Score</th></tr></thead>
@@ -296,27 +296,27 @@
         </tbody>
       </table>
     </div>
-    <p>Historically, the best months to smoke in Las Vegas are <strong>April, October, and November</strong>. April is the windiest month (avg 8.2 mph) — the one to plan around.</p>
+    <p>Historically, the best months to smoke in Las Vegas are <strong>April, October, and November</strong>. April is the windiest month (avg 8.2 mph): the one to plan around.</p>
   </section>
 
   <section class="editorial-section smoke-windows" aria-label="Las Vegas smoke season">
     <h2>Las Vegas’s smoke season, month by month</h2>
-    <p>In spring (March–May), Las Vegas rates 89/100 — a prime window with 79°F days, 56°F nights and 8.0 mph of wind as a stubborn stall settles over the cook. Las Vegas in summer (June–August) grades strong at 76/100 — highs near 102°F, lows near 77°F, wind about 7.1 mph as hot afternoons stretch the stall. Through fall (September–November), Las Vegas runs prime: a 87 score off 81°F highs, 58°F lows, and 5.7-mph wind as the plateau runs long and flat. Las Vegas’s winter (December–February) is prime, scoring 87 on 59°F highs, 40°F lows and wind near 5.6 mph as a stubborn stall settles over the cook.</p>
+    <p>In spring (March–May), Las Vegas rates 89/100, a prime window with 79°F days, 56°F nights and 8.0 mph of wind as a stubborn stall settles over the cook. Las Vegas in summer (June–August) grades strong at 76/100: highs near 102°F, lows near 77°F, wind about 7.1 mph as hot afternoons stretch the stall. Through fall (September–November), Las Vegas runs prime: a 87 score off 81°F highs, 58°F lows, and 5.7-mph wind as the plateau runs long and flat. Las Vegas’s winter (December–February) is prime, scoring 87 on 59°F highs, 40°F lows and wind near 5.6 mph as a stubborn stall settles over the cook.</p>
     <p>April is the prime month to smoke in Las Vegas at 90/100; July is the hardest at 74 where hot afternoons stretch the stall.</p>
     <p>Tallied across the year, 12 of 12 months clear the Good line in Las Vegas, peaking at 90 in April, and 8 crack Ideal.</p>
-    <p>With Las Vegas near 102°F, bark forms early — fight dry-out with foil-free wraps and a water pan.</p>
+    <p>With Las Vegas near 102°F, bark forms early; fight dry-out with foil-free wraps and a water pan.</p>
   </section>
 
   <section class="editorial-section" aria-label="Las Vegas BBQ context">
     <h2>Barbecue heritage</h2>
-    <p>Las Vegas has no native barbecue tradition, but the hospitality economy has made it an unusual market. Major Texas, Kansas City, and Memphis-style operations run alongside casino food halls, and the concentrated restaurant talent pool ensures consistent quality. What Vegas lacks in regional identity it compensates for in variety: nearly every significant American smoke style is represented within a few miles, and competition for diners keeps the standards elevated in ways a smaller city couldn’t sustain.</p>
+    <p>Las Vegas has no native barbecue tradition, but the hospitality economy has made it an unusual market. Major Texas, Kansas City, and Memphis-style operations run alongside casino food halls. What Vegas lacks in regional identity it makes up for in variety: nearly every significant American smoke style is represented within a few miles.</p>
     <h2>Las Vegas climate</h2>
-    <p>Las Vegas weather is hot, dry, and high-contrast. Summer highs average above 100 °F with dew points often in the teens, so stalls are short and bark forms fast — the cook fights moisture loss, not humidity. Days cool 25 to 35 °F into the night, which helps overnight cooks. At roughly 2,000 feet the elevation is low enough that boiling point and wrap-and-rest timing behave essentially as they do near sea level, so plan the cook around the dry air rather than altitude. Winters are mild and sunny; insulated kamados and pellet rigs hold temp best, and the calendar stays open year-round.</p>
+    <p>Las Vegas weather is hot, dry, and high-contrast. Summer highs average above 100 °F with dew points often in the teens, so stalls are short and bark forms fast: the cook fights moisture loss, not humidity. Days cool 25 to 35 °F into the night, which helps overnight cooks. At roughly 2,000 feet the elevation is low enough that boiling point and wrap-and-rest timing behave essentially as they do near sea level, so plan the cook around the dry air rather than altitude. Winters are mild and sunny; insulated kamados and pellet rigs hold temp best, and the calendar stays open year-round.</p>
     <p>In Las Vegas, the normals bear this out: April is the windiest month at 8.2 mph, while April scores highest for low-and-slow at 90 of 100.</p>
     <h2>Cooker fit for Las Vegas</h2>
     <p>Mountain cooks benefit from cooker choices that hold moisture. Butcher paper over foil for the wrap, water pans for offsets, and shorter rest windows reduce the dry-out risk that comes with low dew points. Insulated kamados perform best in this climate; an offset works well if you build the cook around the moisture loss the dry air imposes.</p>
     <p>Las Vegas grades Good or better in 12 of 12 months; on the windiest weekends, plan for gusts near 11 mph and let an insulated cooker carry the long cuts.</p>
-    <p>Pick a day with a strong score, light the fire, and stop guessing whether Saturday in Las Vegas will hold. The form lets you swap cut and cooker without leaving the page — your selection persists across visits via local storage. ZIP defaults to 89101 for the Las Vegas metro; change it any time to score a different yard.</p>
+    <p>Pick a day with a strong score, light the fire, and stop guessing whether Saturday in Las Vegas will hold. The form lets you swap cut and cooker without leaving the page, and your selection persists across visits via local storage. ZIP defaults to 89101 for the Las Vegas metro; change it any time to score a different yard.</p>
   </section>
 
   <p class="sw-disclaimer">
