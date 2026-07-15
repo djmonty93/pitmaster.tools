@@ -5,7 +5,7 @@
   permalink="rib-calculator.html"
   og_type="article"
   published="2026-04-12"
-  modified="2026-06-14"
+  modified="2026-07-15"
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -27,7 +27,7 @@
   "inLanguage": "en",
   "isAccessibleForFree": true,
   "browserRequirements": "Requires JavaScript enabled in a modern browser.",
-  "dateModified": "2026-05-03",
+  "dateModified": "2026-07-15",
   "featureList": [
     "Baby back, spare, competition, and beef rib timing",
     "3-2-1 method timeline generator",
@@ -53,7 +53,7 @@
       "name": "How long to smoke baby back ribs?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Baby back ribs take approximately 5–5.5 hours at 225°F, or about 4.7 hours at 250°F. The exact time depends on rack thickness and smoker airflow. Use the bend test — lift the rack from one end and look for a 45-degree sag — rather than the clock alone. Internal temperature should reach 195°F between the bones, but texture is the more reliable doneness indicator."
+        "text": "Baby back ribs take approximately 5–5.5 hours at 225°F, or about 4.7 hours at 250°F. The exact time depends on rack thickness and smoker airflow. Use the bend test (lift the rack from one end and look for a 45-degree sag) rather than the clock alone. Internal temperature should reach 195°F between the bones, but texture is the more reliable doneness indicator."
       }
     },
     {
@@ -69,7 +69,7 @@
       "name": "How do you know when ribs are done?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Three reliable doneness tests for smoked ribs: 1) The bend test — lift the rack from one end with tongs and look for a 45-degree sag with slight cracking on the bark; 2) The toothpick test — a toothpick or probe slides between the bones with little resistance; 3) Bone pullback — the meat has pulled back at least 1/4 inch from the ends of the bones. Internal temperature of 195–203°F between the bones is a useful secondary indicator, but texture tests are more reliable than temperature alone for ribs."
+        "text": "Three reliable doneness tests for smoked ribs: 1) The bend test: lift the rack from one end with tongs and look for a 45-degree sag with slight cracking on the bark; 2) The toothpick test: a toothpick or probe slides between the bones with little resistance; 3) Bone pullback: the meat has pulled back at least 1/4 inch from the ends of the bones. Internal temperature of 195–203°F between the bones is a useful secondary indicator, but texture tests are more reliable than temperature alone for ribs."
       }
     },
     {
@@ -85,7 +85,7 @@
       "name": "Should you wrap ribs in foil or butcher paper?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Foil wrapping (the Texas Crutch) traps steam and braising liquid, producing maximum tenderness and the classic fall-off-the-bone texture. Butcher paper allows more moisture to escape, resulting in firmer meat with more bite — closer to competition style. No wrap at all produces the firmest bite and most pronounced bark but requires longer cook times. For the 3-2-1 method, foil is preferred because the liquid additions (butter, brown sugar, juice) need to stay in contact with the meat."
+        "text": "Foil wrapping (the Texas Crutch) traps steam and braising liquid, producing maximum tenderness and the classic fall-off-the-bone texture. Butcher paper allows more moisture to escape, resulting in firmer meat with more bite, closer to competition style. No wrap at all produces the firmest bite and most pronounced bark but requires longer cook times. For the 3-2-1 method, foil is preferred because the liquid additions (butter, brown sugar, juice) need to stay in contact with the meat."
       }
     }
   ]
@@ -265,14 +265,14 @@
 
   <section class="page-hero" aria-label="Page introduction">
     <h1>Rib Smoking Calculator</h1>
-    <p>Enter your rib type, method, and serving time to get a complete smoking timeline — including 3-2-1 phase breakdowns for baby back and spare ribs.</p>
+    <p>Enter your rib type, method, and serving time to get a complete smoking timeline, including 3-2-1 phase breakdowns for baby back and spare ribs.</p>
   </section>
 
   <section id="calculator" aria-labelledby="calculator-title">
     <h2 class="calculator-section-title" id="calculator-title" style="font-family:Georgia,serif;font-size:1.45rem;margin-bottom:.75rem;">Plan your rib cook</h2>
 
     <div class="form-card">
-      <h3 class="section-title">Rib Type</h3>
+      <h3 class="section-title">Rib type</h3>
       <div class="rib-type-grid" role="radiogroup" aria-label="Rib type">
         <label>
           <input type="radio" class="rib-radio" name="ribType" value="baby-back" checked>
@@ -305,13 +305,13 @@
       </div>
 
       <div style="margin-top:1.25rem;">
-        <h3 class="section-title">Cook Method</h3>
+        <h3 class="section-title">Cook method</h3>
         <div class="method-toggle" role="group" aria-label="Cook method">
           <button id="btnStandard" class="active" type="button">Standard</button>
           <button id="btn321" type="button">3-2-1 Method</button>
         </div>
         <div class="method-note" id="methodNote">
-          <strong>3-2-1 / 2-2-1 phases:</strong> Phase 1 — unwrapped on the smoker (smoke and bark). Phase 2 — tightly wrapped in foil with butter, brown sugar, and a splash of apple juice (tenderizing). Phase 3 — unwrapped to firm up bark, optional sauce glaze the last 15 min.
+          <strong>3-2-1 / 2-2-1 phases:</strong> Phase 1: unwrapped on the smoker (smoke and bark). Phase 2: tightly wrapped in foil with butter, brown sugar, and a splash of apple juice (tenderizing). Phase 3: unwrapped to firm up bark, optional sauce glaze the last 15 min.
         </div>
       </div>
 
@@ -414,12 +414,12 @@
       </div>
 
       <div class="card">
-        <h3 class="section-title">Cook Timeline</h3>
+        <h3 class="section-title">Cook timeline</h3>
         <div class="timeline" id="tlEl" aria-label="Cook timeline"></div>
       </div>
 
       <div class="card" id="phaseBreakdown" style="display:none;">
-        <h3 class="section-title">Cook Phases</h3>
+        <h3 class="section-title">Cook phases</h3>
         <ul class="phase-list">
           <li class="phase-row"><span class="phase-lbl">Heat-up to stall</span><span class="phase-val" id="phT1">—</span></li>
           <li class="phase-row" id="stallRow"><span class="phase-lbl">Estimated stall plateau</span><span class="phase-val" id="phT2">—</span></li>
@@ -438,7 +438,7 @@
         <p class="resolve-result" id="resolveResult"></p>
       </div>
 
-      <p class="model-note">This estimate uses a physics-based heat diffusion model calibrated to real cook data. It does not account for bone geometry, fat content variation, or uneven smoker heat. Always cook to doneness tests — bend test, toothpick, and internal temperature — not to the clock alone.</p>
+      <p class="model-note">This estimate uses a physics-based heat diffusion model calibrated to real cook data. It does not account for bone geometry, fat content variation, or uneven smoker heat. Always cook to doneness tests (bend test, toothpick, and internal temperature) not to the clock alone.</p>
 
       <div class="share-buttons no-print" aria-label="Share options">
         <a class="share-btn" href="https://pinterest.com/pin/create/button/?url=https://pitmaster.tools/rib-calculator&description=Free+rib+smoking+calculator" target="_blank" rel="noopener noreferrer">Share on Pinterest</a>
@@ -460,7 +460,7 @@
 
   <!-- Reference Table -->
   <section class="editorial-section" aria-labelledby="ref-table-title">
-    <h2 id="ref-table-title">Rib Smoke Time Reference</h2>
+    <h2 id="ref-table-title">Rib smoke time reference</h2>
     <p>Quick reference for flat rib times at common smoker temperatures. Beef rib times based on an 8-lb rack.</p>
     <div class="ref-table-wrap">
       <table class="ref-table">
@@ -514,28 +514,28 @@
 
   <!-- Editorial Content -->
   <section class="editorial-section" aria-labelledby="how-long-title">
-    <h2 id="how-long-title">How Long to Smoke Ribs</h2>
-    <p>Rib cook times depend almost entirely on rib type, rack thickness, and smoker temperature — not raw weight. Unlike brisket or pork shoulder, you cannot multiply a per-pound rate to get a reliable finish window. A 4-pound rack and a 6-pound rack of spare ribs cook in roughly the same time because heat travels through a similar thickness of meat and bone.</p>
-    <p>At 225&#xB0;F, baby back ribs typically finish in 5 to 5.5 hours, spare ribs in 6 to 6.5 hours, and competition-trimmed ribs in about 5 hours. At 250&#xB0;F those windows compress by 10 to 15 percent. At 275&#xB0;F and above, cooks move faster but require more attention to prevent the bark from charring before the internal connective tissue has finished breaking down. These numbers assume settled weather — the <a href="/smoke-weather/">smoke-weather forecast</a> flags days where wind or cold would stretch each phase.</p>
-    <p>Beef plate ribs (dino bones) are the exception. These massive cuts — often 8 to 10 pounds per rack — behave more like a small <a href="brisket-calculator">brisket</a>. They follow a loose per-pound rate, benefit from low-and-slow cooking at 225&#xB0;F to 250&#xB0;F, and finish around 203&#xB0;F internal when the probe slides between the bones with almost no resistance.</p>
+    <h2 id="how-long-title">How long to smoke ribs</h2>
+    <p>Rib cook times depend almost entirely on rib type, rack thickness, and smoker temperature, not raw weight. Unlike brisket or pork shoulder, you cannot multiply a per-pound rate to get a reliable finish window. A 4-pound rack and a 6-pound rack of spare ribs cook in roughly the same time because heat travels through a similar thickness of meat and bone.</p>
+    <p>At 225&#xB0;F, baby back ribs typically finish in 5 to 5.5 hours, spare ribs in 6 to 6.5 hours, and competition-trimmed ribs in about 5 hours. At 250&#xB0;F those windows compress by 10 to 15 percent. At 275&#xB0;F and above, cooks move faster but require more attention to prevent the bark from charring before the internal connective tissue has finished breaking down. These numbers assume settled weather: the <a href="/smoke-weather/">smoke-weather forecast</a> flags days where wind or cold would stretch each phase.</p>
+    <p>Beef plate ribs (dino bones) are the exception. These massive cuts, often 8 to 10 pounds per rack, behave more like a small <a href="brisket-calculator">brisket</a>. They follow a loose per-pound rate, benefit from low-and-slow cooking at 225&#xB0;F to 250&#xB0;F, and finish around 203&#xB0;F internal when the probe slides between the bones with almost no resistance.</p>
 
-    <h3>The 3-2-1 Method Explained</h3>
+    <h3>The 3-2-1 method explained</h3>
     <p>The 3-2-1 method breaks a spare rib cook into three phases: three hours unwrapped on the smoker for smoke penetration and bark formation, two hours tightly wrapped in foil with butter, brown sugar, and a splash of apple juice to steam and tenderize, and one final hour back on the smoker unwrapped to firm up the bark and optionally apply a sauce glaze for the last 15 minutes.</p>
-    <p>For baby back ribs and competition ribs, use the 2-2-1 variation. Baby backs are thinner and cook faster — three hours of unwrapped smoke would push them past the point of ideal texture before the wrap phase even begins. Two hours smoke, two hours wrapped, one hour unwrapped totals five hours and produces excellent results for baby backs.</p>
+    <p>For baby back ribs and competition ribs, use the 2-2-1 variation. Baby backs are thinner and cook faster: three hours of unwrapped smoke would push them past the point of ideal texture before the wrap phase even begins. Two hours smoke, two hours wrapped, one hour unwrapped totals five hours and produces excellent results for baby backs.</p>
     <p>Temperature adjustments apply to the total time, not individual phases. If you cook at 250&#xB0;F instead of 225&#xB0;F, each phase shortens proportionally. The calculator handles this automatically and shows you exact adjusted phase times for your smoker temperature. If you are serving ribs alongside larger cuts, the <a href="cook-time-coordinator">Cook Time Coordinator</a> is the better tool for the combined schedule.</p>
 
-    <h3>How Do You Know When Ribs Are Done?</h3>
-    <p>Three reliable doneness tests work better than temperature alone for pork ribs. The bend test is the most used: pick up the rack from one end with tongs and look for a 45-degree sag with slight cracking in the bark on the top side. A stiff rack that barely bends needs more time. The toothpick test checks for tenderness between the bones — a toothpick or probe should slide in with almost no resistance at the thickest point between the middle bones. Bone pullback is the visual tell: the meat should have pulled back at least a quarter inch from the ends of the bones along the length of the rack.</p>
+    <h3>How do you know when ribs are done?</h3>
+    <p>Three reliable doneness tests work better than temperature alone for pork ribs. The bend test is the most used: pick up the rack from one end with tongs and look for a 45-degree sag with slight cracking in the bark on the top side. A stiff rack that barely bends needs more time. The toothpick test checks for tenderness between the bones: a toothpick or probe should slide in with almost no resistance at the thickest point between the middle bones. Bone pullback is the visual tell: the meat should have pulled back at least a quarter inch from the ends of the bones along the length of the rack.</p>
     <p>Internal temperature between the bones at 195 to 203&#xB0;F is a useful secondary reference, but ribs can probe at 195&#xB0;F and still feel tight. A rack that passes all three texture tests is done regardless of what the thermometer reads.</p>
 
-    <h3>Baby Back vs. Spare Ribs</h3>
+    <h3>Baby back vs. spare ribs</h3>
     <p>Baby back ribs come from the upper back where the rib meets the spine, just below the loin. They are shorter, leaner, and more curved, with less connective tissue and more tender meat. Because they are leaner, they can dry out if cooked too long or wrapped too aggressively. Baby backs reward a slightly shorter cook at slightly higher temperatures.</p>
-    <p>Spare ribs come from the belly side of the rib cage and are larger, flatter, and fattier. The extra fat and collagen make them more forgiving of long cooks and benefit from the full braising effect of a foil wrap. St. Louis-cut spare ribs are spare ribs with the brisket bone, cartilage, and rib tips removed — they have a uniform rectangular shape that cooks more evenly and is the standard cut for competition barbecue.</p>
+    <p>Spare ribs come from the belly side of the rib cage and are larger, flatter, and fattier. The extra fat and collagen make them more forgiving of long cooks and benefit from the full braising effect of a foil wrap. St. Louis-cut spare ribs are spare ribs with the brisket bone, cartilage, and rib tips removed: they have a uniform rectangular shape that cooks more evenly and is the standard cut for competition barbecue.</p>
     <p>In terms of flavor, spare ribs generally have more depth due to higher fat content. Baby backs have a milder, more refined pork flavor and are the more popular choice at restaurants. For backyard cooks who want maximum flavor with manageable size, St. Louis-cut spares are the gold standard.</p>
 
-    <h3>Beef Ribs (Dino Bones)</h3>
-    <p>Beef plate ribs — often called dino bones — are cut from the short plate section between the brisket and the flank. A full rack of three bones can weigh 8 to 10 pounds and will dwarf any pork rib rack. Plate ribs have an enormous amount of intramuscular fat and collagen that renders beautifully over a long low-and-slow cook.</p>
-    <p>Beef back ribs are a different, less prized cut — they come from the same area as prime rib but most of the meat has been removed during butchering. Seek out plate ribs or short ribs for the dino bone experience. Season with simple salt, pepper, and garlic (SPG) — the beef flavor is rich enough that it does not need complex rubs. For best bark formation, skip the foil wrap entirely. Pair with oak or post oak smoke for the authentic central Texas style. Pull around 203&#xB0;F when a probe between the bones slides in with almost no resistance.</p>
+    <h3>Beef ribs (dino bones)</h3>
+    <p>Beef plate ribs, often called dino bones, are cut from the short plate section between the brisket and the flank. A full rack of three bones can weigh 8 to 10 pounds and will dwarf any pork rib rack. Plate ribs have an enormous amount of intramuscular fat and collagen that renders beautifully over a long low-and-slow cook.</p>
+    <p>Beef back ribs are a different, less prized cut: they come from the same area as prime rib but most of the meat has been removed during butchering. Seek out plate ribs or short ribs for the dino bone experience. Season with simple salt, pepper, and garlic (SPG): the beef flavor is rich enough that it does not need complex rubs. For best bark formation, skip the foil wrap entirely. Pair with oak or post oak smoke for the authentic central Texas style. Pull around 203&#xB0;F when a probe between the bones slides in with almost no resistance.</p>
   </section>
 
   <div class="ad-slot" aria-hidden="true">
@@ -550,25 +550,25 @@
 
   <!-- FAQ Section -->
   <section class="editorial-section" aria-labelledby="faq-title">
-    <h2 id="faq-title">Frequently Asked Questions</h2>
+    <h2 id="faq-title">Frequently asked questions</h2>
     <div class="faq-group">
       <details class="faq-item">
         <summary>How long to smoke baby back ribs?</summary>
         <div class="faq-answer">
-          <p>Baby back ribs take approximately 5 to 5.5 hours at 225&#xB0;F, or about 4.7 hours at 250&#xB0;F. The exact finish time depends on rack thickness, smoker airflow, and how your smoker holds temperature. Use the bend test as your primary doneness check — lift the rack from one end with tongs and look for a 45-degree sag with slight bark cracking on top. Internal temperature should reach around 195&#xB0;F measured between the bones, but texture is the more reliable indicator. The 2-2-1 method (2 hrs smoke + 2 hrs wrapped + 1 hr unwrapped) is a solid structured approach for baby backs.</p>
+          <p>Baby back ribs take approximately 5 to 5.5 hours at 225&#xB0;F, or about 4.7 hours at 250&#xB0;F. The exact finish time depends on rack thickness, smoker airflow, and how your smoker holds temperature. Use the bend test as your primary doneness check: lift the rack from one end with tongs and look for a 45-degree sag with slight bark cracking on top. Internal temperature should reach around 195&#xB0;F measured between the bones, but texture is the more reliable indicator. The 2-2-1 method (2 hrs smoke + 2 hrs wrapped + 1 hr unwrapped) is a solid structured approach for baby backs.</p>
         </div>
       </details>
       <details class="faq-item">
         <summary>What is the 3-2-1 method for ribs?</summary>
         <div class="faq-answer">
-          <p>The 3-2-1 method structures a spare rib cook into three distinct phases. Phase 1 is 3 hours on the smoker unwrapped — this builds smoke penetration and the beginning of the bark. Phase 2 is 2 hours tightly wrapped in foil with butter, brown sugar, and apple juice — the trapped steam tenderizes the meat and breaks down collagen. Phase 3 is 1 hour back on the smoker unwrapped to firm up the bark, with an optional sauce glaze applied in the final 15 minutes.</p>
-          <p>For baby back ribs and competition ribs, use the 2-2-1 variation: 2 hours smoke, 2 hours wrapped, 1 hour unwrapped. Baby backs are thinner and cook faster — a full 3-hour Phase 1 would overcook them before wrapping even begins. The total of 5 hours at 225&#xB0;F aligns well with their natural cook window.</p>
+          <p>The 3-2-1 method structures a spare rib cook into three distinct phases. Phase 1 is 3 hours on the smoker unwrapped: this builds smoke penetration and the beginning of the bark. Phase 2 is 2 hours tightly wrapped in foil with butter, brown sugar, and apple juice: the trapped steam tenderizes the meat and breaks down collagen. Phase 3 is 1 hour back on the smoker unwrapped to firm up the bark, with an optional sauce glaze applied in the final 15 minutes.</p>
+          <p>For baby back ribs and competition ribs, use the 2-2-1 variation: 2 hours smoke, 2 hours wrapped, 1 hour unwrapped. Baby backs are thinner and cook faster: a full 3-hour Phase 1 would overcook them before wrapping even begins. The total of 5 hours at 225&#xB0;F aligns well with their natural cook window.</p>
         </div>
       </details>
       <details class="faq-item">
         <summary>How do you know when ribs are done?</summary>
         <div class="faq-answer">
-          <p>Three tests are more reliable than a timer for determining rib doneness. The bend test: lift the rack from one end with tongs — a fully cooked rack will sag at roughly 45 degrees and the bark may show slight cracks on top. A stiff rack that barely bends needs more time. The toothpick test: a wooden toothpick or thin probe should slide between the bones at the thickest point with very little resistance — if it snags, the collagen has not fully rendered. Bone pullback: look for at least a quarter inch of exposed bone along the ends of the rack.</p>
+          <p>Three tests are more reliable than a timer for determining rib doneness. The bend test: lift the rack from one end with tongs: a fully cooked rack will sag at roughly 45 degrees and the bark may show slight cracks on top. A stiff rack that barely bends needs more time. The toothpick test: a wooden toothpick or thin probe should slide between the bones at the thickest point with very little resistance: if it snags, the collagen has not fully rendered. Bone pullback: look for at least a quarter inch of exposed bone along the ends of the rack.</p>
           <p>Internal temperature of 195 to 203&#xB0;F between the bones is useful context but should not be used alone. A rack can read 195&#xB0;F and still feel tight. When all three texture tests pass, the ribs are done.</p>
         </div>
       </details>
@@ -582,7 +582,7 @@
         <summary>Should you wrap ribs in foil or butcher paper?</summary>
         <div class="faq-answer">
           <p>Foil wrapping traps steam and any liquid additions (butter, juice, brown sugar), producing the maximum tenderizing effect and the classic fall-off-the-bone texture. If you want ribs that nearly slide off the bone, foil is the right choice for the 3-2-1 method.</p>
-          <p>Butcher paper allows more moisture to escape during the wrap phase, resulting in firmer meat with a better bite — closer to competition-style ribs where judges look for a clean bite that does not pull the whole bone. No wrap at all produces the firmest bite and most developed bark but requires longer cook times and more careful monitoring. For the 3-2-1 method specifically, foil is preferred because liquid additions need to stay in contact with the meat to do their job.</p>
+          <p>Butcher paper allows more moisture to escape during the wrap phase, resulting in firmer meat with a better bite: closer to competition-style ribs where judges look for a clean bite that does not pull the whole bone. No wrap at all produces the firmest bite and most developed bark but requires longer cook times and more careful monitoring. For the 3-2-1 method specifically, foil is preferred because liquid additions need to stay in contact with the meat to do their job.</p>
         </div>
       </details>
     </div>
@@ -590,11 +590,11 @@
 
   <!-- Related Tools -->
   <section class="editorial-section" aria-labelledby="related-title">
-    <h2 id="related-title">Related BBQ Calculators</h2>
+    <h2 id="related-title">Related BBQ calculators</h2>
     <div class="related-grid">
       <a href="/" class="related-card">
         <span class="related-card-title">Meat Smoking Calculator</span>
-        <span class="related-card-desc">Complete smoking times and timelines for every cut — brisket, pork, chicken, turkey, lamb, and more.</span>
+        <span class="related-card-desc">Complete smoking times and timelines for every cut: brisket, pork, chicken, turkey, lamb, and more.</span>
       </a>
       <a href="brisket-calculator" class="related-card">
         <span class="related-card-title">Brisket Calculator</span>
@@ -938,24 +938,24 @@
       var methodName = (ribKey === 'spare') ? '3-2-1' : '2-2-1';
 
       document.getElementById('phaseNum1').textContent = spFmtHrs(p1h);
-      document.getElementById('phaseLabel1').textContent = 'Phase 1 — Smoke';
-      document.getElementById('phaseDesc1').textContent = 'Unwrapped — smoke penetration and bark formation';
+      document.getElementById('phaseLabel1').textContent = 'Phase 1: Smoke';
+      document.getElementById('phaseDesc1').textContent = 'Unwrapped: smoke penetration and bark formation';
 
       document.getElementById('phaseNum2').textContent = spFmtHrs(p2h);
-      document.getElementById('phaseLabel2').textContent = 'Phase 2 — Wrap';
+      document.getElementById('phaseLabel2').textContent = 'Phase 2: Wrap';
       document.getElementById('phaseDesc2').textContent = 'Foil-wrapped with butter, brown sugar, and apple juice';
 
       document.getElementById('phaseNum3').textContent = spFmtHrs(p3h);
-      document.getElementById('phaseLabel3').textContent = 'Phase 3 — Finish';
-      document.getElementById('phaseDesc3').textContent = 'Unwrapped — firm bark, optional sauce glaze last 15 min';
+      document.getElementById('phaseLabel3').textContent = 'Phase 3: Finish';
+      document.getElementById('phaseDesc3').textContent = 'Unwrapped: firm bark, optional sauce glaze last 15 min';
 
       tlEl.innerHTML = '';
       var events = [
         { color: 'blue',  time: lightSmoker, label: 'Light smoker / preheat',    sub: 'Get smoker up to temp and running clean' },
-        { color: 'blue',  time: phase1Start, label: 'Ribs go on — Phase 1',       sub: spFmtHrs(p1h) + ' unwrapped — smoke penetration and bark formation' },
-        { color: 'amber', time: phase2Start, label: 'Wrap in foil — Phase 2',     sub: spFmtHrs(p2h) + ' tightly wrapped with butter, brown sugar, and apple juice' },
-        { color: 'red',   time: phase3Start, label: 'Unwrap — Phase 3',           sub: spFmtHrs(p3h) + ' back on smoker — firm up bark, optional sauce glaze last 15 min' },
-        { color: 'amber', time: phase3End,   label: 'Pull from smoker — rest ' + rib.restMinutes + ' min', sub: 'Target internal: ' + fmtTemp(rib.pullTemp) + ' — probe between bones' },
+        { color: 'blue',  time: phase1Start, label: 'Ribs go on: Phase 1',       sub: spFmtHrs(p1h) + ' unwrapped — smoke penetration and bark formation' },
+        { color: 'amber', time: phase2Start, label: 'Wrap in foil: Phase 2',     sub: spFmtHrs(p2h) + ' tightly wrapped with butter, brown sugar, and apple juice' },
+        { color: 'red',   time: phase3Start, label: 'Unwrap: Phase 3',           sub: spFmtHrs(p3h) + ' back on smoker — firm up bark, optional sauce glaze last 15 min' },
+        { color: 'amber', time: phase3End,   label: 'Pull from smoker: rest ' + rib.restMinutes + ' min', sub: 'Target internal: ' + fmtTemp(rib.pullTemp) + ' — probe between bones' },
         { color: 'green', time: serve,       label: 'Serve',                      sub: rib.name + ' — ' + methodName + ' method' }
       ];
       events.forEach(function(ev, i) { tlEl.appendChild(tlItem(ev.color, ev.time, ev.label, ev.sub, i)); });
@@ -997,15 +997,15 @@
       tlEl.innerHTML = '';
       var evs = [
         { color: 'blue',  time: light,   label: 'Light smoker / preheat', sub: 'Get smoker to temp and running clean smoke' },
-        { color: 'amber', time: meatOn,  label: 'Ribs go on smoker',      sub: rib.name + ' — standard method' }
+        { color: 'amber', time: meatOn,  label: 'Ribs go on smoker',      sub: rib.name + ', standard method' }
       ];
       if (result.t2h > 0) {
-        evs.push({ color: 'amber', time: stallStartT, label: 'Stall may begin (~' + fmtTemp(150) + ')', sub: 'Temperature plateaus for ' + spFmtHrs(result.t2h) + ' — driven by evaporative cooling' });
+        evs.push({ color: 'amber', time: stallStartT, label: 'Stall may begin (~' + fmtTemp(150) + ')', sub: 'Temperature plateaus for ' + spFmtHrs(result.t2h) + ', driven by evaporative cooling' });
         evs.push({ color: 'amber', time: stallEndT,   label: 'Stall ends (~' + fmtTemp(165) + ')',      sub: 'Temperature climbs again toward pull temp' });
       } else {
         evs.push({ color: 'amber', time: stallStartT, label: 'Bend test / wrap check', sub: 'Check for 45\u00B0 bend test and pullback from bone' });
       }
-      evs.push({ color: 'amber', time: pull,  label: 'Pull from smoker — rest ' + rib.restMinutes + ' min', sub: 'Target internal: ' + fmtTemp(rib.pullTemp) + ' — probe between bones' });
+      evs.push({ color: 'amber', time: pull,  label: 'Pull from smoker: rest ' + rib.restMinutes + ' min', sub: 'Target internal: ' + fmtTemp(rib.pullTemp) + ' — probe between bones' });
       evs.push({ color: 'green', time: serve, label: 'Serve', sub: rib.name });
       evs.forEach(function(ev, i) { tlEl.appendChild(tlItem(ev.color, ev.time, ev.label, ev.sub, i)); });
     }

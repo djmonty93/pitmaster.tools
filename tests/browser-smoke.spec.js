@@ -487,10 +487,10 @@ test('brisket timeline distinguishes wrapped and unwrapped stall events', async 
   await expect(page.locator('#results')).toBeVisible();
 
   let labels = await getTimelineLabels(page, '#tlList');
-  expect(labels).toContain('Stall — wrap now');
+  expect(labels).toContain('Stall: wrap now');
   expect(labels).not.toContain('Stall ends');
   await expect(page.locator('#tlList .tl-item')).toHaveCount(5);
-  await expect(page.locator('#tlList .tl-item').filter({ hasText: 'Stall — wrap now' }).locator('.tl-sub'))
+  await expect(page.locator('#tlList .tl-item').filter({ hasText: 'Stall: wrap now' }).locator('.tl-sub'))
     .toContainText(/leave wrapped until pull temp/i);
 
   await page.locator('#resultsClose').click();
@@ -501,10 +501,10 @@ test('brisket timeline distinguishes wrapped and unwrapped stall events', async 
   labels = await getTimelineLabels(page, '#tlList');
   expect(labels).toContain('Stall begins');
   expect(labels).toContain('Stall ends');
-  expect(labels).not.toContain('Stall — wrap now');
+  expect(labels).not.toContain('Stall: wrap now');
   await expect(page.locator('#tlList .tl-item')).toHaveCount(6);
   await expect(page.locator('#tlList .tl-item').filter({ hasText: 'Stall begins' }).locator('.tl-sub'))
-    .toContainText(/hold steady — no wrap/i);
+    .toContainText(/hold steady, no wrap/i);
   expect(errors).toEqual([]);
 });
 
@@ -581,10 +581,10 @@ test('homepage timeline distinguishes wrapped and unwrapped stall events', async
   await expect(page.locator('#results')).toBeVisible();
 
   let labels = await getTimelineLabels(page, '#tlEl');
-  expect(labels).toContain('Stall — wrap now');
+  expect(labels).toContain('Stall: wrap now');
   expect(labels).not.toContain('Stall ends');
   await expect(page.locator('#tlEl .tl-item')).toHaveCount(5);
-  await expect(page.locator('#tlEl .tl-item').filter({ hasText: 'Stall — wrap now' }).locator('.tl-sub'))
+  await expect(page.locator('#tlEl .tl-item').filter({ hasText: 'Stall: wrap now' }).locator('.tl-sub'))
     .toContainText(/leave wrapped until pull temp/i);
 
   await page.locator('#closeResultsBtn').click();
@@ -595,7 +595,7 @@ test('homepage timeline distinguishes wrapped and unwrapped stall events', async
   labels = await getTimelineLabels(page, '#tlEl');
   expect(labels).toContain('Stall begins');
   expect(labels).toContain('Stall ends');
-  expect(labels).not.toContain('Stall — wrap now');
+  expect(labels).not.toContain('Stall: wrap now');
   await expect(page.locator('#tlEl .tl-item')).toHaveCount(6);
   expect(errors).toEqual([]);
 });
@@ -641,10 +641,10 @@ test('pork shoulder timeline distinguishes wrapped and unwrapped stall events', 
   await expect(page.locator('#results')).toBeVisible();
 
   let labels = await getTimelineLabels(page, '#tlList');
-  expect(labels).toContain('Stall — wrap now');
+  expect(labels).toContain('Stall: wrap now');
   expect(labels).not.toContain('Stall ends');
   await expect(page.locator('#tlList .tl-item')).toHaveCount(5);
-  await expect(page.locator('#tlList .tl-item').filter({ hasText: 'Stall — wrap now' }).locator('.tl-sub'))
+  await expect(page.locator('#tlList .tl-item').filter({ hasText: 'Stall: wrap now' }).locator('.tl-sub'))
     .toContainText(/leave wrapped until pull temp/i);
 
   await page.locator('#resultsClose').click();
@@ -655,10 +655,10 @@ test('pork shoulder timeline distinguishes wrapped and unwrapped stall events', 
   labels = await getTimelineLabels(page, '#tlList');
   expect(labels).toContain('Stall begins');
   expect(labels).toContain('Stall ends');
-  expect(labels).not.toContain('Stall — wrap now');
+  expect(labels).not.toContain('Stall: wrap now');
   await expect(page.locator('#tlList .tl-item')).toHaveCount(6);
   await expect(page.locator('#tlList .tl-item').filter({ hasText: 'Stall begins' }).locator('.tl-sub'))
-    .toContainText(/no wrap — full bark development/i);
+    .toContainText(/no wrap: full bark development/i);
   expect(errors).toEqual([]);
 });
 
