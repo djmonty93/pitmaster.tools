@@ -131,7 +131,7 @@ const RULES: readonly AffiliateRule[] = [
   {
     product: P.thermapen,
     bands: ['ideal', 'green', 'yellow', 'red'],
-    reason: 'A fast-read thermometer is the single biggest accuracy win on any cook.',
+    reason: 'A fast-read thermometer confirms doneness in seconds, so you cook to temperature, not the clock.',
   },
 ];
 

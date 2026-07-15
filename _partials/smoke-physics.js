@@ -207,7 +207,7 @@ function spResolve(p) {
   }
 
   if (!isFinite(t) || t < 0) {
-    return { remainingH: 0, error: 'Cannot calculate — check pit and target temperatures.' };
+    return { remainingH: 0, error: 'Cannot calculate: check pit and target temperatures.' };
   }
   return { remainingH: t, error: null };
 }
