@@ -961,7 +961,9 @@ function smokeWindowsSection(metro, derived) {
 }
 
 function fmtNum(v, places) {
-  if (v == null || !isFinite(v)) return ', ';
+  // Em dash is the empty-value placeholder for the climate table, not prose
+  // punctuation — the humanize pass must not rewrite it.
+  if (v == null || !isFinite(v)) return '—';
   return places ? v.toFixed(places) : String(Math.round(v));
 }
 
