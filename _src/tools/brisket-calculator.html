@@ -28,7 +28,7 @@
   "inLanguage": "en",
   "isAccessibleForFree": true,
   "browserRequirements": "Requires JavaScript enabled in a modern browser.",
-  "dateModified": "2026-05-03",
+  "dateModified": "2026-07-15",
   "featureList": [
     "Brisket cook time calculator",
     "Full smoking timeline working backward from serve time",
@@ -54,7 +54,7 @@
       "name": "How long does it take to smoke a brisket?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "At 250°F, a 12-pound brisket takes approximately 15 hours of active cook time before a 90-minute rest. The exact time depends on the smoker temperature, wrap method, and the brisket's thickness. Always cook to internal temperature — never to time alone. A probe thermometer is mandatory."
+        "text": "At 250°F, a 12-pound brisket takes approximately 15 hours of active cook time before a 90-minute rest. The exact time depends on the smoker temperature, wrap method, and the brisket's thickness. Always cook to internal temperature: never to time alone. A probe thermometer is mandatory."
       }
     },
     {
@@ -62,7 +62,7 @@
       "name": "What temperature do you pull a brisket?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Pull brisket for slicing at 195°F internal temperature. Pull brisket for pulling (shredding) at 205°F. At both temperatures, test with a probe — it should slide in with zero resistance, like pushing into warm butter. Do not rely on temperature alone if the probe still meets resistance."
+        "text": "Pull brisket for slicing at 195°F internal temperature. Pull brisket for pulling (shredding) at 205°F. At both temperatures, test with a probe: it should slide in with zero resistance, like pushing into warm butter. Do not rely on temperature alone if the probe still meets resistance."
       }
     },
     {
@@ -70,7 +70,7 @@
       "name": "What is the brisket stall?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The brisket stall is a plateau that occurs between 150°F and 170°F internal temperature, where the meat stops rising in temperature for several hours. This is caused by evaporative cooling — moisture evaporating from the meat's surface at the same rate that the smoker adds heat. Collagen is also breaking down into gelatin during this period. The stall can last 3–6 hours. Do not panic and do not raise the smoker temperature. Wrapping in foil (Texas Crutch) or butcher paper will shorten or eliminate the stall."
+        "text": "The brisket stall is a plateau that occurs between 150°F and 170°F internal temperature, where the meat stops rising in temperature for several hours. This is caused by evaporative cooling: moisture evaporating from the meat's surface at the same rate that the smoker adds heat. Collagen is also breaking down into gelatin during this period. The stall can last 3–6 hours. Do not panic and do not raise the smoker temperature. Wrapping in foil (Texas Crutch) or butcher paper will shorten or eliminate the stall."
       }
     },
     {
@@ -78,7 +78,7 @@
       "name": "Should you wrap a brisket in foil or butcher paper?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Wrapping in foil (the Texas Crutch) speeds the brisket through the stall fastest by trapping steam, but it softens the bark. Butcher paper allows the bark to breathe while still reducing stall time by roughly half — it is the preferred method for competition pitmasters who want both speed and bark quality. No wrap produces the hardest, most developed bark but adds significant cook time and requires more fuel management. All three methods produce excellent brisket when executed well."
+        "text": "Wrapping in foil (the Texas Crutch) speeds the brisket through the stall fastest by trapping steam, but it softens the bark. Butcher paper allows the bark to breathe while still reducing stall time by roughly half: it is the preferred method for competition pitmasters who want both speed and bark quality. No wrap produces the hardest, most developed bark but adds significant cook time and requires more fuel management. All three methods produce excellent brisket when executed well."
       }
     },
     {
@@ -86,7 +86,7 @@
       "name": "How long should brisket rest before slicing?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Brisket should rest a minimum of 90 minutes before slicing. A 2–4 hour rest is ideal and will noticeably improve juiciness and sliceability. For large events, a faux Cambro — wrapping the foiled brisket in towels and placing it in a cooler — can hold a brisket safely at temperature for 6 hours or more, giving you tremendous flexibility on serve time."
+        "text": "Brisket should rest a minimum of 90 minutes before slicing. A 2–4 hour rest is ideal and will noticeably improve juiciness and sliceability. For large events, a faux Cambro, wrapping the foiled brisket in towels and placing it in a cooler, can hold a brisket safely at temperature for 6 hours or more, giving you tremendous flexibility on serve time."
       }
     }
   ]
@@ -193,7 +193,7 @@
 
   <section class="page-hero" aria-label="Page introduction">
     <h1>Brisket Smoking Calculator</h1>
-    <p>Enter your brisket details and serve time to get a complete cook timeline — including exactly when to light the smoker, when the stall hits, and when to pull.</p>
+    <p>Enter your brisket details and serve time to get a complete cook timeline, including exactly when to light the smoker, when the stall hits, and when to pull.</p>
   </section>
 
   <div class="form-card">
@@ -271,7 +271,7 @@
   <div id="results" role="dialog" aria-modal="true" aria-labelledby="resultsModalTitle">
     <div class="results-modal" tabindex="-1">
       <div class="results-modal__header no-print">
-        <h2 class="results-modal__title" id="resultsModalTitle">Your Brisket Timeline</h2>
+        <h2 class="results-modal__title" id="resultsModalTitle">Your brisket timeline</h2>
         <button class="results-close" id="resultsClose" type="button" aria-label="Close results">Close</button>
       </div>
 
@@ -294,7 +294,7 @@
       </div>
 
       <div class="card" id="phaseBreakdown" style="display:none">
-        <h3 class="section-title">Cook Phases</h3>
+        <h3 class="section-title">Cook phases</h3>
         <ul class="phase-list">
           <li class="phase-row"><span class="phase-lbl">Heat-up to stall</span><span class="phase-val" id="phT1">—</span></li>
           <li class="phase-row" id="phT2Row"><span class="phase-lbl">Estimated stall</span><span class="phase-val" id="phT2">—</span></li>
@@ -314,11 +314,11 @@
       </div>
 
       <div class="card">
-        <h3 class="section-title">Cook Timeline</h3>
+        <h3 class="section-title">Cook timeline</h3>
         <ul class="tl-list" id="tlList" aria-label="Cook timeline"></ul>
       </div>
 
-      <p class="model-note">Treat this as a planning estimate, not a promise. Every brisket cooks a little differently &mdash; thickness, fat, grade, and your pit's hot spots all move the clock. So cook to feel and temperature, not to the timeline: pull when the thickest part of the flat probes butter-tender, usually around 195&#x2013;205&#xB0;F. Start early and leave yourself a 1&#x2013;2 hour buffer &mdash; a faux cambro hold (wrap it and rest it in a dry cooler) keeps brisket hot for hours, so finishing early is your insurance policy, never a problem.</p>
+      <p class="model-note">Treat this as a planning estimate, not a promise. Every brisket cooks a little differently: thickness, fat, grade, and your pit's hot spots all move the clock. So cook to feel and temperature, not to the timeline: pull when the thickest part of the flat probes butter-tender, usually around 195&#x2013;205&#xB0;F. Start early and leave yourself a 1&#x2013;2 hour buffer: a faux cambro hold (wrap it and rest it in a dry cooler) keeps brisket hot for hours, so finishing early is your insurance policy, never a problem.</p>
 
       <div style="margin-top:1rem" class="no-print">
         <button class="print-btn" id="printBtn" type="button" aria-label="Print results">
@@ -336,52 +336,52 @@
 
   <!-- Editorial content -->
   <section class="editorial-section" aria-labelledby="editorial-title">
-    <h2 id="editorial-title">How Long to Smoke a Brisket</h2>
+    <h2 id="editorial-title">How long to smoke a brisket</h2>
 
-    <p>Brisket is the most rewarding — and most demanding — cook in low-and-slow BBQ. The general rule of thumb is <strong>1.25 to 1.5 hours per pound at 225&#xB0;F</strong>. A full packer brisket weighing 14 to 16 pounds will take 17 to 22 hours from smoker on to pull. At 250&#xB0;F, that same brisket comes in closer to 14 to 18 hours. These numbers are averages; your actual time will depend on the thickness of the flat, your smoker's temperature consistency, and how you manage the stall. Wind and ambient temperature also shift the numbers — a cold, gusty day can add hours, so check the <a href="/smoke-weather/">smoke-weather forecast</a> for your ZIP before you commit to a cook date. If you are trying to estimate usable sliced meat instead of clock time, the <a href="brisket-yield-calculator">Brisket Yield Calculator</a> breaks down packer, flat, point, and trim loss.</p>
+    <p>Brisket is the most rewarding, and most demanding, cook in low-and-slow BBQ. The general rule of thumb is <strong>1.25 to 1.5 hours per pound at 225&#xB0;F</strong>. A full packer brisket weighing 14 to 16 pounds will take 17 to 22 hours from smoker on to pull. At 250&#xB0;F, that same brisket comes in closer to 14 to 18 hours. These numbers are averages; your actual time will depend on the thickness of the flat, your smoker's temperature consistency, and how you manage the stall. Wind and ambient temperature also shift the numbers: a cold, gusty day can add hours, so check the <a href="/smoke-weather/">smoke-weather forecast</a> for your ZIP before you commit to a cook date. If you are trying to estimate usable sliced meat instead of clock time, the <a href="brisket-yield-calculator">Brisket Yield Calculator</a> breaks down packer, flat, point, and trim loss.</p>
 
-    <p>The single most important rule: <strong>cook to temperature, not to time.</strong> A meat thermometer is not optional equipment for brisket — it is the cook. Pull brisket for slicing at 195&#xB0;F internal, or 205&#xB0;F if you are pulling or chopping. Use the probe test to confirm: when a thermometer probe slides into the thickest part of the flat with zero resistance — like pushing into warm butter — the brisket is done regardless of what the thermometer reads.</p>
+    <p>The single most important rule: <strong>cook to temperature, not to time.</strong> A meat thermometer is not optional equipment for brisket: it is the cook. Pull brisket for slicing at 195&#xB0;F internal, or 205&#xB0;F if you are pulling or chopping. Use the probe test to confirm: when a thermometer probe slides into the thickest part of the flat with zero resistance, like pushing into warm butter, the brisket is done regardless of what the thermometer reads.</p>
 
-    <h3>The Brisket Stall</h3>
+    <h3>The brisket stall</h3>
 
     <p>Every pitmaster who has cooked a brisket has encountered the stall: a maddening plateau that begins around 150&#xB0;F and can hold for three to six hours. The internal temperature stops climbing or even drops a degree or two, and panic sets in. Do not raise the smoker temperature. The brisket is fine.</p>
 
-    <p>The stall occurs because brisket contains a significant amount of surface moisture that evaporates at the same rate the smoker adds heat — a process called evaporative cooling. Your brisket is essentially sweating, and as long as that evaporation is happening, the temperature will not rise. Simultaneously, collagen in the connective tissue is beginning its conversion into gelatin — the process that makes brisket tender. The stall ends naturally when enough moisture has evaporated and the collagen conversion is complete, at which point the internal temperature begins climbing again.</p>
+    <p>The stall occurs because brisket contains a significant amount of surface moisture that evaporates at the same rate the smoker adds heat, a process called evaporative cooling. Your brisket is essentially sweating, and as long as that evaporation is happening, the temperature will not rise. Simultaneously, collagen in the connective tissue is beginning its conversion into gelatin: the process that makes brisket tender. The stall ends naturally when enough moisture has evaporated and the collagen conversion is complete, at which point the internal temperature begins climbing again.</p>
 
     <p>The stall typically begins at around 40% of total cook time and ends near 65%. For a 16-hour cook, that means a stall window of roughly hours 6 through 10. This calculator estimates your stall window and builds it into the timeline automatically.</p>
 
-    <h3>Wrapping Decisions: Foil vs. Butcher Paper vs. No Wrap</h3>
+    <h3>Wrapping decisions: foil vs. butcher paper vs. no wrap</h3>
 
-    <p>How you wrap — or choose not to wrap — is one of the most consequential decisions of the cook. Each method produces a different result.</p>
+    <p>How you wrap, or choose not to wrap, is one of the most consequential decisions of the cook. Each method produces a different result.</p>
 
     <ul>
       <li><strong>Foil (Texas Crutch):</strong> Wrapping tightly in heavy-duty aluminum foil eliminates the stall almost entirely by trapping steam around the meat. The brisket essentially braises in its own juices for the remainder of the cook. Cook time is reduced by roughly 10%. The downside is bark: the steam softens the crust. If you wrap in foil, unwrap during the rest to let the bark firm up. Most backyard cooks and competition teams on a schedule use foil.</li>
-      <li><strong>Butcher Paper (Pink / Peach Paper):</strong> Butcher paper is breathable, which means it reduces the stall without the bark-destroying steam environment of foil. It slows moisture loss and stabilizes the cook without fully trapping humidity. Cook time is reduced by about 5% compared to foil. The bark is noticeably better — this is the method used by Franklin Barbecue and most serious Texas pitmasters. Wrap when the bark is fully set and the surface is deep mahogany, typically at the onset of the stall.</li>
+      <li><strong>Butcher Paper (Pink / Peach Paper):</strong> Butcher paper is breathable, which means it reduces the stall without the bark-destroying steam environment of foil. It slows moisture loss and stabilizes the cook without fully trapping humidity. Cook time is reduced by about 5% compared to foil. The bark is noticeably better: this is the method used at Franklin Barbecue. Wrap when the bark is fully set and the surface is deep mahogany, typically at the onset of the stall.</li>
       <li><strong>No Wrap:</strong> The purist approach. The stall runs its full course, the bark gets maximum time exposed to smoke and airflow, and the result is the hardest, most developed crust you can achieve. Cook time is 10% longer than foil-wrapped. Fuel management matters more with no wrap because temperature spikes will dry out the flat faster. It is the highest-risk approach and the most rewarding when executed well.</li>
     </ul>
 
-    <h3>The Rest Is Not Optional</h3>
+    <h3>The rest is not optional</h3>
 
-    <p>Resting brisket is not a suggestion — it is a step as important as the cook itself. When brisket comes off the smoker, the muscle fibers are tightly contracted from hours of heat. During the rest, those fibers relax and reabsorb the juices that were pushed to the center during cooking. Slice too early, and the cutting board fills with juice that should have stayed in the meat.</p>
+    <p>Resting brisket is not a suggestion: it is a step as important as the cook itself. When brisket comes off the smoker, the muscle fibers are tightly contracted from hours of heat. During the rest, those fibers relax and reabsorb the juices that were pushed to the center during cooking. Slice too early, and the cutting board fills with juice that should have stayed in the meat.</p>
 
-    <p>The minimum rest is 90 minutes, loosely tented in foil. Two to four hours is ideal. For large events or catering situations, the faux Cambro method — wrapping the brisket tightly in foil, then in a thick beach towel, and placing it in a dry cooler — will safely hold a brisket at serving temperature for four to six hours, sometimes more. This technique gives you enormous flexibility on timing and is used at competition cook sites worldwide. If you are serving a crowd, the <a href="catering-calculator">Catering Calculator</a> helps convert that finished brisket into realistic portions and shopping numbers.</p>
+    <p>The minimum rest is 90 minutes, loosely tented in foil. Two to four hours is ideal. For large events or catering situations, the faux Cambro method (wrapping the brisket tightly in foil, then in a thick beach towel, and placing it in a dry cooler) will safely hold a brisket at serving temperature for four to six hours, sometimes more. This technique gives you enormous flexibility on timing and is used at competition cook sites worldwide. If you are serving a crowd, the <a href="catering-calculator">Catering Calculator</a> helps convert that finished brisket into realistic portions and shopping numbers.</p>
 
-    <p>Do not skip the rest because the brisket probed done an hour early. That extra hour in the cooler makes it better, not worse. The calculator builds in a 90-minute rest by default and works backward from your serve time accordingly.</p>
+    <p>Do not skip the rest because the brisket probed done an hour early. The extra hour in the cooler only helps. The calculator builds in a 90-minute rest by default and works backward from your serve time accordingly.</p>
 
-    <h3>Sliced vs. Pulled Brisket</h3>
+    <h3>Sliced vs. pulled brisket</h3>
 
     <p>A full packer brisket consists of two muscles: the flat and the point. The flat is the leaner, thinner muscle used for classic sliced brisket. The point (also called the deckle or nose) is heavily marbled and is typically used for burnt ends or pulled brisket.</p>
 
     <ul>
-      <li><strong>Sliced brisket (195&#xB0;F):</strong> The flat holds its structure for clean slices. Pull at 195&#xB0;F internal, rest, and slice against the grain to 1/4-inch thickness — the width of a pencil. Going thicker or thinner makes it either chewy or crumbly.</li>
-      <li><strong>Pulled brisket (205&#xB0;F):</strong> Cooking to 205&#xB0;F breaks down more collagen and renders more intramuscular fat, producing meat that pulls apart easily. The point is ideal for this treatment. At 205&#xB0;F, the flat will be very tender but may not hold together for slices — plan accordingly and separate the flat and point before pulling.</li>
+      <li><strong>Sliced brisket (195&#xB0;F):</strong> The flat holds its structure for clean slices. Pull at 195&#xB0;F internal, rest, and slice against the grain to 1/4-inch thickness, the width of a pencil. Going thicker or thinner makes it either chewy or crumbly.</li>
+      <li><strong>Pulled brisket (205&#xB0;F):</strong> Cooking to 205&#xB0;F breaks down more collagen and renders more intramuscular fat, producing meat that pulls apart easily. The point is ideal for this treatment. At 205&#xB0;F, the flat will be very tender but may not hold together for slices: plan accordingly and separate the flat and point before pulling.</li>
     </ul>
 
-    <p>Neither style is superior — they serve different occasions. Sliced brisket is the centerpiece of a Texas-style plate. Pulled brisket works beautifully in sandwiches, tacos, and hash. If you are cooking a whole packer, you can serve both by pulling the point while slicing the flat.</p>
+    <p>Neither style is superior: they serve different occasions. Sliced brisket is the centerpiece of a Texas-style plate. Pulled brisket works beautifully in sandwiches, tacos, and hash. If you are cooking a whole packer, you can serve both by pulling the point while slicing the flat.</p>
 
     <!-- Reference table -->
-    <h3>Brisket Smoke Time Reference (foil wrap)</h3>
-    <p>Estimated cook times at each temperature using foil wrap. Add 5% for butcher paper and 10% for no wrap. All times include cook only — rest is not included.</p>
+    <h3>Brisket smoke time reference (foil wrap)</h3>
+    <p>Estimated cook times at each temperature using foil wrap. Add 5% for butcher paper and 10% for no wrap. All times include cook only: rest is not included.</p>
     <div class="ref-table-wrap">
       <table class="ref-table">
         <thead>
@@ -443,27 +443,27 @@
 
   <!-- FAQ -->
   <section class="faq-section" aria-labelledby="faq-title">
-    <h2 id="faq-title">Frequently Asked Questions</h2>
+    <h2 id="faq-title">Frequently asked questions</h2>
     <div class="faq-group">
       <details class="faq-item">
         <summary>How long does it take to smoke a brisket?</summary>
-        <div class="faq-body">At 250&#xB0;F, a 12-pound brisket takes approximately 15 hours of active cook time before a 90-minute rest. The exact time depends on the smoker temperature, wrap method, and the brisket's thickness. Always cook to internal temperature — never to time alone. A probe thermometer is mandatory.</div>
+        <div class="faq-body">At 250&#xB0;F, a 12-pound brisket takes approximately 15 hours of active cook time before a 90-minute rest. The exact time depends on the smoker temperature, wrap method, and the brisket's thickness. Always cook to internal temperature: never to time alone. A probe thermometer is mandatory.</div>
       </details>
       <details class="faq-item">
         <summary>What temperature do you pull a brisket?</summary>
-        <div class="faq-body">Pull brisket for slicing at 195&#xB0;F internal temperature. Pull brisket for pulling (shredding) at 205&#xB0;F. At both temperatures, test with a probe — it should slide in with zero resistance, like pushing into warm butter. Do not rely on temperature alone if the probe still meets resistance.</div>
+        <div class="faq-body">Pull brisket for slicing at 195&#xB0;F internal temperature. Pull brisket for pulling (shredding) at 205&#xB0;F. At both temperatures, test with a probe: it should slide in with zero resistance, like pushing into warm butter. Do not rely on temperature alone if the probe still meets resistance.</div>
       </details>
       <details class="faq-item">
         <summary>What is the brisket stall?</summary>
-        <div class="faq-body">The brisket stall is a plateau that occurs between 150&#xB0;F and 170&#xB0;F internal temperature, where the meat stops rising in temperature for several hours. This is caused by evaporative cooling — moisture evaporating from the meat's surface at the same rate that the smoker adds heat. Collagen is also breaking down into gelatin during this period. The stall can last 3 to 6 hours. Do not panic and do not raise the smoker temperature. Wrapping in foil (Texas Crutch) or butcher paper will shorten or eliminate the stall.</div>
+        <div class="faq-body">The brisket stall is a plateau that occurs between 150&#xB0;F and 170&#xB0;F internal temperature, where the meat stops rising in temperature for several hours. This is caused by evaporative cooling: moisture evaporating from the meat's surface at the same rate that the smoker adds heat. Collagen is also breaking down into gelatin during this period. The stall can last 3 to 6 hours. Do not panic and do not raise the smoker temperature. Wrapping in foil (Texas Crutch) or butcher paper will shorten or eliminate the stall.</div>
       </details>
       <details class="faq-item">
         <summary>Should you wrap a brisket in foil or butcher paper?</summary>
-        <div class="faq-body">Wrapping in foil (the Texas Crutch) speeds the brisket through the stall fastest by trapping steam, but it softens the bark. Butcher paper allows the bark to breathe while still reducing stall time — it is the preferred method for pitmasters who want both speed and bark quality. No wrap produces the hardest, most developed bark but adds significant cook time and requires more fuel management. All three methods produce excellent brisket when executed well.</div>
+        <div class="faq-body">Wrapping in foil (the Texas Crutch) speeds the brisket through the stall fastest by trapping steam, but it softens the bark. Butcher paper allows the bark to breathe while still reducing stall time: it is the preferred method for pitmasters who want both speed and bark quality. No wrap produces the hardest, most developed bark but adds significant cook time and requires more fuel management. All three methods produce excellent brisket when executed well.</div>
       </details>
       <details class="faq-item">
         <summary>How long should brisket rest before slicing?</summary>
-        <div class="faq-body">Brisket should rest a minimum of 90 minutes before slicing. A 2 to 4 hour rest is ideal and will noticeably improve juiciness and sliceability. For large events, a faux Cambro — wrapping the foiled brisket in towels and placing it in a cooler — can hold a brisket safely at temperature for 6 hours or more, giving you tremendous flexibility on serve time.</div>
+        <div class="faq-body">Brisket should rest a minimum of 90 minutes before slicing. A 2 to 4 hour rest is ideal and will noticeably improve juiciness and sliceability. For large events, a faux Cambro, wrapping the foiled brisket in towels and placing it in a cooler, can hold a brisket safely at temperature for 6 hours or more, giving you tremendous flexibility on serve time.</div>
       </details>
     </div>
   </section>
@@ -667,18 +667,18 @@ function calculate() {
   // Stall notes
   var T_wb_disp = Math.round(state.tu === 'C' ? (physics.T_wb - 32) * 5 / 9 : physics.T_wb) + (state.tu === 'C' ? '\u00B0C' : '\u00B0F');
   var stallNote = '';
-  if (wrap === 'foil') stallNote = 'Internal reaches ' + fmtTemp(150) + ' \u2014 wrap tightly in foil now (Texas Crutch). Leave wrapped until pull temp.';
-  else if (wrap === 'paper') stallNote = 'Internal reaches ' + fmtTemp(150) + ' \u2014 wrap in butcher paper now. Leave wrapped until pull temp.';
-  else stallNote = 'Internal reaches ' + fmtTemp(150) + ' \u2014 plateau driven by evaporative cooling (~' + T_wb_disp + ' wet-bulb). Hold steady \u2014 no wrap.';
+  if (wrap === 'foil') stallNote = 'Internal reaches ' + fmtTemp(150) + ': wrap tightly in foil now (Texas Crutch). Leave wrapped until pull temp.';
+  else if (wrap === 'paper') stallNote = 'Internal reaches ' + fmtTemp(150) + ': wrap in butcher paper now. Leave wrapped until pull temp.';
+  else stallNote = 'Internal reaches ' + fmtTemp(150) + ': plateau driven by evaporative cooling (~' + T_wb_disp + ' wet-bulb). Hold steady, no wrap.';
 
   // Build timeline — wrapped cooks get one stall event (wrap action); unwrapped get two (start + end)
   var events = [
     { dot: 'blue',  time: light,      day: lightDay,      label: 'Light smoker / preheat',            sub: 'Target: ' + fmtSmokerTemp(temp) + ' stable before meat goes on' },
-    { dot: 'amber', time: meatOn,     day: meatOnDay,     label: 'Meat goes on smoker',               sub: weightLbs.toFixed(1) + ' lbs brisket \u2014 fat side up or down per your setup' },
-    { dot: 'red',   time: stallStart, day: stallStartDay, label: wrap !== 'none' ? 'Stall \u2014 wrap now' : 'Stall begins', sub: stallNote },
+    { dot: 'amber', time: meatOn,     day: meatOnDay,     label: 'Meat goes on smoker',               sub: weightLbs.toFixed(1) + ' lbs brisket: fat side up or down per your setup' },
+    { dot: 'red',   time: stallStart, day: stallStartDay, label: wrap !== 'none' ? 'Stall: wrap now' : 'Stall begins', sub: stallNote },
     wrap === 'none' ? { dot: 'amber', time: stallEnd, day: stallEndDay, label: 'Stall ends', sub: 'Temperature climbs again past ' + fmtTemp(165) } : null,
-    { dot: 'amber', time: pull,       day: pullDay,       label: 'Pull from smoker \u2014 begin rest', sub: 'Target internal: ' + fmtTemp(cut.pullTemp) + ' \u2014 rest 90 min loosely tented' },
-    { dot: 'green', time: serve,      day: '',            label: 'Serve',                              sub: 'Slice against the grain 1/4\u201D thick \u2014 enjoy' }
+    { dot: 'amber', time: pull,       day: pullDay,       label: 'Pull from smoker (begin rest', sub: 'Target internal: ' + fmtTemp(cut.pullTemp) + ') rest 90 min loosely tented' },
+    { dot: 'green', time: serve,      day: '',            label: 'Serve',                              sub: 'Slice against the grain 1/4\u201D thick, enjoy' }
   ].filter(Boolean);
 
   var tlList = document.getElementById('tlList');
@@ -730,7 +730,7 @@ function calculate() {
 
   // Print header
   document.getElementById('ptitle').textContent = cut.name + ' Smoking Timeline';
-  document.getElementById('pmeta').textContent = weightLbs.toFixed(1) + ' lbs \u2014 ' + temp + '\u00B0F \u2014 serve ' + fmtTime(serve);
+  document.getElementById('pmeta').textContent = weightLbs.toFixed(1) + ' lbs, ' + temp + '\u00B0F, serve ' + fmtTime(serve);
 
   openResultsModal();
   syncUrl();
