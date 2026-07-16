@@ -24,7 +24,7 @@
   "inLanguage": "en",
   "isAccessibleForFree": true,
   "browserRequirements": "Requires JavaScript enabled in a modern browser.",
-  "dateModified": "2026-05-15",
+  "dateModified": "2026-07-15",
   "featureList": [
     "Accuracy and confidence guidance for the 7-day forecast",
     "Cooker-by-cooker scoring explanation",
@@ -44,7 +44,7 @@
       "name": "Is Best Smoke Days free?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. The zip-coded 7-day forecast, the score calculation, the cut and cooker toggles, the 50 metro pages, and the Friday email digest are all free. Pitmaster Tools is supported by Google AdSense and a small set of affiliate product recommendations — both are disclosed and neither influences the scoring math."
+        "text": "Yes. The zip-coded 7-day forecast, the score calculation, the cut and cooker toggles, the 50 metro pages, and the Friday email digest are all free. Pitmaster Tools is supported by Google AdSense and a small set of affiliate product recommendations: both are disclosed and neither influences the scoring math."
       }
     },
     {
@@ -52,7 +52,7 @@
       "name": "Do I need to sign up?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "No. The 7-day forecast works without an account — just drop in a zip and pick your cut and cooker. The optional Friday email digest does require a subscription so we know where to send it; you can subscribe and unsubscribe at any time, and we never sell or share your email."
+        "text": "No. The 7-day forecast works without an account: just drop in a zip and pick your cut and cooker. The optional Friday email digest does require a subscription so we know where to send it; you can subscribe and unsubscribe at any time, and we never sell or share your email."
       }
     },
     {
@@ -60,7 +60,7 @@
       "name": "Why is my Saturday score lower than last weekend's was?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Most often the answer is wind or humidity — both swing more than headline temperature, and both have a stronger impact on the score for offset cookers and stall-sensitive cuts. Hover the confidence pill or open the day details to see the dominant penalty reasons. The methodology page breaks down each of the five signals."
+        "text": "Most often the answer is wind or humidity: both swing more than headline temperature, and both have a stronger impact on the score for offset cookers and stall-sensitive cuts. Hover the confidence pill or open the day details to see the dominant penalty reasons. The methodology page breaks down each of the five signals."
       }
     },
     {
@@ -100,7 +100,7 @@
       "name": "Where does my data go?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Subscriber emails live in Cloudflare D1; the email itself only appears in Sender.net for sending via an encrypted HTTPS connection. We do not include user-identifying tokens in HTTP headers sent to Sender.net — deduplication uses an internal idempotency key stored only in our database. ZIPs are stored alongside the email for region routing. Forecast queries are not associated with any user identifier. Affiliate clicks land on the merchant's site without forwarding your inputs. See the privacy policy for the full data map."
+        "text": "Subscriber emails live in Cloudflare D1; the email itself only appears in Sender.net for sending via an encrypted HTTPS connection. We do not include user-identifying tokens in HTTP headers sent to Sender.net: deduplication uses an internal idempotency key stored only in our database. ZIPs are stored alongside the email for region routing. Forecast queries are not associated with any user identifier. Affiliate clicks land on the merchant's site without forwarding your inputs. See the privacy policy for the full data map."
       }
     }
   ]
@@ -127,7 +127,7 @@
 
 <main id="main-content">
   <section class="page-hero" aria-label="Page introduction">
-    <h1>Best Smoke Days — FAQ</h1>
+    <h1>Best Smoke Days: FAQ</h1>
     <p>Common questions about the 7-day weather-aware BBQ forecast, the Friday digest, and how Pitmaster Tools handles your data.</p>
   </section>
 
@@ -135,7 +135,7 @@
     <h2 id="faq-list">Frequently asked questions</h2>
 
     <h3>Is Best Smoke Days free?</h3>
-    <p>Yes. The zip-coded 7-day forecast, the score calculation, the cut and cooker toggles, the 50 metro pages, and the Friday email digest are all free. Pitmaster Tools is supported by Google AdSense and a small set of affiliate product recommendations — both are <a href="/smoke-weather/disclosures">disclosed</a> and neither influences the scoring math.</p>
+    <p>Yes. The zip-coded 7-day forecast, the score calculation, the cut and cooker toggles, the 50 metro pages, and the Friday email digest are all free. Pitmaster Tools is supported by Google AdSense and a small set of affiliate product recommendations: both are <a href="/smoke-weather/disclosures">disclosed</a> and neither influences the scoring math.</p>
 
     <h3>Do I need to sign up?</h3>
     <p>No. The 7-day forecast works without an account. The optional Friday email digest does require a subscription so we know where to send it; you can subscribe and unsubscribe at any time, and we never sell or share your email.</p>
@@ -144,16 +144,16 @@
     <p>Most often: wind or humidity. Both swing more than headline temperature, and both have a stronger impact on offset cookers and stall-sensitive cuts. Open the day details for the dominant reasons, or read the <a href="/smoke-weather/methodology">methodology</a> for the math.</p>
 
     <h3>Which cuts and cookers does the score support?</h3>
-    <p>13 cuts (brisket, pork butt, ribs, chicken, turkey, fish, lamb shoulder, pork loin) and 5 cookers (offset, pellet, kamado, kettle, electric). Each combination produces a distinct score — your offset's response to a 30 mph gust is different from an electric smoker's, and the math reflects that.</p>
+    <p>13 cuts (brisket, pork butt, ribs, chicken, turkey, fish, lamb shoulder, pork loin) and 5 cookers (offset, pellet, kamado, kettle, electric). Each combination produces a distinct score: your offset's response to a 30 mph gust is different from an electric smoker's, and the math reflects that.</p>
 
     <h3>Does the forecast cover non-US locations?</h3>
     <p>Open-Meteo covers most of the world, so the 7-day forecast usually works internationally. The 50 pre-built metro pages and the Friday email regional segmentation are US-focused. International support is on the roadmap.</p>
 
     <h3>How do I unsubscribe from the Friday digest?</h3>
-    <p>Every email carries a one-click unsubscribe link signed with an HMAC-SHA256 token tied to your email — so no one else can unsubscribe you. If the link ever fails, email <a href="mailto:contact@pitmaster.tools">contact@pitmaster.tools</a>.</p>
+    <p>Every email carries a one-click unsubscribe link signed with an HMAC-SHA256 token tied to your email, so no one else can unsubscribe you. If the link ever fails, email <a href="mailto:contact@pitmaster.tools">contact@pitmaster.tools</a>.</p>
 
     <h3>Where does my data go?</h3>
-    <p>Subscriber emails live in Cloudflare D1; the email itself only appears in Sender.net for sending over HTTPS. We don't include user-identifying tokens in the headers sent to Sender.net — deduplication uses an internal idempotency key stored only in our database, not transmitted as a header. Forecast queries are not associated with any user identifier. Affiliate clicks land on the merchant's site without forwarding your inputs. See the <a href="/privacy-policy">privacy policy</a> for the full data map.</p>
+    <p>Subscriber emails live in Cloudflare D1; the email itself only appears in Sender.net for sending over HTTPS. We don't include user-identifying tokens in the headers sent to Sender.net: deduplication uses an internal idempotency key stored only in our database, not transmitted as a header. Forecast queries are not associated with any user identifier. Affiliate clicks land on the merchant's site without forwarding your inputs. See the <a href="/privacy-policy">privacy policy</a> for the full data map.</p>
 
     <p>
       Want the math? Read the <a href="/smoke-weather/methodology">methodology</a> page. Want to know how affiliate links work? See <a href="/smoke-weather/disclosures">disclosures</a>.

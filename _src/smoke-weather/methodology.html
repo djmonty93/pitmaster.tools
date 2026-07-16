@@ -24,7 +24,7 @@
   "inLanguage": "en",
   "isAccessibleForFree": true,
   "browserRequirements": "Requires JavaScript enabled in a modern browser.",
-  "dateModified": "2026-05-15",
+  "dateModified": "2026-07-15",
   "featureList": [
     "Open-Meteo primary forecast source with NWS failover",
     "Wet-bulb stall-risk modeling using Stull 2011 formula",
@@ -45,7 +45,7 @@
       "name": "Where does the weather data come from?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Pitmaster Tools uses the Open-Meteo API as the primary forecast source. If Open-Meteo is unavailable or returns malformed data, the worker fails over to the US National Weather Service (api.weather.gov). Both sources are airport-grade — they don't see your specific yard's microclimate. The day's confidence label drops from high to medium to low as the forecast horizon grows."
+        "text": "Pitmaster Tools uses the Open-Meteo API as the primary forecast source. If Open-Meteo is unavailable or returns malformed data, the worker fails over to the US National Weather Service (api.weather.gov). Both sources are airport-grade: they don't see your specific yard's microclimate. The day's confidence label drops from high to medium to low as the forecast horizon grows."
       }
     },
     {
@@ -61,7 +61,7 @@
       "name": "What is wet-bulb temperature and why does it matter?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Wet-bulb temperature is the lowest temperature evaporation can cool a wet surface down to. It's a function of air temperature and humidity. For a low-and-slow cook, the meat's surface evaporates moisture and is cooled by it — this is the source of the stall plateau around 150-165 °F. We compute the wet-bulb inside the cooker cavity using the Stull 2011 closed-form formula and adjust it for the cooker's baseline RH (offset is dry, electric is humid). Higher cavity wet-bulb means a longer stall."
+        "text": "Wet-bulb temperature is the lowest temperature evaporation can cool a wet surface down to. It's a function of air temperature and humidity. For a low-and-slow cook, the meat's surface evaporates moisture and is cooled by it: this is the source of the stall plateau around 150-165 °F. We compute the wet-bulb inside the cooker cavity using the Stull 2011 closed-form formula and adjust it for the cooker's baseline RH (offset is dry, electric is humid). Higher cavity wet-bulb means a longer stall."
       }
     },
     {
@@ -69,7 +69,7 @@
       "name": "Why does cooker type affect the score?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Different cookers respond differently to weather. An offset stick burner's fire is exposed to wind and shifts pit temperature with every gust — we apply a 1.5× wind sensitivity coefficient. An electric smoker doesn't notice wind at all (0.1×). A kamado is well-insulated but holds high humidity (25% RH baseline) so its stall pattern is different from an offset's (4% RH baseline). The score weighs both effects."
+        "text": "Different cookers respond differently to weather. An offset stick burner's fire is exposed to wind and shifts pit temperature with every gust: we apply a 1.5× wind sensitivity coefficient. An electric smoker doesn't notice wind at all (0.1×). A kamado is well-insulated but holds high humidity (25% RH baseline) so its stall pattern is different from an offset's (4% RH baseline). The score weighs both effects."
       }
     },
     {
@@ -85,7 +85,7 @@
       "name": "How accurate is the forecast?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "We pull from professional-grade sources, but every forecast carries uncertainty that grows with the horizon. The day index gets a confidence label — high for the next 24-48 hours, dropping to medium and then low further out. Treat the day-5 through day-7 end of the window as a planning signal, not a commitment. Also: the airport-grade forecast doesn't model your yard's trees, structures, or elevation. Step outside before lighting the fire."
+        "text": "We pull from professional-grade sources, but every forecast carries uncertainty that grows with the horizon. The day index gets a confidence label: high for the next 24-48 hours, dropping to medium and then low further out. Treat the day-5 through day-7 end of the window as a planning signal, not a commitment. Also: the airport-grade forecast doesn't model your yard's trees, structures, or elevation. Step outside before lighting the fire."
       }
     }
   ]
@@ -112,7 +112,7 @@
 
 <main id="main-content">
   <section class="page-hero" aria-label="Page introduction">
-    <h1>Best Smoke Days — Methodology</h1>
+    <h1>Best Smoke Days: Methodology</h1>
     <p>How the 0-100 smoke score is calculated. Five weather signals, a wet-bulb stall model, cooker-specific wind sensitivity, and full transparency on the data sources.</p>
   </section>
 
@@ -123,12 +123,12 @@
       primary source, with the <a href="https://www.weather.gov/" rel="noopener" target="_blank">US National Weather
       Service</a> as failover. The worker tries Open-Meteo first; if Open-Meteo returns 5xx, times out, or sends
       malformed JSON, the request fails over to NWS within the same fetch cycle. Successful Open-Meteo responses
-      are cached in Cloudflare KV with a 30-minute freshness window and a 6-hour stale-while-error window — so a
+      are cached in Cloudflare KV with a 30-minute freshness window and a 6-hour stale-while-error window, so a
       brief upstream outage doesn't blank the forecast.
     </p>
     <p>
       Both sources are airport-grade. They don't see your yard's trees, structures, or elevation. Step outside
-      before lighting the fire — the score is a planning signal, not a ground truth.
+      before lighting the fire: the score is a planning signal, not a ground truth.
     </p>
 
     <h2 id="signals">The five scoring signals</h2>
@@ -144,7 +144,7 @@
     <ul>
       <li><strong>Ideal (85-100).</strong> Light the fire.</li>
       <li><strong>Green (70-84).</strong> Solid cook conditions with one or two minor caveats.</li>
-      <li><strong>Yellow (50-69).</strong> Cook is workable but requires attention — wind, humidity, or temperature are pushing the edges.</li>
+      <li><strong>Yellow (50-69).</strong> Cook is workable but requires attention: wind, humidity, or temperature are pushing the edges.</li>
       <li><strong>Red (0-49).</strong> Pick a different day if you can.</li>
     </ul>
 
@@ -152,7 +152,7 @@
     <p>
       Each day in the 7-day window carries a confidence label that reflects the forecast horizon, not the score:
       <strong>high</strong> for the next 24-48 hours, <strong>medium</strong> for days 3-4, <strong>low</strong> for days 5-7. The
-      label is a forecast-uncertainty signal — a high-confidence red day is more reliable bad news than a
+      label is a forecast-uncertainty signal: a high-confidence red day is more reliable bad news than a
       low-confidence ideal day is reliable good news.
     </p>
 

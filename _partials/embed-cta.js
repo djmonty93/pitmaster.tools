@@ -111,7 +111,7 @@
     copyBtn.addEventListener('click', function () {
       copyToClipboard(ta.value)
         .then(function () { setStatus('Copied to clipboard.'); })
-        .catch(function () { setStatus('Copy failed — select the snippet and use Ctrl/Cmd+C.', true); });
+        .catch(function () { setStatus('Copy failed: select the snippet and use Ctrl/Cmd+C.', true); });
     });
   }
 
