@@ -309,6 +309,31 @@ test('findUnwrappedTables — a stray closing container tag is ignored', () => {
   );
 });
 
+test('findUnwrappedTables — unquoted class value satisfies the gate', () => {
+  assert.deepEqual(
+    findUnwrappedTables('<div class=table-scroll><table class="x"></table></div>'),
+    []
+  );
+});
+
+test('findUnwrappedTables — > inside a quoted attribute does not end the tag early', () => {
+  // The wrapper opening tag carries a title with a literal '>'. A naive
+  // [^>]* scan would truncate before class= and flag the table as unwrapped.
+  assert.deepEqual(
+    findUnwrappedTables('<div title="a > b" class="table-scroll"><table class="y"></table></div>'),
+    []
+  );
+});
+
+test('findUnwrappedTables — <div/> is not self-closing (it wraps following content)', () => {
+  // Per HTML parsing the trailing slash is ignored, so the div stays open and
+  // the table is inside it.
+  assert.deepEqual(
+    findUnwrappedTables('<div class="table-scroll"/><table class="z"></table>'),
+    []
+  );
+});
+
 // ── resolveLocalLink ────────────────────────────────────────────────────────
 function withTempDist(layout) {
   const dir = mkdtempSync(join(tmpdir(), 'pmt-validate-'));

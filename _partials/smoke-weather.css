@@ -554,18 +554,6 @@ a.affiliate-card__product:focus-visible {
   border-radius: var(--radius);
   background: var(--surface-strong);
   box-shadow: var(--shadow);
-  /* Same edge-fade "more →" hint as site-base's .table-scroll. Declared after
-     the `background` shorthand above so the scroll-shadow layers replace only
-     background-image; the surface-strong background-color is preserved. */
-  background-image: var(--table-scroll-shadow);
-  background-position: 0 0, 100% 0, 0 0, 100% 0;
-  background-repeat: no-repeat;
-  background-size: 34px 100%, 34px 100%, 16px 100%, 16px 100%;
-  background-attachment: local, local, scroll, scroll;
-}
-.climate-normals .normals-scroll:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
-@media print {
-  .climate-normals .normals-scroll { overflow: visible; background-image: none; }
 }
 .normals-table {
   width: 100%;
