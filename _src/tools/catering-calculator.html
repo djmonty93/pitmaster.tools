@@ -238,7 +238,13 @@
     </ol>
   </nav>
 
-  <section class="page-hero" aria-label="Page introduction">
+  <section class="page-hero page-hero--photo" aria-label="Page introduction">
+    <picture>
+      <source type="image/avif" srcset="/og/img/hero-catering-calculator.avif">
+      <source type="image/webp" srcset="/og/img/hero-catering-calculator.webp">
+      <img class="page-hero__bg" src="/og/img/hero-catering-calculator.jpg" width="1000" height="666" alt="A large BBQ catering spread of sliced brisket, ribs, pulled pork and sides" fetchpriority="high" decoding="async">
+    </picture>
+    <div class="page-hero__scrim" aria-hidden="true"></div>
     <h1>BBQ Catering Calculator</h1>
     <p>Enter your guest count, pick your meats, and get exact raw weight to purchase for every cut, including racks, pieces, and optional cost estimates for events up to 500 people.</p>
   </section>

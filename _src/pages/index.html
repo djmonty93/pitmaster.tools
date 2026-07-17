@@ -318,7 +318,13 @@
   </div>
 
   <div class="hero-row">
-    <section class="page-hero" aria-label="Page introduction">
+    <section class="page-hero page-hero--photo" aria-label="Page introduction">
+      <picture>
+        <source type="image/avif" srcset="/og/img/hero-home.avif">
+        <source type="image/webp" srcset="/og/img/hero-home.webp">
+        <img class="page-hero__bg" src="/og/img/hero-home.jpg" width="1000" height="666" alt="Sliced smoked beef brisket with a deep pink smoke ring and peppery bark on a wooden board" fetchpriority="high" decoding="async">
+      </picture>
+      <div class="page-hero__scrim" aria-hidden="true"></div>
       <p class="eyebrow">Weather-scored BBQ planning</p>
       <h1>Free Meat Smoking Calculator &amp; Smoke-Day Forecast</h1>
       <p>The only BBQ planner that scores your local 7-day weather for smoking (wind, humidity, and rain) and builds your cook timeline backward from serving time. Free, no signup, built for backyard pitmasters.</p>
