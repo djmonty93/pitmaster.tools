@@ -197,6 +197,8 @@ test('metro hero renders its region photo with a full responsive <picture> (Stag
     mountain:      'hero-region-mountain',
     pacific:       'hero-region-pacific',
   };
+  // Must mirror heroSizes in generate-metros.js renderMetro().
+  const HERO_SIZES = '(max-width: 863px) calc(100vw - 2.7rem), 820px';
   const seenRegions = new Set();
   for (const m of gen.METROS) {
     const region = gen.REGION_BY_STATE[m.state];
@@ -207,22 +209,21 @@ test('metro hero renders its region photo with a full responsive <picture> (Stag
     const html = gen.renderMetro(m);
     assert.match(html, /<section class="page-hero page-hero--photo"/,
       m.slug + ' hero missing --photo modifier');
-    // All six asset references (avif/webp/jpg × 1000w + 600w) resolve to this region's base.
-    for (const ext of ['avif', 'webp', 'jpg']) {
-      assert.ok(html.includes('/og/img/' + base + '.' + ext),
-        m.slug + ' missing 1000w ' + ext + ' (' + base + ')');
-      assert.ok(html.includes('/og/img/' + base + '-600.' + ext),
-        m.slug + ' missing 600w ' + ext + ' (' + base + ')');
+    // Exact <source> markup per type — pins the 600w/1000w descriptor order and
+    // the shared sizes so dropping sizes or swapping descriptors fails the test.
+    for (const type of ['avif', 'webp']) {
+      assert.ok(html.includes(
+        '<source type="image/' + type + '" srcset="/og/img/' + base + '-600.' + type +
+        ' 600w, /og/img/' + base + '.' + type + ' 1000w" sizes="' + HERO_SIZES + '">'),
+        m.slug + ' missing exact ' + type + ' <source> srcset/sizes');
     }
-    // <picture> contract: two typed sources + a decorative, dimensioned, high-priority LCP img.
-    assert.ok(html.includes('<source type="image/avif"'), m.slug + ' missing avif source');
-    assert.ok(html.includes('<source type="image/webp"'), m.slug + ' missing webp source');
-    assert.match(html, /<img class="page-hero__bg"[^>]*width="1000" height="666"[^>]*>/,
-      m.slug + ' hero img missing explicit 1000x666 dimensions');
-    assert.match(html, /<img class="page-hero__bg"[^>]*alt=""[^>]*>/,
-      m.slug + ' hero img not decorative (alt="")');
-    assert.match(html, /<img class="page-hero__bg"[^>]*fetchpriority="high"[^>]*>/,
-      m.slug + ' hero img missing fetchpriority="high"');
+    // Exact JPG-fallback <img>: src + srcset descriptors + sizes + explicit dims +
+    // decorative alt + LCP fetch hint, in one shot.
+    assert.ok(html.includes(
+      '<img class="page-hero__bg" src="/og/img/' + base + '.jpg" srcset="/og/img/' +
+      base + '-600.jpg 600w, /og/img/' + base + '.jpg 1000w" sizes="' + HERO_SIZES +
+      '" width="1000" height="666" alt="" fetchpriority="high" decoding="async">'),
+      m.slug + ' missing exact hero <img> fallback markup');
     assert.ok(html.includes('<div class="page-hero__scrim"'), m.slug + ' hero missing scrim');
   }
   // Every BBQ region is exercised by at least one metro in the set.
