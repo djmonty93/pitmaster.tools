@@ -263,7 +263,13 @@
     <div class="pm" id="pmeta"></div>
   </div>
 
-  <section class="page-hero" aria-label="Page introduction">
+  <section class="page-hero page-hero--photo" aria-label="Page introduction">
+    <picture>
+      <source type="image/avif" srcset="/og/img/hero-rib-calculator-600.avif 600w, /og/img/hero-rib-calculator.avif 1000w" sizes="(max-width: 863px) calc(100vw - 2.7rem), 820px">
+      <source type="image/webp" srcset="/og/img/hero-rib-calculator-600.webp 600w, /og/img/hero-rib-calculator.webp 1000w" sizes="(max-width: 863px) calc(100vw - 2.7rem), 820px">
+      <img class="page-hero__bg" src="/og/img/hero-rib-calculator.jpg" srcset="/og/img/hero-rib-calculator-600.jpg 600w, /og/img/hero-rib-calculator.jpg 1000w" sizes="(max-width: 863px) calc(100vw - 2.7rem), 820px" width="1000" height="666" alt="" fetchpriority="high" decoding="async">
+    </picture>
+    <div class="page-hero__scrim" aria-hidden="true"></div>
     <h1>Rib Smoking Calculator</h1>
     <p>Enter your rib type, method, and serving time to get a complete smoking timeline, including 3-2-1 phase breakdowns for baby back and spare ribs.</p>
   </section>

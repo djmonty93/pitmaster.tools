@@ -117,6 +117,39 @@ main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
   font-size: 1.05rem;
   line-height: 1.75;
 }
+/* Photographic hero: subject photo behind the intro text with a warm scrim for
+   legibility. Shared by the homepage and calculator pages; opt in with
+   .page-hero--photo and add a <picture class implicit>/<img class="page-hero__bg">
+   plus a <div class="page-hero__scrim">. */
+.page-hero--photo {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 14px;
+  min-height: 300px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--card-border);
+}
+.page-hero__bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+.page-hero__scrim {
+  position: absolute; inset: 0; z-index: -1;
+  background:
+    linear-gradient(180deg, rgba(28,20,13,.10) 0%, rgba(28,20,13,.52) 55%, rgba(28,20,13,.88) 100%),
+    linear-gradient(90deg, rgba(28,20,13,.62) 0%, rgba(28,20,13,0) 62%);
+}
+.page-hero--photo .eyebrow { color: var(--gold); margin-bottom: .6rem; }
+.page-hero--photo h1 { color: #fff; text-shadow: 0 2px 14px rgba(0,0,0,.55); }
+.page-hero--photo > p { color: #f3ead8; text-shadow: 0 1px 8px rgba(0,0,0,.6); }
+@media (max-width: 600px) {
+  .page-hero--photo { min-height: 260px; padding: 1.35rem; }
+  /* Full-width mobile: text wraps wider, so drop the horizontal fade and lean on a
+     strong vertical scrim for reliable contrast under the whole heading. */
+  .page-hero__scrim { background: linear-gradient(180deg, rgba(28,20,13,.30) 0%, rgba(28,20,13,.60) 45%, rgba(28,20,13,.90) 100%); }
+}
 /* Eyebrow kicker above an H1 — Oswald, uppercase, ember (utility/data role). */
 .eyebrow {
   font-family: var(--font-util);
@@ -657,6 +690,10 @@ body.embed-mode main { padding-top: .5rem; }
   body { background: #fff !important; color: #000 !important; font-size: 12px; }
   body * { color: #000 !important; box-shadow: none !important; text-shadow: none !important; }
   header,.form-card,.calc-btn,.vmsg,.print-btn,.ad-slot,.cookie-banner,.share-buttons,.no-print,footer nav { display: none !important; }
+  /* Keep the hero's H1/intro text (black on white via the rules above) but drop the
+     photo + scrim so print stays legible and ink-light. */
+  .page-hero--photo { min-height: 0 !important; padding: 0 !important; border: 0 !important; box-shadow: none !important; border-radius: 0 !important; }
+  .page-hero--photo picture, .page-hero__scrim { display: none !important; }
   #results { display: block !important; position: static !important; inset: auto !important; padding: 0 !important; background: transparent !important; overflow: visible !important; }
   .results-modal { max-width: none !important; margin: 0 !important; background: transparent !important; border-radius: 0 !important; padding: 0 !important; box-shadow: none !important; animation: none !important; }
   .results-modal__header, .results-close { display: none !important; }
