@@ -190,7 +190,13 @@
       <li><span aria-current="page">New York, NY</span></li>
     </ol>
   </nav>
-  <section class="page-hero" aria-label="Page introduction">
+  <section class="page-hero page-hero--photo" aria-label="Page introduction">
+    <picture>
+      <source type="image/avif" srcset="/og/img/hero-region-northeast-600.avif 600w, /og/img/hero-region-northeast.avif 1000w" sizes="(max-width: 863px) calc(100vw - 2.7rem), 820px">
+      <source type="image/webp" srcset="/og/img/hero-region-northeast-600.webp 600w, /og/img/hero-region-northeast.webp 1000w" sizes="(max-width: 863px) calc(100vw - 2.7rem), 820px">
+      <img class="page-hero__bg" src="/og/img/hero-region-northeast.jpg" srcset="/og/img/hero-region-northeast-600.jpg 600w, /og/img/hero-region-northeast.jpg 1000w" sizes="(max-width: 863px) calc(100vw - 2.7rem), 820px" width="1000" height="666" alt="" fetchpriority="high" decoding="async">
+    </picture>
+    <div class="page-hero__scrim" aria-hidden="true"></div>
     <h1>Best Smoke Days in New York, NY</h1>
     <p>New York, New York sits in the Northeast barbecue region. New York’s restaurant-grade pit scene runs out of Brooklyn and the outer boroughs, where Texas-trained pitmasters built brisket-first menus on industrial wood-burning offsets in the 2010s. This page scores the next seven days for low-and-slow cooks in the New York metro, weighing rain probability, sustained wind and gusts, daytime temperature, and the wet-bulb humidity that drives the stall. It then weights the result for your cut and cooker, so you can pick the day with the best odds of a clean cook.</p>
   </section>

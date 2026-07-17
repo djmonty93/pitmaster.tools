@@ -1089,6 +1089,26 @@ function normalsDistribution(metro, entry, derived) {
   };
 }
 
+// Shared responsive-image contract for the smoke-weather heroes (Stage-2
+// imagery). Single source of truth: renderMetro(), the hand-authored landing
+// page, and the generator test all pin to heroPicture()/HERO_SIZES, so the
+// <picture> markup cannot drift across the three call sites.
+const HERO_SIZES = '(max-width: 863px) calc(100vw - 2.7rem), 820px';
+
+// Emit the exact hero <picture> block for an og/img/<imgBase>.{avif,webp,jpg}
+// image set: 600w + 1000w in AVIF→WebP→JPG order, explicit 1000x666 dims for
+// zero CLS, decorative alt="", and the LCP fetch hint. Returns a newline-joined
+// string ready to drop into the page-hero section as one array element.
+function heroPicture(imgBase) {
+  return [
+    '    <picture>',
+    '      <source type="image/avif" srcset="/og/img/' + imgBase + '-600.avif 600w, /og/img/' + imgBase + '.avif 1000w" sizes="' + HERO_SIZES + '">',
+    '      <source type="image/webp" srcset="/og/img/' + imgBase + '-600.webp 600w, /og/img/' + imgBase + '.webp 1000w" sizes="' + HERO_SIZES + '">',
+    '      <img class="page-hero__bg" src="/og/img/' + imgBase + '.jpg" srcset="/og/img/' + imgBase + '-600.jpg 600w, /og/img/' + imgBase + '.jpg 1000w" sizes="' + HERO_SIZES + '" width="1000" height="666" alt="" fetchpriority="high" decoding="async">',
+    '    </picture>',
+  ].join('\n');
+}
+
 function renderMetro(metro) {
   const region   = regionOf(metro.state);
   const stateNm  = STATE_NAME[metro.state] || metro.state;
@@ -1099,6 +1119,12 @@ function renderMetro(metro) {
   const name     = metro.name;
   const slug     = metro.slug;
   const zip      = metro.zip;
+
+  // Stage-2 imagery: one shared on-brand smoke photo per BBQ region (6 total),
+  // reused across every metro in that region so the 50-page network reads as
+  // designed, not templated, while staying tiny (browser-cached region-wide).
+  // Deterministic (keyed on region, not build date) so committed source is stable.
+  const heroImg   = 'hero-region-' + region.replace(/_/g, '-');
 
   const pageTitle = name + ', ' + metro.state + ' BBQ Forecast | Pitmaster Tools';
   const ogTitle   = name + ', ' + metro.state + ' BBQ Forecast — Best Smoke Days';
@@ -1244,7 +1270,9 @@ function renderMetro(metro) {
     '      <li><span aria-current="page">' + escapeHtml(name + ', ' + metro.state) + '</span></li>',
     '    </ol>',
     '  </nav>',
-    '  <section class="page-hero" aria-label="Page introduction">',
+    '  <section class="page-hero page-hero--photo" aria-label="Page introduction">',
+    heroPicture(heroImg),
+    '    <div class="page-hero__scrim" aria-hidden="true"></div>',
     '    <h1>Best Smoke Days in ' + escapeHtml(name) + ', ' + escapeHtml(metro.state) + '</h1>',
     '    <p>' + escapeHtml(intro) + '</p>',
     '  </section>',
@@ -1532,6 +1560,8 @@ module.exports = {
   normalsDistribution,
   renderMetro,
   renderMetrosListPartial,
+  heroPicture,
+  HERO_SIZES,
   regionOf,
   heritageFor,
   climateFor,

@@ -116,7 +116,13 @@
       <li><span aria-current="page">Best Smoke Days</span></li>
     </ol>
   </nav>
-  <section class="page-hero" aria-label="Page introduction">
+  <section class="page-hero page-hero--photo" aria-label="Page introduction">
+    <picture>
+      <source type="image/avif" srcset="/og/img/hero-smoke-weather-600.avif 600w, /og/img/hero-smoke-weather.avif 1000w" sizes="(max-width: 863px) calc(100vw - 2.7rem), 820px">
+      <source type="image/webp" srcset="/og/img/hero-smoke-weather-600.webp 600w, /og/img/hero-smoke-weather.webp 1000w" sizes="(max-width: 863px) calc(100vw - 2.7rem), 820px">
+      <img class="page-hero__bg" src="/og/img/hero-smoke-weather.jpg" srcset="/og/img/hero-smoke-weather-600.jpg 600w, /og/img/hero-smoke-weather.jpg 1000w" sizes="(max-width: 863px) calc(100vw - 2.7rem), 820px" width="1000" height="666" alt="" fetchpriority="high" decoding="async">
+    </picture>
+    <div class="page-hero__scrim" aria-hidden="true"></div>
     <h1>Best Smoke Days</h1>
     <p>A weather-aware forecast scored for your cut and cooker. Pick a day with a high score, light the fire, and stop guessing which Saturday gets blown out by 35-mph gusts.</p>
     <p>Curious where it's a great day to smoke right now? See the <a href="/smoke-weather/best-cities">best cities to smoke meat today</a>, ranked live.</p>

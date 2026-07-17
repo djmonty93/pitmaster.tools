@@ -174,14 +174,80 @@ test('same-state metros have distinct intros (no near-duplicate SEO pages)', () 
     if (metros.length < 2) continue;
     const introHtmls = metros.map((m) => {
       const html = gen.renderMetro(m);
-      const match = html.match(/<section class="page-hero"[^>]*>([\s\S]*?)<\/section>/);
-      assert.ok(match, m.slug + ' page-hero missing');
+      // Capture ONLY the intro <p> that follows the <h1>, not the whole hero
+      // section: the <h1> always carries the distinct city name and the shared
+      // per-region <picture> is identical across same-state siblings, so either
+      // would mask a genuine duplicate intro paragraph (this test's real target).
+      const match = html.match(/<\/h1>\s*<p>([\s\S]*?)<\/p>/);
+      assert.ok(match, m.slug + ' hero intro paragraph missing');
       return match[1];
     });
     const unique = new Set(introHtmls);
     assert.equal(unique.size, introHtmls.length,
       state + ' has duplicate page-hero content across same-state metros');
   }
+});
+
+test('metro hero renders its region photo with a full responsive <picture> (Stage-2 imagery)', () => {
+  // Locks the region→filename slug mapping (notably south_central → south-central)
+  // and the responsive <picture> contract. Production (renderMetro + the landing
+  // page) references the shared gen.heroPicture() helper; this test hard-codes the
+  // canonical markup as the spec and pins the helper's output to it, so a contract
+  // change (dropped sizes, reordered sources, wrong dims) fails loudly HERE while
+  // the three call sites can never silently drift apart.
+  const EXPECTED = {
+    northeast:     'hero-region-northeast',
+    southeast:     'hero-region-southeast',
+    midwest:       'hero-region-midwest',
+    south_central: 'hero-region-south-central',
+    mountain:      'hero-region-mountain',
+    pacific:       'hero-region-pacific',
+  };
+  const SIZES = '(max-width: 863px) calc(100vw - 2.7rem), 820px';
+  // The generator's exported sizes constant must equal the spec literal.
+  assert.equal(gen.HERO_SIZES, SIZES, 'gen.HERO_SIZES drifted from the spec');
+
+  // Canonical expected <picture> block: wrapper tags + AVIF-before-WebP order
+  // (browsers ignore <source> outside <picture>, and order decides the winner) +
+  // exact 600w/1000w descriptors, shared sizes, 1000x666 dims, decorative alt,
+  // and the LCP fetch hint.
+  const expectedPicture = (base) => [
+    '    <picture>',
+    '      <source type="image/avif" srcset="/og/img/' + base + '-600.avif 600w, /og/img/' + base + '.avif 1000w" sizes="' + SIZES + '">',
+    '      <source type="image/webp" srcset="/og/img/' + base + '-600.webp 600w, /og/img/' + base + '.webp 1000w" sizes="' + SIZES + '">',
+    '      <img class="page-hero__bg" src="/og/img/' + base + '.jpg" srcset="/og/img/' + base + '-600.jpg 600w, /og/img/' + base + '.jpg 1000w" sizes="' + SIZES + '" width="1000" height="666" alt="" fetchpriority="high" decoding="async">',
+    '    </picture>',
+  ].join('\n');
+
+  const seenRegions = new Set();
+  for (const m of gen.METROS) {
+    const region = gen.REGION_BY_STATE[m.state];
+    const base = EXPECTED[region];
+    assert.ok(base, m.slug + ': no expected hero image for region ' + region);
+    seenRegions.add(region);
+
+    // The shared helper must emit exactly the spec for this region's image...
+    assert.equal(gen.heroPicture(base), expectedPicture(base),
+      base + ': heroPicture() output drifted from the spec');
+    // ...and the rendered metro must use it, wrapped in the --photo hero + scrim.
+    const html = gen.renderMetro(m);
+    assert.match(html, /<section class="page-hero page-hero--photo"/,
+      m.slug + ' hero missing --photo modifier');
+    assert.ok(html.includes(expectedPicture(base)),
+      m.slug + ' hero <picture> block missing, reordered, or altered');
+    assert.ok(html.includes('<div class="page-hero__scrim"'), m.slug + ' hero missing scrim');
+  }
+  // Every BBQ region is exercised by at least one metro in the set.
+  assert.deepEqual([...seenRegions].sort(), Object.keys(EXPECTED).sort(),
+    'not all regions represented by a metro');
+
+  // The hand-authored landing page must use the same helper/contract, so the
+  // third copy of the <picture> markup can't drift from the generated pages.
+  const landing = fs.readFileSync(
+    path.join(__dirname, '..', '_src', 'smoke-weather', 'index.html'), 'utf8')
+    .replace(/\r\n/g, '\n'); // normalize CRLF (git autocrlf) before matching LF markup
+  assert.ok(landing.includes(gen.heroPicture('hero-smoke-weather')),
+    'smoke-weather landing hero <picture> drifted from gen.heroPicture()');
 });
 
 test('every state in METROS has a region, state-name, and either state or regional heritage', () => {
