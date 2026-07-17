@@ -184,6 +184,52 @@ test('same-state metros have distinct intros (no near-duplicate SEO pages)', () 
   }
 });
 
+test('metro hero renders its region photo with a full responsive <picture> (Stage-2 imagery)', () => {
+  // Each metro's hero pulls one shared per-region photo. Locks the region→
+  // filename slug mapping (notably south_central → south-central) and the
+  // responsive <picture> contract (AVIF/WebP/JPG at 600w+1000w, explicit dims,
+  // decorative alt, LCP fetch hint) so a template regression can't ship silently.
+  const EXPECTED = {
+    northeast:     'hero-region-northeast',
+    southeast:     'hero-region-southeast',
+    midwest:       'hero-region-midwest',
+    south_central: 'hero-region-south-central',
+    mountain:      'hero-region-mountain',
+    pacific:       'hero-region-pacific',
+  };
+  const seenRegions = new Set();
+  for (const m of gen.METROS) {
+    const region = gen.REGION_BY_STATE[m.state];
+    const base = EXPECTED[region];
+    assert.ok(base, m.slug + ': no expected hero image for region ' + region);
+    seenRegions.add(region);
+
+    const html = gen.renderMetro(m);
+    assert.match(html, /<section class="page-hero page-hero--photo"/,
+      m.slug + ' hero missing --photo modifier');
+    // All six asset references (avif/webp/jpg × 1000w + 600w) resolve to this region's base.
+    for (const ext of ['avif', 'webp', 'jpg']) {
+      assert.ok(html.includes('/og/img/' + base + '.' + ext),
+        m.slug + ' missing 1000w ' + ext + ' (' + base + ')');
+      assert.ok(html.includes('/og/img/' + base + '-600.' + ext),
+        m.slug + ' missing 600w ' + ext + ' (' + base + ')');
+    }
+    // <picture> contract: two typed sources + a decorative, dimensioned, high-priority LCP img.
+    assert.ok(html.includes('<source type="image/avif"'), m.slug + ' missing avif source');
+    assert.ok(html.includes('<source type="image/webp"'), m.slug + ' missing webp source');
+    assert.match(html, /<img class="page-hero__bg"[^>]*width="1000" height="666"[^>]*>/,
+      m.slug + ' hero img missing explicit 1000x666 dimensions');
+    assert.match(html, /<img class="page-hero__bg"[^>]*alt=""[^>]*>/,
+      m.slug + ' hero img not decorative (alt="")');
+    assert.match(html, /<img class="page-hero__bg"[^>]*fetchpriority="high"[^>]*>/,
+      m.slug + ' hero img missing fetchpriority="high"');
+    assert.ok(html.includes('<div class="page-hero__scrim"'), m.slug + ' hero missing scrim');
+  }
+  // Every BBQ region is exercised by at least one metro in the set.
+  assert.deepEqual([...seenRegions].sort(), Object.keys(EXPECTED).sort(),
+    'not all regions represented by a metro');
+});
+
 test('every state in METROS has a region, state-name, and either state or regional heritage', () => {
   for (const m of gen.METROS) {
     assert.ok(gen.REGION_BY_STATE[m.state], m.slug + ' missing region map');
