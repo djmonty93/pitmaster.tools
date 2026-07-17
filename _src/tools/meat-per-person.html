@@ -243,9 +243,9 @@
 
   <section class="page-hero page-hero--photo" aria-label="Page introduction">
     <picture>
-      <source type="image/avif" srcset="/og/img/hero-meat-per-person.avif">
-      <source type="image/webp" srcset="/og/img/hero-meat-per-person.webp">
-      <img class="page-hero__bg" src="/og/img/hero-meat-per-person.jpg" width="1000" height="666" alt="A plated portion of sliced smoked brisket and ribs with bread and pickles" fetchpriority="high" decoding="async">
+      <source type="image/avif" srcset="/og/img/hero-meat-per-person-600.avif 600w, /og/img/hero-meat-per-person.avif 1000w" sizes="(max-width: 600px) 100vw, 820px">
+      <source type="image/webp" srcset="/og/img/hero-meat-per-person-600.webp 600w, /og/img/hero-meat-per-person.webp 1000w" sizes="(max-width: 600px) 100vw, 820px">
+      <img class="page-hero__bg" src="/og/img/hero-meat-per-person.jpg" srcset="/og/img/hero-meat-per-person-600.jpg 600w, /og/img/hero-meat-per-person.jpg 1000w" sizes="(max-width: 600px) 100vw, 820px" width="1000" height="666" alt="" fetchpriority="high" decoding="async">
     </picture>
     <div class="page-hero__scrim" aria-hidden="true"></div>
     <h1>How Much Meat Per Person</h1>
