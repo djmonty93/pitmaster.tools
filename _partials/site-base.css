@@ -689,7 +689,11 @@ body.embed-mode main { padding-top: .5rem; }
 @media print {
   body { background: #fff !important; color: #000 !important; font-size: 12px; }
   body * { color: #000 !important; box-shadow: none !important; text-shadow: none !important; }
-  header,.form-card,.calc-btn,.vmsg,.print-btn,.ad-slot,.cookie-banner,.share-buttons,.no-print,.page-hero--photo,footer nav { display: none !important; }
+  header,.form-card,.calc-btn,.vmsg,.print-btn,.ad-slot,.cookie-banner,.share-buttons,.no-print,footer nav { display: none !important; }
+  /* Keep the hero's H1/intro text (black on white via the rules above) but drop the
+     photo + scrim so print stays legible and ink-light. */
+  .page-hero--photo { min-height: 0 !important; padding: 0 !important; border: 0 !important; box-shadow: none !important; border-radius: 0 !important; }
+  .page-hero--photo picture, .page-hero__scrim { display: none !important; }
   #results { display: block !important; position: static !important; inset: auto !important; padding: 0 !important; background: transparent !important; overflow: visible !important; }
   .results-modal { max-width: none !important; margin: 0 !important; background: transparent !important; border-radius: 0 !important; padding: 0 !important; box-shadow: none !important; animation: none !important; }
   .results-modal__header, .results-close { display: none !important; }
