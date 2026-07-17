@@ -272,6 +272,43 @@ test('findUnwrappedTables — a table with no class attribute reports (no class)
   assert.deepEqual(findUnwrappedTables('<main><table></table></main>'), ['(no class)']);
 });
 
+test('findUnwrappedTables — data-class is not read as class (no false wrap)', () => {
+  assert.deepEqual(
+    findUnwrappedTables('<div data-class="table-scroll"><table class="x"></table></div>'),
+    ['x']
+  );
+});
+
+test('findUnwrappedTables — mismatched nesting does not fake a wrapper', () => {
+  // </div> closes the table-scroll div (popping the stray inner <section>), so
+  // the following <table> is outside the wrapper and must be flagged.
+  assert.deepEqual(
+    findUnwrappedTables('<div class="table-scroll"><section></div><table class="y"></table>'),
+    ['y']
+  );
+});
+
+test('findUnwrappedTables — a <details> wrapper satisfies the gate', () => {
+  assert.deepEqual(
+    findUnwrappedTables('<details class="table-scroll"><table class="z"></table></details>'),
+    []
+  );
+});
+
+test('findUnwrappedTables — unclosed inline element inside a wrapper still passes', () => {
+  assert.deepEqual(
+    findUnwrappedTables('<div class="table-scroll"><p><table class="q"></table></div>'),
+    []
+  );
+});
+
+test('findUnwrappedTables — a stray closing container tag is ignored', () => {
+  assert.deepEqual(
+    findUnwrappedTables('</div><div class="table-scroll"><table class="r"></table></div>'),
+    []
+  );
+});
+
 // ── resolveLocalLink ────────────────────────────────────────────────────────
 function withTempDist(layout) {
   const dir = mkdtempSync(join(tmpdir(), 'pmt-validate-'));

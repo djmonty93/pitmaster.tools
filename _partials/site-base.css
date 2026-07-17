@@ -61,15 +61,17 @@ body.modal-open { overflow: hidden; }
 
   /* Scroll-shadow layers for responsive data tables (see the .table-scroll
      block below). Single-sourced here so site-base.css and smoke-weather.css
-     paint the identical edge-fade. Two "cover" gradients in the warm card tone
-     sit at the left/right ends (background-attachment: local, so they ride the
-     content and expose the shadow beneath only when that side can scroll);
-     two soft dark radial "shadows" are pinned to the container edges
-     (background-attachment: scroll). Result: a "more →" hint that self-hides
-     when a table already fits. rgba(...,0) endpoints avoid a gray fringe. */
+     paint the identical edge-fade. Two "cover" gradients sit at the left/right
+     ends (background-attachment: local, so they ride the content and expose the
+     shadow beneath only when that side can scroll); two soft dark radial
+     "shadows" are pinned to the container edges (background-attachment: scroll).
+     Result: a "more →" hint that self-hides when a table already fits. The cover
+     colour is the wrapper's own --table-fade (resolved lazily per element, so
+     white editorial tables and warm card tables each blend); the paired
+     --table-fade-0 is that same colour at zero alpha to avoid a gray fringe. */
   --table-scroll-shadow:
-    linear-gradient(to right, #FFFBF3 32%, rgba(255,251,243,0)),
-    linear-gradient(to left, #FFFBF3 32%, rgba(255,251,243,0)),
+    linear-gradient(to right, var(--table-fade, #FFFBF3) 32%, var(--table-fade-0, rgba(255,251,243,0))),
+    linear-gradient(to left, var(--table-fade, #FFFBF3) 32%, var(--table-fade-0, rgba(255,251,243,0))),
     radial-gradient(farthest-side at 0 50%, rgba(38,35,31,.17), rgba(38,35,31,0)),
     radial-gradient(farthest-side at 100% 50%, rgba(38,35,31,.17), rgba(38,35,31,0));
 }
@@ -398,13 +400,18 @@ main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
    they never force the whole page into horizontal scroll on phones (which reads
    as a clipped, half-visible table). The CSS-only edge-fade signals there's more
    to the right/left and self-hides once a table fits. background-image longhands
-   (not the `background` shorthand) so wrappers keep their own background-color.
-   This rule follows .editorial-table-wrap so it wins the cascade for its fade;
-   .normals-scroll is painted in smoke-weather.css, which loads after this file. */
-.table-scroll,
-.ref-table-wrap,
-.rub-table-wrap,
-.editorial-table-wrap {
+   (not the `background` shorthand) keep each wrapper's own background-color.
+   The leading `body ` is deliberate: several calculators inline a per-page
+   `.ref-table-wrap { ...; background:#fff; overflow-x:auto }` card style *after*
+   this file, and at equal specificity that would reset our background-image to
+   none and defeat the print override below. `body .ref-table-wrap` (0,0,1,1)
+   outranks it while leaving the wrapper's own background-color intact. */
+body .table-scroll,
+body .ref-table-wrap,
+body .rub-table-wrap,
+body .editorial-table-wrap {
+  --table-fade: #FFFBF3;                 /* cover colour = warm card surface */
+  --table-fade-0: rgba(255, 251, 243, 0);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   background-image: var(--table-scroll-shadow);
@@ -413,6 +420,9 @@ main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
   background-size: 34px 100%, 34px 100%, 16px 100%, 16px 100%;
   background-attachment: local, local, scroll, scroll;
 }
+/* White editorial tables: match the cover to their #fff surface, else a warm
+   band would show at the edges when the table isn't scrolling. */
+body .editorial-table-wrap { --table-fade: #fff; --table-fade-0: rgba(255, 255, 255, 0); }
 /* Keyboard users can focus a scrollable region and arrow through it. */
 .table-scroll:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 
@@ -429,11 +439,12 @@ main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
 }
 
 @media print {
-  /* Never clip a printed chart, and don't ink the screen-only fade. */
-  .table-scroll,
-  .ref-table-wrap,
-  .rub-table-wrap,
-  .editorial-table-wrap { overflow: visible; background-image: none; }
+  /* Never clip a printed chart, and don't ink the screen-only fade. `body `
+     prefix so this outranks the per-page inline `.ref-table-wrap` overflow. */
+  body .table-scroll,
+  body .ref-table-wrap,
+  body .rub-table-wrap,
+  body .editorial-table-wrap { overflow: visible; background-image: none; }
 }
 
 /* ----- FAQ sections ----- */

@@ -256,18 +256,32 @@ export const TABLE_SCROLL_WRAPPERS = [
   'editorial-table-wrap', 'normals-scroll'
 ];
 
+// Container elements that can act as a table's scroll wrapper. Only these are
+// tracked on the ancestor stack; every other tag (including void elements and
+// unclosed inline elements like <p>/<li>) is ignored, so they can't corrupt it.
+const CONTAINER_TAGS = new Set([
+  'div', 'section', 'article', 'main', 'aside', 'figure', 'details'
+]);
+
+// Class= attribute matcher. The leading (?:^|\s) boundary is load-bearing: it
+// stops `data-class="table-scroll"` from being read as `class="table-scroll"`
+// (a substring match there would wrongly treat the table as wrapped).
+const CLASS_ATTR_RE = /(?:^|\s)class\s*=\s*["']([^"']*)["']/i;
+
 // Returns the class string of every <table> NOT nested inside an approved
-// scroll wrapper (empty array = OK). A stack tracks open container elements;
-// comments and <script>/<style> blocks are stripped first so table/div markup
-// inside JS template strings can neither corrupt the stack nor trip a false
-// positive. Class matching is token-exact so e.g. "ref-table-wrapper" (no such
-// class) does not satisfy the "ref-table-wrap" requirement.
+// scroll wrapper (empty array = OK). A stack of {name, tokens} tracks open
+// container ancestors; a close tag pops to the nearest same-named open
+// container (tolerating unclosed containers) and a stray close is ignored, so
+// mismatched nesting can't fake a wrapper. Comments and <script>/<style>
+// blocks are stripped first so markup inside JS template strings can neither
+// corrupt the stack nor trip a false positive. Class matching is token-exact,
+// so e.g. "ref-table-wrapper" does not satisfy the "ref-table-wrap" gate.
 export function findUnwrappedTables(content) {
   const cleaned = content
     .replace(/<!--[\s\S]*?-->/g, '')
     .replace(/<script\b[\s\S]*?<\/script>/gi, '')
     .replace(/<style\b[\s\S]*?<\/style>/gi, '');
-  const tagRe = /<(\/?)(div|section|article|main|aside|figure|table)\b([^>]*)>/gi;
+  const tagRe = /<(\/?)([a-zA-Z][\w-]*)\b([^>]*)>/g;
   const stack = [];
   const unwrapped = [];
   let m;
@@ -277,18 +291,24 @@ export function findUnwrappedTables(content) {
     const attrs = m[3] || '';
     if (name === 'table') {
       if (isClose) continue;
-      const wrapped = stack.some((tokens) =>
-        tokens.some((t) => TABLE_SCROLL_WRAPPERS.includes(t)));
+      const wrapped = stack.some((e) =>
+        e.tokens.some((t) => TABLE_SCROLL_WRAPPERS.includes(t)));
       if (!wrapped) {
-        const cm = attrs.match(/class\s*=\s*["']([^"']*)["']/i);
+        const cm = attrs.match(CLASS_ATTR_RE);
         unwrapped.push(cm ? cm[1] : '(no class)');
       }
       continue;
     }
-    if (isClose) { stack.pop(); continue; }
+    if (!CONTAINER_TAGS.has(name)) continue;
+    if (isClose) {
+      for (let i = stack.length - 1; i >= 0; i--) {
+        if (stack[i].name === name) { stack.length = i; break; }
+      }
+      continue;
+    }
     if (/\/\s*$/.test(attrs)) continue; // self-closing container (rare)
-    const cm = attrs.match(/class\s*=\s*["']([^"']*)["']/i);
-    stack.push(cm ? cm[1].trim().split(/\s+/) : []);
+    const cm = attrs.match(CLASS_ATTR_RE);
+    stack.push({ name, tokens: cm ? cm[1].trim().split(/\s+/) : [] });
   }
   return unwrapped;
 }
