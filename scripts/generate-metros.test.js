@@ -209,21 +209,20 @@ test('metro hero renders its region photo with a full responsive <picture> (Stag
     const html = gen.renderMetro(m);
     assert.match(html, /<section class="page-hero page-hero--photo"/,
       m.slug + ' hero missing --photo modifier');
-    // Exact <source> markup per type — pins the 600w/1000w descriptor order and
-    // the shared sizes so dropping sizes or swapping descriptors fails the test.
-    for (const type of ['avif', 'webp']) {
-      assert.ok(html.includes(
-        '<source type="image/' + type + '" srcset="/og/img/' + base + '-600.' + type +
-        ' 600w, /og/img/' + base + '.' + type + ' 1000w" sizes="' + HERO_SIZES + '">'),
-        m.slug + ' missing exact ' + type + ' <source> srcset/sizes');
-    }
-    // Exact JPG-fallback <img>: src + srcset descriptors + sizes + explicit dims +
-    // decorative alt + LCP fetch hint, in one shot.
-    assert.ok(html.includes(
-      '<img class="page-hero__bg" src="/og/img/' + base + '.jpg" srcset="/og/img/' +
-      base + '-600.jpg 600w, /og/img/' + base + '.jpg 1000w" sizes="' + HERO_SIZES +
-      '" width="1000" height="666" alt="" fetchpriority="high" decoding="async">'),
-      m.slug + ' missing exact hero <img> fallback markup');
+    // Assert the ENTIRE <picture>…</picture> block verbatim, including the
+    // wrapper tags and AVIF-before-WebP source order (browsers ignore <source>
+    // outside <picture>, and order decides which format wins). This pins the
+    // 600w/1000w descriptors, shared sizes, explicit 1000x666 dims, decorative
+    // alt, and the LCP fetch hint in one shot.
+    const pictureBlock = [
+      '    <picture>',
+      '      <source type="image/avif" srcset="/og/img/' + base + '-600.avif 600w, /og/img/' + base + '.avif 1000w" sizes="' + HERO_SIZES + '">',
+      '      <source type="image/webp" srcset="/og/img/' + base + '-600.webp 600w, /og/img/' + base + '.webp 1000w" sizes="' + HERO_SIZES + '">',
+      '      <img class="page-hero__bg" src="/og/img/' + base + '.jpg" srcset="/og/img/' + base + '-600.jpg 600w, /og/img/' + base + '.jpg 1000w" sizes="' + HERO_SIZES + '" width="1000" height="666" alt="" fetchpriority="high" decoding="async">',
+      '    </picture>',
+    ].join('\n');
+    assert.ok(html.includes(pictureBlock),
+      m.slug + ' hero <picture> block missing, reordered, or altered');
     assert.ok(html.includes('<div class="page-hero__scrim"'), m.slug + ' hero missing scrim');
   }
   // Every BBQ region is exercised by at least one metro in the set.
