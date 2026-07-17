@@ -1100,6 +1100,13 @@ function renderMetro(metro) {
   const slug     = metro.slug;
   const zip      = metro.zip;
 
+  // Stage-2 imagery: one shared on-brand smoke photo per BBQ region (6 total),
+  // reused across every metro in that region so the 50-page network reads as
+  // designed, not templated, while staying tiny (browser-cached region-wide).
+  // Deterministic (keyed on region, not build date) so committed source is stable.
+  const heroImg   = 'hero-region-' + region.replace(/_/g, '-');
+  const heroSizes = '(max-width: 863px) calc(100vw - 2.7rem), 820px';
+
   const pageTitle = name + ', ' + metro.state + ' BBQ Forecast | Pitmaster Tools';
   const ogTitle   = name + ', ' + metro.state + ' BBQ Forecast — Best Smoke Days';
   const desc      = 'Free 7-day smoke forecast for ' + name + ', ' + metro.state + '. Scores for brisket, ribs, pork, and chicken across all cooker types.';
@@ -1244,7 +1251,13 @@ function renderMetro(metro) {
     '      <li><span aria-current="page">' + escapeHtml(name + ', ' + metro.state) + '</span></li>',
     '    </ol>',
     '  </nav>',
-    '  <section class="page-hero" aria-label="Page introduction">',
+    '  <section class="page-hero page-hero--photo" aria-label="Page introduction">',
+    '    <picture>',
+    '      <source type="image/avif" srcset="/og/img/' + heroImg + '-600.avif 600w, /og/img/' + heroImg + '.avif 1000w" sizes="' + heroSizes + '">',
+    '      <source type="image/webp" srcset="/og/img/' + heroImg + '-600.webp 600w, /og/img/' + heroImg + '.webp 1000w" sizes="' + heroSizes + '">',
+    '      <img class="page-hero__bg" src="/og/img/' + heroImg + '.jpg" srcset="/og/img/' + heroImg + '-600.jpg 600w, /og/img/' + heroImg + '.jpg 1000w" sizes="' + heroSizes + '" width="1000" height="666" alt="" fetchpriority="high" decoding="async">',
+    '    </picture>',
+    '    <div class="page-hero__scrim" aria-hidden="true"></div>',
     '    <h1>Best Smoke Days in ' + escapeHtml(name) + ', ' + escapeHtml(metro.state) + '</h1>',
     '    <p>' + escapeHtml(intro) + '</p>',
     '  </section>',

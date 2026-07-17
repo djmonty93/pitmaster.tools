@@ -174,7 +174,7 @@ test('same-state metros have distinct intros (no near-duplicate SEO pages)', () 
     if (metros.length < 2) continue;
     const introHtmls = metros.map((m) => {
       const html = gen.renderMetro(m);
-      const match = html.match(/<section class="page-hero"[^>]*>([\s\S]*?)<\/section>/);
+      const match = html.match(/<section class="page-hero[^"]*"[^>]*>([\s\S]*?)<\/section>/);
       assert.ok(match, m.slug + ' page-hero missing');
       return match[1];
     });
