@@ -12,7 +12,9 @@ import {
   checkHeadBlock,
   resolveLocalLink,
   findBrokenLocalLinks,
-  discoverHtmlFiles
+  discoverHtmlFiles,
+  findUnwrappedTables,
+  TABLE_SCROLL_WRAPPERS
 } from './validate.mjs';
 
 // ── stripJsonc ──────────────────────────────────────────────────────────────
@@ -204,6 +206,70 @@ test('consentBeforeAnalytics — matches double-quoted gtag call', () => {
 test('consentBeforeAnalytics — fails when double-quoted analytics precedes consent', () => {
   const html = `googletagmanager.com/gtag.js ... gtag("consent", "default", {})`;
   assert.match(consentBeforeAnalytics(html), /consent default must precede/);
+});
+
+// ── findUnwrappedTables ─────────────────────────────────────────────────────
+test('findUnwrappedTables — bare table is flagged', () => {
+  assert.deepEqual(
+    findUnwrappedTables('<section><table class="times-table"><tr><td>x</td></tr></table></section>'),
+    ['times-table']
+  );
+});
+
+test('findUnwrappedTables — table inside a div.table-scroll passes', () => {
+  assert.deepEqual(
+    findUnwrappedTables('<div class="table-scroll"><table class="times-table"></table></div>'),
+    []
+  );
+});
+
+test('findUnwrappedTables — every approved wrapper class satisfies the gate', () => {
+  for (const cls of TABLE_SCROLL_WRAPPERS) {
+    // section wrapper here proves the gate is not div-only.
+    assert.deepEqual(
+      findUnwrappedTables(`<section class="${cls}"><table class="ref-table"></table></section>`),
+      [],
+      cls
+    );
+  }
+});
+
+test('findUnwrappedTables — approved class among several tokens still passes', () => {
+  assert.deepEqual(
+    findUnwrappedTables('<div class="card table-scroll no-print"><table></table></div>'),
+    []
+  );
+});
+
+test('findUnwrappedTables — non-approved wrapper does not satisfy the gate', () => {
+  assert.deepEqual(
+    findUnwrappedTables('<div class="card"><table class="breakdown-table"></table></div>'),
+    ['breakdown-table']
+  );
+});
+
+test('findUnwrappedTables — class matching is token-exact (no substring pass)', () => {
+  // "ref-table-wrapper" contains "ref-table-wrap" as a substring but is not
+  // the same class token, so the table must still be flagged.
+  assert.deepEqual(
+    findUnwrappedTables('<div class="ref-table-wrapper"><table class="ref-table"></table></div>'),
+    ['ref-table']
+  );
+});
+
+test('findUnwrappedTables — table markup inside <script> is ignored', () => {
+  const html = `<script>const t = '<table class="fake"></table>';</script>
+    <div class="table-scroll"><table class="real"></table></div>`;
+  assert.deepEqual(findUnwrappedTables(html), []);
+});
+
+test('findUnwrappedTables — unbalanced div inside a comment does not corrupt the stack', () => {
+  const html = `<!-- <div class="table-scroll"> --><table class="lonely"></table>`;
+  assert.deepEqual(findUnwrappedTables(html), ['lonely']);
+});
+
+test('findUnwrappedTables — a table with no class attribute reports (no class)', () => {
+  assert.deepEqual(findUnwrappedTables('<main><table></table></main>'), ['(no class)']);
 });
 
 // ── resolveLocalLink ────────────────────────────────────────────────────────

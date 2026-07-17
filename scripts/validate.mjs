@@ -244,6 +244,55 @@ export function findBrokenLocalLinks(content, fullPath, baseDir) {
   return broken;
 }
 
+// ── Responsive-table wrapper gate ───────────────────────────────────────────
+
+// Every data <table> must live inside one of these scroll-wrapper classes so
+// it scrolls within its own container on narrow viewports instead of forcing
+// the whole page into horizontal scroll (which reads to users as a clipped,
+// half-visible table). Keep in sync with the selectors in site-base.css /
+// smoke-weather.css that apply the overflow + edge-fade treatment.
+export const TABLE_SCROLL_WRAPPERS = [
+  'table-scroll', 'ref-table-wrap', 'rub-table-wrap',
+  'editorial-table-wrap', 'normals-scroll'
+];
+
+// Returns the class string of every <table> NOT nested inside an approved
+// scroll wrapper (empty array = OK). A stack tracks open container elements;
+// comments and <script>/<style> blocks are stripped first so table/div markup
+// inside JS template strings can neither corrupt the stack nor trip a false
+// positive. Class matching is token-exact so e.g. "ref-table-wrapper" (no such
+// class) does not satisfy the "ref-table-wrap" requirement.
+export function findUnwrappedTables(content) {
+  const cleaned = content
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<script\b[\s\S]*?<\/script>/gi, '')
+    .replace(/<style\b[\s\S]*?<\/style>/gi, '');
+  const tagRe = /<(\/?)(div|section|article|main|aside|figure|table)\b([^>]*)>/gi;
+  const stack = [];
+  const unwrapped = [];
+  let m;
+  while ((m = tagRe.exec(cleaned)) !== null) {
+    const isClose = m[1] === '/';
+    const name = m[2].toLowerCase();
+    const attrs = m[3] || '';
+    if (name === 'table') {
+      if (isClose) continue;
+      const wrapped = stack.some((tokens) =>
+        tokens.some((t) => TABLE_SCROLL_WRAPPERS.includes(t)));
+      if (!wrapped) {
+        const cm = attrs.match(/class\s*=\s*["']([^"']*)["']/i);
+        unwrapped.push(cm ? cm[1] : '(no class)');
+      }
+      continue;
+    }
+    if (isClose) { stack.pop(); continue; }
+    if (/\/\s*$/.test(attrs)) continue; // self-closing container (rare)
+    const cm = attrs.match(/class\s*=\s*["']([^"']*)["']/i);
+    stack.push(cm ? cm[1].trim().split(/\s+/) : []);
+  }
+  return unwrapped;
+}
+
 // ── Script entry point ──────────────────────────────────────────────────────
 
 function isMinimal(rel) {
@@ -354,6 +403,16 @@ function runScript() {
       for (const e of headErrs) addError(`${rel}: ${e}`);
     } else {
       console.log(`OK HEAD ${rel}`);
+    }
+
+    // Responsive-table wrappers
+    const unwrappedTables = findUnwrappedTables(content);
+    if (unwrappedTables.length) {
+      for (const c of unwrappedTables) {
+        addError(`Table without scroll wrapper in ${rel}: <table class="${c}"> (wrap it in a .table-scroll element)`);
+      }
+    } else {
+      console.log(`OK TBL  ${rel}`);
     }
   }
 
