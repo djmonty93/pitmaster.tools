@@ -1095,16 +1095,32 @@ function normalsDistribution(metro, entry, derived) {
 // <picture> markup cannot drift across the three call sites.
 const HERO_SIZES = '(max-width: 863px) calc(100vw - 2.7rem), 820px';
 
+// Descriptive, SEO-friendly alt text keyed by og/img/<base>. The region shots are
+// shared across every metro in a region (text stays accurate to the image, not the
+// city); the smoke-weather landing has its own. heroPicture() looks alt up here so
+// the alt content can never drift from the markup contract across the three call
+// sites. Cut/homepage heroes live on hand-authored pages and carry their own alt.
+const HERO_ALT = {
+  'hero-smoke-weather':        'An offset barbecue smoker running at dawn with smoke rising over open countryside',
+  'hero-region-northeast':     'An offset barbecue smoker running on a backyard patio at dusk',
+  'hero-region-southeast':     'Ribs and brisket smoking on a barbecue grate at sunrise',
+  'hero-region-midwest':       'A backyard barbecue smoker at sunset over open farmland',
+  'hero-region-south-central': 'A large offset smoker with a lit firebox on the open plains at sunrise',
+  'hero-region-mountain':      'A barbecue smoker cooking with a mountain range in the background at dusk',
+  'hero-region-pacific':       'Salmon fillets smoking on a grate along the Pacific coast at sunset',
+};
+
 // Emit the exact hero <picture> block for an og/img/<imgBase>.{avif,webp,jpg}
 // image set: 600w + 1000w in AVIF→WebP→JPG order, explicit 1000x666 dims for
-// zero CLS, decorative alt="", and the LCP fetch hint. Returns a newline-joined
-// string ready to drop into the page-hero section as one array element.
+// zero CLS, a descriptive alt looked up from HERO_ALT, and the LCP fetch hint.
+// Returns a newline-joined string ready to drop into the page-hero section.
 function heroPicture(imgBase) {
+  const alt = HERO_ALT[imgBase] || '';
   return [
     '    <picture>',
     '      <source type="image/avif" srcset="/og/img/' + imgBase + '-600.avif 600w, /og/img/' + imgBase + '.avif 1000w" sizes="' + HERO_SIZES + '">',
     '      <source type="image/webp" srcset="/og/img/' + imgBase + '-600.webp 600w, /og/img/' + imgBase + '.webp 1000w" sizes="' + HERO_SIZES + '">',
-    '      <img class="page-hero__bg" src="/og/img/' + imgBase + '.jpg" srcset="/og/img/' + imgBase + '-600.jpg 600w, /og/img/' + imgBase + '.jpg 1000w" sizes="' + HERO_SIZES + '" width="1000" height="666" alt="" fetchpriority="high" decoding="async">',
+    '      <img class="page-hero__bg" src="/og/img/' + imgBase + '.jpg" srcset="/og/img/' + imgBase + '-600.jpg 600w, /og/img/' + imgBase + '.jpg 1000w" sizes="' + HERO_SIZES + '" width="1000" height="666" alt="' + escapeHtml(alt) + '" fetchpriority="high" decoding="async">',
     '    </picture>',
   ].join('\n');
 }
@@ -1562,6 +1578,7 @@ module.exports = {
   renderMetrosListPartial,
   heroPicture,
   HERO_SIZES,
+  HERO_ALT,
   regionOf,
   heritageFor,
   climateFor,
