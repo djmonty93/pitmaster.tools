@@ -379,6 +379,83 @@ main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
 .editorial-table thead th { position: sticky; top: 0; background: #FAF5EC; z-index: 1; }
 .editorial-table tbody tr:nth-child(even) { background: #FCFAF6; }
 
+/* ----- Responsive data tables -----
+   Wide reference/data tables scroll horizontally inside their own container so
+   they never force the whole page into horizontal scroll on phones (which reads
+   as a clipped, half-visible table). */
+.table-scroll,
+.ref-table-wrap,
+.rub-table-wrap,
+.editorial-table-wrap,
+.climate-normals .normals-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+/* Keyboard users can focus a scrollable region and arrow through it. */
+.table-scroll:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+/* Edge-fade scroll cue. _partials/table-scroll.js wraps each scroll container
+   in a .table-scroll-frame and toggles .has-l/.has-r by scroll position; the
+   overlays live on the NON-scrolling frame (absolutely-positioned children of a
+   scroll container would scroll away with the content) and sit ON TOP of the
+   table (pointer-events:none), so the fade shows over opaque cell backgrounds
+   and never eats the wrapper's own border — a `mask-image` fade would fade the
+   border-box edge, erasing the side borders/rounded corners of the card
+   wrappers. No JS → no frame → tables still scroll, just without the cue. */
+.table-scroll-frame { position: relative; }
+.table-scroll-frame > .table-fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s ease;
+  z-index: 1;
+}
+/* The outer corners are rounded to var(--radius) so the overlay follows the
+   bordered card wrappers' rounded corners instead of painting a square wedge
+   across them (harmless no-op on the borderless .table-scroll wrappers). */
+.table-scroll-frame > .table-fade--l {
+  left: 0;
+  background: linear-gradient(to right, rgba(38, 35, 31, .16), rgba(38, 35, 31, 0));
+  border-top-left-radius: var(--radius);
+  border-bottom-left-radius: var(--radius);
+}
+.table-scroll-frame > .table-fade--r {
+  right: 0;
+  background: linear-gradient(to left, rgba(38, 35, 31, .16), rgba(38, 35, 31, 0));
+  border-top-right-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+}
+.table-scroll-frame.has-l > .table-fade--l,
+.table-scroll-frame.has-r > .table-fade--r { opacity: 1; }
+
+@media (max-width: 560px) {
+  /* Denser cells fit more of each table before scrolling is needed. Descendant
+     selectors outrank the single-class .ref-table rules inlined per calculator
+     page (which load after site-base.css), so no !important is required. */
+  .ref-table-wrap .ref-table th,
+  .ref-table-wrap .ref-table td { padding: .5rem .6rem; }
+  .ref-table-wrap .ref-table th { font-size: .74rem; }
+  .ref-table-wrap .ref-table td { font-size: .82rem; }
+  .table-scroll .times-table th,
+  .table-scroll .times-table td { padding: .5rem .55rem; }
+}
+
+@media print {
+  /* Never clip a printed chart, and hide the scroll overlays. `body ` prefix so
+     the overflow reset outranks the per-page inline `.ref-table-wrap {
+     overflow-x }` card style (and smoke-weather.css's `.normals-scroll`) that
+     load after this file at equal specificity. */
+  body .table-scroll,
+  body .ref-table-wrap,
+  body .rub-table-wrap,
+  body .editorial-table-wrap,
+  body .climate-normals .normals-scroll { overflow: visible; }
+  .table-scroll-frame > .table-fade { display: none; }
+}
+
 /* ----- FAQ sections ----- */
 .faq-group { display: grid; gap: 1rem; }
 .faq-item { background: rgba(255,255,255,.78); border: 1px solid var(--card-border); border-radius: var(--radius); box-shadow: var(--shadow); }

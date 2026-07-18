@@ -244,6 +244,102 @@ export function findBrokenLocalLinks(content, fullPath, baseDir) {
   return broken;
 }
 
+// ── Responsive-table wrapper gate ───────────────────────────────────────────
+
+// Every data <table> must live inside one of these scroll-wrapper classes so
+// it scrolls within its own container on narrow viewports instead of forcing
+// the whole page into horizontal scroll (which reads to users as a clipped,
+// half-visible table). Keep in sync with the selectors in site-base.css /
+// smoke-weather.css that apply the overflow + edge-fade treatment.
+export const TABLE_SCROLL_WRAPPERS = [
+  'table-scroll', 'ref-table-wrap', 'rub-table-wrap',
+  'editorial-table-wrap', 'normals-scroll'
+];
+
+// Container elements that can act as a table's scroll wrapper. Only these are
+// tracked on the ancestor stack; every other tag (including void elements and
+// unclosed inline elements like <p>/<li>) is ignored, so they can't corrupt it.
+const CONTAINER_TAGS = new Set([
+  'div', 'section', 'article', 'main', 'aside', 'figure', 'details'
+]);
+
+// Extracts the class token list from a start tag's attribute text, matching
+// double-quoted, single-quoted, AND unquoted (class=foo) values. The leading
+// (?:^|\s) boundary is load-bearing: it stops `data-class="table-scroll"` from
+// being read as `class="table-scroll"` (a substring match there would wrongly
+// treat the table as wrapped). Returns [] when there is no class attribute.
+function classTokensOf(attrs) {
+  const m = attrs.match(/(?:^|\s)class\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/i);
+  const value = m && (m[1] ?? m[2] ?? m[3]);
+  return value ? value.trim().split(/\s+/).filter(Boolean) : [];
+}
+
+// Returns the class string of every <table> NOT nested inside an approved
+// scroll wrapper (empty array = OK). A stack of {name, tokens} tracks open
+// container ancestors; a close tag pops to the nearest same-named open
+// container (tolerating unclosed containers) and a stray close is ignored, so
+// mismatched nesting can't fake a wrapper. Tags are scanned quote-aware (a '>'
+// inside an attribute value doesn't terminate the tag early), and comments and
+// <script>/<style> blocks are stripped first so markup inside JS template
+// strings can neither corrupt the stack nor trip a false positive. Class
+// matching is token-exact, so "ref-table-wrapper" doesn't satisfy the gate.
+export function findUnwrappedTables(content) {
+  const cleaned = content
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<script\b[\s\S]*?<\/script>/gi, '')
+    .replace(/<style\b[\s\S]*?<\/style>/gi, '');
+  const stack = [];
+  const unwrapped = [];
+  const len = cleaned.length;
+  let i = 0;
+  while (i < len) {
+    const lt = cleaned.indexOf('<', i);
+    if (lt < 0) break;
+    // Find the '>' that closes this tag, skipping any '>' inside a quoted
+    // attribute value (same approach as validateXmlBalance above).
+    let j = lt + 1;
+    let inQuote = null;
+    while (j < len) {
+      const ch = cleaned[j];
+      if (inQuote) { if (ch === inQuote) inQuote = null; }
+      else if (ch === '"' || ch === "'") inQuote = ch;
+      else if (ch === '>') break;
+      j++;
+    }
+    if (j >= len) break;
+    const raw = cleaned.slice(lt + 1, j);
+    i = j + 1;
+    if (!raw || raw[0] === '!' || raw[0] === '?') continue; // stray decl/prolog
+    const isClose = raw[0] === '/';
+    const nameMatch = (isClose ? raw.slice(1) : raw).match(/^\s*([a-zA-Z][\w-]*)/);
+    if (!nameMatch) continue;
+    const name = nameMatch[1].toLowerCase();
+    const attrs = (isClose ? raw.slice(1) : raw).slice(nameMatch[0].length);
+
+    if (name === 'table') {
+      if (isClose) continue;
+      const wrapped = stack.some((e) =>
+        e.tokens.some((t) => TABLE_SCROLL_WRAPPERS.includes(t)));
+      if (!wrapped) {
+        const tokens = classTokensOf(attrs);
+        unwrapped.push(tokens.length ? tokens.join(' ') : '(no class)');
+      }
+      continue;
+    }
+    if (!CONTAINER_TAGS.has(name)) continue;
+    if (isClose) {
+      for (let k = stack.length - 1; k >= 0; k--) {
+        if (stack[k].name === name) { stack.length = k; break; }
+      }
+      continue;
+    }
+    // Container elements are never void: a trailing slash (`<div/>`) does NOT
+    // self-close them in HTML, so always push.
+    stack.push({ name, tokens: classTokensOf(attrs) });
+  }
+  return unwrapped;
+}
+
 // ── Script entry point ──────────────────────────────────────────────────────
 
 function isMinimal(rel) {
@@ -354,6 +450,16 @@ function runScript() {
       for (const e of headErrs) addError(`${rel}: ${e}`);
     } else {
       console.log(`OK HEAD ${rel}`);
+    }
+
+    // Responsive-table wrappers
+    const unwrappedTables = findUnwrappedTables(content);
+    if (unwrappedTables.length) {
+      for (const c of unwrappedTables) {
+        addError(`Table without scroll wrapper in ${rel}: <table class="${c}"> (wrap it in a .table-scroll element)`);
+      }
+    } else {
+      console.log(`OK TBL  ${rel}`);
     }
   }
 
