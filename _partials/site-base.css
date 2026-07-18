@@ -382,16 +382,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
 /* ----- Responsive data tables -----
    Wide reference/data tables scroll horizontally inside their own container so
    they never force the whole page into horizontal scroll on phones (which reads
-   as a clipped, half-visible table). A CSS-only edge-fade signals there's more
-   to scroll. It's a `mask-image`, not a background: these tables paint opaque
-   backgrounds (.ref-table, .inline-table, striped cells), so a background fade
-   would sit *behind* the table and never show — a mask fades the content itself
-   and is colour-agnostic, so it needs no per-wrapper colour matching. The fade
-   is ~12px (about one cell's padding), so at rest only the padding gutter
-   softens and data stays legible; when scrolled, the clipped cell content fades
-   out as a clear "more →" cue. Because mask is not a `background` property, it
-   is not reset by smoke-weather.css's `.normals-scroll { background: … }`, so
-   every wrapper — including .normals-scroll — is handled here in one place. */
+   as a clipped, half-visible table). */
 .table-scroll,
 .ref-table-wrap,
 .rub-table-wrap,
@@ -399,13 +390,33 @@ main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
 .climate-normals .normals-scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
 }
 /* Keyboard users can focus a scrollable region and arrow through it. */
-.table-scroll:focus-visible,
-.ref-table-wrap:focus-visible,
-.climate-normals .normals-scroll:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.table-scroll:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+/* Edge-fade scroll cue. _partials/table-scroll.js wraps each scroll container
+   in a .table-scroll-frame and toggles .has-l/.has-r by scroll position; the
+   overlays live on the NON-scrolling frame (absolutely-positioned children of a
+   scroll container would scroll away with the content) and sit ON TOP of the
+   table (pointer-events:none), so the fade shows over opaque cell backgrounds
+   and never eats the wrapper's own border — a `mask-image` fade would fade the
+   border-box edge, erasing the side borders/rounded corners of the card
+   wrappers. No JS → no frame → tables still scroll, just without the cue. */
+.table-scroll-frame { position: relative; }
+.table-scroll-frame > .table-fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s ease;
+  z-index: 1;
+}
+.table-scroll-frame > .table-fade--l { left: 0; background: linear-gradient(to right, rgba(38, 35, 31, .16), rgba(38, 35, 31, 0)); }
+.table-scroll-frame > .table-fade--r { right: 0; background: linear-gradient(to left, rgba(38, 35, 31, .16), rgba(38, 35, 31, 0)); }
+.table-scroll-frame.has-l > .table-fade--l,
+.table-scroll-frame.has-r > .table-fade--r { opacity: 1; }
 
 @media (max-width: 560px) {
   /* Denser cells fit more of each table before scrolling is needed. Descendant
@@ -420,18 +431,16 @@ main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
 }
 
 @media print {
-  /* Never clip a printed chart, and don't fade its edges. `body ` prefix so the
-     overflow reset outranks the per-page inline `.ref-table-wrap { overflow-x }`
-     card style that loads after this file. */
+  /* Never clip a printed chart, and hide the scroll overlays. `body ` prefix so
+     the overflow reset outranks the per-page inline `.ref-table-wrap {
+     overflow-x }` card style (and smoke-weather.css's `.normals-scroll`) that
+     load after this file at equal specificity. */
   body .table-scroll,
   body .ref-table-wrap,
   body .rub-table-wrap,
   body .editorial-table-wrap,
-  .climate-normals .normals-scroll {
-    overflow: visible;
-    -webkit-mask-image: none;
-    mask-image: none;
-  }
+  body .climate-normals .normals-scroll { overflow: visible; }
+  .table-scroll-frame > .table-fade { display: none; }
 }
 
 /* ----- FAQ sections ----- */
