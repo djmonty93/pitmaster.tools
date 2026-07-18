@@ -347,6 +347,77 @@ const METRO_NOTE = {
   'tulsa-ok':             'Tulsa’s pit scene shares Oklahoma City’s Texas-brisket-and-smoked-bologna playbook: the Arkansas River corridor and northeast Oklahoma woods give the regional cook a distinct hickory-and-pecan flavor.',
 };
 
+// Short (<=48-char) meta-description hook per metro. Condensed from the
+// METRO_NOTE entry above (same facts, no new claims, just fewer words) so the
+// <meta name="description"> varies metro-to-metro instead of the pre-2026-07
+// boilerplate that only swapped city/state. hookFor() falls back to
+// REGION_HOOK when a metro lacks an entry, mirroring the
+// climateFor()/cookerTipFor() fallback pattern; every metro has an entry here
+// today so the fallback path is defensive, not load-bearing.
+const METRO_HOOK = {
+  'new-york-ny':          'Brooklyn runs a Texas-style brisket scene',
+  'los-angeles-ca':       'LA’s brisket scene rivals Austin’s post-oak',
+  'chicago-il':           'Chicago’s rib-tip and hot-link tradition',
+  'dallas-fort-worth-tx': 'DFW’s brisket scene follows Austin’s lead',
+  'houston-tx':           'Houston blends brisket, seafood smoke, barbacoa',
+  'washington-dc':        'DC blends Carolina pork and Texas brisket',
+  'miami-fl':             'Miami’s Cuban and Caribbean smoke traditions',
+  'philadelphia-pa':      'Philly runs Texas-leaning brisket and ribs',
+  'atlanta-ga':           'Atlanta blends pulled pork and Texas brisket',
+  'boston-ma':            'Boston runs Carolina pork and Memphis ribs',
+  'phoenix-az':           'Phoenix’s dry heat means short stalls',
+  'san-francisco-ca':     'Bay Area runs a precise Texas-style scene',
+  'riverside-ca':         'Inland Empire’s hot, dry backyard pit scene',
+  'detroit-mi':           'Detroit blends Memphis ribs, Carolina pork',
+  'seattle-wa':           'Seattle pairs alder-smoked salmon with brisket',
+  'minneapolis-mn':       'Twin Cities: winter-tested, kamado-friendly',
+  'san-diego-ca':         'San Diego’s mild, low-humidity offset climate',
+  'tampa-fl':             'Tampa blends Cuban roots with Carolina pork',
+  'denver-co':            'Denver’s mile-high altitude changes the cook',
+  'baltimore-md':         'Baltimore’s pit beef and Chesapeake seafood',
+  'st-louis-mo':          'St. Louis’ own rib cut, sharper tomato sauce',
+  'charlotte-nc':         'Charlotte blends whole-hog and Lexington styles',
+  'orlando-fl':           'Orlando blends Carolina pork, Texas brisket',
+  'san-antonio-tx':       'San Antonio blends brisket with barbacoa',
+  'portland-or':          'Portland pairs brisket with alder-smoked salmon',
+  'sacramento-ca':        'Sacramento’s hot, dry pellet-cooker culture',
+  'pittsburgh-pa':        'Pittsburgh’s three-river wind and humidity',
+  'las-vegas-nv':         'Vegas’ dry desert favors insulated cookers',
+  'cincinnati-oh':        'Cincinnati blends BBQ ribs, German sausage',
+  'kansas-city-mo':       'Kansas City: birthplace of burnt ends',
+  'columbus-oh':          'Columbus mixes Carolina, Memphis, Texas styles',
+  'indianapolis-in':      'Indianapolis runs a contest-heavy pit scene',
+  'cleveland-oh':         'Cleveland’s kielbasa-and-brats pit tradition',
+  'austin-tx':            'Austin sets the world standard for brisket',
+  'nashville-tn':         'Nashville pairs hot chicken with smoked brisket',
+  'virginia-beach-va':    'Tidewater’s pulled pork and smoked seafood',
+  'providence-ri':        'Providence runs a small, offset-driven scene',
+  'milwaukee-wi':         'Milwaukee’s German-Polish sausage tradition',
+  'jacksonville-fl':      'Jacksonville blends Carolina pork, brisket',
+  'oklahoma-city-ok':     'OKC’s brisket, ribs, and smoked bologna',
+  'raleigh-nc':           'Raleigh blends whole-hog and brisket traditions',
+  'memphis-tn':           'Memphis: world capital of dry-rubbed ribs',
+  'richmond-va':          'Richmond’s chopped-pork-and-brisket scene',
+  'louisville-ky':        'Louisville’s black-dip mutton tradition',
+  'new-orleans-la':       'New Orleans threads andouille into its smoke',
+  'hartford-ct':          'Hartford’s New England take on Southern BBQ',
+  'salt-lake-city-ut':    'Salt Lake City’s dry, high-altitude smoke',
+  'birmingham-al':        'Birmingham’s white-sauce smoked chicken',
+  'buffalo-ny':           'Buffalo’s lake-effect winters close most pits',
+  'tulsa-ok':             'Tulsa’s hickory-and-pecan brisket scene',
+};
+
+// Regional fallback for METRO_HOOK. Condensed from REGION_CLIMATE above
+// (same facts: humidity, wind, dry air, marine mildness — no new claims).
+const REGION_HOOK = {
+  northeast:     'Cold winters, humid summers set the calendar',
+  southeast:     'Humid summers drive long stalls here',
+  midwest:       'Wind and swinging seasons shape the cook',
+  south_central: 'Wind and summer humidity dominate here',
+  mountain:      'Dry air brings short stalls, fast bark',
+  pacific:       'Mild, marine air keeps the season long',
+};
+
 // Per-metro local guide (Milestone 6). A 150-200 word, metro-SPECIFIC section
 // (distinct climate calendar + practical home-pitmaster advice) that gives each
 // page genuine unique content beyond the region-shared heritage/climate
@@ -581,6 +652,10 @@ function climateFor(metro) {
 
 function cookerTipFor(metro) {
   return COOKER_TIP_BY_METRO[metro.slug] || REGION_COOKER_TIP[regionOf(metro.state)];
+}
+
+function hookFor(metro) {
+  return METRO_HOOK[metro.slug] || REGION_HOOK[regionOf(metro.state)];
 }
 
 // Serialize an object as JSON for embedding inside a <script> tag. Escapes the
@@ -1144,7 +1219,12 @@ function renderMetro(metro) {
 
   const pageTitle = name + ', ' + metro.state + ' BBQ Forecast | Pitmaster Tools';
   const ogTitle   = name + ', ' + metro.state + ' BBQ Forecast — Best Smoke Days';
-  const desc      = 'Free 7-day smoke forecast for ' + name + ', ' + metro.state + '. Scores for brisket, ribs, pork, and chicken across all cooker types.';
+  // De-templated per METRO_HOOK/REGION_HOOK above: the hook clause varies by
+  // metro (falling back to one of 6 region variants) so this description is
+  // no longer byte-identical across all 50 pages. hookFor() is capped at
+  // ~48 chars, which keeps every metro's rendered description <=160 chars
+  // even for the longest name+state combo (verified in generate-metros.test.js).
+  const desc      = name + ', ' + metro.state + ' 7-day BBQ smoke forecast. ' + hookFor(metro) + '. Brisket, ribs, pork, and chicken scored by cooker.';
   const canonical = 'https://pitmaster.tools/smoke-weather/' + slug;
 
   const note      = METRO_NOTE[slug];
@@ -1172,7 +1252,11 @@ function renderMetro(metro) {
         'name': 'What makes a day a good smoke day in ' + name + '?',
         'acceptedAnswer': {
           '@type': 'Answer',
-          'text': 'A day in ' + name + ' scores well when rain probability is low, sustained wind and gusts are mild for your cooker, the temperature stays inside roughly 40-85 °F, and the wet-bulb temperature is low enough that long-stall cuts (brisket, pork butt, ribs) won’t get stuck for hours. Each factor reduces the score with its own weight, calibrated for the ' + regLbl + ' climate.',
+          // De-boilerplated: weaves the metro-specific `note` (METRO_NOTE,
+          // required per metro above) between the scoring-mechanics sentences
+          // so this answer is genuinely metro-specific, not just the city
+          // name swapped into identical text across all 50 pages.
+          'text': 'A day in ' + name + ' scores well when rain probability is low, sustained wind and gusts are mild for your cooker, the temperature stays inside roughly 40-85 °F, and the wet-bulb temperature is low enough that long-stall cuts (brisket, pork butt, ribs) won’t get stuck for hours. ' + note + ' Each factor reduces the score with its own weight, calibrated for the ' + regLbl + ' climate.',
         },
       },
       {

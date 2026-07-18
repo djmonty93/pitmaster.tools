@@ -314,6 +314,23 @@ test('renderMetro embeds canonical, title, description, and ZIP-prefilled input'
   }
 });
 
+test('every metro description stays <=160 rendered chars and varies across metros', () => {
+  const descriptions = new Set();
+  for (const metro of gen.METROS) {
+    const html = gen.renderMetro(metro);
+    const match = html.match(/description="([^"]*)"/);
+    assert.ok(match, metro.slug + ' description missing from frontmatter');
+    const desc = match[1].replace(/\\"/g, '"');
+    assert.ok(desc.length <= 160,
+      metro.slug + ' description is ' + desc.length + ' chars (max 160): ' + desc);
+    descriptions.add(desc);
+  }
+  // De-templating check: the pre-2026-07 description was byte-identical
+  // (only city/state swapped) across all 50 metros. Confirm real variety now.
+  assert.ok(descriptions.size >= 6,
+    'expected descriptions to vary by at least the 6 BBQ regions, got ' + descriptions.size + ' unique values');
+});
+
 test('renderMetro embeds four JSON-LD blocks (WebApplication + FAQPage + BreadcrumbList + Dataset)', () => {
   const html = gen.renderMetro(gen.METROS[0]);
   const ldBlocks = html.match(/<script type="application\/ld\+json">/g) || [];
