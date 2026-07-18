@@ -128,6 +128,15 @@
   box-shadow: 0 12px 22px rgba(24,23,20,.16);
   transform: translateY(-1px);
 }
+.tool-card__thumb {
+  display: block;
+  margin: -1.4rem -1.35rem .2rem;
+  height: 150px;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(213,204,189,.9);
+}
+.tool-card__thumb picture { display: block; width: 100%; height: 100%; }
+.tool-card__thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .intro-section {
   margin-top: 3rem;
   padding: 1.6rem 1.65rem;
@@ -155,6 +164,7 @@ footer nav a:hover { color: var(--amber); }
   .tools-grid { grid-template-columns: 1fr; }
   header { padding: 0 1rem; min-height: 60px; }
   .tool-card { min-height: 0; }
+  .tool-card__thumb { height: 130px; }
   .intro-section { padding: 1.25rem; }
 }
 </style>
@@ -182,21 +192,49 @@ footer nav a:hover { color: var(--amber); }
   <h2 class="section-title">Cut calculators</h2>
   <div class="tools-grid">
     <div class="tool-card">
+      <a href="brisket-calculator" class="tool-card__thumb" tabindex="-1" aria-hidden="true">
+        <picture>
+          <source type="image/avif" srcset="/og/img/hero-brisket-calculator-600.avif">
+          <source type="image/webp" srcset="/og/img/hero-brisket-calculator-600.webp">
+          <img src="/og/img/hero-brisket-calculator-600.jpg" width="600" height="400" alt="" loading="lazy" decoding="async">
+        </picture>
+      </a>
       <a href="brisket-calculator" class="tool-card__name">Brisket Calculator</a>
       <p class="tool-card__desc">Full cook timeline for flat, point, and packer briskets: stall window, wrap options, and exact start time working backward from serve time.</p>
       <a href="brisket-calculator" class="tool-card__link">Open Calculator</a>
     </div>
     <div class="tool-card">
+      <a href="pork-shoulder-calculator" class="tool-card__thumb" tabindex="-1" aria-hidden="true">
+        <picture>
+          <source type="image/avif" srcset="/og/img/hero-pork-shoulder-calculator-600.avif">
+          <source type="image/webp" srcset="/og/img/hero-pork-shoulder-calculator-600.webp">
+          <img src="/og/img/hero-pork-shoulder-calculator-600.jpg" width="600" height="400" alt="" loading="lazy" decoding="async">
+        </picture>
+      </a>
       <a href="pork-shoulder-calculator" class="tool-card__name">Pork Shoulder Calculator</a>
       <p class="tool-card__desc">Pull times and stall windows for pork butt and shoulder. Supports bone-in toggle, pulled or sliced style, and any smoker temperature.</p>
       <a href="pork-shoulder-calculator" class="tool-card__link">Open Calculator</a>
     </div>
     <div class="tool-card">
+      <a href="rib-calculator" class="tool-card__thumb" tabindex="-1" aria-hidden="true">
+        <picture>
+          <source type="image/avif" srcset="/og/img/hero-rib-calculator-600.avif">
+          <source type="image/webp" srcset="/og/img/hero-rib-calculator-600.webp">
+          <img src="/og/img/hero-rib-calculator-600.jpg" width="600" height="400" alt="" loading="lazy" decoding="async">
+        </picture>
+      </a>
       <a href="rib-calculator" class="tool-card__name">Rib Calculator</a>
       <p class="tool-card__desc">Baby back, spare, competition, and beef ribs with standard or 3-2-1 method timelines. Baby back uses 2-2-1; spare uses 3-2-1.</p>
       <a href="rib-calculator" class="tool-card__link">Open Calculator</a>
     </div>
     <div class="tool-card">
+      <a href="turkey-smoking-calculator" class="tool-card__thumb" tabindex="-1" aria-hidden="true">
+        <picture>
+          <source type="image/avif" srcset="/og/img/hero-turkey-smoking-calculator-600.avif">
+          <source type="image/webp" srcset="/og/img/hero-turkey-smoking-calculator-600.webp">
+          <img src="/og/img/hero-turkey-smoking-calculator-600.jpg" width="600" height="400" alt="" loading="lazy" decoding="async">
+        </picture>
+      </a>
       <a href="turkey-smoking-calculator" class="tool-card__name">Turkey Calculator</a>
       <p class="tool-card__desc">Whole turkey, spatchcocked, breast, legs, thighs, and wings: exact cook times from 225°F to 325°F and a full start-to-serve schedule.</p>
       <a href="turkey-smoking-calculator" class="tool-card__link">Open Calculator</a>
@@ -206,21 +244,49 @@ footer nav a:hover { color: var(--amber); }
   <h2 class="section-title">Planning &amp; timing</h2>
   <div class="tools-grid">
     <div class="tool-card">
+      <a href="/" class="tool-card__thumb" tabindex="-1" aria-hidden="true">
+        <picture>
+          <source type="image/avif" srcset="/og/img/hero-home-600.avif">
+          <source type="image/webp" srcset="/og/img/hero-home-600.webp">
+          <img src="/og/img/hero-home-600.jpg" width="600" height="400" alt="" loading="lazy" decoding="async">
+        </picture>
+      </a>
       <a href="/" class="tool-card__name">Meat Smoking Calculator</a>
       <p class="tool-card__desc">The complete BBQ planner: 28 cuts, full cook timeline, serving math, wood pairings, unit toggles, and a printable results sheet.</p>
       <a href="/" class="tool-card__link">Open Calculator</a>
     </div>
     <div class="tool-card">
+      <a href="cook-time-coordinator" class="tool-card__thumb" tabindex="-1" aria-hidden="true">
+        <picture>
+          <source type="image/avif" srcset="/og/img/hero-cook-time-coordinator-600.avif">
+          <source type="image/webp" srcset="/og/img/hero-cook-time-coordinator-600.webp">
+          <img src="/og/img/hero-cook-time-coordinator-600.jpg" width="600" height="400" alt="" loading="lazy" decoding="async">
+        </picture>
+      </a>
       <a href="cook-time-coordinator" class="tool-card__name">Cook Time Coordinator</a>
       <p class="tool-card__desc">Stagger up to 6 different meats to all land on the table at the same time. CSS Gantt chart shows every cut's start window at a glance.</p>
       <a href="cook-time-coordinator" class="tool-card__link">Open Calculator</a>
     </div>
     <div class="tool-card">
+      <a href="meat-per-person" class="tool-card__thumb" tabindex="-1" aria-hidden="true">
+        <picture>
+          <source type="image/avif" srcset="/og/img/hero-meat-per-person-600.avif">
+          <source type="image/webp" srcset="/og/img/hero-meat-per-person-600.webp">
+          <img src="/og/img/hero-meat-per-person-600.jpg" width="600" height="400" alt="" loading="lazy" decoding="async">
+        </picture>
+      </a>
       <a href="meat-per-person" class="tool-card__name">Meat Per Person</a>
       <p class="tool-card__desc">How much raw meat to buy for any number of guests. Accounts for shrinkage by cut so you never run short at the table.</p>
       <a href="meat-per-person" class="tool-card__link">Open Calculator</a>
     </div>
     <div class="tool-card">
+      <a href="catering-calculator" class="tool-card__thumb" tabindex="-1" aria-hidden="true">
+        <picture>
+          <source type="image/avif" srcset="/og/img/hero-catering-calculator-600.avif">
+          <source type="image/webp" srcset="/og/img/hero-catering-calculator-600.webp">
+          <img src="/og/img/hero-catering-calculator-600.jpg" width="600" height="400" alt="" loading="lazy" decoding="async">
+        </picture>
+      </a>
       <a href="catering-calculator" class="tool-card__name">Catering Calculator</a>
       <p class="tool-card__desc">Multi-meat planning for events up to 500 people. Calculates ribs by racks, chicken by pieces, and includes optional cost estimates.</p>
       <a href="catering-calculator" class="tool-card__link">Open Calculator</a>
@@ -230,16 +296,37 @@ footer nav a:hover { color: var(--amber); }
   <h2 class="section-title">Ingredient calculators</h2>
   <div class="tools-grid">
     <div class="tool-card">
+      <a href="dry-rub-calculator" class="tool-card__thumb" tabindex="-1" aria-hidden="true">
+        <picture>
+          <source type="image/avif" srcset="/og/img/hero-dry-rub-calculator-600.avif">
+          <source type="image/webp" srcset="/og/img/hero-dry-rub-calculator-600.webp">
+          <img src="/og/img/hero-dry-rub-calculator-600.jpg" width="600" height="400" alt="" loading="lazy" decoding="async">
+        </picture>
+      </a>
       <a href="dry-rub-calculator" class="tool-card__name">Dry Rub Calculator</a>
       <p class="tool-card__desc">Scale any rub recipe to the right total weight for your meat. Supports up to 8 ingredients in tsp, tbsp, cup, oz, or grams.</p>
       <a href="dry-rub-calculator" class="tool-card__link">Open Calculator</a>
     </div>
     <div class="tool-card">
+      <a href="brine-calculator" class="tool-card__thumb" tabindex="-1" aria-hidden="true">
+        <picture>
+          <source type="image/avif" srcset="/og/img/hero-brine-calculator-600.avif">
+          <source type="image/webp" srcset="/og/img/hero-brine-calculator-600.webp">
+          <img src="/og/img/hero-brine-calculator-600.jpg" width="600" height="400" alt="" loading="lazy" decoding="async">
+        </picture>
+      </a>
       <a href="brine-calculator" class="tool-card__name">Brine Calculator</a>
       <p class="tool-card__desc">Exact water, salt, and sugar for wet brining, or dry-brine salt amounts. Supports Diamond Crystal, Morton kosher, table, and sea salt.</p>
       <a href="brine-calculator" class="tool-card__link">Open Calculator</a>
     </div>
     <div class="tool-card">
+      <a href="charcoal-calculator" class="tool-card__thumb" tabindex="-1" aria-hidden="true">
+        <picture>
+          <source type="image/avif" srcset="/og/img/hero-charcoal-calculator-600.avif">
+          <source type="image/webp" srcset="/og/img/hero-charcoal-calculator-600.webp">
+          <img src="/og/img/hero-charcoal-calculator-600.jpg" width="600" height="400" alt="" loading="lazy" decoding="async">
+        </picture>
+      </a>
       <a href="charcoal-calculator" class="tool-card__name">Charcoal Calculator</a>
       <p class="tool-card__desc">Starting charcoal, lit coals, and top-up amounts for Minion, Snake, or direct-heat methods. Covers lump and briquettes.</p>
       <a href="charcoal-calculator" class="tool-card__link">Open Calculator</a>
@@ -249,11 +336,25 @@ footer nav a:hover { color: var(--amber); }
   <h2 class="section-title">Cost &amp; yield</h2>
   <div class="tools-grid">
     <div class="tool-card">
+      <a href="bbq-cost-calculator" class="tool-card__thumb" tabindex="-1" aria-hidden="true">
+        <picture>
+          <source type="image/avif" srcset="/og/img/hero-bbq-cost-calculator-600.avif">
+          <source type="image/webp" srcset="/og/img/hero-bbq-cost-calculator-600.webp">
+          <img src="/og/img/hero-bbq-cost-calculator-600.jpg" width="600" height="400" alt="" loading="lazy" decoding="async">
+        </picture>
+      </a>
       <a href="bbq-cost-calculator" class="tool-card__name">BBQ Cost Calculator</a>
       <p class="tool-card__desc">Total cook cost, cost per pound cooked, and cost per serving: accounting for meat, rub, fuel, and optional time value.</p>
       <a href="bbq-cost-calculator" class="tool-card__link">Open Calculator</a>
     </div>
     <div class="tool-card">
+      <a href="brisket-yield-calculator" class="tool-card__thumb" tabindex="-1" aria-hidden="true">
+        <picture>
+          <source type="image/avif" srcset="/og/img/hero-brisket-yield-calculator-600.avif">
+          <source type="image/webp" srcset="/og/img/hero-brisket-yield-calculator-600.webp">
+          <img src="/og/img/hero-brisket-yield-calculator-600.jpg" width="600" height="400" alt="" loading="lazy" decoding="async">
+        </picture>
+      </a>
       <a href="brisket-yield-calculator" class="tool-card__name">Brisket Yield Calculator</a>
       <p class="tool-card__desc">Flat weight, point weight, and cooked yield at 195°F and 203°F by USDA grade. Tells you exactly how many packer briskets to buy for a crowd.</p>
       <a href="brisket-yield-calculator" class="tool-card__link">Open Calculator</a>
@@ -263,6 +364,13 @@ footer nav a:hover { color: var(--amber); }
   <h2 class="section-title">Smoke forecast</h2>
   <div class="tools-grid">
     <div class="tool-card">
+      <a href="/smoke-weather/" class="tool-card__thumb" tabindex="-1" aria-hidden="true">
+        <picture>
+          <source type="image/avif" srcset="/og/img/hero-smoke-weather-600.avif">
+          <source type="image/webp" srcset="/og/img/hero-smoke-weather-600.webp">
+          <img src="/og/img/hero-smoke-weather-600.jpg" width="600" height="400" alt="" loading="lazy" decoding="async">
+        </picture>
+      </a>
       <a href="/smoke-weather/" class="tool-card__name">Best Smoke Days</a>
       <p class="tool-card__desc">7-day smoking-weather forecast by ZIP: wind, humidity, temperature, and rain scored for each day so you know when to fire the smoker. Pre-built pages for 50+ US metros.</p>
       <a href="/smoke-weather/" class="tool-card__link">Open Forecast</a>

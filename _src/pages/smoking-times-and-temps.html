@@ -122,10 +122,16 @@
     </ol>
   </nav>
 
-  <div class="page-hero">
+  <section class="page-hero page-hero--photo" aria-label="Page introduction">
+    <picture>
+      <source type="image/avif" srcset="/og/img/hero-smoking-times-and-temps-600.avif 600w, /og/img/hero-smoking-times-and-temps.avif 1000w" sizes="(max-width: 863px) calc(100vw - 2.7rem), 820px">
+      <source type="image/webp" srcset="/og/img/hero-smoking-times-and-temps-600.webp 600w, /og/img/hero-smoking-times-and-temps.webp 1000w" sizes="(max-width: 863px) calc(100vw - 2.7rem), 820px">
+      <img class="page-hero__bg" src="/og/img/hero-smoking-times-and-temps.jpg" srcset="/og/img/hero-smoking-times-and-temps-600.jpg 600w, /og/img/hero-smoking-times-and-temps.jpg 1000w" sizes="(max-width: 863px) calc(100vw - 2.7rem), 820px" width="1000" height="666" alt="" fetchpriority="high" decoding="async">
+    </picture>
+    <div class="page-hero__scrim" aria-hidden="true"></div>
     <h1>Smoking Times &amp; Temperatures Chart</h1>
     <p class="no-print">A free, printable BBQ cheat sheet: cook times, smoker and pull temperatures, rest, and cooked-yield loss for the cuts you smoke most, plus the USDA safe minimums. Print it for the smoker, or run the exact numbers in our <a href="/tools">free calculators</a>.</p>
-  </div>
+  </section>
 
   <div class="chart-actions no-print">
     <button type="button" class="print-btn" id="printChartBtn">Print / Save as PDF</button>
