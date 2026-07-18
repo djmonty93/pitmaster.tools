@@ -356,7 +356,7 @@ const METRO_NOTE = {
 // today so the fallback path is defensive, not load-bearing.
 const METRO_HOOK = {
   'new-york-ny':          'Brooklyn runs a Texas-style brisket scene',
-  'los-angeles-ca':       'LA’s brisket scene rivals Austin’s post-oak',
+  'los-angeles-ca':       'LA runs the West Coast’s largest brisket scene',
   'chicago-il':           'Chicago’s rib-tip and hot-link tradition',
   'dallas-fort-worth-tx': 'DFW’s brisket scene follows Austin’s lead',
   'houston-tx':           'Houston blends brisket, seafood smoke, barbacoa',
@@ -1252,11 +1252,11 @@ function renderMetro(metro) {
         'name': 'What makes a day a good smoke day in ' + name + '?',
         'acceptedAnswer': {
           '@type': 'Answer',
-          // De-boilerplated: weaves the metro-specific `note` (METRO_NOTE,
-          // required per metro above) between the scoring-mechanics sentences
-          // so this answer is genuinely metro-specific, not just the city
-          // name swapped into identical text across all 50 pages.
-          'text': 'A day in ' + name + ' scores well when rain probability is low, sustained wind and gusts are mild for your cooker, the temperature stays inside roughly 40-85 °F, and the wet-bulb temperature is low enough that long-stall cuts (brisket, pork butt, ribs) won’t get stuck for hours. ' + note + ' Each factor reduces the score with its own weight, calibrated for the ' + regLbl + ' climate.',
+          // Kept weather-scoring only: the culinary METRO_NOTE belongs in the
+          // page's heritage prose, not spliced into a scoring answer. Per-metro
+          // variation here comes from the region-climate calibration clause;
+          // the meta description carries the metro-specific hook.
+          'text': 'A day in ' + name + ' scores well when rain probability is low, sustained wind and gusts are mild for your cooker, the temperature stays inside roughly 40-85 °F, and the wet-bulb temperature is low enough that long-stall cuts (brisket, pork butt, ribs) won’t get stuck for hours. Each factor reduces the score with its own weight, calibrated for the ' + regLbl + ' climate.',
         },
       },
       {

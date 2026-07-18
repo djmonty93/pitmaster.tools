@@ -314,8 +314,8 @@ test('renderMetro embeds canonical, title, description, and ZIP-prefilled input'
   }
 });
 
-test('every metro description stays <=160 rendered chars and varies across metros', () => {
-  const descriptions = new Set();
+test('every metro description stays <=160 rendered chars and carries a distinct per-metro hook', () => {
+  const hooks = new Set();
   for (const metro of gen.METROS) {
     const html = gen.renderMetro(metro);
     const match = html.match(/description="([^"]*)"/);
@@ -323,12 +323,21 @@ test('every metro description stays <=160 rendered chars and varies across metro
     const desc = match[1].replace(/\\"/g, '"');
     assert.ok(desc.length <= 160,
       metro.slug + ' description is ' + desc.length + ' chars (max 160): ' + desc);
-    descriptions.add(desc);
+    // Strip the shared prefix ("<City>, <ST> 7-day BBQ smoke forecast. ") and
+    // suffix (". Brisket, ..."). Asserting on the remaining hook, not the whole
+    // description, is what actually proves de-templating: the city name alone
+    // would make all 50 descriptions unique even with boilerplate hooks.
+    const hook = desc
+      .replace(/^.*?7-day BBQ smoke forecast\.\s*/, '')
+      .replace(/\.\s*Brisket, ribs, pork, and chicken scored by cooker\.?$/, '')
+      .trim();
+    assert.ok(hook.length > 0, metro.slug + ' has no distinct description hook');
+    hooks.add(hook);
   }
-  // De-templating check: the pre-2026-07 description was byte-identical
-  // (only city/state swapped) across all 50 metros. Confirm real variety now.
-  assert.ok(descriptions.size >= 6,
-    'expected descriptions to vary by at least the 6 BBQ regions, got ' + descriptions.size + ' unique values');
+  // Pre-2026-07 the hook did not exist (description was byte-identical modulo
+  // city/state). Confirm real per-metro/region variety now.
+  assert.ok(hooks.size >= 6,
+    'expected description hooks to vary by at least the 6 BBQ regions, got ' + hooks.size + ' unique values');
 });
 
 test('renderMetro embeds four JSON-LD blocks (WebApplication + FAQPage + BreadcrumbList + Dataset)', () => {
