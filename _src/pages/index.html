@@ -240,6 +240,16 @@
   box-shadow: var(--shadow);
   padding: 1.25rem 1.35rem;
 }
+.wood-card { overflow: hidden; }
+.wood-card__thumb {
+  display: block;
+  margin: -1.25rem -1.35rem 1rem;
+  height: 140px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--card-border);
+}
+.wood-card__thumb picture { display: block; width: 100%; height: 100%; }
+.wood-card__thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .wood-card p,
 .guide-card p { margin-top: .55rem; }
 .faq-numbered {
@@ -680,22 +690,57 @@
     <p>If you want to <a class="text-link" href="/#calculator">enter your cut and get a full timeline</a>, the calculator above also surfaces wood recommendations. Use this quick guide when you just need a clean pairing fast.</p>
     <div class="wood-grid">
       <article class="wood-card">
+        <div class="wood-card__thumb">
+          <picture>
+            <source type="image/avif" srcset="/og/img/wood-oak.avif">
+            <source type="image/webp" srcset="/og/img/wood-oak.webp">
+            <img src="/og/img/wood-oak.jpg" width="700" height="467" alt="Split oak logs and smoking wood chunks" loading="lazy" decoding="async">
+          </picture>
+        </div>
         <h3>Beef</h3>
         <p>Oak gives beef neutral, even smoke and is the safest all-day choice. Hickory is bolder and more bacon-like, pecan is slightly sweet and rounder, and mesquite is intense enough that it works best in moderation or blended with oak.</p>
       </article>
       <article class="wood-card">
+        <div class="wood-card__thumb">
+          <picture>
+            <source type="image/avif" srcset="/og/img/wood-apple.avif">
+            <source type="image/webp" srcset="/og/img/wood-apple.webp">
+            <img src="/og/img/wood-apple.jpg" width="700" height="467" alt="Applewood smoking chunks and split apple logs" loading="lazy" decoding="async">
+          </picture>
+        </div>
         <h3>Pork</h3>
         <p>Apple adds sweet fruit character, cherry gives mild smoke and deep mahogany color, hickory brings classic barbecue punch, and pecan lands in the middle with a rich, nutty finish that still stays balanced over long cooks.</p>
       </article>
       <article class="wood-card">
+        <div class="wood-card__thumb">
+          <picture>
+            <source type="image/avif" srcset="/og/img/wood-cherry.avif">
+            <source type="image/webp" srcset="/og/img/wood-cherry.webp">
+            <img src="/og/img/wood-cherry.jpg" width="700" height="467" alt="Cherry wood smoking chunks" loading="lazy" decoding="async">
+          </picture>
+        </div>
         <h3>Chicken</h3>
         <p>Apple and cherry are gentle enough for white meat, pecan gives more depth without turning harsh, and alder stays delicate when you want smoke in the background instead of dominating the bird.</p>
       </article>
       <article class="wood-card">
+        <div class="wood-card__thumb">
+          <picture>
+            <source type="image/avif" srcset="/og/img/wood-maple.avif">
+            <source type="image/webp" srcset="/og/img/wood-maple.webp">
+            <img src="/og/img/wood-maple.jpg" width="700" height="467" alt="Maple wood smoking chunks and split logs" loading="lazy" decoding="async">
+          </picture>
+        </div>
         <h3>Turkey</h3>
         <p>Apple keeps turkey sweet and clean, cherry improves color, maple gives a light mellow smoke that plays well with herb butter, and pecan adds just enough richness for dark meat without overpowering the breast.</p>
       </article>
       <article class="wood-card">
+        <div class="wood-card__thumb">
+          <picture>
+            <source type="image/avif" srcset="/og/img/wood-oak-herb.avif">
+            <source type="image/webp" srcset="/og/img/wood-oak-herb.webp">
+            <img src="/og/img/wood-oak-herb.jpg" width="700" height="467" alt="Oak wood chunks with fresh rosemary sprigs" loading="lazy" decoding="async">
+          </picture>
+        </div>
         <h3>Lamb</h3>
         <p>Oak is usually the best base wood for lamb, pecan adds subtle sweetness, cherry brightens the finish, and rosemary or herb sprigs over coals can add a Mediterranean accent when used lightly.</p>
       </article>
