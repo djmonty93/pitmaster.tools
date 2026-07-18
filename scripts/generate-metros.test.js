@@ -209,13 +209,13 @@ test('metro hero renders its region photo with a full responsive <picture> (Stag
 
   // Canonical expected <picture> block: wrapper tags + AVIF-before-WebP order
   // (browsers ignore <source> outside <picture>, and order decides the winner) +
-  // exact 600w/1000w descriptors, shared sizes, 1000x666 dims, decorative alt,
-  // and the LCP fetch hint.
+  // exact 600w/1000w descriptors, shared sizes, 1000x666 dims, the per-image
+  // descriptive alt from gen.HERO_ALT, and the LCP fetch hint.
   const expectedPicture = (base) => [
     '    <picture>',
     '      <source type="image/avif" srcset="/og/img/' + base + '-600.avif 600w, /og/img/' + base + '.avif 1000w" sizes="' + SIZES + '">',
     '      <source type="image/webp" srcset="/og/img/' + base + '-600.webp 600w, /og/img/' + base + '.webp 1000w" sizes="' + SIZES + '">',
-    '      <img class="page-hero__bg" src="/og/img/' + base + '.jpg" srcset="/og/img/' + base + '-600.jpg 600w, /og/img/' + base + '.jpg 1000w" sizes="' + SIZES + '" width="1000" height="666" alt="" fetchpriority="high" decoding="async">',
+    '      <img class="page-hero__bg" src="/og/img/' + base + '.jpg" srcset="/og/img/' + base + '-600.jpg 600w, /og/img/' + base + '.jpg 1000w" sizes="' + SIZES + '" width="1000" height="666" alt="' + gen.escapeHtml(gen.HERO_ALT[base]) + '" fetchpriority="high" decoding="async">',
     '    </picture>',
   ].join('\n');
 
