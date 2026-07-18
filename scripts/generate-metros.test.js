@@ -215,7 +215,7 @@ test('metro hero renders its region photo with a full responsive <picture> (Stag
     '    <picture>',
     '      <source type="image/avif" srcset="/og/img/' + base + '-600.avif 600w, /og/img/' + base + '.avif 1000w" sizes="' + SIZES + '">',
     '      <source type="image/webp" srcset="/og/img/' + base + '-600.webp 600w, /og/img/' + base + '.webp 1000w" sizes="' + SIZES + '">',
-    '      <img class="page-hero__bg" src="/og/img/' + base + '.jpg" srcset="/og/img/' + base + '-600.jpg 600w, /og/img/' + base + '.jpg 1000w" sizes="' + SIZES + '" width="1000" height="666" alt="' + gen.HERO_ALT[base] + '" fetchpriority="high" decoding="async">',
+    '      <img class="page-hero__bg" src="/og/img/' + base + '.jpg" srcset="/og/img/' + base + '-600.jpg 600w, /og/img/' + base + '.jpg 1000w" sizes="' + SIZES + '" width="1000" height="666" alt="' + gen.escapeHtml(gen.HERO_ALT[base]) + '" fetchpriority="high" decoding="async">',
     '    </picture>',
   ].join('\n');
 
