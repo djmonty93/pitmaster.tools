@@ -13,6 +13,30 @@ function wetBulb_F(Tdb_F, rh) {
   return tw * 9 / 5 + 32;
 }
 
+/* ── Temperature conversions ────────────────────────────────────────────────*/
+function spF2C(f) { return (f - 32) * 5 / 9; }
+function spC2F(c) { return c * 9 / 5 + 32; }
+
+/* ── Psychrometrics (SI: kPa, °C, humidity ratio W in kg water / kg dry air) ─
+   pSat: Buck equation. wetBulbC: ASHRAE relation solved by bisection (stable
+   near saturation, where a Newton step is not). */
+function spPSat(T) { return 0.61121 * Math.exp((18.678 - T / 234.5) * (T / (257.14 + T))); }
+function spPAtm(altM) { return 101.325 * Math.pow(1 - 2.25577e-5 * (altM || 0), 5.2559); }
+function spHumidityRatio(T, rh, p) {
+  var pv = (rh / 100) * spPSat(T);
+  return 0.621945 * pv / (p - pv);
+}
+function spWetBulbC(Tdb, W, p) {
+  var lo = 0, hi = Tdb, Twb, Ws, Wc, i;
+  for (i = 0; i < 40; i++) {
+    Twb = (lo + hi) / 2;
+    Ws = 0.621945 * spPSat(Twb) / (p - spPSat(Twb));
+    Wc = ((2501 - 2.326 * Twb) * Ws - 1.006 * (Tdb - Twb)) / (2501 + 1.86 * Tdb - 4.186 * Twb);
+    if (Wc > W) hi = Twb; else lo = Twb;
+  }
+  return (lo + hi) / 2;
+}
+
 /* ── Default RH by cooker type (Blonder empirical) ──────────────────────────*/
 var SP_COOKER_RH = {
   'offset':   4,
