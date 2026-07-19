@@ -402,7 +402,7 @@ a.affiliate-card__product:focus-visible {
   border: 1px solid var(--card-border);
   border-radius: var(--radius);
 }
-.score-explainer h3 {
+.score-explainer h2 {
   margin: 0 0 .55rem;
   font-size: 1rem;
 }

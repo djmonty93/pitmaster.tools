@@ -21,11 +21,23 @@ Pitmaster Tools provides browser-based calculators for low-and-slow BBQ cooking.
 - [Best Smoke Days Forecast](https://pitmaster.tools/smoke-weather/) — 7-day weather forecast scored 0-100 for your cut and cooker, by ZIP
 - [Best Cities to Smoke Meat Today](https://pitmaster.tools/smoke-weather/best-cities) — all 50 U.S. metros ranked by today's smoke score, updated daily
 - [Smoking Times & Temperatures Chart](https://pitmaster.tools/smoking-times-and-temps) — free printable cook times, smoker and pull temps, rest, and USDA safe minimums
+- [All BBQ Calculators](https://pitmaster.tools/tools) — index of every free Pitmaster Tools calculator
+
+## Guides & Reference
+
+- [Metro Forecast Directory](https://pitmaster.tools/smoke-weather/metros/) — browse Best Smoke Days forecasts for all 50 U.S. metros
+- [Smoke Weather Methodology](https://pitmaster.tools/smoke-weather/methodology) — how the 0-100 smoke score is calculated (wet-bulb stall risk, cooker wind sensitivity, data sources)
+- [Smoke Weather FAQ](https://pitmaster.tools/smoke-weather/faq) — common questions about the forecast, scoring, and accuracy
+- [Winter BBQ Guide](https://pitmaster.tools/seasonal/winter) — cold-weather smoking: fuel burn, daylight, and cook planning
+- [Spring BBQ Guide](https://pitmaster.tools/seasonal/spring) — frontal wind and shoulder-season smoke planning
+- [Summer BBQ Guide](https://pitmaster.tools/seasonal/summer) — humidity, wet-bulb stall, and afternoon storm timing
+- [Fall BBQ Guide](https://pitmaster.tools/seasonal/fall) — dew point, tailgate demand, and autumn cook planning
+- [About Pitmaster Tools](https://pitmaster.tools/about) — who builds the tools and the data sources behind them
 
 ## Key Facts
 
 - Brisket cooks at ~1.25–1.5 hrs/lb at 225°F; pull at 195°F (sliced) or 205°F (pulled)
-- Pork shoulder: ~1.5 hrs/lb at 225°F; pull at 205°F for pulled pork
+- Pork shoulder: ~1.5 hrs/lb at 225°F; pull at 203°F for pulled pork
 - Baby back ribs: 5–5.5 hrs at 225°F; spare ribs: 6–6.5 hrs
 - Brisket loses ~40% weight during cooking; pork butt ~35%
 - Minimum brisket rest: 90 minutes; ideal rest: 2–4 hours

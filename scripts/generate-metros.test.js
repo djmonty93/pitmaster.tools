@@ -314,6 +314,32 @@ test('renderMetro embeds canonical, title, description, and ZIP-prefilled input'
   }
 });
 
+test('every metro description stays <=160 rendered chars and carries a distinct per-metro hook', () => {
+  const hooks = new Set();
+  for (const metro of gen.METROS) {
+    const html = gen.renderMetro(metro);
+    const match = html.match(/description="([^"]*)"/);
+    assert.ok(match, metro.slug + ' description missing from frontmatter');
+    const desc = match[1].replace(/\\"/g, '"');
+    assert.ok(desc.length <= 160,
+      metro.slug + ' description is ' + desc.length + ' chars (max 160): ' + desc);
+    // Strip the shared prefix ("<City>, <ST> 7-day BBQ smoke forecast. ") and
+    // suffix (". Brisket, ..."). Asserting on the remaining hook, not the whole
+    // description, is what actually proves de-templating: the city name alone
+    // would make all 50 descriptions unique even with boilerplate hooks.
+    const hook = desc
+      .replace(/^.*?7-day BBQ smoke forecast\.\s*/, '')
+      .replace(/\.\s*Brisket, ribs, pork, and chicken scored by cooker\.?$/, '')
+      .trim();
+    assert.ok(hook.length > 0, metro.slug + ' has no distinct description hook');
+    hooks.add(hook);
+  }
+  // Pre-2026-07 the hook did not exist (description was byte-identical modulo
+  // city/state). Every metro now carries its own distinct hook.
+  assert.strictEqual(hooks.size, gen.METROS.length,
+    'expected every metro to have a unique description hook, got ' + hooks.size + ' unique of ' + gen.METROS.length);
+});
+
 test('renderMetro embeds four JSON-LD blocks (WebApplication + FAQPage + BreadcrumbList + Dataset)', () => {
   const html = gen.renderMetro(gen.METROS[0]);
   const ldBlocks = html.match(/<script type="application\/ld\+json">/g) || [];

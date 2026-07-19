@@ -125,7 +125,7 @@
     <div class="page-hero__scrim" aria-hidden="true"></div>
     <h1>Best Smoke Days</h1>
     <p>A weather-aware forecast scored for your cut and cooker. Pick a day with a high score, light the fire, and stop guessing which Saturday gets blown out by 35-mph gusts.</p>
-    <p>Curious where it's a great day to smoke right now? See the <a href="/smoke-weather/best-cities">best cities to smoke meat today</a>, ranked live.</p>
+    <p>Curious where it's a great day to smoke right now? See the <a href="/smoke-weather/best-cities">best cities to smoke meat today</a>, ranked live, or browse the <a href="/smoke-weather/metros/">full metro forecast directory</a>.</p>
   </section>
 
   <form id="swForm" class="form-card" autocomplete="off" novalidate aria-label="Smoke forecast inputs">
@@ -196,7 +196,7 @@
        tokens for the swatches so any future change to the score
        palette propagates here automatically. -->
   <aside class="score-explainer" aria-label="What the score means">
-    <h3>What the 0-100 score means</h3>
+    <h2>What the 0-100 score means</h2>
     <ul class="score-legend">
       <li><span class="score-legend__swatch band-ideal" aria-hidden="true"></span><strong>85-100 &middot; Ideal</strong>: light the fire</li>
       <li><span class="score-legend__swatch band-green" aria-hidden="true"></span><strong>70-84 &middot; Good</strong>: solid smoke day</li>
@@ -211,6 +211,32 @@
   <p class="sw-disclaimer">
     Forecasts model regional weather, not your microclimate. Trees, structures, and elevation can shift wind and temperature noticeably from the airport-grade source we pull. Always step outside before lighting the fire.
   </p>
+
+  <section class="faq-section" aria-labelledby="sw-faq-title">
+    <h2 id="sw-faq-title">Frequently asked questions</h2>
+    <details class="faq-item">
+      <summary>What makes a day a good smoke day?</summary>
+      <div class="faq-body">A day scores well when rain probability is low, sustained wind and gusts are mild for your cooker type, the temperature stays inside roughly 40-85 °F, and the wet-bulb temperature is low enough that long-stall cuts (brisket, pork butt, ribs) won't get stuck for hours. Each factor reduces the score with its own weight, capped at 0.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Why does cooker type change the score?</summary>
+      <div class="faq-body">An offset stick burner is roughly 15× more wind-sensitive than an electric smoker and pulls humidity from outside air, which feeds straight into stall risk. A kamado is heavily insulated with a small intake, so wind barely moves the needle. The score weights wind and humidity per cooker so an offset day and an electric day are evaluated on the right standard.</div>
+    </details>
+    <details class="faq-item">
+      <summary>How accurate is the forecast?</summary>
+      <div class="faq-body">We pull from Open-Meteo as the primary source with the US National Weather Service as failover. Each day carries a confidence label: high for the next 24-48 hours, dropping to medium and then low further out. Treat the 5-7 day end of the window as a rough planning signal, not a commitment.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Does the score include cooker output, fuel, or my altitude?</summary>
+      <div class="faq-body">No. The score evaluates outdoor conditions only: what the weather is doing to your cook. Fuel quantity, cooker output, altitude, and pit-management style are out of scope here. Use the <a href="/charcoal-calculator">Charcoal Calculator</a> and <a href="/cook-time-coordinator">Cook Time Coordinator</a> for those.</div>
+    </details>
+    <p>More detail in the <a href="/smoke-weather/faq">Smoke Weather FAQ</a> and the <a href="/smoke-weather/methodology">scoring methodology</a>.</p>
+  </section>
+
+  <section aria-labelledby="seasonal-title">
+    <h2 id="seasonal-title">Plan by season</h2>
+    <p>Weather shifts the whole cook. See the season-specific guides for <a href="/seasonal/winter">winter</a>, <a href="/seasonal/spring">spring</a>, <a href="/seasonal/summer">summer</a>, and <a href="/seasonal/fall">fall</a> smoking.</p>
+  </section>
 
   <section class="related-tools" aria-labelledby="related-title">
     <h2 id="related-title">More Pitmaster Tools</h2>
