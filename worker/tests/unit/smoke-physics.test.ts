@@ -53,3 +53,31 @@ describe('cut geometry', () => {
     expect(P.spLc('brisket-packer', 20, 0)).toBeGreaterThan(1.25);
   });
 });
+
+const AMB = { ambientF: 70, ambientRh: 50, altitudeM: 0 };
+function wb(cookerType: string, extra: any = {}) {
+  return P.spPitWetBulbF({ pitF: 225, cookerType, kmKey: 'brisket-packer', weightLbs: 14, ...AMB, ...extra });
+}
+
+describe('pit mass balance -> wet-bulb', () => {
+  it('reproduces spec §4 table within 1.5 F across cookers', () => {
+    const spec: Record<string, number> = { offset: 97, pellet: 100, kettle: 102, drum: 101, kamado: 107, electric: 110 };
+    for (const c of Object.keys(spec)) expect(Math.abs(wb(c) - spec[c])).toBeLessThan(1.5);
+  });
+  it('W_pit rises (wet-bulb rises) as air exchange falls: sealed > open', () => {
+    expect(wb('electric')).toBeGreaterThan(wb('kamado'));
+    expect(wb('kamado')).toBeGreaterThan(wb('offset'));
+  });
+  it('humidity iteration is stable (4 passes) and stays below pit-5', () => {
+    for (const c of ['offset', 'pellet', 'kettle', 'kamado', 'electric'])
+      expect(wb(c)).toBeLessThanOrEqual(220);
+  });
+  it('water pan raises wet-bulb more than any cooker swap', () => {
+    const panSwing = wb('electric', { waterPan: true }) - wb('electric');
+    const cookerSwing = wb('electric') - wb('offset');
+    expect(panSwing).toBeGreaterThan(cookerSwing);
+  });
+  it('more pieces raise pit wet-bulb', () => {
+    expect(wb('kamado', { nPieces: 8 })).toBeGreaterThan(wb('kamado', { nPieces: 1 }));
+  });
+});

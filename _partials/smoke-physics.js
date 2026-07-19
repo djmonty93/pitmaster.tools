@@ -94,6 +94,45 @@ function spSurfaceArea(kmKey, weightLbs) {
   return c.ARef * Math.pow((weightLbs || c.wRef) / c.wRef, 1 - c.n);
 }
 
+/* ── Cooker air exchange (kg dry air/h) — the only place cooker type enters
+   the humidity model (spec §3.2). Higher = drier pit. ────────────────────── */
+var SP_AIR_EXCHANGE = {
+  'offset': 40, 'drum': 14, 'pellet': 18, 'kettle': 10,
+  'kamado': 4, 'electric': 3, 'pellet-hi': 26
+};
+
+var SP_EVAP_C = 0.28;   /* kg/(h·m²·100K) — lumped meat mass-transfer coeff */
+var SP_PAN_C  = 1.6;    /* kg/(h·m²·100K) — water pan */
+var SP_PAN_AREA = 0.25; /* m² — full water pan surface */
+var SP_WIND_C = 0.05;   /* per mph — draft boost on open cookers */
+
+/* Pit wet-bulb (°F) from an ambient + cooker mass balance (spec §3–4).
+   Fixed-point iterate 4x (evap flux depends on T_wb depends on flux). Final
+   T_wb capped at pitF−5 to keep the plateau/dwell math off the singularity. */
+function spPitWetBulbF(o) {
+  var p = spPAtm(o.altitudeM);
+  var Wamb = spHumidityRatio(spF2C(o.ambientF != null ? o.ambientF : 70),
+                             (o.ambientRh != null ? o.ambientRh : 50), p);
+  var TpitC = spF2C(o.pitF);
+  var mAir = SP_AIR_EXCHANGE[o.cookerType] || 18;
+  if (o.windMph && (o.cookerType === 'offset' || o.cookerType === 'kettle' || o.cookerType === 'drum')) {
+    mAir = mAir * (1 + SP_WIND_C * o.windMph);
+  }
+  var Asurf = spSurfaceArea(o.kmKey, o.weightLbs);
+  var Apan = o.waterPan ? SP_PAN_AREA : 0;
+  var nPieces = o.nPieces || 1;
+  var capC = spF2C(o.pitF - 5);
+  var TwbC = 40, i, mEvap, mPan, Wpit;
+  for (i = 0; i < 4; i++) {
+    mEvap = SP_EVAP_C * Asurf * (TpitC - TwbC) / 100 * nPieces;
+    mPan  = Apan > 0 ? SP_PAN_C * Apan * (TpitC - TwbC) / 100 : 0;
+    Wpit = Wamb + (mEvap + mPan) / mAir;
+    TwbC = spWetBulbC(TpitC, Wpit, p);
+    if (TwbC > capC) TwbC = capC;
+  }
+  return spC2F(TwbC);
+}
+
 var SP_STALL_START = 150;
 var SP_STALL_END   = 165;
 
