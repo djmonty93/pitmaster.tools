@@ -132,7 +132,7 @@ function buildArticle(parts: IsoWeekParts, scheduled: Date): BuiltArticle {
       heading: 'Southeast (anchor: Atlanta)',
       body:
         `The southeast is humidity central from late spring through October. ` +
-        `Long cooks like whole hog and packer brisket are forgiving when the dew point stays high — the stall is shorter — but expect smoke ring to feel muted if surface winds are calm. ` +
+        `Long cooks like whole hog and packer brisket run a longer stall when the dew point stays high, because humid air keeps the meat surface wet and evaporating, so plan extra time or wrap to push through it. Expect the smoke ring to feel muted if surface winds are calm. ` +
         `If the forecast shows gusts above 15 mph in Atlanta, Charlotte, or Nashville, plan a wind break or move the offset closer to the house.`,
     },
     {
@@ -154,7 +154,7 @@ function buildArticle(parts: IsoWeekParts, scheduled: Date): BuiltArticle {
       heading: 'Mountain (anchor: Denver)',
       body:
         `Altitude affects cook time more than weather most weeks. ` +
-        `At 5,000+ ft, internal temperatures rise faster but stalls can run longer if the air is dry. ` +
+        `At 5,000+ ft, internal temperatures rise faster, and the region's dry air tends to shorten the stall rather than stretch it, since a dry surface finishes evaporating sooner. ` +
         `Watch overnight lows: a clear sky in Denver, Salt Lake City, or Albuquerque can drop pit temps 30°F between 2 a.m. and 5 a.m., which is why overnight cooks here need an insulated firebox or a controller with low-temp recovery.`,
     },
     {
