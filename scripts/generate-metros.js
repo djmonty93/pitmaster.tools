@@ -1243,40 +1243,54 @@ function renderMetro(metro) {
         .concat(['  </section>', ''])
     : [];
 
+  // Single source of truth for the metro FAQ. The same {q, a} pairs feed
+  // both the FAQPage JSON-LD (below) and the visible <details> FAQ section
+  // (faqSectionLines), so the two can never drift — enforced by the
+  // schema↔visible parity test in generate-metros.test.js (#133).
+  const faqItems = [
+    {
+      // Kept weather-scoring only: the culinary METRO_NOTE belongs in the
+      // page's heritage prose, not spliced into a scoring answer. Per-metro
+      // variation here comes from the region-climate calibration clause;
+      // the meta description carries the metro-specific hook.
+      q: 'What makes a day a good smoke day in ' + name + '?',
+      a: 'A day in ' + name + ' scores well when rain probability is low, sustained wind and gusts are mild for your cooker, the temperature stays inside roughly 40-85 °F, and the wet-bulb temperature is low enough that long-stall cuts (brisket, pork butt, ribs) won’t get stuck for hours. Each factor reduces the score with its own weight, calibrated for the ' + regLbl + ' climate.',
+    },
+    {
+      q: 'Which cooker works best in ' + name + '?',
+      a: cooker,
+    },
+    {
+      q: 'How accurate is the ' + name + ' forecast?',
+      a: 'We pull from Open-Meteo as the primary source with the US National Weather Service as failover. Each day in the ' + name + ' 7-day window carries a confidence label: high for the next 24-48 hours, dropping to medium and then low further out. Treat the 5-7 day end of the window as a planning signal, not a commitment.',
+    },
+  ];
+
   const faqJson = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    'mainEntity': [
-      {
+    'mainEntity': faqItems.map(function (it) {
+      return {
         '@type': 'Question',
-        'name': 'What makes a day a good smoke day in ' + name + '?',
-        'acceptedAnswer': {
-          '@type': 'Answer',
-          // Kept weather-scoring only: the culinary METRO_NOTE belongs in the
-          // page's heritage prose, not spliced into a scoring answer. Per-metro
-          // variation here comes from the region-climate calibration clause;
-          // the meta description carries the metro-specific hook.
-          'text': 'A day in ' + name + ' scores well when rain probability is low, sustained wind and gusts are mild for your cooker, the temperature stays inside roughly 40-85 °F, and the wet-bulb temperature is low enough that long-stall cuts (brisket, pork butt, ribs) won’t get stuck for hours. Each factor reduces the score with its own weight, calibrated for the ' + regLbl + ' climate.',
-        },
-      },
-      {
-        '@type': 'Question',
-        'name': 'Which cooker works best in ' + name + '?',
-        'acceptedAnswer': {
-          '@type': 'Answer',
-          'text': cooker,
-        },
-      },
-      {
-        '@type': 'Question',
-        'name': 'How accurate is the ' + name + ' forecast?',
-        'acceptedAnswer': {
-          '@type': 'Answer',
-          'text': 'We pull from Open-Meteo as the primary source with the US National Weather Service as failover. Each day in the ' + name + ' 7-day window carries a confidence label: high for the next 24-48 hours, dropping to medium and then low further out. Treat the 5-7 day end of the window as a planning signal, not a commitment.',
-        },
-      },
-    ],
+        'name': it.q,
+        'acceptedAnswer': { '@type': 'Answer', 'text': it.a },
+      };
+    }),
   };
+
+  // Visible FAQ mirroring faqJson — same copy, rendered as accessible
+  // <details> disclosures (PR #132 pattern from the seasonal/hub pages).
+  const faqSectionLines = ['  <section class="faq-section" aria-label="Frequently asked questions">',
+    '    <h2>Frequently asked questions</h2>']
+    .concat(faqItems.flatMap(function (it) {
+      return [
+        '    <details class="faq-item">',
+        '      <summary>' + escapeHtml(it.q) + '</summary>',
+        '      <div class="faq-body">' + escapeHtml(it.a) + '</div>',
+        '    </details>',
+      ];
+    }))
+    .concat(['  </section>', '']);
 
   // BreadcrumbList helps Google show the page hierarchy in the SERP and
   // sitelinks. Three levels: site root → /smoke-weather/ landing → this
@@ -1465,6 +1479,7 @@ function renderMetro(metro) {
     '    <p>' + escapeHtml(closing) + '</p>',
     '  </section>',
     '',
+    ...faqSectionLines,
     '  <p class="sw-disclaimer">',
     '    Forecasts model regional weather, not your microclimate. Trees, structures, and elevation can shift wind and temperature noticeably from the airport-grade source we pull. Always step outside before lighting the fire.',
     '  </p>',

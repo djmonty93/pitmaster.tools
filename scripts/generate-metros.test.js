@@ -350,6 +350,39 @@ test('renderMetro embeds four JSON-LD blocks (WebApplication + FAQPage + Breadcr
   assert.ok(html.includes('"@type": "Dataset"'));
 });
 
+test('renderMetro renders a visible FAQ that mirrors the FAQPage JSON-LD (#133)', () => {
+  const { escapeHtml } = require('./lib/text.js');
+  for (const metro of gen.METROS) {
+    const html = gen.renderMetro(metro);
+    // Visible FAQ section is present with one <details> per Q&A.
+    assert.ok(html.includes('class="faq-section"'), metro.slug + ' missing visible faq-section');
+    const items = html.match(/class="faq-item"/g) || [];
+    assert.equal(items.length, 3, metro.slug + ' expected 3 visible faq-item blocks, got ' + items.length);
+
+    // Pull the FAQPage JSON-LD and assert every question + answer also
+    // appears (HTML-escaped) in the visible body — schema↔visible parity
+    // so the two can't silently drift.
+    const blocks = [];
+    const re = /<script type="application\/ld\+json">\s*([\s\S]*?)\s*<\/script>/g;
+    let m;
+    while ((m = re.exec(html)) !== null) blocks.push(m[1]);
+    let faq = null;
+    for (const raw of blocks) {
+      const candidate = JSON.parse(raw);
+      if (candidate && candidate['@type'] === 'FAQPage') { faq = candidate; break; }
+    }
+    assert.ok(faq, metro.slug + ' FAQPage JSON-LD block missing');
+    // Strip the JSON-LD scripts so we only search the rendered body.
+    const body = html.replace(re, '');
+    for (const qa of faq.mainEntity) {
+      assert.ok(body.includes(escapeHtml(qa.name)),
+        metro.slug + ' visible FAQ missing question: ' + qa.name);
+      assert.ok(body.includes(escapeHtml(qa.acceptedAnswer.text)),
+        metro.slug + ' visible FAQ missing answer for: ' + qa.name);
+    }
+  }
+});
+
 test('ldJson escapes script-breaking characters in JSON-LD', () => {
   const out = gen.ldJson({ evil: '</script><img src=x onerror=alert(1)>', amp: 'a & b' });
   // No raw <, >, or & may survive into the <script> body.
