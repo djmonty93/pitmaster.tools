@@ -28,6 +28,67 @@ Everything below Section 1 is the owner-authored spec, reproduced verbatim.
 
 ---
 
+## 0.1 Resolved open items (owner decisions — supersede Sections 3.3 / 9 / 10 / 11 where noted)
+
+Verification of the owner spec reproduced Sections 5–6 exactly and Section 4 only under an unstated surface-area assumption (~0.47 m² for a 14 lb brisket). The owner resolved it as follows; all values re-verified against the pipeline.
+
+**1. Surface area is geometric and pinned — never fitted.** `ṁ_evap = C_evap·A·ΔT/100` is degenerate: `C_evap` and `A` only appear as a product, and no data separates them until pit humidity is measured directly. So `A` is fixed from geometry (a measurable fact about the meat) and `SP_EVAP_C` absorbs all transport uncertainty. This keeps `n_pieces`, weight-scaling, and trim effects physically meaningful.
+
+**2. No new scaling parameter.** Reuse the same `n` that drives `Lc`: since volume ∝ mass and thickness ∝ m^n, the two dominant faces give
+
+```
+A = A_ref · (weight / weight_ref) ^ (1 − n)
+```
+
+Brisket (n=0.22) → A ∝ m^0.78 (grows in plane, faster); pork butt (n=0.33) → A ∝ m^0.67 (isotropic). **Verified:** brisket 14→28 lb raises A by 1.717× (target 1.72); butt 8→16 lb by 1.591× (target 1.59).
+
+**3. `A_ref` table** (box/ellipsoid geometry × rugosity for surface irregularity). This is the new authoritative per-cut area column; it joins the Section 9 table.
+
+| Cut | weight_ref (lb) | A_ref (m²) | rugosity |
+|---|---|---|---|
+| Brisket, packer | 14 | 0.36 | 1.20 |
+| Brisket, flat | 7 | 0.23 | 1.20 |
+| Brisket, point | 6 | 0.19 | 1.20 |
+| Pork butt / shoulder | 8 | 0.22 | 1.20 |
+| Beef chuck roast | 4 | 0.16 | 1.20 |
+| Beef short rib (plate) | 4 | 0.17 | 1.30 |
+| Beef back rib | 3 | 0.19 | 1.55 |
+| Pork spare rib | 3.5 | 0.26 | 1.50 |
+| Pork baby back | 2 | 0.17 | 1.50 |
+| Pork belly | 5 | 0.20 | 1.15 |
+| Pork loin | 4 | 0.17 | 1.10 |
+| Whole chicken | 4.5 | 0.13 | 1.15 |
+| Turkey, whole | 14 | 0.29 | 1.15 |
+| Turkey breast | 7 | 0.17 | 1.10 |
+| Tri-tip | 2.5 | 0.12 | 1.15 |
+| Prime rib | 12 | 0.21 | 1.15 |
+| Lamb shoulder | 5 | 0.17 | 1.20 |
+| Salmon fillet | 2 | 0.15 | 1.10 |
+
+A 3.5 lb spare rack (A_ref 0.26) has more surface than an 8 lb butt (0.22): the high surface-to-mass ratio is a second, independent route to "ribs barely stall."
+
+**4. Constant change:** `SP_EVAP_C: 0.22 → 0.28` to hold the Section 4 table with the geometric A_ref=0.36. **Verified:** reproduces the dry-cooker wet-bulb column within ~1 °F (offset 97.4/spec 97, kamado 106.6/107, electric 109.3/110). This is fitting a constant to the earlier inferred table (itself unmeasured) — it only removes internal inconsistency; **only a pit hygrometer resolves it for real** (Section 12, Tier 2).
+
+**5. Sensitivity — the real reason not to over-engineer `A`.** ±25 % error on `A` shifts wet-bulb by <0.5 °F (offset) rising to ~4 °F (electric), and dwell by <1 % (offset) to ~4 % (kamado/electric). `A` is load-bearing **only for sealed cookers**, where the meat term rivals the ambient term; in an offset the ambient term dominates and the meat is a rounding error. Consequence: **no shape model, no taper parameter** — geometric ±15 % is adequate. Test 19 (below) is the guardrail that keeps a future refactor from quietly making `A` load-bearing everywhere.
+
+**6. Two additions worth building in M1/M2:**
+- *Dimension override* (optional): accept length/width/thickness and compute `A` and `Lc` directly instead of from weight. Costs nothing; it's what a serious user wants once they see the model reason about thickness.
+- *Trim state*: heavily-trimmed → `A × 1.05` (more exposed muscle) **and** apply the trim mass loss to `weight` before scaling (removing a layer, not shrinking the cut). Small but a real, expected input.
+
+**7. Water-pan clamp (Section 3.4 fix) & M1 inclusion.** The spec's "clamp to 92 % of `W_sat(T_pit)`" is undefined above 100 °C (at a 225 °F pit `pSat > pAtm`). **Resolution:** drop that clamp; instead cap the *solved* wet-bulb at `T_pit − 5 °F` (consistent with the `T_plat` clamp) — bisection is already bounded to `[0, T_db]`, so this only prevents the near-singularity value, not a crash. Water pan ships in **Milestone 1** (owner decision): model area `SP_PAN_AREA ≈ 0.25 m²` for a full pan (**verified:** electric + 0.25 m² pan → T_wb 132.2 °F vs spec 133). Needs a water-pan control on the 4 calculators.
+
+**8. Added tests (extend Section 11):**
+- **17.** `A` scales as `m^(1−n)`: brisket 14→28 lb ×1.72 ±0.02; butt 8→16 lb ×1.59 ±0.02.
+- **18.** `A_ref/weight_ref` ordering sane: highest for baby back, lowest for prime rib (surface-to-mass sanity).
+- **19.** (keep this one) Perturbing `A` ±25 % moves offset dwell <1 % and kamado dwell <5 % — pins the sensitivity claim.
+- **20.** `SP_EVAP_C · A_ref` for a 14 lb packer reproduces the Section 4 wet-bulb column within ~1.5 °F across all seven cookers.
+
+**Weakest point (owner):** the rugosity factors are eyeballed; 1.5 for rib racks is close to a guess, and ribs are where `A_ref` is proportionally largest — so on a kamado that guess does real work. Flagged in Section 13.
+
+**Revised Milestone 1 scope:** Stages 1–4 + 6 **plus the water pan** (Stage 5 pan branch + clamp fix + one UI control). Spritz, injection, fat cap, dewpoint/ambient inputs, load-count, and butcher-paper/foil-boat variants remain Milestone 2.
+
+---
+
 ## 1. Why the current model breaks
 
 | Symptom | Root cause |
