@@ -354,32 +354,38 @@ test('renderMetro renders a visible FAQ that mirrors the FAQPage JSON-LD (#133)'
   const { escapeHtml } = require('./lib/text.js');
   for (const metro of gen.METROS) {
     const html = gen.renderMetro(metro);
-    // Visible FAQ section is present with one <details> per Q&A.
-    assert.ok(html.includes('class="faq-section"'), metro.slug + ' missing visible faq-section');
-    const items = html.match(/class="faq-item"/g) || [];
-    assert.equal(items.length, 3, metro.slug + ' expected 3 visible faq-item blocks, got ' + items.length);
 
-    // Pull the FAQPage JSON-LD and assert every question + answer also
-    // appears (HTML-escaped) in the visible body — schema↔visible parity
-    // so the two can't silently drift.
-    const blocks = [];
-    const re = /<script type="application\/ld\+json">\s*([\s\S]*?)\s*<\/script>/g;
-    let m;
-    while ((m = re.exec(html)) !== null) blocks.push(m[1]);
-    let faq = null;
-    for (const raw of blocks) {
-      const candidate = JSON.parse(raw);
+    // Pull the FAQPage JSON-LD block.
+    const ldRe = /<script type="application\/ld\+json">\s*([\s\S]*?)\s*<\/script>/g;
+    let m, faq = null;
+    while ((m = ldRe.exec(html)) !== null) {
+      const candidate = JSON.parse(m[1]);
       if (candidate && candidate['@type'] === 'FAQPage') { faq = candidate; break; }
     }
     assert.ok(faq, metro.slug + ' FAQPage JSON-LD block missing');
-    // Strip the JSON-LD scripts so we only search the rendered body.
-    const body = html.replace(re, '');
-    for (const qa of faq.mainEntity) {
-      assert.ok(body.includes(escapeHtml(qa.name)),
-        metro.slug + ' visible FAQ missing question: ' + qa.name);
-      assert.ok(body.includes(escapeHtml(qa.acceptedAnswer.text)),
-        metro.slug + ' visible FAQ missing answer for: ' + qa.name);
-    }
+
+    // Extract ONLY the visible FAQ section, then pull its ordered
+    // <summary>/.faq-body pairs. Scoping to the section (rather than a
+    // body-wide `includes`) matters: the cooker answer also appears in the
+    // editorial "Cooker fit" prose, so a whole-page search could pass even
+    // if the visible FAQ drifted from the schema.
+    const section = html.match(/<section class="faq-section"[\s\S]*?<\/section>/);
+    assert.ok(section, metro.slug + ' missing visible faq-section');
+    const summaries = [...section[0].matchAll(/<summary>([\s\S]*?)<\/summary>/g)].map((x) => x[1]);
+    const bodies = [...section[0].matchAll(/<div class="faq-body">([\s\S]*?)<\/div>/g)].map((x) => x[1]);
+
+    // One visible Q&A per JSON-LD entry, in the same order, byte-identical
+    // to the HTML-escaped schema copy — so the two can never drift.
+    assert.equal(summaries.length, faq.mainEntity.length,
+      metro.slug + ' visible FAQ question count != JSON-LD');
+    assert.equal(bodies.length, faq.mainEntity.length,
+      metro.slug + ' visible FAQ answer count != JSON-LD');
+    faq.mainEntity.forEach((qa, i) => {
+      assert.equal(summaries[i], escapeHtml(qa.name),
+        metro.slug + ' visible question ' + i + ' != JSON-LD');
+      assert.equal(bodies[i], escapeHtml(qa.acceptedAnswer.text),
+        metro.slug + ' visible answer ' + i + ' != JSON-LD');
+    });
   }
 });
 
