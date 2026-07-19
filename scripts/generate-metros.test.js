@@ -335,9 +335,9 @@ test('every metro description stays <=160 rendered chars and carries a distinct 
     hooks.add(hook);
   }
   // Pre-2026-07 the hook did not exist (description was byte-identical modulo
-  // city/state). Confirm real per-metro/region variety now.
-  assert.ok(hooks.size >= 6,
-    'expected description hooks to vary by at least the 6 BBQ regions, got ' + hooks.size + ' unique values');
+  // city/state). Every metro now carries its own distinct hook.
+  assert.strictEqual(hooks.size, gen.METROS.length,
+    'expected every metro to have a unique description hook, got ' + hooks.size + ' unique of ' + gen.METROS.length);
 });
 
 test('renderMetro embeds four JSON-LD blocks (WebApplication + FAQPage + BreadcrumbList + Dataset)', () => {
