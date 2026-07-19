@@ -350,6 +350,47 @@ test('renderMetro embeds four JSON-LD blocks (WebApplication + FAQPage + Breadcr
   assert.ok(html.includes('"@type": "Dataset"'));
 });
 
+test('renderMetro renders a visible FAQ that mirrors the FAQPage JSON-LD (#133)', () => {
+  const { escapeHtml } = require('./lib/text.js');
+  for (const metro of gen.METROS) {
+    const html = gen.renderMetro(metro);
+
+    // Pull the FAQPage JSON-LD block.
+    const ldRe = /<script type="application\/ld\+json">\s*([\s\S]*?)\s*<\/script>/g;
+    let m, faq = null;
+    while ((m = ldRe.exec(html)) !== null) {
+      const candidate = JSON.parse(m[1]);
+      if (candidate && candidate['@type'] === 'FAQPage') { faq = candidate; break; }
+    }
+    assert.ok(faq, metro.slug + ' FAQPage JSON-LD block missing');
+
+    // Extract ONLY the visible FAQ section, then each <details class="faq-item">
+    // block within it. Parsing per-item (rather than collecting all summaries
+    // and all bodies independently) means a body moved outside its <details>
+    // or into the wrong one can't silently pass. Scoping to the section also
+    // avoids the editorial "Cooker fit" prose, where the cooker answer repeats.
+    const section = html.match(/<section class="faq-section"[\s\S]*?<\/section>/);
+    assert.ok(section, metro.slug + ' missing visible faq-section');
+    const items = [...section[0].matchAll(/<details class="faq-item">([\s\S]*?)<\/details>/g)].map((x) => x[1]);
+
+    // One visible <details> per JSON-LD entry, in the same order, each with
+    // exactly one summary/body pair byte-identical to the HTML-escaped schema
+    // copy — so the two can never drift.
+    assert.equal(items.length, faq.mainEntity.length,
+      metro.slug + ' visible faq-item count != JSON-LD');
+    items.forEach((item, i) => {
+      const summ = [...item.matchAll(/<summary>([\s\S]*?)<\/summary>/g)];
+      const body = [...item.matchAll(/<div class="faq-body">([\s\S]*?)<\/div>/g)];
+      assert.equal(summ.length, 1, metro.slug + ' faq-item ' + i + ' must have exactly one summary');
+      assert.equal(body.length, 1, metro.slug + ' faq-item ' + i + ' must have exactly one faq-body');
+      assert.equal(summ[0][1], escapeHtml(faq.mainEntity[i].name),
+        metro.slug + ' visible question ' + i + ' != JSON-LD');
+      assert.equal(body[0][1], escapeHtml(faq.mainEntity[i].acceptedAnswer.text),
+        metro.slug + ' visible answer ' + i + ' != JSON-LD');
+    });
+  }
+});
+
 test('ldJson escapes script-breaking characters in JSON-LD', () => {
   const out = gen.ldJson({ evil: '</script><img src=x onerror=alert(1)>', amp: 'a & b' });
   // No raw <, >, or & may survive into the <script> body.

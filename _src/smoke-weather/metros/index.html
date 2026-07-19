@@ -115,6 +115,22 @@
     </div>
   </section>
 
+  <section class="faq-section" aria-label="Frequently asked questions">
+    <h2>Frequently asked questions</h2>
+    <details class="faq-item">
+      <summary>How often do the metro scores refresh?</summary>
+      <div class="faq-body">Each metro's score refreshes once per day at midnight Eastern Time. A scheduled job re-fetches the latest 7-day forecast from Open-Meteo (with National Weather Service failover) and re-scores it. Every visitor in a given metro on a given day sees the same forecast, so a cook crew can coordinate around one shared score.</div>
+    </details>
+    <details class="faq-item">
+      <summary>What cut and cooker are the tile scores based on?</summary>
+      <div class="faq-body">The chooser tiles score the weather against the default brisket-packer cut on an offset stick burner, the most demanding low-and-slow combination. Open any metro to switch cut and cooker (pellet, kamado, kettle, electric) and re-score the same 7-day window for your setup. The detailed per-metro page persists your selection across visits.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Does the chooser cover every US ZIP code?</summary>
+      <div class="faq-body">The chooser lists 50 of the largest US metropolitan areas with pre-warmed daily forecasts. For any other US ZIP, use the main Best Smoke Days tool at /smoke-weather/: enter your 5-digit ZIP and the same scoring engine returns a forecast within a couple of seconds (cached for 24 hours after the first lookup).</div>
+    </details>
+  </section>
+
   <p class="sw-disclaimer">
     Tile scores use the default brisket-packer cut on an offset cooker, the most demanding combination. The metro page lets you switch cut and cooker to re-score for your setup.
   </p>
