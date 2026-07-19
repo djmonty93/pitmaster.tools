@@ -330,7 +330,11 @@ test('homepage cold-load output stays within the frontend budget', async ({ page
   }));
 
   expect(documentBytes).toBeLessThanOrEqual(200000);
-  expect(metrics.domNodes).toBeLessThanOrEqual(700);
+  // Budget raised 700 -> 760 (2026-07): the homepage grew via the food-photography
+  // hero (#127) and Stage-3 imagery / wood reference photos (#130), which add
+  // <picture>/<source>/<img> nodes. 760 keeps headroom while staying far under
+  // the ~1500-node range where DOM size starts to hurt performance.
+  expect(metrics.domNodes).toBeLessThanOrEqual(760);
   expect(metrics.inlineScriptBytes).toBeLessThanOrEqual(100000);
   expect(metrics.inlineStyleBytes).toBeLessThanOrEqual(45000);
   expect(metrics.resourceTransferBytes).toBeLessThanOrEqual(150000);
