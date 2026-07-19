@@ -32,3 +32,24 @@ describe('psychrometric primitives', () => {
     expect(hi).toBeGreaterThan(lo);
   });
 });
+
+describe('cut geometry', () => {
+  it('A scales as m^(1-n): brisket 14->28 lb ~1.72x', () => {
+    const r = P.spSurfaceArea('brisket-packer', 28) / P.spSurfaceArea('brisket-packer', 14);
+    expect(Math.abs(r - 1.72)).toBeLessThan(0.02);
+  });
+  it('A scales as m^(1-n): pork butt 8->16 lb ~1.59x', () => {
+    const r = P.spSurfaceArea('pork-butt', 16) / P.spSurfaceArea('pork-butt', 8);
+    expect(Math.abs(r - 1.59)).toBeLessThan(0.02);
+  });
+  it('surface-to-mass ordering: baby back highest, prime rib lowest', () => {
+    const ratio = (k: string) => P.SP_CUT[k].ARef / P.SP_CUT[k].wRef;
+    const keys = Object.keys(P.SP_CUT);
+    const byRatio = keys.slice().sort((a, b) => ratio(b) - ratio(a));
+    expect(byRatio[0]).toBe('baby-back-ribs');
+  });
+  it('Lc rises with weight and Lc(ref weight) == LcRef', () => {
+    expect(P.spLc('brisket-packer', 14, 0)).toBeCloseTo(1.25, 5);
+    expect(P.spLc('brisket-packer', 20, 0)).toBeGreaterThan(1.25);
+  });
+});

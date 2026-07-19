@@ -63,6 +63,37 @@ var SP_KM = {
   'lamb-shoulder':       1.85
 };
 
+/* ── Per-cut stall parameters (spec §9 + §0.1) ──────────────────────────────
+   LcRef: conduction half-thickness (in) at wRef. ARef: surface area (m²) at
+   wRef (geometric, rugosity baked in). Xw: water mass fraction. n: thickness
+   scaling exponent (Lc ∝ w^n, A ∝ w^(1−n)). Only stall-bearing cuts need real
+   values; non-stall cuts fall through to SP_CUT_DEFAULT and never reach the
+   dwell path. These feed plateau/dwell ONLY — baseline diffusion uses spGetL. */
+var SP_CUT = {
+  'brisket-packer': { LcRef: 1.25, wRef: 14,  Xw: 0.71, n: 0.22, ARef: 0.36 },
+  'brisket-flat':   { LcRef: 1.00, wRef: 7,   Xw: 0.73, n: 0.22, ARef: 0.23 },
+  'pork-butt':      { LcRef: 1.50, wRef: 8,   Xw: 0.72, n: 0.33, ARef: 0.22 },
+  'spare-ribs':     { LcRef: 0.60, wRef: 3.5, Xw: 0.72, n: 0.22, ARef: 0.26 },
+  'baby-back-ribs': { LcRef: 0.50, wRef: 2,   Xw: 0.73, n: 0.22, ARef: 0.17 },
+  'lamb-shoulder':  { LcRef: 1.30, wRef: 5,   Xw: 0.72, n: 0.33, ARef: 0.17 }
+};
+var SP_CUT_DEFAULT = { LcRef: 1.25, wRef: 10, Xw: 0.71, n: 0.30, ARef: 0.30 };
+
+function spCutParams(kmKey) { return SP_CUT[kmKey] || SP_CUT_DEFAULT; }
+
+/* Conduction half-thickness (in). thicknessIn override wins. */
+function spLc(kmKey, weightLbs, thicknessIn) {
+  if (thicknessIn > 0) return thicknessIn;
+  var c = spCutParams(kmKey);
+  return c.LcRef * Math.pow((weightLbs || c.wRef) / c.wRef, c.n);
+}
+
+/* Evaporating surface area (m²). Same n as spLc, opposite role. */
+function spSurfaceArea(kmKey, weightLbs) {
+  var c = spCutParams(kmKey);
+  return c.ARef * Math.pow((weightLbs || c.wRef) / c.wRef, 1 - c.n);
+}
+
 var SP_STALL_START = 150;
 var SP_STALL_END   = 165;
 
