@@ -438,6 +438,10 @@
           </div>
 
           <div class="form-group">
+            <label class="opt-check"><input type="checkbox" id="waterPan"> Water pan in smoker</label>
+          </div>
+
+          <div class="form-group">
             <label for="wrapMethod">Wrap Method</label>
             <select id="wrapMethod">
               <option value="foil">Foil (Texas Crutch)</option>
@@ -1338,12 +1342,13 @@ function cookHrs(cut, wLbs, temp, boneIn, inj, wrap){
   return h;
 }
 
-function getPhysicsResult(cutKey, cut, wLbs, tempF, wrap, rh) {
+function getPhysicsResult(cutKey, cut, wLbs, tempF, wrap, rh, cookerType, waterPan) {
   var pk = PHYSICS_KEYS[cutKey];
   if (!pk || cut.cookRate === null) return null; // skip flat-time & two-phase
   var r = spCompute({
     kmKey: pk.kmKey, weightLbs: wLbs, thicknessIn: 0,
-    pitF: tempF, rh: rh, tiF: 38, tfF: cut.pullTemp,
+    pitF: tempF, rh: rh, cookerType: cookerType, waterPan: waterPan,
+    tiF: 38, tfF: cut.pullTemp,
     hasStall: pk.hasStall, wrapTriggerF: 150, wrapMethod: wrap
   });
   return r.error ? null : r;
@@ -1414,7 +1419,7 @@ function buildTL(cut, serve, hrs, wrap, grill, physicsResult){
    ============================================================ */
 function render(cut, inp){
   var rh = SP_COOKER_RH[inp.cookerType] || 12;
-  var physicsResult = getPhysicsResult(inp.cutKey, cut, inp.wLbs, inp.temp, inp.wrap, rh);
+  var physicsResult = getPhysicsResult(inp.cutKey, cut, inp.wLbs, inp.temp, inp.wrap, rh, inp.cookerType, inp.waterPan);
   if (physicsResult) {
     var timeFactor = 1;
     if (inp.boneIn && cut.boneInOk) timeFactor *= 1.10;
@@ -1430,6 +1435,8 @@ function render(cut, inp){
       thicknessIn: 0,
       pitF: inp.temp,
       rh: rh,
+      cookerType: inp.cookerType,
+      waterPan: inp.waterPan,
       tfF: cut.pullTemp,
       hasStall: PHYSICS_KEYS[inp.cutKey].hasStall,
       wrapMethod: inp.wrap,
@@ -1644,6 +1651,7 @@ function calc(){
   render(c,{
     cutKey:k, wLbs:w, temp:parseInt(document.getElementById('smokerTemp').value),
     cookerType:document.getElementById('cookerType').value,
+    waterPan:document.getElementById('waterPan').checked,
     serve:sd, wrap:document.getElementById('wrapMethod').value,
     boneIn:document.getElementById('boneIn').value==='yes',
     inj:document.getElementById('injected').value==='yes',
@@ -1668,6 +1676,8 @@ function resolveNow() {
     thicknessIn: _lastPhysicsParams.thicknessIn,
     pitF: _lastPhysicsParams.pitF,
     rh: _lastPhysicsParams.rh,
+    cookerType: _lastPhysicsParams.cookerType,
+    waterPan: _lastPhysicsParams.waterPan,
     currentF: currentF,
     tfF: _lastPhysicsParams.tfF
   });

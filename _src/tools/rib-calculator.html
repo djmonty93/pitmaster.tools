@@ -343,6 +343,10 @@
         </div>
 
         <div class="form-group">
+          <label class="opt-check"><input type="checkbox" id="waterPan"> Water pan in smoker</label>
+        </div>
+
+        <div class="form-group">
           <label for="smokerTemp">Smoker Temperature</label>
           <select id="smokerTemp">
             <option value="225">225&#xB0;F</option>
@@ -900,6 +904,8 @@
       thicknessIn: 0,
       pitF: tempF,
       rh: rh,
+      cookerType: cookerType,
+      waterPan: document.getElementById('waterPan').checked,
       tiF: 38,
       tfF: rib.pullTemp,
       hasStall: true,
@@ -919,6 +925,8 @@
       thicknessIn: 0,
       pitF: tempF,
       rh: rh,
+      cookerType: cookerType,
+      waterPan: document.getElementById('waterPan').checked,
       tfF: rib.pullTemp,
       hasStall: true,
       wrapMethod: wrapMethod,
@@ -996,7 +1004,7 @@
         stallRowEl.style.display = 'none';
       }
       document.getElementById('phT3').textContent = spFmtHrs(result.t3h);
-      var wbF = result.T_wb;
+      var wbF = (result.T_plat != null) ? result.T_plat : result.T_wb;
       document.getElementById('phWb').textContent = tempUnit === 'C'
         ? Math.round((wbF - 32) * 5 / 9) + '\u00B0C'
         : Math.round(wbF) + '\u00B0F';
@@ -1012,7 +1020,7 @@
       ];
       if (result.t2h > 0) {
         evs.push({ color: 'amber', time: stallStartT, label: 'Stall may begin (~' + fmtTemp(150) + ')', sub: 'Temperature plateaus for ' + spFmtHrs(result.t2h) + ', driven by evaporative cooling' });
-        evs.push({ color: 'amber', time: stallEndT,   label: 'Stall ends (~' + fmtTemp(165) + ')',      sub: 'Temperature climbs again toward pull temp' });
+        evs.push({ color: 'amber', time: stallEndT,   label: 'Stall ends (~' + fmtTemp(Math.round(result.T_plat || 165)) + ')', sub: 'Temperature climbs again toward pull temp' });
       } else {
         evs.push({ color: 'amber', time: stallStartT, label: 'Bend test / wrap check', sub: 'Check for 45\u00B0 bend test and pullback from bone' });
       }
@@ -1086,6 +1094,8 @@
       thicknessIn: _lastPhysicsParams.thicknessIn,
       pitF: _lastPhysicsParams.pitF,
       rh: _lastPhysicsParams.rh,
+      cookerType: _lastPhysicsParams.cookerType,
+      waterPan: _lastPhysicsParams.waterPan,
       currentF: currentF,
       tfF: _lastPhysicsParams.tfF
     });

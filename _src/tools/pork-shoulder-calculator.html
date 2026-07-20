@@ -282,6 +282,10 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
       </div>
 
       <div class="form-group">
+        <label class="opt-check"><input type="checkbox" id="waterPan"> Water pan in smoker</label>
+      </div>
+
+      <div class="form-group">
         <label>Bone-In?</label>
         <label class="checkbox-row">
           <input type="checkbox" id="boneIn">
@@ -355,7 +359,7 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
           <li class="phase-row"><span class="phase-lbl">Heat-up to stall</span><span class="phase-val" id="phT1">—</span></li>
           <li class="phase-row" id="phT2Row"><span class="phase-lbl">Estimated stall</span><span class="phase-val" id="phT2">—</span></li>
           <li class="phase-row"><span class="phase-lbl">Post-stall finish</span><span class="phase-val" id="phT3">—</span></li>
-          <li class="phase-row" id="phWbRow"><span class="phase-lbl">Stall plateau (wet-bulb)</span><span class="phase-val" id="phWb">—</span></li>
+          <li class="phase-row" id="phWbRow"><span class="phase-lbl">Stall plateau temp</span><span class="phase-val" id="phWb">—</span></li>
         </ul>
       </div>
 
@@ -756,13 +760,16 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
     var nowMinute = new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours(), today.getMinutes(), 0, 0);
     if(serve < nowMinute) serve.setDate(serve.getDate() + 1);
 
-    var rh = SP_COOKER_RH[document.getElementById('cookerType').value] || 12;
+    var cookerType = document.getElementById('cookerType').value;
+    var rh = SP_COOKER_RH[cookerType] || 12;
     var physics = spCompute({
       kmKey: 'pork-butt',
       weightLbs: wLbs,
       thicknessIn: 0,
       pitF: temp,
       rh: rh,
+      cookerType: cookerType,
+      waterPan: document.getElementById('waterPan').checked,
       tiF: 38,
       tfF: style.pullTemp,
       hasStall: true,
@@ -781,6 +788,8 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
       thicknessIn: 0,
       pitF: temp,
       rh: rh,
+      cookerType: cookerType,
+      waterPan: document.getElementById('waterPan').checked,
       tfF: style.pullTemp,
       hasStall: true,
       wrapMethod: wrap,
@@ -804,6 +813,8 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
 
     var totalHrs = hrs + style.restMinutes / 60;
     var T_wb_disp = Math.round(tempUnit === 'C' ? (physics.T_wb - 32) * 5 / 9 : physics.T_wb) + (tempUnit === 'C' ? '\u00B0C' : '\u00B0F');
+    var platF = (physics.T_plat != null) ? physics.T_plat : physics.T_wb;
+    var T_plat_disp = Math.round(tempUnit === 'C' ? (platF - 32) * 5 / 9 : platF) + (tempUnit === 'C' ? '\u00B0C' : '\u00B0F');
 
     // ── Stat cards ──
     statCookTime.textContent = spFmtHrs(totalHrs);
@@ -825,7 +836,7 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
     var phWbRow = document.getElementById('phWbRow');
     if (wrap === 'none' && physics.t2h > 0.05) {
       phWbRow.style.display = '';
-      document.getElementById('phWb').textContent = '~' + T_wb_disp + ' plateau';
+      document.getElementById('phWb').textContent = '~' + T_plat_disp + ' plateau';
     } else { phWbRow.style.display = 'none'; }
 
     // Clear live re-solve

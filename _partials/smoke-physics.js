@@ -214,14 +214,19 @@ function spPhase(Km, L, T_drive, Ti, Tf) {
     weightLbs    — used for L when thicknessIn is 0/falsy
     thicknessIn  — half-thickness override (inches); 0 = derive from weight
     pitF         — smoker temp °F
-    rh           — relative humidity 0-100
+    rh           — relative humidity 0-100 (legacy path; ignored when cookerType is set)
+    cookerType   — key into SP_AIR_EXCHANGE/SP_COOKER_RH; when set, T_wb comes from
+                   the mass-balance model (spPitWetBulbF) instead of the legacy rh path
+    waterPan     — true if a water pan is in the cooker (feeds the mass-balance model)
+    ambientF     — ambient temp °F (mass-balance model only; default 70)
+    ambientRh    — ambient relative humidity 0-100 (mass-balance model only; default 50)
     tiF          — starting meat temp °F (default 38)
     tfF          — pull temp °F
     hasStall     — true for brisket/butt/ribs/lamb
     wrapTriggerF — internal temp at which meat is wrapped (default SP_STALL_START)
     wrapMethod   — 'foil' | 'paper' | 'none'
   returns:
-    { t1h, t2h, t3h, totalH, T_wb, L, error } */
+    { t1h, t2h, t3h, totalH, T_wb, T_plat, L, dwellH, error } */
 function spCompute(p) {
   var Km  = SP_KM[p.kmKey] || 1.70;
   var L   = (p.thicknessIn > 0) ? p.thicknessIn : spGetL(p.kmKey, p.weightLbs || 10);
@@ -281,7 +286,9 @@ function spScaleResult(result, factor) {
     t3h: (result.t3h || 0) * factor,
     totalH: (result.totalH || 0) * factor,
     T_wb: result.T_wb,
+    T_plat: result.T_plat,
     L: result.L,
+    dwellH: (result.dwellH || 0) * factor,
     error: result.error || null
   };
 }
