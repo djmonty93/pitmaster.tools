@@ -225,63 +225,50 @@ function spPhase(Km, L, T_drive, Ti, Tf) {
 function spCompute(p) {
   var Km  = SP_KM[p.kmKey] || 1.70;
   var L   = (p.thicknessIn > 0) ? p.thicknessIn : spGetL(p.kmKey, p.weightLbs || 10);
-  var rh  = p.rh || 12;
   var tiF = p.tiF || 38;
-  var T_wb = wetBulb_F(p.pitF, rh);
 
-  if (T_wb >= p.pitF) {
+  /* No-stall cuts: single diffusion phase. Humidity does not affect timing here
+     (baseline uses Km/L), so T_wb is display-only. */
+  if (!p.hasStall) {
+    var tw0 = (p.cookerType) ? spStall(p).T_wb : wetBulb_F(p.pitF, p.rh || 12);
+    var t = spPhase(Km, L, p.pitF, tiF, p.tfF);
+    if (!isFinite(t)) return { error: 'Pull temperature exceeds pit temperature.' };
+    return { t1h: t, t2h: 0, t3h: 0, totalH: t, T_wb: tw0, T_plat: null, L: L, dwellH: 0, error: null };
+  }
+
+  var s = spStall(p);
+  if (s.T_wb >= p.pitF) {
     return { error: 'Pit temperature is too low to cook. Raise smoker temperature.' };
   }
 
-  /* No-stall path: single phase to pull temp */
-  if (!p.hasStall) {
-    var t = spPhase(Km, L, p.pitF, tiF, p.tfF);
-    if (!isFinite(t)) return { error: 'Pull temperature exceeds pit temperature.' };
-    return { t1h: t, t2h: 0, t3h: 0, totalH: t, T_wb: T_wb, L: L, error: null };
-  }
-
+  /* Wrapped cook (saturated limit): stall truncated, climb at full pit drive. */
   var wrapActive = (p.wrapMethod === 'foil' || p.wrapMethod === 'paper');
-
   if (wrapActive) {
-    /* Wrapped cook: phase 1 to wrap trigger, then drive is T_pit to pull temp.
-       Foil at ~95% RH means T_wb ≈ T_pit, so evaporative cooling vanishes —
-       the drive temperature for the wrapped phase is T_pit. */
     var Twrap = p.wrapTriggerF || SP_STALL_START;
-    var t1 = spPhase(Km, L, p.pitF, tiF, Twrap);
-    var t_wrapped = spPhase(Km, L, p.pitF, Twrap, p.tfF);
-    if (!isFinite(t1) || !isFinite(t_wrapped)) {
+    var t1w = spPhase(Km, L, p.pitF, tiF, Twrap);
+    var t3w = spPhase(Km, L, p.pitF, Twrap, p.tfF);
+    if (!isFinite(t1w) || !isFinite(t3w)) {
       return { error: 'Pull temperature or wrap trigger temperature exceeds pit temperature.' };
     }
-    return { t1h: t1, t2h: 0, t3h: t_wrapped, totalH: t1 + t_wrapped, T_wb: T_wb, L: L, error: null };
+    return { t1h: t1w, t2h: 0, t3h: t3w, totalH: t1w + t3w, T_wb: s.T_wb, T_plat: s.T_plat, L: L, dwellH: 0, error: null };
   }
 
-  /* Unwrapped stall path: 3 phases */
-  var T_ss = SP_STALL_START;
-  var T_se = SP_STALL_END;
-  /* Effective driving temperature during the stall: evaporative cooling at the
-     meat surface partially offsets pit heat input. Factor 0.40 is empirically
-     calibrated against offset/pellet competition cook data (14–18 lb briskets,
-     225 °F, 4–12% RH → 3.5–5h observed stalls). */
-  var T_eff_stall = p.pitF - (p.pitF - T_wb) * 0.40;
-  var t1 = spPhase(Km, L, p.pitF, tiF, T_ss);
-
-  /* Phase 2: stall plateau.
-     Guard 1 (T_wb < T_se): high-humidity cookers where T_wb >= T_se (165 °F)
-       indicate the environment is too humid for meaningful evaporative cooling —
-       the wet-bulb already exceeds the stall range, so no stall applies.
-     Guard 2 (T_eff_stall > T_se): very-low-humidity or very-low-pit-temp edge
-       case where T_eff_stall would still fall at or below T_se; skip stall. */
-  var t2 = 0;
-  if (T_wb < T_se && T_eff_stall > T_se) {
-    t2 = spPhase(Km, L, T_eff_stall, T_ss, T_se);
-    if (!isFinite(t2) || t2 < 0) t2 = 0;
+  /* Plateau overtakes the target: no observable stall, single climb. Guards
+     against a negative t3 when T_plat > tfF. */
+  if (s.T_plat >= p.tfF) {
+    var tAll = spPhase(Km, L, p.pitF, tiF, p.tfF);
+    if (!isFinite(tAll)) return { error: 'Pull temperature exceeds pit temperature.' };
+    return { t1h: tAll, t2h: 0, t3h: 0, totalH: tAll, T_wb: s.T_wb, T_plat: s.T_plat, L: L, dwellH: 0, error: null };
   }
 
-  var t3 = spPhase(Km, L, p.pitF, T_se, p.tfF);
+  /* Unwrapped stall: additive. Phase boundary = T_plat (was hardcoded 150). */
+  var t1 = spPhase(Km, L, p.pitF, tiF, s.T_plat);
+  var t2 = s.dwellH;
+  var t3 = spPhase(Km, L, p.pitF, s.T_plat, p.tfF);
   if (!isFinite(t1) || !isFinite(t3)) {
     return { error: 'Pull temperature exceeds pit temperature.' };
   }
-  return { t1h: t1, t2h: t2, t3h: t3, totalH: t1 + t2 + t3, T_wb: T_wb, L: L, error: null };
+  return { t1h: t1, t2h: t2, t3h: t3, totalH: t1 + t2 + t3, T_wb: s.T_wb, T_plat: s.T_plat, L: L, dwellH: t2, error: null };
 }
 
 /* ── Shared result scaling ────────────────────────────────────────────────────
@@ -303,28 +290,19 @@ function spScaleResult(result, factor) {
   params: { kmKey, thicknessIn, weightLbs, pitF, rh, currentF, tfF, hasStall, wrapMethod, wrapTriggerF }
   returns: { remainingH, error } */
 function spResolve(p) {
-  var Km   = SP_KM[p.kmKey] || 1.70;
-  var L    = (p.thicknessIn > 0) ? p.thicknessIn : spGetL(p.kmKey, p.weightLbs || 10);
-  var T_wb = wetBulb_F(p.pitF, p.rh || 12);
+  var Km  = SP_KM[p.kmKey] || 1.70;
+  var L   = (p.thicknessIn > 0) ? p.thicknessIn : spGetL(p.kmKey, p.weightLbs || 10);
+  var tiF = p.tiF || 38;
   var hasStall = !!p.hasStall;
   var wrapMethod = p.wrapMethod || 'none';
   var wrapTriggerF = p.wrapTriggerF || SP_STALL_START;
   var wrapActive = (wrapMethod === 'foil' || wrapMethod === 'paper');
-  var T_eff_stall = p.pitF - (p.pitF - T_wb) * 0.40;
-  /* Mirror spCompute: omit tfF > SP_STALL_START guard so both functions treat
-     hasStall meats with low pull temps identically (spPhase returns Infinity,
-     caught by the isFinite guard below). */
-  var stallActive = hasStall && T_wb < SP_STALL_END && T_eff_stall > SP_STALL_END;
-  var t = 0;
-
-  if (T_wb >= p.pitF) {
-    return { remainingH: 0, error: 'Pit temperature is too low to cook. Raise smoker temperature.' };
-  }
 
   if (p.currentF >= p.tfF) {
     return { remainingH: 0, error: 'Temperature already at or above pull temperature.' };
   }
 
+  var t;
   if (!hasStall) {
     t = spPhase(Km, L, p.pitF, p.currentF, p.tfF);
   } else if (wrapActive) {
@@ -334,15 +312,18 @@ function spResolve(p) {
     } else {
       t = spPhase(Km, L, p.pitF, p.currentF, p.tfF);
     }
-  } else if (!stallActive || p.currentF >= SP_STALL_END) {
-    t = spPhase(Km, L, p.pitF, p.currentF, p.tfF);
-  } else if (p.currentF < SP_STALL_START) {
-    t = spPhase(Km, L, p.pitF, p.currentF, SP_STALL_START)
-      + spPhase(Km, L, T_eff_stall, SP_STALL_START, SP_STALL_END)
-      + spPhase(Km, L, p.pitF, SP_STALL_END, p.tfF);
   } else {
-    t = spPhase(Km, L, T_eff_stall, p.currentF, SP_STALL_END)
-      + spPhase(Km, L, p.pitF, SP_STALL_END, p.tfF);
+    var s = spStall(p);
+    if (s.T_wb >= p.pitF) {
+      return { remainingH: 0, error: 'Pit temperature is too low to cook. Raise smoker temperature.' };
+    }
+    if (s.T_plat >= p.tfF || s.dwellH <= 0) {
+      t = spPhase(Km, L, p.pitF, p.currentF, p.tfF);
+    } else {
+      var frac = (s.T_plat - p.currentF) / (s.T_plat - tiF);
+      frac = Math.min(Math.max(frac, 0), 1);
+      t = spPhase(Km, L, p.pitF, p.currentF, p.tfF) + s.dwellH * frac;
+    }
   }
 
   if (!isFinite(t) || t < 0) {

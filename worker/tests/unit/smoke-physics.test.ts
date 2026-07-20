@@ -126,3 +126,54 @@ describe('plateau temperature + dwell', () => {
     expect(Math.abs(kamP - kam1) / kam1).toBeLessThan(0.06);
   });
 });
+
+function compute(extra: any = {}) {
+  return P.spCompute({ kmKey: 'brisket-packer', weightLbs: 14, thicknessIn: 0, pitF: 225,
+    tiF: 38, tfF: 203, hasStall: true, wrapMethod: 'none', cookerType: 'offset', ...AMB, ...extra });
+}
+
+describe('spCompute / spResolve assembly', () => {
+  it('phases split at T_plat, not 150', () => {
+    const r = compute({ cookerType: 'kamado' });
+    // t1 climbs to the plateau; with T_plat ~158 the boundary is well above 150.
+    expect(r.T_plat).toBeGreaterThan(150);
+    // total == baseline diffusion (ti->tf) + dwell, to 1e-6 h
+    const baseline = P.spCompute({ kmKey: 'brisket-packer', weightLbs: 14, pitF: 225, tiF: 38,
+      tfF: 203, hasStall: false, cookerType: 'kamado', ...AMB }).totalH;
+    expect(Math.abs(r.totalH - (baseline + r.dwellH))).toBeLessThan(1e-6);
+  });
+  it('brisket totals land 12–20 h across cookers', () => {
+    for (const c of ['offset', 'pellet', 'kettle', 'kamado', 'electric']) {
+      const t = compute({ cookerType: c }).totalH;
+      expect(t).toBeGreaterThan(12);
+      expect(t).toBeLessThan(20);
+    }
+  });
+  it('a stall adds time: unwrapped total > baseline no-stall cook', () => {
+    const r = compute();
+    const baseline = P.spCompute({ kmKey: 'brisket-packer', weightLbs: 14, pitF: 225, tiF: 38,
+      tfF: 203, hasStall: false, cookerType: 'offset', ...AMB }).totalH;
+    expect(r.totalH).toBeGreaterThan(baseline);
+  });
+  it('wrapped cook truncates the stall (t2h == 0)', () => {
+    expect(compute({ wrapMethod: 'foil' }).t2h).toBe(0);
+  });
+  it('legacy rh path still resolves (browser-smoke compatibility)', () => {
+    const r = P.spResolve({ kmKey: 'brisket-packer', weightLbs: 12, pitF: 250, rh: 4,
+      currentF: 155, tfF: 195, hasStall: true, wrapMethod: 'foil', wrapTriggerF: 150 });
+    expect(r.error).toBeNull();
+    expect(r.remainingH).toBeGreaterThan(0);
+  });
+  it('spResolve dwell proration: full at start temp, zero at plateau', () => {
+    const base = { kmKey: 'brisket-packer', weightLbs: 14, pitF: 225, tiF: 38, tfF: 203,
+      hasStall: true, wrapMethod: 'none', cookerType: 'offset', ...AMB };
+    const s = P.spStall({ ...base });
+    const atStart = P.spResolve({ ...base, currentF: 38 }).remainingH;
+    const climbOnly = P.spResolve({ ...base, currentF: 38, hasStall: false }).remainingH;
+    // remaining at start == full climb + full dwell
+    expect(Math.abs(atStart - (climbOnly + s.dwellH))).toBeLessThan(0.01);
+    const atPlateau = P.spResolve({ ...base, currentF: Math.round(s.T_plat) }).remainingH;
+    const climbFromPlateau = P.spResolve({ ...base, currentF: Math.round(s.T_plat), hasStall: false }).remainingH;
+    expect(Math.abs(atPlateau - climbFromPlateau)).toBeLessThan(0.05); // ~no dwell left
+  });
+});
