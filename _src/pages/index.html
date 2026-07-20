@@ -1377,9 +1377,11 @@ function buildTL(cut, serve, hrs, wrap, grill, physicsResult){
         sb=new Date(on.getTime()+baseMs*0.40);
         se=new Date(on.getTime()+cMs*0.65);
       }
-      var sn = (physicsResult && physicsResult.T_plat)
-        ? 'Internal approaches the ~'+dT(Math.round(physicsResult.T_plat))+' plateau'
-        : (cut.stallLo ? 'Internal reaches '+dT(cut.stallLo)+'\u2013'+dT(cut.stallHi)+': temperature plateau begins' : '');
+      var sn = (wrap !== 'none')
+        ? 'Internal reaches '+dT(150)   // wrapped cooks: the wrap fires at the 150 trigger, not the plateau
+        : (physicsResult && physicsResult.T_plat)
+          ? 'Internal approaches the ~'+dT(Math.round(physicsResult.T_plat))+' plateau'
+          : (cut.stallLo ? 'Internal reaches '+dT(cut.stallLo)+'\u2013'+dT(cut.stallHi)+': temperature plateau begins' : '');
       var wn= wrap==='foil'  ? ': wrap in foil now (Texas Crutch). Leave wrapped until pull temp.'
             : wrap==='paper' ? ': wrap in butcher paper now. Leave wrapped until pull temp.' : '';
       // Wrapped cooks: one event (wrap action). Unwrapped: two events bookending the stall.
