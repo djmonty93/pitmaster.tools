@@ -433,7 +433,7 @@
               <option value="offset">Offset stick-burner</option>
               <option value="kamado">Kamado (BGE / Kamado Joe)</option>
               <option value="kettle">Kettle (Weber / PK)</option>
-              <option value="electric">Water-pan electric (Masterbuilt / Bradley)</option>
+              <option value="electric">Electric cabinet (Masterbuilt / Bradley)</option>
             </select>
           </div>
 
@@ -1377,7 +1377,9 @@ function buildTL(cut, serve, hrs, wrap, grill, physicsResult){
         sb=new Date(on.getTime()+baseMs*0.40);
         se=new Date(on.getTime()+cMs*0.65);
       }
-      var sn=cut.stallLo ? 'Internal reaches '+dT(cut.stallLo)+'\u2013'+dT(cut.stallHi)+': temperature plateau begins' : '';
+      var sn = (physicsResult && physicsResult.T_plat)
+        ? 'Internal approaches the ~'+dT(Math.round(physicsResult.T_plat))+' plateau'
+        : (cut.stallLo ? 'Internal reaches '+dT(cut.stallLo)+'\u2013'+dT(cut.stallHi)+': temperature plateau begins' : '');
       var wn= wrap==='foil'  ? ': wrap in foil now (Texas Crutch). Leave wrapped until pull temp.'
             : wrap==='paper' ? ': wrap in butcher paper now. Leave wrapped until pull temp.' : '';
       // Wrapped cooks: one event (wrap action). Unwrapped: two events bookending the stall.
@@ -1670,17 +1672,7 @@ function resolveNow() {
   var rawT = parseFloat(input.value);
   if (isNaN(rawT)) { resultEl.textContent = 'Enter a temperature reading first.'; return; }
   var currentF = state.tu === 'C' ? rawT * 9 / 5 + 32 : rawT;
-  var r = spResolve({
-    kmKey: _lastPhysicsParams.kmKey,
-    weightLbs: _lastPhysicsParams.weightLbs,
-    thicknessIn: _lastPhysicsParams.thicknessIn,
-    pitF: _lastPhysicsParams.pitF,
-    rh: _lastPhysicsParams.rh,
-    cookerType: _lastPhysicsParams.cookerType,
-    waterPan: _lastPhysicsParams.waterPan,
-    currentF: currentF,
-    tfF: _lastPhysicsParams.tfF
-  });
+  var r = spResolve(Object.assign({}, _lastPhysicsParams, { currentF: currentF }));
   if (!r.error && _lastPhysicsParams.resolveScale && _lastPhysicsParams.resolveScale !== 1) {
     r.remainingH *= _lastPhysicsParams.resolveScale;
   }

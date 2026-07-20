@@ -338,7 +338,7 @@
             <option value="offset">Offset stick-burner</option>
             <option value="kamado">Kamado (BGE / Kamado Joe)</option>
             <option value="kettle">Kettle (Weber / PK)</option>
-            <option value="electric">Water-pan electric (Masterbuilt / Bradley)</option>
+            <option value="electric">Electric cabinet (Masterbuilt / Bradley)</option>
           </select>
         </div>
 
@@ -1019,7 +1019,7 @@
         { color: 'amber', time: meatOn,  label: 'Ribs go on smoker',      sub: rib.name + ', standard method' }
       ];
       if (result.t2h > 0) {
-        evs.push({ color: 'amber', time: stallStartT, label: 'Stall may begin (~' + fmtTemp(150) + ')', sub: 'Temperature plateaus for ' + spFmtHrs(result.t2h) + ', driven by evaporative cooling' });
+        evs.push({ color: 'amber', time: stallStartT, label: 'Stall may begin (~' + fmtTemp(Math.round(result.T_plat || 165)) + ')', sub: 'Temperature plateaus for ' + spFmtHrs(result.t2h) + ', driven by evaporative cooling' });
         evs.push({ color: 'amber', time: stallEndT,   label: 'Stall ends (~' + fmtTemp(Math.round(result.T_plat || 165)) + ')', sub: 'Temperature climbs again toward pull temp' });
       } else {
         evs.push({ color: 'amber', time: stallStartT, label: 'Bend test / wrap check', sub: 'Check for 45\u00B0 bend test and pullback from bone' });
@@ -1088,17 +1088,7 @@
     var rawT = parseFloat(input.value);
     if (isNaN(rawT)) { resultEl.textContent = 'Enter a temperature reading first.'; return; }
     var currentF = tempUnit === 'C' ? rawT * 9 / 5 + 32 : rawT;
-    var r = spResolve({
-      kmKey: _lastPhysicsParams.kmKey,
-      weightLbs: _lastPhysicsParams.weightLbs,
-      thicknessIn: _lastPhysicsParams.thicknessIn,
-      pitF: _lastPhysicsParams.pitF,
-      rh: _lastPhysicsParams.rh,
-      cookerType: _lastPhysicsParams.cookerType,
-      waterPan: _lastPhysicsParams.waterPan,
-      currentF: currentF,
-      tfF: _lastPhysicsParams.tfF
-    });
+    var r = spResolve(Object.assign({}, _lastPhysicsParams, { currentF: currentF }));
     resultEl.textContent = r.error ? r.error : 'Estimated time remaining: ' + spFmtHrs(r.remainingH);
   }
   window.resolveNow = resolveNow;
