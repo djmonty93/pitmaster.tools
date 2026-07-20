@@ -1756,7 +1756,7 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
   // onMeatChange() can't reset them.
   var plan = (typeof PlanUrl !== 'undefined') ? PlanUrl.decodePlanParams(window.location.search) : {};
   var hasPlan = plan && Object.keys(plan).length > 0;
-  var hasAdvancedPlan = plan && ['ppl','ck','wrap','bone','inj','sz','grill','sear'].some(function(key) {
+  var hasAdvancedPlan = plan && ['ppl','ck','wp','wrap','bone','inj','sz','grill','sear'].some(function(key) {
     return plan[key] != null;
   });
   if (hasAdvancedPlan) document.getElementById('advancedSettings').open = true;
