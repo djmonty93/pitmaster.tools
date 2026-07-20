@@ -299,7 +299,6 @@ function spScaleResult(result, factor) {
 function spResolve(p) {
   var Km  = SP_KM[p.kmKey] || 1.70;
   var L   = (p.thicknessIn > 0) ? p.thicknessIn : spGetL(p.kmKey, p.weightLbs || 10);
-  var tiF = p.tiF || 38;
   var hasStall = !!p.hasStall;
   var wrapMethod = p.wrapMethod || 'none';
   var wrapTriggerF = p.wrapTriggerF || SP_STALL_START;
