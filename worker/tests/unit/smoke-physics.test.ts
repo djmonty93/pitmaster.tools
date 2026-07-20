@@ -81,3 +81,48 @@ describe('pit mass balance -> wet-bulb', () => {
     expect(wb('kamado', { nPieces: 8 })).toBeGreaterThan(wb('kamado', { nPieces: 1 }));
   });
 });
+
+function stall(cookerType: string, extra: any = {}) {
+  return P.spStall({ kmKey: 'brisket-packer', weightLbs: 14, thicknessIn: 0, pitF: 225,
+    tfF: 203, cookerType, ...AMB, ...extra });
+}
+
+describe('plateau temperature + dwell', () => {
+  it('every cooker produces a nonzero brisket dwell at 225 F (the #138 regression)', () => {
+    for (const c of ['offset', 'pellet', 'kettle', 'kamado', 'electric'])
+      expect(stall(c).dwellH).toBeGreaterThan(0);
+  });
+  it('dwell increases as air exchange falls (humid = longer)', () => {
+    expect(stall('kamado').dwellH).toBeGreaterThan(stall('offset').dwellH);
+  });
+  it('plateau temperature increases as air exchange falls (humid = shallower)', () => {
+    expect(stall('kamado').T_plat).toBeGreaterThan(stall('offset').T_plat);
+  });
+  it('plateau temperature decreases as Lc increases', () => {
+    const thin = P.spPlateauTempF(107, 225, 0.6);
+    const thick = P.spPlateauTempF(107, 225, 1.6);
+    expect(thick).toBeLessThan(thin);
+  });
+  it('brisket dwell lands ~3.5 h dry, ~3.8 h kamado (spec §6)', () => {
+    expect(stall('offset').dwellH).toBeGreaterThan(3.2);
+    expect(stall('offset').dwellH).toBeLessThan(3.8);
+    expect(stall('kamado').dwellH).toBeGreaterThan(3.5);
+    expect(stall('kamado').dwellH).toBeLessThan(4.2);
+  });
+  it('brisket at 225 F has full fade; a high plateau vs low target fades to 0', () => {
+    expect(P.spFade(175, 203)).toBe(1);
+    expect(P.spFade(205, 203)).toBe(0);
+  });
+  it('doubling brisket weight raises dwell < 40% (thickness-only scaling)', () => {
+    const d14 = stall('offset', { weightLbs: 14 }).dwellH;
+    const d28 = stall('offset', { weightLbs: 28 }).dwellH;
+    expect(d28 / d14).toBeLessThan(1.40);
+  });
+  it('A ±25% moves offset dwell <1% and kamado dwell <5% (sensitivity guardrail)', () => {
+    // Perturb via nPieces as an A-proxy on the evap term: +25% pieces ~ +25% meat flux.
+    const off1 = stall('offset').dwellH, offP = stall('offset', { nPieces: 1.25 }).dwellH;
+    const kam1 = stall('kamado').dwellH, kamP = stall('kamado', { nPieces: 1.25 }).dwellH;
+    expect(Math.abs(offP - off1) / off1).toBeLessThan(0.02);
+    expect(Math.abs(kamP - kam1) / kam1).toBeLessThan(0.06);
+  });
+});

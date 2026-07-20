@@ -133,8 +133,53 @@ function spPitWetBulbF(o) {
   return spC2F(TwbC);
 }
 
-var SP_STALL_START = 150;
-var SP_STALL_END   = 165;
+var SP_STALL_START = 150; /* wrap-trigger default only; no longer a stall-band edge */
+
+/* ── Plateau temperature & additive dwell (spec §5–6) ───────────────────────
+   Two independent axes: T_plat rises with wet-bulb and falls with thickness;
+   dwell = K·Lc²·(Xw/Xw_ref)/(pit−T_wb) rises with wet-bulb. The stall is
+   ADDITIVE — total = baseline diffusion cook + dwell — so it can only ever add
+   time, and fades to zero as the plateau overtakes the target. */
+var SP_PLAT_A = 0.68;
+var SP_PLAT_B = 0.20;   /* per inch */
+var SP_STALL_K = 287;   /* °F·h/in² */
+var SP_XW_REF = 0.71;
+var SP_PLAT_FADE = 15;  /* °F */
+
+function spPlateauTempF(T_wb, pitF, Lc) {
+  var T = T_wb + (pitF - T_wb) * (SP_PLAT_A - SP_PLAT_B * Lc);
+  var lo = T_wb + 5, hi = pitF - 5;
+  return Math.min(Math.max(T, lo), hi);
+}
+
+function spStallDwellH(Lc, Xw, pitF, T_wb) {
+  var drive = pitF - T_wb;
+  if (drive <= 0) return 0;
+  return SP_STALL_K * Lc * Lc * (Xw / SP_XW_REF) / drive;
+}
+
+/* Fade: 1 well below target, ramping to 0 as the plateau reaches the pull temp
+   (the poultry/ribs/low-target branch — the meat blows through the plateau). */
+function spFade(T_plat, tfF) {
+  var f = (tfF - T_plat) / SP_PLAT_FADE;
+  return Math.min(Math.max(f, 0), 1);
+}
+
+/* Resolve the stall quantities for a set of cook params. T_wb comes from the
+   mass balance when cookerType is given, else the legacy Stull path (rh). */
+function spStall(p) {
+  var c = spCutParams(p.kmKey);
+  var Lc = spLc(p.kmKey, p.weightLbs || c.wRef, p.thicknessIn);
+  var T_wb = (p.cookerType)
+    ? spPitWetBulbF({ pitF: p.pitF, cookerType: p.cookerType,
+        ambientF: p.ambientF, ambientRh: p.ambientRh, altitudeM: p.altitudeM,
+        waterPan: p.waterPan, nPieces: p.nPieces, kmKey: p.kmKey,
+        weightLbs: p.weightLbs, windMph: p.windMph })
+    : wetBulb_F(p.pitF, p.rh || 12);
+  var T_plat = spPlateauTempF(T_wb, p.pitF, Lc);
+  var dwellH = spStallDwellH(Lc, c.Xw, p.pitF, T_wb) * spFade(T_plat, p.tfF);
+  return { T_wb: T_wb, T_plat: T_plat, Lc: Lc, dwellH: dwellH };
+}
 
 /* ── Weight → characteristic half-thickness L (inches) ─────────────────────*/
 function spGetL(kmKey, weightLbs) {
