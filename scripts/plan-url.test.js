@@ -19,6 +19,7 @@ const FULL = {
   ppl: 8,
   temp: 225,
   ck: 'offset',
+  wp: 1,
   serve: '18:00',
   wrap: 'paper',
   bone: 1,
@@ -107,10 +108,13 @@ test('decode rejects malformed serve times, accepts valid HH:MM', () => {
   assert.equal(decodePlanParams('serve=23:59').serve, '23:59');
 });
 
-test('decode treats bone/inj as strict 0|1 booleans', () => {
+test('decode treats bone/inj/wp as strict 0|1 booleans', () => {
   assert.equal(decodePlanParams('bone=1&inj=0').bone, 1);
   assert.equal(decodePlanParams('bone=1&inj=0').inj, 0);
   assert.deepEqual(decodePlanParams('bone=yes&inj=2'), {}); // garbage dropped
+  assert.equal(decodePlanParams('wp=1').wp, 1);
+  assert.equal(decodePlanParams('wp=0').wp, 0);
+  assert.deepEqual(decodePlanParams('wp=yes'), {}); // garbage dropped
 });
 
 test('decode ignores non-numeric weight and unknown keys', () => {

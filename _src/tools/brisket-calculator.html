@@ -574,6 +574,7 @@ function planState(){
     wu: state.wu,
     temp: parseInt(document.getElementById('smokerTemp').value,10),
     ck: document.getElementById('cookerType').value,
+    wp: document.getElementById('waterPan').checked ? 1 : 0,
     wrap: state.wrap,
     serve: document.getElementById('serveTime').value,
     thick: parseFloat(document.getElementById('meatThickness').value)
@@ -880,6 +881,7 @@ document.getElementById('printBtn').addEventListener('click', function() { windo
   if(plan.wt!=null) document.getElementById('weight').value=plan.wt;
   if(plan.temp!=null) setSelectIfOption('smokerTemp', String(plan.temp));
   if(plan.ck) setSelectIfOption('cookerType', plan.ck);
+  if(plan.wp!=null) document.getElementById('waterPan').checked=(plan.wp==1);
   if(plan.serve) document.getElementById('serveTime').value=plan.serve;
   if(plan.thick!=null) document.getElementById('meatThickness').value=plan.thick;
 

@@ -97,6 +97,7 @@
     wrap: function (v) { return inEnum(v, ENUMS.wrap); },
     bone: bool01,
     inj: bool01,
+    wp: bool01,
     sz: function (v) { return inEnum(v, ENUMS.sz); },
     tu: function (v) { return inEnum(v, ENUMS.tu); },
     grill: function (v) { return inEnum(v, ENUMS.grill); },

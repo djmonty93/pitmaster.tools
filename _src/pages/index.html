@@ -1623,6 +1623,7 @@ function planState(){
     ppl: parseInt(document.getElementById('numPeople').value,10),
     temp: parseInt(document.getElementById('smokerTemp').value,10),
     ck: document.getElementById('cookerType').value,
+    wp: document.getElementById('waterPan').checked ? 1 : 0,
     serve: document.getElementById('serveTime').value,
     wrap: document.getElementById('wrapMethod').value,
     bone: document.getElementById('boneIn').value==='yes' ? 1 : 0,
@@ -1771,6 +1772,7 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
   if(plan.ppl!=null) document.getElementById('numPeople').value=plan.ppl;
   if(plan.temp!=null) setSelectIfOption('smokerTemp', String(plan.temp));
   if(plan.ck) setSelectIfOption('cookerType', plan.ck);
+  if(plan.wp!=null) document.getElementById('waterPan').checked=(plan.wp==1);
   if(plan.serve) document.getElementById('serveTime').value=plan.serve;
   if(plan.inj!=null) document.getElementById('injected').value=(plan.inj===1?'yes':'no');
   // Cut-dependent controls: onMeatChange() hides wrap (and resets it to none)
