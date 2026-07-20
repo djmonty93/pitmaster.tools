@@ -885,7 +885,10 @@
       now.getHours(), now.getMinutes(), 0, 0);
     if (serve < nowMinute) serve.setDate(serve.getDate() + 1);
 
-    var weightLbs = 8;
+    // Non-beef racks carry no weight input: 0 makes spLc/spSurfaceArea fall back to
+    // each cut's reference geometry (LcRef/ARef) instead of scaling off a placeholder
+    // weight (real rack weight / piece count is a Milestone-2 input). Beef overrides below.
+    var weightLbs = 0;
     if (ribKey === 'beef') {
       var rawW = parseFloat(beefWeightInput.value);
       if (isNaN(rawW) || rawW <= 0) {
