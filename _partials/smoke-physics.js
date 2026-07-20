@@ -327,8 +327,11 @@ function spResolve(p) {
     if (s.T_plat >= p.tfF || s.dwellH <= 0) {
       t = spPhase(Km, L, p.pitF, p.currentF, p.tfF);
     } else {
-      var frac = (s.T_plat - p.currentF) / (s.T_plat - tiF);
-      frac = Math.min(Math.max(frac, 0), 1);
+      /* Dwell is a discrete lump the meat sits through AT the plateau (see
+         spCompute). Temperature can't observe progress through a flat plateau,
+         so the honest estimate holds the full dwell until the reading is past
+         T_plat, then drops to zero (post-stall climb only). */
+      var frac = (p.currentF <= s.T_plat) ? 1 : 0;
       t = spPhase(Km, L, p.pitF, p.currentF, p.tfF) + s.dwellH * frac;
     }
   }

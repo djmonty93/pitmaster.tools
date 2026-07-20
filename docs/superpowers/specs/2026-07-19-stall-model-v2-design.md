@@ -396,10 +396,12 @@ Under the new calibration this rarely fires for brisket or butt, and correctly f
 ### `spResolve` (mid-cook re-estimate)
 
 ```js
-remainingDwell = dwell * clamp((T_plat - currentF) / (T_plat - tStart), 0, 1);
+remainingDwell = (currentF <= T_plat) ? dwell : 0;
 ```
 
-Prorate against the phase-1 span, not against a literal 150.
+Temperature alone cannot resolve position within a flat plateau — a probe reading has no way to distinguish "just entered the stall" from "about to exit it." The honest estimate is therefore a step, not a ramp: hold the full dwell for any reading at or below `T_plat` (the stall is still ahead or in progress), and drop to zero once the reading is past `T_plat` (the stall is behind, only the post-plateau climb remains).
+
+**Correction (owner-approved, #138):** an earlier version of this formula prorated linearly against the phase-1 span — `dwell * clamp((T_plat - currentF) / (T_plat - tStart), 0, 1)`, i.e. anchored to `tStart` (fridge temp). That ramp depletes the stall across the *entire* climb from fridge temp, so a reading taken early in the climb (still well below `T_plat`) reported almost no stall remaining even though the full stall was still ahead — backwards from the physical picture above. Do not prorate against `tStart`; use the step function.
 
 ---
 

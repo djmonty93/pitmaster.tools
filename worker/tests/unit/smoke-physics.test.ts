@@ -164,16 +164,23 @@ describe('spCompute / spResolve assembly', () => {
     expect(r.error).toBeNull();
     expect(r.remainingH).toBeGreaterThan(0);
   });
-  it('spResolve dwell proration: full at start temp, zero at plateau', () => {
+  it('spResolve dwell proration: full dwell until past the plateau, then zero', () => {
     const base = { kmKey: 'brisket-packer', weightLbs: 14, pitF: 225, tiF: 38, tfF: 203,
       hasStall: true, wrapMethod: 'none', cookerType: 'offset', ...AMB };
     const s = P.spStall({ ...base });
+    // Still climbing (below the plateau): the whole stall is ahead -> full dwell remains.
+    const belowF = Math.round(s.T_plat) - 5;
+    const below = P.spResolve({ ...base, currentF: belowF }).remainingH;
+    const climbBelow = P.spResolve({ ...base, currentF: belowF, hasStall: false }).remainingH;
+    expect(Math.abs(below - (climbBelow + s.dwellH))).toBeLessThan(0.01);
+    // At fridge start temp is also below the plateau -> full dwell.
     const atStart = P.spResolve({ ...base, currentF: 38 }).remainingH;
-    const climbOnly = P.spResolve({ ...base, currentF: 38, hasStall: false }).remainingH;
-    // remaining at start == full climb + full dwell
-    expect(Math.abs(atStart - (climbOnly + s.dwellH))).toBeLessThan(0.01);
-    const atPlateau = P.spResolve({ ...base, currentF: Math.round(s.T_plat) }).remainingH;
-    const climbFromPlateau = P.spResolve({ ...base, currentF: Math.round(s.T_plat), hasStall: false }).remainingH;
-    expect(Math.abs(atPlateau - climbFromPlateau)).toBeLessThan(0.05); // ~no dwell left
+    const climbStart = P.spResolve({ ...base, currentF: 38, hasStall: false }).remainingH;
+    expect(Math.abs(atStart - (climbStart + s.dwellH))).toBeLessThan(0.01);
+    // Past the plateau: the stall is done -> no dwell remains, just the climb.
+    const aboveF = Math.round(s.T_plat) + 5;
+    const above = P.spResolve({ ...base, currentF: aboveF }).remainingH;
+    const climbAbove = P.spResolve({ ...base, currentF: aboveF, hasStall: false }).remainingH;
+    expect(Math.abs(above - climbAbove)).toBeLessThan(0.05); // ~no dwell left
   });
 });
