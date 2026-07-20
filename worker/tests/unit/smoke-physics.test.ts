@@ -62,7 +62,7 @@ function wb(cookerType: string, extra: any = {}) {
 describe('pit mass balance -> wet-bulb', () => {
   it('reproduces spec §4 table within 1.5 F across cookers', () => {
     const spec: Record<string, number> = { offset: 97, pellet: 100, kettle: 102, drum: 101, kamado: 107, electric: 110 };
-    for (const c of Object.keys(spec)) expect(Math.abs(wb(c) - spec[c])).toBeLessThan(1.5);
+    for (const [c, target] of Object.entries(spec)) expect(Math.abs(wb(c) - target)).toBeLessThan(1.5);
   });
   it('W_pit rises (wet-bulb rises) as air exchange falls: sealed > open', () => {
     expect(wb('electric')).toBeGreaterThan(wb('kamado'));

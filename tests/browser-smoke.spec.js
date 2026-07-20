@@ -335,7 +335,7 @@ test('homepage cold-load output stays within the frontend budget', async ({ page
   // <picture>/<source>/<img> nodes. 760 keeps headroom while staying far under
   // the ~1500-node range where DOM size starts to hurt performance.
   expect(metrics.domNodes).toBeLessThanOrEqual(760);
-  expect(metrics.inlineScriptBytes).toBeLessThanOrEqual(100000);
+  expect(metrics.inlineScriptBytes).toBeLessThanOrEqual(108000); // raised from 100000 for the v2 stall-physics engine inlined site-wide (#138)
   expect(metrics.inlineStyleBytes).toBeLessThanOrEqual(45000);
   expect(metrics.resourceTransferBytes).toBeLessThanOrEqual(150000);
   expect(metrics.lcp).toBeGreaterThan(0);
