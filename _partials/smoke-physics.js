@@ -292,6 +292,7 @@ function spScaleResult(result, factor) {
     totalH: (result.totalH || 0) * factor,
     T_wb: result.T_wb,
     T_plat: result.T_plat,
+    wrapAtF: result.wrapAtF,
     L: result.L,
     dwellH: (result.dwellH || 0) * factor,
     error: result.error || null
