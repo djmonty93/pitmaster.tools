@@ -691,8 +691,9 @@ function calculate() {
   var platF = (physics.T_plat != null) ? physics.T_plat : physics.T_wb;
   var T_plat_disp = Math.round(state.tu === 'C' ? (platF - 32) * 5 / 9 : platF) + (state.tu === 'C' ? '\u00B0C' : '\u00B0F');
   var stallNote = '';
-  if (wrap === 'foil') stallNote = 'Internal reaches ' + fmtTemp(150) + ': wrap tightly in foil now (Texas Crutch). Leave wrapped until pull temp.';
-  else if (wrap === 'paper') stallNote = 'Internal reaches ' + fmtTemp(150) + ': wrap in butcher paper now. Leave wrapped until pull temp.';
+  var wrapAtDisp = fmtTemp(Math.round(physics.wrapAtF || 150));
+  if (wrap === 'foil') stallNote = 'Internal reaches ' + wrapAtDisp + ': wrap tightly in foil now (Texas Crutch). Leave wrapped until pull temp.';
+  else if (wrap === 'paper') stallNote = 'Internal reaches ' + wrapAtDisp + ': wrap in butcher paper now. Leave wrapped until pull temp.';
   else stallNote = 'Internal approaches the ~' + T_plat_disp + ' plateau, held by evaporative cooling. Hold steady, no wrap.';
 
   // Build timeline — wrapped cooks get one stall event (wrap action); unwrapped get two (start + end)

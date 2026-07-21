@@ -850,7 +850,7 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
                 :                    'Wrap tightly in foil now. Leave wrapped until pull temp.';
     var stallSub = wrap === 'none'
       ? 'Internal approaches the ~' + T_plat_disp + ' plateau \u2014 ' + wrapNote
-      : 'Internal reaches ' + fmtTemp(150) + ' \u2014 ' + wrapNote;
+      : 'Internal reaches ' + fmtTemp(Math.round(physics.wrapAtF || 150)) + ' \u2014 ' + wrapNote;
 
     // Wrapped cooks: one stall event (wrap action). Unwrapped: two events (start + end).
     var events = [

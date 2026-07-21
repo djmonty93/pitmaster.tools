@@ -183,17 +183,24 @@ describe('spCompute / spResolve assembly', () => {
     const climbAbove = P.spResolve({ ...base, currentF: aboveF, hasStall: false }).remainingH;
     expect(Math.abs(above - climbAbove)).toBeLessThan(0.05); // ~no dwell left
   });
-  it('wrapped cook keeps the pre-wrap dwell when the plateau is below the wrap trigger', () => {
-    const base = { kmKey: 'pork-butt', weightLbs: 8, thicknessIn: 0, pitF: 225, tiF: 38, tfF: 203,
+  it('a wrapped cook carries no dwell and is shorter than the unwrapped stall', () => {
+    // Pork butt: plateau below the 150 trigger -> wrap at the ~146 stall temp.
+    const pb = { kmKey: 'pork-butt', weightLbs: 8, thicknessIn: 0, pitF: 225, tiF: 38, tfF: 203,
       hasStall: true, cookerType: 'offset', ...AMB };
-    const s = P.spStall({ ...base });
-    expect(s.T_plat).toBeLessThan(150);                 // precondition: plateau below the 150 wrap trigger
-    const wrapped = P.spCompute({ ...base, wrapMethod: 'foil', wrapTriggerF: 150 });
-    expect(wrapped.dwellH).toBeGreaterThan(0);
-    expect(Math.abs(wrapped.dwellH - s.dwellH)).toBeLessThan(1e-9);   // full stall counted
-    // Brisket plateau is above 150 -> wrap still fully truncates the stall.
-    const bw = P.spCompute({ kmKey: 'brisket-packer', weightLbs: 14, thicknessIn: 0, pitF: 225,
-      tiF: 38, tfF: 203, hasStall: true, wrapMethod: 'foil', wrapTriggerF: 150, cookerType: 'offset', ...AMB });
-    expect(bw.dwellH).toBe(0);
+    const s = P.spStall({ ...pb });
+    expect(s.T_plat).toBeLessThan(150);
+    const pbWrap = P.spCompute({ ...pb, wrapMethod: 'foil', wrapTriggerF: 150 });
+    const pbNone = P.spCompute({ ...pb, wrapMethod: 'none' });
+    expect(pbWrap.dwellH).toBe(0);
+    expect(pbWrap.wrapAtF).toBeCloseTo(s.T_plat, 5);          // wraps at the stall temp, not 150
+    expect(pbWrap.totalH).toBeLessThan(pbNone.totalH);        // wrapping saves the stall
+    // Brisket: plateau above the trigger -> wrap at 150, still no dwell, still shorter.
+    const bz = { kmKey: 'brisket-packer', weightLbs: 14, thicknessIn: 0, pitF: 225, tiF: 38, tfF: 203,
+      hasStall: true, cookerType: 'offset', ...AMB };
+    const bWrap = P.spCompute({ ...bz, wrapMethod: 'foil', wrapTriggerF: 150 });
+    const bNone = P.spCompute({ ...bz, wrapMethod: 'none' });
+    expect(bWrap.dwellH).toBe(0);
+    expect(bWrap.wrapAtF).toBe(150);
+    expect(bWrap.totalH).toBeLessThan(bNone.totalH);
   });
 });

@@ -1378,7 +1378,7 @@ function buildTL(cut, serve, hrs, wrap, grill, physicsResult){
         se=new Date(on.getTime()+cMs*0.65);
       }
       var sn = (wrap !== 'none')
-        ? 'Internal reaches '+dT(150)   // wrapped cooks: the wrap fires at the 150 trigger, not the plateau
+        ? 'Internal reaches '+dT(Math.round((physicsResult && physicsResult.wrapAtF) || 150))   // wrap fires at the actual stall/trigger temp
         : (physicsResult && physicsResult.T_plat)
           ? 'Internal approaches the ~'+dT(Math.round(physicsResult.T_plat))+' plateau'
           : (cut.stallLo ? 'Internal reaches '+dT(cut.stallLo)+'\u2013'+dT(cut.stallHi)+': temperature plateau begins' : '');
