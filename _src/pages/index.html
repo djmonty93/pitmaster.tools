@@ -1385,8 +1385,11 @@ function buildTL(cut, serve, hrs, wrap, grill, physicsResult){
       var wn= wrap==='foil'  ? ': wrap in foil now (Texas Crutch). Leave wrapped until pull temp.'
             : wrap==='paper' ? ': wrap in butcher paper now. Leave wrapped until pull temp.' : '';
       // Wrapped cooks: one event (wrap action). Unwrapped: two events bookending the stall.
-      ev.push({t:sb, l:wrap!=='none'?'Stall: wrap now':'Stall begins', s:sn+wn, c:'red'});
-      if(wrap==='none') ev.push({t:se, l:'Stall ends', s:'Temperature climbs again', c:'amber'});
+      // Physics-backed cuts with no real dwell (t2h ~0) suppress the unwrapped begin/end events;
+      // non-physics (flat-time) cuts have no physicsResult here, so they keep today's behavior.
+      var hasStallDwell = !physicsResult || physicsResult.t2h > 0.05;
+      if (wrap !== 'none' || hasStallDwell) ev.push({t:sb, l:wrap!=='none'?'Stall: wrap now':'Stall begins', s:sn+wn, c:'red'});
+      if (wrap === 'none' && hasStallDwell) ev.push({t:se, l:'Stall ends', s:'Temperature climbs again', c:'amber'});
     }
     var pull=new Date(serve-restMs);
     ev.push({t:pull, l:'Pull from smoker: begin rest', s:'Target internal: '+dT(cut.pullTemp)+' \u2014 rest '+cut.restMinutes+' min loosely tented', c:'amber'});
