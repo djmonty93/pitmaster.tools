@@ -433,8 +433,12 @@
               <option value="offset">Offset stick-burner</option>
               <option value="kamado">Kamado (BGE / Kamado Joe)</option>
               <option value="kettle">Kettle (Weber / PK)</option>
-              <option value="electric">Water-pan electric (Masterbuilt / Bradley)</option>
+              <option value="electric">Electric cabinet (Masterbuilt / Bradley)</option>
             </select>
+          </div>
+
+          <div class="form-group">
+            <label class="opt-check"><input type="checkbox" id="waterPan"> Water pan in smoker</label>
           </div>
 
           <div class="form-group">
@@ -1338,12 +1342,13 @@ function cookHrs(cut, wLbs, temp, boneIn, inj, wrap){
   return h;
 }
 
-function getPhysicsResult(cutKey, cut, wLbs, tempF, wrap, rh) {
+function getPhysicsResult(cutKey, cut, wLbs, tempF, wrap, rh, cookerType, waterPan) {
   var pk = PHYSICS_KEYS[cutKey];
   if (!pk || cut.cookRate === null) return null; // skip flat-time & two-phase
   var r = spCompute({
     kmKey: pk.kmKey, weightLbs: wLbs, thicknessIn: 0,
-    pitF: tempF, rh: rh, tiF: 38, tfF: cut.pullTemp,
+    pitF: tempF, rh: rh, cookerType: cookerType, waterPan: waterPan,
+    tiF: 38, tfF: cut.pullTemp,
     hasStall: pk.hasStall, wrapTriggerF: 150, wrapMethod: wrap
   });
   return r.error ? null : r;
@@ -1372,12 +1377,19 @@ function buildTL(cut, serve, hrs, wrap, grill, physicsResult){
         sb=new Date(on.getTime()+baseMs*0.40);
         se=new Date(on.getTime()+cMs*0.65);
       }
-      var sn=cut.stallLo ? 'Internal reaches '+dT(cut.stallLo)+'\u2013'+dT(cut.stallHi)+': temperature plateau begins' : '';
+      var sn = (wrap !== 'none')
+        ? 'Internal reaches '+dT(Math.round((physicsResult && physicsResult.wrapAtF) || 150))   // wrap fires at the actual stall/trigger temp
+        : (physicsResult && physicsResult.T_plat)
+          ? 'Internal approaches the ~'+dT(Math.round(physicsResult.T_plat))+' plateau'
+          : (cut.stallLo ? 'Internal reaches '+dT(cut.stallLo)+'\u2013'+dT(cut.stallHi)+': temperature plateau begins' : '');
       var wn= wrap==='foil'  ? ': wrap in foil now (Texas Crutch). Leave wrapped until pull temp.'
             : wrap==='paper' ? ': wrap in butcher paper now. Leave wrapped until pull temp.' : '';
       // Wrapped cooks: one event (wrap action). Unwrapped: two events bookending the stall.
-      ev.push({t:sb, l:wrap!=='none'?'Stall: wrap now':'Stall begins', s:sn+wn, c:'red'});
-      if(wrap==='none') ev.push({t:se, l:'Stall ends', s:'Temperature climbs again', c:'amber'});
+      // Physics-backed cuts with no real dwell (t2h ~0) suppress the unwrapped begin/end events;
+      // non-physics (flat-time) cuts have no physicsResult here, so they keep today's behavior.
+      var hasStallDwell = !physicsResult || physicsResult.t2h > 0.05;
+      if (wrap !== 'none' || hasStallDwell) ev.push({t:sb, l:wrap!=='none'?'Stall: wrap now':'Stall begins', s:sn+wn, c:'red'});
+      if (wrap === 'none' && hasStallDwell) ev.push({t:se, l:'Stall ends', s:'Temperature climbs again', c:'amber'});
     }
     var pull=new Date(serve-restMs);
     ev.push({t:pull, l:'Pull from smoker: begin rest', s:'Target internal: '+dT(cut.pullTemp)+' \u2014 rest '+cut.restMinutes+' min loosely tented', c:'amber'});
@@ -1414,7 +1426,7 @@ function buildTL(cut, serve, hrs, wrap, grill, physicsResult){
    ============================================================ */
 function render(cut, inp){
   var rh = SP_COOKER_RH[inp.cookerType] || 12;
-  var physicsResult = getPhysicsResult(inp.cutKey, cut, inp.wLbs, inp.temp, inp.wrap, rh);
+  var physicsResult = getPhysicsResult(inp.cutKey, cut, inp.wLbs, inp.temp, inp.wrap, rh, inp.cookerType, inp.waterPan);
   if (physicsResult) {
     var timeFactor = 1;
     if (inp.boneIn && cut.boneInOk) timeFactor *= 1.10;
@@ -1430,6 +1442,8 @@ function render(cut, inp){
       thicknessIn: 0,
       pitF: inp.temp,
       rh: rh,
+      cookerType: inp.cookerType,
+      waterPan: inp.waterPan,
       tfF: cut.pullTemp,
       hasStall: PHYSICS_KEYS[inp.cutKey].hasStall,
       wrapMethod: inp.wrap,
@@ -1612,6 +1626,7 @@ function planState(){
     ppl: parseInt(document.getElementById('numPeople').value,10),
     temp: parseInt(document.getElementById('smokerTemp').value,10),
     ck: document.getElementById('cookerType').value,
+    wp: document.getElementById('waterPan').checked ? 1 : 0,
     serve: document.getElementById('serveTime').value,
     wrap: document.getElementById('wrapMethod').value,
     bone: document.getElementById('boneIn').value==='yes' ? 1 : 0,
@@ -1644,6 +1659,7 @@ function calc(){
   render(c,{
     cutKey:k, wLbs:w, temp:parseInt(document.getElementById('smokerTemp').value),
     cookerType:document.getElementById('cookerType').value,
+    waterPan:document.getElementById('waterPan').checked,
     serve:sd, wrap:document.getElementById('wrapMethod').value,
     boneIn:document.getElementById('boneIn').value==='yes',
     inj:document.getElementById('injected').value==='yes',
@@ -1662,15 +1678,7 @@ function resolveNow() {
   var rawT = parseFloat(input.value);
   if (isNaN(rawT)) { resultEl.textContent = 'Enter a temperature reading first.'; return; }
   var currentF = state.tu === 'C' ? rawT * 9 / 5 + 32 : rawT;
-  var r = spResolve({
-    kmKey: _lastPhysicsParams.kmKey,
-    weightLbs: _lastPhysicsParams.weightLbs,
-    thicknessIn: _lastPhysicsParams.thicknessIn,
-    pitF: _lastPhysicsParams.pitF,
-    rh: _lastPhysicsParams.rh,
-    currentF: currentF,
-    tfF: _lastPhysicsParams.tfF
-  });
+  var r = spResolve(Object.assign({}, _lastPhysicsParams, { currentF: currentF }));
   if (!r.error && _lastPhysicsParams.resolveScale && _lastPhysicsParams.resolveScale !== 1) {
     r.remainingH *= _lastPhysicsParams.resolveScale;
   }
@@ -1751,7 +1759,7 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
   // onMeatChange() can't reset them.
   var plan = (typeof PlanUrl !== 'undefined') ? PlanUrl.decodePlanParams(window.location.search) : {};
   var hasPlan = plan && Object.keys(plan).length > 0;
-  var hasAdvancedPlan = plan && ['ppl','ck','wrap','bone','inj','sz','grill','sear'].some(function(key) {
+  var hasAdvancedPlan = plan && ['ppl','ck','wp','wrap','bone','inj','sz','grill','sear'].some(function(key) {
     return plan[key] != null;
   });
   if (hasAdvancedPlan) document.getElementById('advancedSettings').open = true;
@@ -1767,6 +1775,7 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
   if(plan.ppl!=null) document.getElementById('numPeople').value=plan.ppl;
   if(plan.temp!=null) setSelectIfOption('smokerTemp', String(plan.temp));
   if(plan.ck) setSelectIfOption('cookerType', plan.ck);
+  if(plan.wp!=null) document.getElementById('waterPan').checked=(plan.wp==1);
   if(plan.serve) document.getElementById('serveTime').value=plan.serve;
   if(plan.inj!=null) document.getElementById('injected').value=(plan.inj===1?'yes':'no');
   // Cut-dependent controls: onMeatChange() hides wrap (and resets it to none)

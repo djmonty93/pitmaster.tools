@@ -225,6 +225,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.35rem 4.5rem; }
 .input-with-unit { display: flex; align-items: stretch; }
 .input-with-unit input { border-radius: 6px 0 0 6px; border-right: none; flex: 1; }
 .input-unit-label { display: flex; align-items: center; padding: 0 .75rem; background: #F0EBE3; border: 1.5px solid var(--card-border); border-left: none; border-radius: 0 6px 6px 0; font-size: .85rem; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+.opt-check { display: flex; align-items: center; gap: 0.4rem; cursor: pointer; }
 .calc-btn {
   width: 100%;
   margin-top: 1.25rem;

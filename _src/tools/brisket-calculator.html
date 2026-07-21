@@ -241,8 +241,12 @@
           <option value="offset">Offset stick-burner</option>
           <option value="kamado">Kamado (BGE / Kamado Joe)</option>
           <option value="kettle">Kettle (Weber / PK)</option>
-          <option value="electric">Water-pan electric (Masterbuilt / Bradley)</option>
+          <option value="electric">Electric cabinet (Masterbuilt / Bradley)</option>
         </select>
+      </div>
+
+      <div class="form-group full-width">
+        <label class="opt-check"><input type="checkbox" id="waterPan"> Water pan in smoker</label>
       </div>
 
       <div class="form-group">
@@ -305,7 +309,7 @@
           <li class="phase-row"><span class="phase-lbl">Heat-up to stall</span><span class="phase-val" id="phT1">—</span></li>
           <li class="phase-row" id="phT2Row"><span class="phase-lbl">Estimated stall</span><span class="phase-val" id="phT2">—</span></li>
           <li class="phase-row"><span class="phase-lbl">Post-stall finish</span><span class="phase-val" id="phT3">—</span></li>
-          <li class="phase-row" id="phWbRow"><span class="phase-lbl">Stall plateau (wet-bulb)</span><span class="phase-val" id="phWb">—</span></li>
+          <li class="phase-row" id="phWbRow"><span class="phase-lbl">Stall plateau temp</span><span class="phase-val" id="phWb">—</span></li>
         </ul>
       </div>
 
@@ -570,6 +574,7 @@ function planState(){
     wu: state.wu,
     temp: parseInt(document.getElementById('smokerTemp').value,10),
     ck: document.getElementById('cookerType').value,
+    wp: document.getElementById('waterPan').checked ? 1 : 0,
     wrap: state.wrap,
     serve: document.getElementById('serveTime').value,
     thick: parseFloat(document.getElementById('meatThickness').value)
@@ -615,7 +620,8 @@ function calculate() {
   }
 
   var cut = CUTS[state.style];
-  var rh  = SP_COOKER_RH[document.getElementById('cookerType').value] || 12;
+  var cookerType = document.getElementById('cookerType').value;
+  var rh  = SP_COOKER_RH[cookerType] || 12;
   var thk = parseFloat(document.getElementById('meatThickness').value) || 0;
 
   var physics = spCompute({
@@ -624,6 +630,8 @@ function calculate() {
     thicknessIn: thk,
     pitF: temp,
     rh: rh,
+    cookerType: cookerType,
+    waterPan: document.getElementById('waterPan').checked,
     tiF: 38,
     tfF: cut.pullTemp,
     hasStall: true,
@@ -643,6 +651,8 @@ function calculate() {
     thicknessIn: thk,
     pitF: temp,
     rh: rh,
+    cookerType: cookerType,
+    waterPan: document.getElementById('waterPan').checked,
     tfF: cut.pullTemp,
     hasStall: true,
     wrapMethod: wrap,
@@ -678,17 +688,20 @@ function calculate() {
 
   // Stall notes
   var T_wb_disp = Math.round(state.tu === 'C' ? (physics.T_wb - 32) * 5 / 9 : physics.T_wb) + (state.tu === 'C' ? '\u00B0C' : '\u00B0F');
+  var platF = (physics.T_plat != null) ? physics.T_plat : physics.T_wb;
+  var T_plat_disp = Math.round(state.tu === 'C' ? (platF - 32) * 5 / 9 : platF) + (state.tu === 'C' ? '\u00B0C' : '\u00B0F');
   var stallNote = '';
-  if (wrap === 'foil') stallNote = 'Internal reaches ' + fmtTemp(150) + ': wrap tightly in foil now (Texas Crutch). Leave wrapped until pull temp.';
-  else if (wrap === 'paper') stallNote = 'Internal reaches ' + fmtTemp(150) + ': wrap in butcher paper now. Leave wrapped until pull temp.';
-  else stallNote = 'Internal reaches ' + fmtTemp(150) + ': plateau driven by evaporative cooling (~' + T_wb_disp + ' wet-bulb). Hold steady, no wrap.';
+  var wrapAtDisp = fmtTemp(Math.round(physics.wrapAtF || 150));
+  if (wrap === 'foil') stallNote = 'Internal reaches ' + wrapAtDisp + ': wrap tightly in foil now (Texas Crutch). Leave wrapped until pull temp.';
+  else if (wrap === 'paper') stallNote = 'Internal reaches ' + wrapAtDisp + ': wrap in butcher paper now. Leave wrapped until pull temp.';
+  else stallNote = 'Internal approaches the ~' + T_plat_disp + ' plateau, held by evaporative cooling. Hold steady, no wrap.';
 
   // Build timeline — wrapped cooks get one stall event (wrap action); unwrapped get two (start + end)
   var events = [
     { dot: 'blue',  time: light,      day: lightDay,      label: 'Light smoker / preheat',            sub: 'Target: ' + fmtSmokerTemp(temp) + ' stable before meat goes on' },
     { dot: 'amber', time: meatOn,     day: meatOnDay,     label: 'Meat goes on smoker',               sub: weightLbs.toFixed(1) + ' lbs brisket: fat side up or down per your setup' },
-    { dot: 'red',   time: stallStart, day: stallStartDay, label: wrap !== 'none' ? 'Stall: wrap now' : 'Stall begins', sub: stallNote },
-    wrap === 'none' ? { dot: 'amber', time: stallEnd, day: stallEndDay, label: 'Stall ends', sub: 'Temperature climbs again past ' + fmtTemp(165) } : null,
+    (wrap !== 'none' || physics.t2h > 0.05) ? { dot: 'red',   time: stallStart, day: stallStartDay, label: wrap !== 'none' ? 'Stall: wrap now' : 'Stall begins', sub: stallNote } : null,
+    (wrap === 'none' && physics.t2h > 0.05) ? { dot: 'amber', time: stallEnd, day: stallEndDay, label: 'Stall ends', sub: 'Temperature climbs again past ' + fmtTemp(Math.round(physics.T_plat || 165)) } : null,
     { dot: 'amber', time: pull,       day: pullDay,       label: 'Pull from smoker: begin rest', sub: 'Target internal: ' + fmtTemp(cut.pullTemp) + ' \u2014 rest 90 min loosely tented' },
     { dot: 'green', time: serve,      day: '',            label: 'Serve',                              sub: 'Slice against the grain 1/4\u201D thick, enjoy' }
   ].filter(Boolean);
@@ -730,7 +743,7 @@ function calculate() {
   var phWbRow = document.getElementById('phWbRow');
   if (wrap === 'none' && physics.t2h > 0.05) {
     phWbRow.style.display = '';
-    document.getElementById('phWb').textContent = '~' + T_wb_disp + ' plateau';
+    document.getElementById('phWb').textContent = '~' + T_plat_disp + ' plateau';
   } else {
     phWbRow.style.display = 'none';
   }
@@ -869,6 +882,7 @@ document.getElementById('printBtn').addEventListener('click', function() { windo
   if(plan.wt!=null) document.getElementById('weight').value=plan.wt;
   if(plan.temp!=null) setSelectIfOption('smokerTemp', String(plan.temp));
   if(plan.ck) setSelectIfOption('cookerType', plan.ck);
+  if(plan.wp!=null) document.getElementById('waterPan').checked=(plan.wp==1);
   if(plan.serve) document.getElementById('serveTime').value=plan.serve;
   if(plan.thick!=null) document.getElementById('meatThickness').value=plan.thick;
 

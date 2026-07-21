@@ -338,8 +338,12 @@
             <option value="offset">Offset stick-burner</option>
             <option value="kamado">Kamado (BGE / Kamado Joe)</option>
             <option value="kettle">Kettle (Weber / PK)</option>
-            <option value="electric">Water-pan electric (Masterbuilt / Bradley)</option>
+            <option value="electric">Electric cabinet (Masterbuilt / Bradley)</option>
           </select>
+        </div>
+
+        <div class="form-group">
+          <label class="opt-check"><input type="checkbox" id="waterPan"> Water pan in smoker</label>
         </div>
 
         <div class="form-group">
@@ -881,7 +885,10 @@
       now.getHours(), now.getMinutes(), 0, 0);
     if (serve < nowMinute) serve.setDate(serve.getDate() + 1);
 
-    var weightLbs = 8;
+    // Non-beef racks carry no weight input: 0 makes spLc/spSurfaceArea fall back to
+    // each cut's reference geometry (LcRef/ARef) instead of scaling off a placeholder
+    // weight (real rack weight / piece count is a Milestone-2 input). Beef overrides below.
+    var weightLbs = 0;
     if (ribKey === 'beef') {
       var rawW = parseFloat(beefWeightInput.value);
       if (isNaN(rawW) || rawW <= 0) {
@@ -900,6 +907,8 @@
       thicknessIn: 0,
       pitF: tempF,
       rh: rh,
+      cookerType: cookerType,
+      waterPan: document.getElementById('waterPan').checked,
       tiF: 38,
       tfF: rib.pullTemp,
       hasStall: true,
@@ -919,6 +928,8 @@
       thicknessIn: 0,
       pitF: tempF,
       rh: rh,
+      cookerType: cookerType,
+      waterPan: document.getElementById('waterPan').checked,
       tfF: rib.pullTemp,
       hasStall: true,
       wrapMethod: wrapMethod,
@@ -996,7 +1007,7 @@
         stallRowEl.style.display = 'none';
       }
       document.getElementById('phT3').textContent = spFmtHrs(result.t3h);
-      var wbF = result.T_wb;
+      var wbF = (result.T_plat != null) ? result.T_plat : result.T_wb;
       document.getElementById('phWb').textContent = tempUnit === 'C'
         ? Math.round((wbF - 32) * 5 / 9) + '\u00B0C'
         : Math.round(wbF) + '\u00B0F';
@@ -1011,8 +1022,8 @@
         { color: 'amber', time: meatOn,  label: 'Ribs go on smoker',      sub: rib.name + ', standard method' }
       ];
       if (result.t2h > 0) {
-        evs.push({ color: 'amber', time: stallStartT, label: 'Stall may begin (~' + fmtTemp(150) + ')', sub: 'Temperature plateaus for ' + spFmtHrs(result.t2h) + ', driven by evaporative cooling' });
-        evs.push({ color: 'amber', time: stallEndT,   label: 'Stall ends (~' + fmtTemp(165) + ')',      sub: 'Temperature climbs again toward pull temp' });
+        evs.push({ color: 'amber', time: stallStartT, label: 'Stall may begin (~' + fmtTemp(Math.round(result.T_plat || 165)) + ')', sub: 'Temperature plateaus for ' + spFmtHrs(result.t2h) + ', driven by evaporative cooling' });
+        evs.push({ color: 'amber', time: stallEndT,   label: 'Stall ends (~' + fmtTemp(Math.round(result.T_plat || 165)) + ')', sub: 'Temperature climbs again toward pull temp' });
       } else {
         evs.push({ color: 'amber', time: stallStartT, label: 'Bend test / wrap check', sub: 'Check for 45\u00B0 bend test and pullback from bone' });
       }
@@ -1080,15 +1091,7 @@
     var rawT = parseFloat(input.value);
     if (isNaN(rawT)) { resultEl.textContent = 'Enter a temperature reading first.'; return; }
     var currentF = tempUnit === 'C' ? rawT * 9 / 5 + 32 : rawT;
-    var r = spResolve({
-      kmKey: _lastPhysicsParams.kmKey,
-      weightLbs: _lastPhysicsParams.weightLbs,
-      thicknessIn: _lastPhysicsParams.thicknessIn,
-      pitF: _lastPhysicsParams.pitF,
-      rh: _lastPhysicsParams.rh,
-      currentF: currentF,
-      tfF: _lastPhysicsParams.tfF
-    });
+    var r = spResolve(Object.assign({}, _lastPhysicsParams, { currentF: currentF }));
     resultEl.textContent = r.error ? r.error : 'Estimated time remaining: ' + spFmtHrs(r.remainingH);
   }
   window.resolveNow = resolveNow;
