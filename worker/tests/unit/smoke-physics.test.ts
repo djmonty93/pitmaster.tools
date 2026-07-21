@@ -9,8 +9,8 @@ export function loadPhysics(): any {
     smokePhysicsSource +
       '\n; return { spF2C, spC2F, spPSat, spPAtm, spHumidityRatio, spWetBulbC,' +
       ' spLc, spSurfaceArea, spPitWetBulbF, spPlateauTempF, spStallDwellH, spFade,' +
-      ' spStall, spCompute, spResolve, wetBulb_F,' +
-      ' SP_AIR_EXCHANGE, SP_CUT, SP_EVAP_C, SP_STALL_K, SP_STALL_START }; '
+      ' spStall, spCompute, spResolve, spPhase, spGetL, wetBulb_F,' +
+      ' SP_AIR_EXCHANGE, SP_CUT, SP_KM, SP_EVAP_C, SP_STALL_K, SP_STALL_START }; '
   )();
 }
 
@@ -137,6 +137,13 @@ describe('spCompute / spResolve assembly', () => {
     const r = compute({ cookerType: 'kamado' });
     // t1 climbs to the plateau; with T_plat ~158 the boundary is well above 150.
     expect(r.T_plat).toBeGreaterThan(150);
+    // The phase boundary IS T_plat (the #138 fix), not the old hardcoded 150:
+    // t1 is exactly the climb ti->T_plat and t3 the climb T_plat->tf. A revert
+    // to a 150 boundary would break these even though totalH stays the same.
+    const Km = P.SP_KM['brisket-packer'];
+    const L = P.spGetL('brisket-packer', 14);
+    expect(r.t1h).toBeCloseTo(P.spPhase(Km, L, 225, 38, r.T_plat), 6);
+    expect(r.t3h).toBeCloseTo(P.spPhase(Km, L, 225, r.T_plat, 203), 6);
     // total == baseline diffusion (ti->tf) + dwell, to 1e-6 h
     const baseline = P.spCompute({ kmKey: 'brisket-packer', weightLbs: 14, pitF: 225, tiF: 38,
       tfF: 203, hasStall: false, cookerType: 'kamado', ...AMB }).totalH;
