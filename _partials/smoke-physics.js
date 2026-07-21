@@ -246,7 +246,11 @@ function spCompute(p) {
     return { error: 'Pit temperature is too low to cook. Raise smoker temperature.' };
   }
 
-  /* Wrapped cook (saturated limit): stall truncated, climb at full pit drive. */
+  /* Wrapped cook: foil/paper saturates the surface and truncates the dwell AT
+     wrap time. But if the plateau forms BELOW the wrap trigger, the meat has
+     already sat through the whole stall before it's wrapped, so that dwell is
+     not truncated (spec §7.1). Plateau at/above the trigger => wrapped before
+     the stall => no dwell. */
   var wrapActive = (p.wrapMethod === 'foil' || p.wrapMethod === 'paper');
   if (wrapActive) {
     var Twrap = p.wrapTriggerF || SP_STALL_START;
@@ -255,7 +259,8 @@ function spCompute(p) {
     if (!isFinite(t1w) || !isFinite(t3w)) {
       return { error: 'Pull temperature or wrap trigger temperature exceeds pit temperature.' };
     }
-    return { t1h: t1w, t2h: 0, t3h: t3w, totalH: t1w + t3w, T_wb: s.T_wb, T_plat: s.T_plat, L: L, dwellH: 0, error: null };
+    var preDwell = (s.T_plat < Twrap) ? s.dwellH : 0;
+    return { t1h: t1w, t2h: preDwell, t3h: t3w, totalH: t1w + preDwell + t3w, T_wb: s.T_wb, T_plat: s.T_plat, L: L, dwellH: preDwell, error: null };
   }
 
   /* Plateau overtakes the target: no observable stall, single climb. Guards
@@ -312,11 +317,15 @@ function spResolve(p) {
   if (!hasStall) {
     t = spPhase(Km, L, p.pitF, p.currentF, p.tfF);
   } else if (wrapActive) {
+    var sw = spStall(p);
+    // If the plateau is below the wrap trigger, the stall happens before the
+    // wrap; count the full dwell until the reading is past the plateau.
+    var wrapDwell = (sw.T_plat < wrapTriggerF && sw.dwellH > 0 && p.currentF <= sw.T_plat) ? sw.dwellH : 0;
     if (p.currentF < wrapTriggerF) {
       t = spPhase(Km, L, p.pitF, p.currentF, wrapTriggerF)
-        + spPhase(Km, L, p.pitF, wrapTriggerF, p.tfF);
+        + spPhase(Km, L, p.pitF, wrapTriggerF, p.tfF) + wrapDwell;
     } else {
-      t = spPhase(Km, L, p.pitF, p.currentF, p.tfF);
+      t = spPhase(Km, L, p.pitF, p.currentF, p.tfF) + wrapDwell;
     }
   } else {
     var s = spStall(p);
