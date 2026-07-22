@@ -798,6 +798,9 @@
           btnStandard.classList.add('active');
           btn321.classList.remove('active');
           methodNote.classList.remove('visible');
+          // Mirror btnStandard's click handler: wrap choice is user-selectable again now
+          // that 3-2-1's forced foil phase doesn't apply.
+          wrapToggle.querySelectorAll('button').forEach(function(b) { b.disabled = false; });
         }
         beefWeightRow.classList.add('visible');
       } else {
@@ -1077,15 +1080,15 @@
 
       var stallStartT = new Date(meatOn.getTime() + result.t1h * 3600000);
       var stallEndT = new Date(stallStartT.getTime() + result.t2h * 3600000);
-      var stallNote = (wrapMethod === 'boat')
-        ? 'Wrap in a foil boat now (bottom sealed, top open) for bark plus speed. Leave until pull temp.'
-        : 'Temperature plateaus for ' + spFmtHrs(result.t2h) + ', driven by evaporative cooling';
       tlEl.innerHTML = '';
       var evs = [
         { color: 'blue',  time: light,   label: 'Light smoker / preheat', sub: 'Get smoker to temp and running clean smoke' },
         { color: 'amber', time: meatOn,  label: 'Ribs go on smoker',      sub: rib.name + ', standard method' }
       ];
       if (result.t2h > 0) {
+        var stallNote = (wrapMethod === 'boat')
+          ? 'Wrap in a foil boat now (bottom sealed, top open) for bark plus speed. Leave until pull temp.'
+          : 'Temperature plateaus for ' + spFmtHrs(result.t2h) + ', driven by evaporative cooling';
         evs.push({ color: 'amber', time: stallStartT, label: (wrapMethod === 'boat' ? 'Stall: wrap in foil boat now' : 'Stall may begin (~' + fmtTemp(Math.round(result.T_plat || 165)) + ')'), sub: stallNote });
         evs.push({ color: 'amber', time: stallEndT,   label: 'Stall ends (~' + fmtTemp(Math.round(result.T_plat || 165)) + ')', sub: 'Temperature climbs again toward pull temp' });
       } else {
