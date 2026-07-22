@@ -1164,18 +1164,20 @@
   /* ---- Use my local weather ---- */
   document.getElementById('useLocalWeather').addEventListener('click', function () {
     var msg = document.getElementById('weatherMsg');
+    var btn = document.getElementById('useLocalWeather');
     spUseLocalForecast({
       cooker: document.getElementById('cookerType').value,
       cut: 'spare-ribs',
-      onStart: function () { msg.textContent = 'Loading…'; },
+      onStart: function () { msg.textContent = 'Loading…'; btn.disabled = true; },
       onApply: function (a) {
         document.getElementById('ambientTemp').value = (a.ambientF != null) ? a.ambientF : '';
         document.getElementById('ambientDew').value  = (a.dewPointF != null) ? a.dewPointF : '';
         document.getElementById('windMph').value     = (a.windMph != null) ? a.windMph : '';
         msg.textContent = 'Loaded local conditions.';
+        btn.disabled = false;
         calculate();
       },
-      onError: function (m) { msg.textContent = m; }
+      onError: function (m) { msg.textContent = m; btn.disabled = false; }
     });
   });
 
