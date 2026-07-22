@@ -1499,6 +1499,7 @@ function render(cut, inp){
   if (physicsResult) {
     var timeFactor = 1;
     if (inp.boneIn && cut.boneInOk) timeFactor *= 1.10;
+    if (!PHYSICS_KEYS[inp.cutKey].hasStall && inp.mods.injectionPct > 0) timeFactor *= 0.95;
     physicsResult = spScaleResult(physicsResult, timeFactor);
   }
   var h = physicsResult ? physicsResult.totalH : cookHrs(cut, inp.wLbs, inp.temp, inp.boneIn, inp.mods.injectionPct > 0, inp.wrap);
