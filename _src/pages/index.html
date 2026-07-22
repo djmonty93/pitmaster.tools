@@ -459,10 +459,11 @@
             </select>
           </div>
 
+          <div class="form-group"><label for="injectionPct">Injection (% of weight)</label>
+            <input type="number" id="injectionPct" min="0" max="25" step="1" value="0" inputmode="numeric"></div>
+
           <div class="form-group" id="stallModifiers" style="display:none; grid-column:1/-1;">
             <div class="advanced-grid">
-              <div class="form-group"><label for="injectionPct">Injection (% of weight)</label>
-                <input type="number" id="injectionPct" min="0" max="25" step="1" value="0" inputmode="numeric"></div>
               <div class="form-group"><label for="fatCap">Fat cap thickness (in)</label>
                 <input type="number" id="fatCap" min="0" max="1" step="0.25" value="0" inputmode="decimal"></div>
               <div class="form-group"><label for="spritzRate">Spritz / mop (times per hour)</label>
@@ -1453,7 +1454,7 @@ function render(cut, inp){
     if (inp.boneIn && cut.boneInOk) timeFactor *= 1.10;
     physicsResult = spScaleResult(physicsResult, timeFactor);
   }
-  var h = physicsResult ? physicsResult.totalH : cookHrs(cut, inp.wLbs, inp.temp, inp.boneIn, inp.inj, inp.wrap);
+  var h = physicsResult ? physicsResult.totalH : cookHrs(cut, inp.wLbs, inp.temp, inp.boneIn, inp.mods.injectionPct > 0, inp.wrap);
 
   if (physicsResult) {
     _lastPhysicsParams = {
@@ -1815,12 +1816,13 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
   // a hidden field that silently changes the result.
   if(plan.wrap && document.getElementById('wrapMethod').closest('.form-group').style.display!=='none') setSelectIfOption('wrapMethod', plan.wrap);
   if(plan.bone!=null && document.getElementById('boneInGroup').style.display!=='none') document.getElementById('boneIn').value=(plan.bone===1?'yes':'no');
-  // Stall modifiers (injection %, fat cap, spritz rate, load count, wind) are
-  // only meaningful for stall cuts; #stallModifiers is hidden otherwise, so a
-  // shared link can't set an inert field. Back-compat: legacy inj=1 prefills
+  // Injection is universal (all cuts); back-compat: legacy inj=1 prefills
   // injectionPct to 12 when the newer injp key isn't present.
+  if(plan.injp!=null || plan.inj!=null) document.getElementById('injectionPct').value = (plan.injp!=null ? plan.injp : (plan.inj===1 ? 12 : 0));
+  // Remaining stall modifiers (fat cap, spritz rate, load count, wind) are
+  // only meaningful for stall cuts; #stallModifiers is hidden otherwise, so a
+  // shared link can't set an inert field.
   if(document.getElementById('stallModifiers').style.display!=='none'){
-    document.getElementById('injectionPct').value = (plan.injp!=null) ? plan.injp : (plan.inj===1 ? 12 : 0);
     if(plan.fat!=null) document.getElementById('fatCap').value=plan.fat;
     if(plan.spz!=null) document.getElementById('spritzRate').value=plan.spz;
     if(plan.np!=null) document.getElementById('loadCount').value=plan.np;
