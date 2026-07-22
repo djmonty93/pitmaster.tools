@@ -198,6 +198,17 @@ test('decode accepts boat wrap and clamps M2 modifier ranges', () => {
   assert.equal(decodePlanParams('injp=abc').injp, undefined); // garbage dropped
 });
 
+// ── Stage B ambient keys (ambt/ambdp/alt) ───────────────────────────────────
+
+test('round-trips + clamps Stage B ambient keys (ambt/ambdp/alt)', () => {
+  assert.deepEqual(decodePlanParams(encodePlanParams({ ambt: 70, ambdp: 55, alt: 500 })), { ambt: 70, ambdp: 55, alt: 500 });
+  assert.equal(decodePlanParams('ambt=999').ambt, 250);   // ceiling
+  assert.equal(decodePlanParams('ambt=-99').ambt, -40);   // floor
+  assert.equal(decodePlanParams('ambdp=999').ambdp, 120); // ceiling
+  assert.equal(decodePlanParams('alt=99999').alt, 15000); // ceiling
+  assert.equal(decodePlanParams('ambt=abc').ambt, undefined);
+});
+
 // ── Cook-time coordinator: variable-length meat list ────────────────────────
 
 test('round-trips a multi-meat cook plan', () => {

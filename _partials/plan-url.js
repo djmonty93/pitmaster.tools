@@ -108,7 +108,10 @@
     fat:  function (v) { return clampNum(v, 0, 1, false); },    // fat cap thickness (in)
     spz:  function (v) { return clampNum(v, 0, 6, true); },     // spritzes per hour
     np:   function (v) { return clampNum(v, 1, 12, true); },    // load count (pieces on the smoker)
-    wind: function (v) { return clampNum(v, 0, 40, true); }     // wind (mph)
+    wind: function (v) { return clampNum(v, 0, 40, true); },    // wind (mph)
+    ambt: function (v) { return clampNum(v, -40, 250, true); },  // ambient temp °F
+    ambdp: function (v) { return clampNum(v, -40, 120, true); }, // ambient dewpoint °F
+    alt:  function (v) { return clampNum(v, 0, 15000, true); }   // altitude (ft)
   };
   var KEYS = Object.keys(VALIDATORS);
   // Every key the plan family owns across both encoders (flat schema + the
