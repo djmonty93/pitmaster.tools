@@ -618,7 +618,7 @@ function spModifierInputs(){
   // sea level) rather than being handed a bogus 0. RH is derived from
   // dewpoint via the same Buck pSat helpers the forecast auto-fill path
   // uses, so manual entry and "Use my local weather" share one derivation.
-  var ambientF, ambientRh, altitudeM, altitudeFt;
+  var ambientF, ambientRh, altitudeM, altitudeFt, ambientDewF;
   var rawTemp = document.getElementById('ambientTemp').value;
   var tempParsed = Number(rawTemp);
   if (rawTemp !== '' && isFinite(tempParsed)) {
@@ -628,6 +628,7 @@ function spModifierInputs(){
   var dewParsed = Number(rawDew);
   if (rawDew !== '' && isFinite(dewParsed)) {
     var dp = Math.min(120, Math.max(-40, Math.round(dewParsed)));
+    ambientDewF = dp;
     var tForRh = (ambientF != null) ? ambientF : 70;
     ambientRh = Math.min(100, Math.max(1, Math.round(100 * spPSat(spF2C(dp)) / spPSat(spF2C(tForRh)))));
   }
@@ -647,7 +648,8 @@ function spModifierInputs(){
     ambientF: ambientF,
     ambientRh: ambientRh,
     altitudeM: altitudeM,
-    altitudeFt: altitudeFt
+    altitudeFt: altitudeFt,
+    ambientDewF: ambientDewF
   };
 }
 function planState(){
@@ -668,7 +670,7 @@ function planState(){
     np: mod.nPieces,
     wind: mod.windMph,
     ambt: mod.ambientF,
-    ambdp: document.getElementById('ambientDew').value === '' ? undefined : parseInt(document.getElementById('ambientDew').value, 10),
+    ambdp: mod.ambientDewF,
     alt: mod.altitudeFt
   };
 }
