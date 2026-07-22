@@ -1009,9 +1009,6 @@ document.getElementById('useLocalWeather').addEventListener('click', function ()
       document.querySelectorAll('#tempToggle button').forEach(function(b) {
         b.classList.toggle('active', b.dataset.unit === savedTu);
       });
-      if (savedTu === 'C') {
-        Array.prototype.forEach.call(document.querySelectorAll('.amb-unit'), function (s) { s.textContent = '°C'; });
-      }
     }
     if (savedWu) {
       state.wu = savedWu;
@@ -1032,7 +1029,7 @@ document.getElementById('useLocalWeather').addEventListener('click', function ()
   var plan = (typeof PlanUrl !== 'undefined') ? PlanUrl.decodePlanParams(window.location.search) : {};
   var hasPlan = plan && Object.keys(plan).length > 0;
 
-  if(plan.tu){ state.tu=plan.tu; document.querySelectorAll('#tempToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.unit===plan.tu);}); if(plan.tu==='C'){ Array.prototype.forEach.call(document.querySelectorAll('.amb-unit'), function(s){ s.textContent='°C'; }); } }
+  if(plan.tu){ state.tu=plan.tu; document.querySelectorAll('#tempToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.unit===plan.tu);}); }
   if(plan.wu){ state.wu=plan.wu; document.getElementById('weightUnitLbl').textContent=plan.wu; document.querySelectorAll('#weightToggle button').forEach(function(b){b.classList.toggle('active',b.dataset.unit===plan.wu);}); }
   if(plan.style){ state.style=plan.style; document.querySelectorAll('.style-btn').forEach(function(b){ var on=b.dataset.style===plan.style; b.classList.toggle('active',on); b.setAttribute('aria-pressed',on?'true':'false'); }); }
   if(plan.wrap){ state.wrap=plan.wrap; document.querySelectorAll('.wrap-toggle button').forEach(function(b){ var on=b.dataset.wrap===plan.wrap; b.classList.toggle('active',on); b.setAttribute('aria-pressed',on?'true':'false'); }); }
@@ -1050,6 +1047,14 @@ document.getElementById('useLocalWeather').addEventListener('click', function ()
   if(plan.ambt!=null) document.getElementById('ambientTemp').value = (state.tu === 'C' ? Math.round((plan.ambt - 32) * 5 / 9) : plan.ambt);
   if(plan.ambdp!=null) document.getElementById('ambientDew').value = (state.tu === 'C' ? Math.round((plan.ambdp - 32) * 5 / 9) : plan.ambdp);
   if(plan.alt!=null) document.getElementById('altitudeFt').value=plan.alt;
+
+  // Sync ambient unit labels to the final resolved state.tu, once, after both
+  // the localStorage/locale (savedTu) and plan-url (plan.tu) hydration paths
+  // above have had a chance to set it (fix: previous one-directional set to
+  // '°C' only left labels stale when a plan URL hydrated tu='F').
+  Array.prototype.forEach.call(document.querySelectorAll('.amb-unit'), function (s) {
+    s.textContent = state.tu === 'C' ? '°C' : '°F';
+  });
 
   initEmbedMode();
   initConsentBanner();
