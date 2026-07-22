@@ -146,6 +146,20 @@ var SP_STALL_K = 287;   /* °F·h/in² */
 var SP_XW_REF = 0.71;
 var SP_PLAT_FADE = 15;  /* °F */
 
+/* ── Stage-5 modifier constants (spec §7) ─────────────────────────────────── */
+var SP_WRAP_FACTOR = { none: 1, foil: 0, paper: 0.45, boat: 0.70 };
+var SP_SPRITZ_C   = 0.06;  /* dwell multiplier per spritz/hour */
+var SP_SPRITZ_CAP = 1.5;   /* max spritz multiplier */
+var SP_FATCAP_C   = 0.5;   /* Lc added (in) per inch of fat cap */
+var SP_INJ_XW_MAX = 0.95;  /* clamp on injected water fraction */
+
+/* Spritz re-wets the surface and re-arms evaporation — unwrapped only. */
+function spSpritzFactor(spritzesPerHour) {
+  var s = spritzesPerHour > 0 ? spritzesPerHour : 0;
+  var f = 1 + SP_SPRITZ_C * s;
+  return f > SP_SPRITZ_CAP ? SP_SPRITZ_CAP : f;
+}
+
 function spPlateauTempF(T_wb, pitF, Lc) {
   var T = T_wb + (pitF - T_wb) * (SP_PLAT_A - SP_PLAT_B * Lc);
   var lo = T_wb + 5, hi = pitF - 5;
@@ -170,14 +184,20 @@ function spFade(T_plat, tfF) {
 function spStall(p) {
   var c = spCutParams(p.kmKey);
   var Lc = spLc(p.kmKey, p.weightLbs || c.wRef, p.thicknessIn);
+  /* Fat cap: an untrimmed cap insulates the capped face (spec §7.4) — raises
+     the conduction path, which lowers T_plat and lengthens dwell. */
+  if (p.fatCapInches > 0) Lc = Lc + SP_FATCAP_C * p.fatCapInches;
   var T_wb = (p.cookerType)
     ? spPitWetBulbF({ pitF: p.pitF, cookerType: p.cookerType,
         ambientF: p.ambientF, ambientRh: p.ambientRh, altitudeM: p.altitudeM,
         waterPan: p.waterPan, nPieces: p.nPieces, kmKey: p.kmKey,
         weightLbs: p.weightLbs, windMph: p.windMph })
     : wetBulb_F(p.pitF, p.rh || 12);
+  /* Injection: free interior water raises the water fraction (spec §7.3). */
+  var Xw = c.Xw + (p.injectionPct > 0 ? p.injectionPct / 100 : 0);
+  if (Xw > SP_INJ_XW_MAX) Xw = SP_INJ_XW_MAX;
   var T_plat = spPlateauTempF(T_wb, p.pitF, Lc);
-  var dwellH = spStallDwellH(Lc, c.Xw, p.pitF, T_wb) * spFade(T_plat, p.tfF);
+  var dwellH = spStallDwellH(Lc, Xw, p.pitF, T_wb) * spFade(T_plat, p.tfF);
   return { T_wb: T_wb, T_plat: T_plat, Lc: Lc, dwellH: dwellH };
 }
 
@@ -251,16 +271,18 @@ function spCompute(p) {
      not at 150 — and foil truncates the dwell. So a wrapped cook carries no
      dwell and is always shorter than the unwrapped stall. `wrapAtF` is the
      temperature the wrap actually happens at (for the timeline label). */
-  var wrapActive = (p.wrapMethod === 'foil' || p.wrapMethod === 'paper');
+  var wrapActive = (p.wrapMethod === 'foil' || p.wrapMethod === 'paper' || p.wrapMethod === 'boat');
   if (wrapActive) {
     var Twrap = p.wrapTriggerF || SP_STALL_START;
     var wrapAtF = Math.min(Twrap, s.T_plat);
+    var wf = SP_WRAP_FACTOR[p.wrapMethod];        /* foil 0, paper .45, boat .70 */
     var t1w = spPhase(Km, L, p.pitF, tiF, wrapAtF);
+    var t2w = s.dwellH * wf;                       /* residual dwell after wrapping */
     var t3w = spPhase(Km, L, p.pitF, wrapAtF, p.tfF);
     if (!isFinite(t1w) || !isFinite(t3w)) {
       return { error: 'Pull temperature or wrap trigger temperature exceeds pit temperature.' };
     }
-    return { t1h: t1w, t2h: 0, t3h: t3w, totalH: t1w + t3w, T_wb: s.T_wb, T_plat: s.T_plat, L: L, dwellH: 0, wrapAtF: wrapAtF, error: null };
+    return { t1h: t1w, t2h: t2w, t3h: t3w, totalH: t1w + t2w + t3w, T_wb: s.T_wb, T_plat: s.T_plat, L: L, dwellH: t2w, wrapAtF: wrapAtF, error: null };
   }
 
   /* Plateau overtakes the target: no observable stall, single climb. Guards
@@ -273,7 +295,7 @@ function spCompute(p) {
 
   /* Unwrapped stall: additive. Phase boundary = T_plat (was hardcoded 150). */
   var t1 = spPhase(Km, L, p.pitF, tiF, s.T_plat);
-  var t2 = s.dwellH;
+  var t2 = s.dwellH * spSpritzFactor(p.spritzesPerHour);
   var t3 = spPhase(Km, L, p.pitF, s.T_plat, p.tfF);
   if (!isFinite(t1) || !isFinite(t3)) {
     return { error: 'Pull temperature exceeds pit temperature.' };
@@ -308,7 +330,7 @@ function spResolve(p) {
   var hasStall = !!p.hasStall;
   var wrapMethod = p.wrapMethod || 'none';
   var wrapTriggerF = p.wrapTriggerF || SP_STALL_START;
-  var wrapActive = (wrapMethod === 'foil' || wrapMethod === 'paper');
+  var wrapActive = (wrapMethod === 'foil' || wrapMethod === 'paper' || wrapMethod === 'boat');
 
   if (p.currentF >= p.tfF) {
     return { remainingH: 0, error: 'Temperature already at or above pull temperature.' };
@@ -318,26 +340,24 @@ function spResolve(p) {
   if (!hasStall) {
     t = spPhase(Km, L, p.pitF, p.currentF, p.tfF);
   } else if (wrapActive) {
-    if (p.currentF < wrapTriggerF) {
-      t = spPhase(Km, L, p.pitF, p.currentF, wrapTriggerF)
-        + spPhase(Km, L, p.pitF, wrapTriggerF, p.tfF);
-    } else {
-      t = spPhase(Km, L, p.pitF, p.currentF, p.tfF);
-    }
+    var sw = spStall(p);
+    var wf = SP_WRAP_FACTOR[wrapMethod] != null ? SP_WRAP_FACTOR[wrapMethod] : 0;
+    var residual = sw.dwellH * wf;
+    var fracW = (p.currentF <= sw.T_plat) ? 1 : 0;
+    t = spPhase(Km, L, p.pitF, p.currentF, p.tfF) + residual * fracW;
   } else {
     var s = spStall(p);
     if (s.T_wb >= p.pitF) {
       return { remainingH: 0, error: 'Pit temperature is too low to cook. Raise smoker temperature.' };
     }
-    if (s.T_plat >= p.tfF || s.dwellH <= 0) {
+    var dwellEff = s.dwellH * spSpritzFactor(p.spritzesPerHour);
+    if (s.T_plat >= p.tfF || dwellEff <= 0) {
       t = spPhase(Km, L, p.pitF, p.currentF, p.tfF);
     } else {
-      /* Dwell is a discrete lump the meat sits through AT the plateau (see
-         spCompute). Temperature can't observe progress through a flat plateau,
-         so the honest estimate holds the full dwell until the reading is past
-         T_plat, then drops to zero (post-stall climb only). */
+      /* Dwell is a discrete lump at the plateau; hold it full until the reading
+         is past T_plat, then drop to zero (post-stall climb only). */
       var frac = (p.currentF <= s.T_plat) ? 1 : 0;
-      t = spPhase(Km, L, p.pitF, p.currentF, p.tfF) + s.dwellH * frac;
+      t = spPhase(Km, L, p.pitF, p.currentF, p.tfF) + dwellEff * frac;
     }
   }
 
