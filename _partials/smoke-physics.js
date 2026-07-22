@@ -238,13 +238,18 @@ function spPhase(Km, L, T_drive, Ti, Tf) {
     cookerType   — key into SP_AIR_EXCHANGE/SP_COOKER_RH; when set, T_wb comes from
                    the mass-balance model (spPitWetBulbF) instead of the legacy rh path
     waterPan     — true if a water pan is in the cooker (feeds the mass-balance model)
+    nPieces      — number of pieces on the cooker (mass-balance model only; default 1)
+    windMph      — wind mph; boosts air exchange on offset/kettle/drum cookers
     ambientF     — ambient temp °F (mass-balance model only; default 70)
     ambientRh    — ambient relative humidity 0-100 (mass-balance model only; default 50)
     tiF          — starting meat temp °F (default 38)
     tfF          — pull temp °F
     hasStall     — true for brisket/butt/ribs/lamb
     wrapTriggerF — internal temp at which meat is wrapped (default SP_STALL_START)
-    wrapMethod   — 'foil' | 'paper' | 'none'
+    wrapMethod   — 'foil' | 'paper' | 'boat' | 'none'
+    spritzesPerHour — spritzes/mops per hour; lengthens unwrapped dwell, capped ×1.5
+    injectionPct — injection as % of weight; raises water fraction Xw
+    fatCapInches — fat-cap thickness in inches; raises conduction length Lc
   returns:
     { t1h, t2h, t3h, totalH, T_wb, T_plat, L, dwellH, error } */
 function spCompute(p) {
@@ -322,14 +327,15 @@ function spScaleResult(result, factor) {
 }
 
 /* ── Live re-solve ───────────────────────────────────────────────────────────
-  params: { kmKey, thicknessIn, weightLbs, pitF, rh, currentF, tfF, hasStall, wrapMethod, wrapTriggerF }
+  params: { kmKey, thicknessIn, weightLbs, pitF, rh, currentF, tfF, hasStall,
+            wrapMethod ('foil' | 'paper' | 'boat' | 'none'), wrapTriggerF,
+            spritzesPerHour, injectionPct, fatCapInches, nPieces, windMph }
   returns: { remainingH, error } */
 function spResolve(p) {
   var Km  = SP_KM[p.kmKey] || 1.70;
   var L   = (p.thicknessIn > 0) ? p.thicknessIn : spGetL(p.kmKey, p.weightLbs || 10);
   var hasStall = !!p.hasStall;
   var wrapMethod = p.wrapMethod || 'none';
-  var wrapTriggerF = p.wrapTriggerF || SP_STALL_START;
   var wrapActive = (wrapMethod === 'foil' || wrapMethod === 'paper' || wrapMethod === 'boat');
 
   if (p.currentF >= p.tfF) {
