@@ -1169,9 +1169,9 @@
       cut: 'spare-ribs',
       onStart: function () { msg.textContent = 'Loading…'; },
       onApply: function (a) {
-        if (a.ambientF != null) document.getElementById('ambientTemp').value = a.ambientF;
-        if (a.dewPointF != null) document.getElementById('ambientDew').value = a.dewPointF;
-        if (a.windMph != null) document.getElementById('windMph').value = a.windMph;
+        document.getElementById('ambientTemp').value = (a.ambientF != null) ? a.ambientF : '';
+        document.getElementById('ambientDew').value  = (a.dewPointF != null) ? a.dewPointF : '';
+        document.getElementById('windMph').value     = (a.windMph != null) ? a.windMph : '';
         msg.textContent = 'Loaded local conditions.';
         calculate();
       },
