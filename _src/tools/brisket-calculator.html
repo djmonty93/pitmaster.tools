@@ -618,7 +618,7 @@ function spModifierInputs(){
   // sea level) rather than being handed a bogus 0. RH is derived from
   // dewpoint via the same Buck pSat helpers the forecast auto-fill path
   // uses, so manual entry and "Use my local weather" share one derivation.
-  var ambientF, ambientRh, altitudeM;
+  var ambientF, ambientRh, altitudeM, altitudeFt;
   var rawTemp = document.getElementById('ambientTemp').value;
   var tempParsed = parseInt(rawTemp, 10);
   if (rawTemp !== '' && !isNaN(tempParsed)) {
@@ -634,7 +634,8 @@ function spModifierInputs(){
   var rawAlt = document.getElementById('altitudeFt').value;
   var altParsed = parseInt(rawAlt, 10);
   if (rawAlt !== '' && !isNaN(altParsed) && altParsed > 0) {
-    altitudeM = Math.round(Math.min(15000, Math.max(0, altParsed)) * 0.3048);
+    altitudeFt = Math.min(15000, Math.max(0, altParsed));
+    altitudeM = Math.round(altitudeFt * 0.3048);
   }
 
   return {
@@ -645,7 +646,8 @@ function spModifierInputs(){
     windMph: Math.min(40, Math.max(0, parseInt(document.getElementById('windMph').value, 10) || 0)),
     ambientF: ambientF,
     ambientRh: ambientRh,
-    altitudeM: altitudeM
+    altitudeM: altitudeM,
+    altitudeFt: altitudeFt
   };
 }
 function planState(){
@@ -667,7 +669,7 @@ function planState(){
     wind: mod.windMph,
     ambt: mod.ambientF,
     ambdp: document.getElementById('ambientDew').value === '' ? undefined : parseInt(document.getElementById('ambientDew').value, 10),
-    alt: mod.altitudeM != null ? Math.round(mod.altitudeM / 0.3048) : undefined
+    alt: mod.altitudeFt
   };
 }
 function syncUrl(){
