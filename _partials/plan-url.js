@@ -31,7 +31,7 @@
   var ENUMS = {
     wu: ['lbs', 'kg'],
     ck: ['pellet', 'offset', 'kamado', 'kettle', 'electric'],
-    wrap: ['foil', 'paper', 'none'],
+    wrap: ['foil', 'paper', 'none', 'boat'],
     sz: ['light', 'normal', 'hungry'],
     tu: ['F', 'C'],
     grill: ['charcoal', 'gas', 'castIron'],
@@ -103,7 +103,12 @@
     grill: function (v) { return inEnum(v, ENUMS.grill); },
     sear: function (v) { return clampNum(v, 200, 800, true); },
     style: function (v) { return inEnum(v, ENUMS.style); },     // brisket
-    thick: function (v) { return clampNum(v, 0, 6, false); }    // brisket flat thickness (in)
+    thick: function (v) { return clampNum(v, 0, 6, false); },   // brisket flat thickness (in)
+    injp: function (v) { return clampNum(v, 0, 25, true); },    // injection % of weight
+    fat:  function (v) { return clampNum(v, 0, 1, false); },    // fat cap thickness (in)
+    spz:  function (v) { return clampNum(v, 0, 6, true); },     // spritzes per hour
+    np:   function (v) { return clampNum(v, 1, 12, true); },    // load count (pieces on the smoker)
+    wind: function (v) { return clampNum(v, 0, 40, true); }     // wind (mph)
   };
   var KEYS = Object.keys(VALIDATORS);
   // Every key the plan family owns across both encoders (flat schema + the
