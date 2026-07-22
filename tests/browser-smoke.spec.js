@@ -528,7 +528,7 @@ test('homepage keeps physics-backed control states honest', async ({ page }) => 
   await page.locator('#weight').fill('8');
   await page.locator('#serveTime').fill('18:00');
   await page.locator('#boneIn').selectOption('no');
-  await page.locator('#injected').selectOption('no');
+  await page.locator('#injectionPct').fill('0');
   await page.locator('#calcBtn').click();
   await expect(page.locator('#results')).toBeVisible();
   const baselineCookTime = await page.locator('#sCookTime').textContent();

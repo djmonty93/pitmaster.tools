@@ -58,7 +58,8 @@ test('homepage: a shared plan URL hydrates inputs and renders the timeline on lo
   await expect(page.locator('#cookerType')).toHaveValue('offset');
   await expect(page.locator('#serveTime')).toHaveValue('16:00');
   await expect(page.locator('#wrapMethod')).toHaveValue('paper');
-  await expect(page.locator('#injected')).toHaveValue('yes');
+  // Legacy inj=1 links migrate to the percentage model (back-compat → 12%).
+  await expect(page.locator('#injectionPct')).toHaveValue('12');
   // Timeline rendered without the user clicking anything.
   await expect(page.locator('#results')).toHaveClass(/visible/);
 });
