@@ -249,6 +249,27 @@
         <label class="opt-check"><input type="checkbox" id="waterPan"> Water pan in smoker</label>
       </div>
 
+      <div class="form-group full-width">
+        <label for="spritzRate">Spritz / mop (times per hour)</label>
+        <input type="number" id="spritzRate" min="0" max="6" step="1" value="0" inputmode="numeric">
+      </div>
+      <div class="form-group full-width">
+        <label for="injectionPct">Injection (% of weight)</label>
+        <input type="number" id="injectionPct" min="0" max="25" step="1" value="0" inputmode="numeric">
+      </div>
+      <div class="form-group full-width">
+        <label for="fatCap">Fat cap thickness (in)</label>
+        <input type="number" id="fatCap" min="0" max="1" step="0.25" value="0" inputmode="decimal">
+      </div>
+      <div class="form-group">
+        <label for="loadCount">Pieces on the smoker</label>
+        <input type="number" id="loadCount" min="1" max="12" step="1" value="1" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label for="windMph">Wind (mph)</label>
+        <input type="number" id="windMph" min="0" max="40" step="1" value="0" inputmode="numeric">
+      </div>
+
       <div class="form-group">
         <label for="meatThickness">Flat Thickness <span style="font-weight:400;font-size:.8rem;color:var(--text-muted)">(inches, optional)</span></label>
         <input type="number" id="meatThickness" min="0" max="6" step="0.25" placeholder="Leave blank to estimate from weight" aria-label="Flat thickness in inches, optional">
@@ -259,6 +280,7 @@
         <div class="wrap-toggle" role="group" aria-label="Wrap method">
           <button data-wrap="foil" class="active" type="button" aria-pressed="true">Foil<br><small style="font-weight:400;font-size:.8rem">Texas Crutch</small></button>
           <button data-wrap="paper" type="button" aria-pressed="false">Butcher Paper<br><small style="font-weight:400;font-size:.8rem">Best bark</small></button>
+          <button data-wrap="boat" type="button" aria-pressed="false">Foil Boat<br><small style="font-weight:400;font-size:.8rem">Bark + speed</small></button>
           <button data-wrap="none" type="button" aria-pressed="false">No Wrap<br><small style="font-weight:400;font-size:.8rem">Maximum bark</small></button>
         </div>
       </div>
@@ -577,7 +599,12 @@ function planState(){
     wp: document.getElementById('waterPan').checked ? 1 : 0,
     wrap: state.wrap,
     serve: document.getElementById('serveTime').value,
-    thick: parseFloat(document.getElementById('meatThickness').value)
+    thick: parseFloat(document.getElementById('meatThickness').value),
+    spz: parseInt(document.getElementById('spritzRate').value, 10) || 0,
+    injp: parseInt(document.getElementById('injectionPct').value, 10) || 0,
+    fat: parseFloat(document.getElementById('fatCap').value) || 0,
+    np: parseInt(document.getElementById('loadCount').value, 10) || 1,
+    wind: parseInt(document.getElementById('windMph').value, 10) || 0
   };
 }
 function syncUrl(){
@@ -636,7 +663,12 @@ function calculate() {
     tfF: cut.pullTemp,
     hasStall: true,
     wrapTriggerF: 150,
-    wrapMethod: wrap
+    wrapMethod: wrap,
+    spritzesPerHour: parseInt(document.getElementById('spritzRate').value, 10) || 0,
+    injectionPct: parseInt(document.getElementById('injectionPct').value, 10) || 0,
+    fatCapInches: parseFloat(document.getElementById('fatCap').value) || 0,
+    nPieces: parseInt(document.getElementById('loadCount').value, 10) || 1,
+    windMph: parseInt(document.getElementById('windMph').value, 10) || 0
   });
 
   if (physics.error) {
@@ -656,7 +688,12 @@ function calculate() {
     tfF: cut.pullTemp,
     hasStall: true,
     wrapMethod: wrap,
-    wrapTriggerF: 150
+    wrapTriggerF: 150,
+    spritzesPerHour: parseInt(document.getElementById('spritzRate').value, 10) || 0,
+    injectionPct: parseInt(document.getElementById('injectionPct').value, 10) || 0,
+    fatCapInches: parseFloat(document.getElementById('fatCap').value) || 0,
+    nPieces: parseInt(document.getElementById('loadCount').value, 10) || 1,
+    windMph: parseInt(document.getElementById('windMph').value, 10) || 0
   };
 
   var totalCookHrs = physics.totalH;
@@ -694,6 +731,7 @@ function calculate() {
   var wrapAtDisp = fmtTemp(Math.round(physics.wrapAtF || 150));
   if (wrap === 'foil') stallNote = 'Internal reaches ' + wrapAtDisp + ': wrap tightly in foil now (Texas Crutch). Leave wrapped until pull temp.';
   else if (wrap === 'paper') stallNote = 'Internal reaches ' + wrapAtDisp + ': wrap in butcher paper now. Leave wrapped until pull temp.';
+  else if (wrap === 'boat') stallNote = 'Internal reaches ' + wrapAtDisp + ': build a foil boat now (bottom sealed, top open) for bark plus speed. Leave until pull temp.';
   else stallNote = 'Internal approaches the ~' + T_plat_disp + ' plateau, held by evaporative cooling. Hold steady, no wrap.';
 
   // Build timeline — wrapped cooks get one stall event (wrap action); unwrapped get two (start + end)
@@ -885,6 +923,11 @@ document.getElementById('printBtn').addEventListener('click', function() { windo
   if(plan.wp!=null) document.getElementById('waterPan').checked=(plan.wp==1);
   if(plan.serve) document.getElementById('serveTime').value=plan.serve;
   if(plan.thick!=null) document.getElementById('meatThickness').value=plan.thick;
+  if(plan.spz!=null) document.getElementById('spritzRate').value=plan.spz;
+  if(plan.injp!=null) document.getElementById('injectionPct').value=plan.injp;
+  if(plan.fat!=null) document.getElementById('fatCap').value=plan.fat;
+  if(plan.np!=null) document.getElementById('loadCount').value=plan.np;
+  if(plan.wind!=null) document.getElementById('windMph').value=plan.wind;
 
   initEmbedMode();
   initConsentBanner();
