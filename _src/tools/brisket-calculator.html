@@ -623,12 +623,13 @@ function spModifierInputs(){
   var tempParsed = parseInt(rawTemp, 10);
   if (rawTemp !== '' && !isNaN(tempParsed)) {
     ambientF = Math.min(250, Math.max(-40, tempParsed));
-    var rawDew = document.getElementById('ambientDew').value;
-    var dewParsed = parseInt(rawDew, 10);
-    if (rawDew !== '' && !isNaN(dewParsed)) {
-      var dp = Math.min(120, Math.max(-40, dewParsed));
-      ambientRh = Math.min(100, Math.max(1, Math.round(100 * spPSat(spF2C(dp)) / spPSat(spF2C(ambientF)))));
-    }
+  }
+  var rawDew = document.getElementById('ambientDew').value;
+  var dewParsed = parseInt(rawDew, 10);
+  if (rawDew !== '' && !isNaN(dewParsed)) {
+    var dp = Math.min(120, Math.max(-40, dewParsed));
+    var tForRh = (ambientF != null) ? ambientF : 70;
+    ambientRh = Math.min(100, Math.max(1, Math.round(100 * spPSat(spF2C(dp)) / spPSat(spF2C(tForRh)))));
   }
   var rawAlt = document.getElementById('altitudeFt').value;
   var altParsed = parseInt(rawAlt, 10);

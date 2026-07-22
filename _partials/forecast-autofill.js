@@ -61,6 +61,7 @@
         if (amb.ambientF != null) clean.ambientF = amb.ambientF;
         if (amb.dewPointF != null) clean.dewPointF = amb.dewPointF;
         if (amb.windMph != null) clean.windMph = amb.windMph;
+        if (amb.ambientRh != null) clean.ambientRh = amb.ambientRh;
         if (opts.onApply) opts.onApply(clean);
       })
       .catch(function (err) {

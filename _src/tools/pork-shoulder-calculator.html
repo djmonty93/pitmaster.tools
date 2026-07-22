@@ -821,12 +821,13 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
     var ambTempParsed = parseInt(rawAmbTemp, 10);
     if (rawAmbTemp !== '' && !isNaN(ambTempParsed)) {
       ambientF = Math.min(250, Math.max(-40, ambTempParsed));
-      var rawAmbDew = document.getElementById('ambientDew').value;
-      var ambDewParsed = parseInt(rawAmbDew, 10);
-      if (rawAmbDew !== '' && !isNaN(ambDewParsed)) {
-        var ambDp = Math.min(120, Math.max(-40, ambDewParsed));
-        ambientRh = Math.min(100, Math.max(1, Math.round(100 * spPSat(spF2C(ambDp)) / spPSat(spF2C(ambientF)))));
-      }
+    }
+    var rawAmbDew = document.getElementById('ambientDew').value;
+    var ambDewParsed = parseInt(rawAmbDew, 10);
+    if (rawAmbDew !== '' && !isNaN(ambDewParsed)) {
+      var ambDp = Math.min(120, Math.max(-40, ambDewParsed));
+      var ambTForRh = (ambientF != null) ? ambientF : 70;
+      ambientRh = Math.min(100, Math.max(1, Math.round(100 * spPSat(spF2C(ambDp)) / spPSat(spF2C(ambTForRh)))));
     }
     var rawAlt = document.getElementById('altitudeFt').value;
     var altParsed = parseInt(rawAlt, 10);
