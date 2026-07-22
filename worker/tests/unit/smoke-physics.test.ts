@@ -11,7 +11,7 @@ export function loadPhysics(): any {
       ' spLc, spSurfaceArea, spPitWetBulbF, spPlateauTempF, spStallDwellH, spFade,' +
       ' spStall, spCompute, spResolve, spPhase, spGetL, wetBulb_F, spSpritzFactor,' +
       ' spCutParams, SP_AIR_EXCHANGE, SP_CUT, SP_KM, SP_EVAP_C, SP_STALL_K, SP_STALL_START,' +
-      ' SP_WRAP_FACTOR, SP_SPRITZ_C, SP_SPRITZ_CAP, SP_FATCAP_C, SP_INJ_XW_MAX }; '
+      ' SP_WRAP_FACTOR, SP_SPRITZ_C, SP_SPRITZ_CAP, SP_FATCAP_C }; '
   )();
 }
 

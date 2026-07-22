@@ -829,13 +829,11 @@
     btnStandard.classList.remove('active');
     methodNote.classList.add('visible');
     // 3-2-1's Phase 2 is always a tight foil wrap (see calculate()) — disable the wrap
-    // toggle rather than let the UI imply "boat" is honored during this method.
-    currentWrap = 'none';
+    // toggle rather than let the UI imply "boat" is honored during this method. The
+    // user's prior wrap choice (currentWrap) is preserved so it's restored on return
+    // to Standard; see methodNote copy above for the foil-wrap disclosure.
     wrapToggle.querySelectorAll('button').forEach(function(b) {
       b.disabled = true;
-      var on = b.dataset.wrap === 'none';
-      b.classList.toggle('active', on);
-      b.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
     refreshVisibleResults();
   });

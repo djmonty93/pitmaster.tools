@@ -151,7 +151,6 @@ var SP_WRAP_FACTOR = { none: 1, foil: 0, paper: 0.45, boat: 0.70 };
 var SP_SPRITZ_C   = 0.06;  /* dwell multiplier per spritz/hour */
 var SP_SPRITZ_CAP = 1.5;   /* max spritz multiplier */
 var SP_FATCAP_C   = 0.5;   /* Lc added (in) per inch of fat cap */
-var SP_INJ_XW_MAX = 0.95;  /* clamp on injected water fraction */
 
 /* Spritz re-wets the surface and re-arms evaporation — unwrapped only. */
 function spSpritzFactor(spritzesPerHour) {
@@ -195,7 +194,6 @@ function spStall(p) {
     : wetBulb_F(p.pitF, p.rh || 12);
   /* Injection: free interior water raises the water fraction (spec §7.3). */
   var Xw = c.Xw + (p.injectionPct > 0 ? p.injectionPct / 100 : 0);
-  if (Xw > SP_INJ_XW_MAX) Xw = SP_INJ_XW_MAX;
   var T_plat = spPlateauTempF(T_wb, p.pitF, Lc);
   var dwellH = spStallDwellH(Lc, Xw, p.pitF, T_wb) * spFade(T_plat, p.tfF);
   return { T_wb: T_wb, T_plat: T_plat, Lc: Lc, dwellH: dwellH };
