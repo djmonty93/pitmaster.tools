@@ -347,6 +347,9 @@ function spResolve(p) {
     t = spPhase(Km, L, p.pitF, p.currentF, p.tfF);
   } else if (wrapActive) {
     var sw = spStall(p);
+    if (sw.T_wb >= p.pitF) {
+      return { remainingH: 0, error: 'Pit temperature is too low to cook. Raise smoker temperature.' };
+    }
     var wf = SP_WRAP_FACTOR[wrapMethod] != null ? SP_WRAP_FACTOR[wrapMethod] : 0;
     var residual = sw.dwellH * wf;
     var fracW = (p.currentF <= sw.T_plat) ? 1 : 0;

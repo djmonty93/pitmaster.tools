@@ -589,7 +589,21 @@ function setSelectIfOption(id, value){
   if(!el) return;
   if([].some.call(el.options,function(o){return o.value===value;})) el.value=value;
 }
+/* Clamp the modifier inputs to the same ranges the plan-URL validators
+   enforce, since HTML min/max attributes don't clamp typed values.
+   Shared by calculate() and planState() so a shared URL always carries
+   the normalized value, not a raw (possibly out-of-range) DOM read. */
+function spModifierInputs(){
+  return {
+    spritz: Math.min(6, Math.max(0, parseInt(document.getElementById('spritzRate').value, 10) || 0)),
+    injection: Math.min(25, Math.max(0, parseInt(document.getElementById('injectionPct').value, 10) || 0)),
+    fatCap: Math.min(1, Math.max(0, parseFloat(document.getElementById('fatCap').value) || 0)),
+    nPieces: Math.min(12, Math.max(1, parseInt(document.getElementById('loadCount').value, 10) || 1)),
+    windMph: Math.min(40, Math.max(0, parseInt(document.getElementById('windMph').value, 10) || 0))
+  };
+}
 function planState(){
+  var mod = spModifierInputs();
   return {
     style: state.style,
     wt: parseFloat(document.getElementById('weight').value),
@@ -600,11 +614,11 @@ function planState(){
     wrap: state.wrap,
     serve: document.getElementById('serveTime').value,
     thick: parseFloat(document.getElementById('meatThickness').value),
-    spz: parseInt(document.getElementById('spritzRate').value, 10) || 0,
-    injp: parseInt(document.getElementById('injectionPct').value, 10) || 0,
-    fat: parseFloat(document.getElementById('fatCap').value) || 0,
-    np: parseInt(document.getElementById('loadCount').value, 10) || 1,
-    wind: parseInt(document.getElementById('windMph').value, 10) || 0
+    spz: mod.spritz,
+    injp: mod.injection,
+    fat: mod.fatCap,
+    np: mod.nPieces,
+    wind: mod.windMph
   };
 }
 function syncUrl(){
@@ -651,6 +665,13 @@ function calculate() {
   var rh  = SP_COOKER_RH[cookerType] || 12;
   var thk = parseFloat(document.getElementById('meatThickness').value) || 0;
 
+  var mod = spModifierInputs();
+  var spritz = mod.spritz;
+  var injection = mod.injection;
+  var fatCap = mod.fatCap;
+  var nPieces = mod.nPieces;
+  var windMph = mod.windMph;
+
   var physics = spCompute({
     kmKey: 'brisket-packer',
     weightLbs: weightLbs,
@@ -664,11 +685,11 @@ function calculate() {
     hasStall: true,
     wrapTriggerF: 150,
     wrapMethod: wrap,
-    spritzesPerHour: parseInt(document.getElementById('spritzRate').value, 10) || 0,
-    injectionPct: parseInt(document.getElementById('injectionPct').value, 10) || 0,
-    fatCapInches: parseFloat(document.getElementById('fatCap').value) || 0,
-    nPieces: parseInt(document.getElementById('loadCount').value, 10) || 1,
-    windMph: parseInt(document.getElementById('windMph').value, 10) || 0
+    spritzesPerHour: spritz,
+    injectionPct: injection,
+    fatCapInches: fatCap,
+    nPieces: nPieces,
+    windMph: windMph
   });
 
   if (physics.error) {
@@ -689,11 +710,11 @@ function calculate() {
     hasStall: true,
     wrapMethod: wrap,
     wrapTriggerF: 150,
-    spritzesPerHour: parseInt(document.getElementById('spritzRate').value, 10) || 0,
-    injectionPct: parseInt(document.getElementById('injectionPct').value, 10) || 0,
-    fatCapInches: parseFloat(document.getElementById('fatCap').value) || 0,
-    nPieces: parseInt(document.getElementById('loadCount').value, 10) || 1,
-    windMph: parseInt(document.getElementById('windMph').value, 10) || 0
+    spritzesPerHour: spritz,
+    injectionPct: injection,
+    fatCapInches: fatCap,
+    nPieces: nPieces,
+    windMph: windMph
   };
 
   var totalCookHrs = physics.totalH;

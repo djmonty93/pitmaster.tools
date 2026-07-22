@@ -784,6 +784,14 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
 
     var cookerType = document.getElementById('cookerType').value;
     var rh = SP_COOKER_RH[cookerType] || 12;
+
+    // Clamp modifier inputs to valid ranges: HTML min/max don't clamp typed values.
+    var spritz = Math.min(6, Math.max(0, parseInt(document.getElementById('spritzRate').value, 10) || 0));
+    var injection = Math.min(25, Math.max(0, parseInt(document.getElementById('injectionPct').value, 10) || 0));
+    var fatCap = Math.min(1, Math.max(0, parseFloat(document.getElementById('fatCap').value) || 0));
+    var nPieces = Math.min(12, Math.max(1, parseInt(document.getElementById('loadCount').value, 10) || 1));
+    var windMph = Math.min(40, Math.max(0, parseInt(document.getElementById('windMph').value, 10) || 0));
+
     var physics = spCompute({
       kmKey: 'pork-butt',
       weightLbs: wLbs,
@@ -797,11 +805,11 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
       hasStall: true,
       wrapTriggerF: 150,
       wrapMethod: wrap,
-      spritzesPerHour: parseInt(document.getElementById('spritzRate').value, 10) || 0,
-      injectionPct: parseInt(document.getElementById('injectionPct').value, 10) || 0,
-      fatCapInches: parseFloat(document.getElementById('fatCap').value) || 0,
-      nPieces: parseInt(document.getElementById('loadCount').value, 10) || 1,
-      windMph: parseInt(document.getElementById('windMph').value, 10) || 0
+      spritzesPerHour: spritz,
+      injectionPct: injection,
+      fatCapInches: fatCap,
+      nPieces: nPieces,
+      windMph: windMph
     });
 
     if (physics.error) { showError(physics.error); return; }
@@ -822,11 +830,11 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
       wrapMethod: wrap,
       wrapTriggerF: 150,
       resolveScale: resolveScale,
-      spritzesPerHour: parseInt(document.getElementById('spritzRate').value, 10) || 0,
-      injectionPct: parseInt(document.getElementById('injectionPct').value, 10) || 0,
-      fatCapInches: parseFloat(document.getElementById('fatCap').value) || 0,
-      nPieces: parseInt(document.getElementById('loadCount').value, 10) || 1,
-      windMph: parseInt(document.getElementById('windMph').value, 10) || 0
+      spritzesPerHour: spritz,
+      injectionPct: injection,
+      fatCapInches: fatCap,
+      nPieces: nPieces,
+      windMph: windMph
     };
 
     var hrs = physics.totalH;
