@@ -271,4 +271,21 @@ describe('stage-5 modifiers (spec §7)', () => {
     expect(Math.abs(foil - climb)).toBeLessThan(0.01);       // foil: no dwell
     expect(paper - foil).toBeCloseTo(s.dwellH * 0.45, 2);    // paper: +45% residual
   });
+  it('spResolve gates wrapped residual dwell at wrapAtF, matching spCompute (paper)', () => {
+    const base = { kmKey: 'brisket-packer', weightLbs: 14, pitF: 225, tiF: 38, tfF: 203,
+      hasStall: true, cookerType: 'offset', wrapTriggerF: 150, wrapMethod: 'paper', ...AMB };
+    const s = P.spStall({ ...base });
+    const wrapAt = Math.min(150, s.T_plat);      // 150 for brisket (T_plat > 150)
+    const residual = s.dwellH * 0.45;
+    // Just below the wrap point: the whole residual is still ahead.
+    const below = P.spResolve({ ...base, currentF: wrapAt - 5 }).remainingH;
+    const climbBelow = P.spResolve({ ...base, hasStall: false, currentF: wrapAt - 5 }).remainingH;
+    expect(below - climbBelow).toBeCloseTo(residual, 2);
+    // Just above the wrap point (but still below T_plat, ~152.3 for these params):
+    // the residual is already burned, matching spCompute's layout. A +5 probe would
+    // overshoot T_plat entirely and mask the bug, so stay inside the (wrapAt, T_plat) gap.
+    const above = P.spResolve({ ...base, currentF: wrapAt + 1 }).remainingH;
+    const climbAbove = P.spResolve({ ...base, hasStall: false, currentF: wrapAt + 1 }).remainingH;
+    expect(Math.abs(above - climbAbove)).toBeLessThan(0.05);
+  });
 });

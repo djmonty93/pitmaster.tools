@@ -351,8 +351,9 @@ function spResolve(p) {
       return { remainingH: 0, error: 'Pit temperature is too low to cook. Raise smoker temperature.' };
     }
     var wf = SP_WRAP_FACTOR[wrapMethod] != null ? SP_WRAP_FACTOR[wrapMethod] : 0;
+    var wrapAtF = Math.min(p.wrapTriggerF || SP_STALL_START, sw.T_plat);
     var residual = sw.dwellH * wf;
-    var fracW = (p.currentF <= sw.T_plat) ? 1 : 0;
+    var fracW = (p.currentF <= wrapAtF) ? 1 : 0;
     t = spPhase(Km, L, p.pitF, p.currentF, p.tfF) + residual * fracW;
   } else {
     var s = spStall(p);
