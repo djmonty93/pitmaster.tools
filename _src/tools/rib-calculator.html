@@ -164,6 +164,12 @@
 .method-toggle button.active { background: var(--amber); color: #fff; }
 .method-toggle button:disabled { opacity: .4; cursor: not-allowed; }
 .method-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.wrap-toggle { display: flex; border: 1.5px solid var(--card-border); border-radius: 6px; overflow: hidden; }
+.wrap-toggle button { flex: 1; border: none; background: #FAFAF8; color: var(--text-muted); font-family: inherit; font-size: .875rem; font-weight: 600; padding: .55rem .5rem; cursor: pointer; transition: background .15s, color .15s; border-right: 1px solid var(--card-border); line-height: 1.2; }
+.wrap-toggle button:last-child { border-right: none; }
+.wrap-toggle button.active { background: var(--amber); color: #fff; }
+.wrap-toggle button:disabled { opacity: .4; cursor: not-allowed; }
+.wrap-toggle button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
 .method-note {
   display: none;
@@ -344,6 +350,29 @@
 
         <div class="form-group">
           <label class="opt-check"><input type="checkbox" id="waterPan"> Water pan in smoker</label>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="spritzRate">Spritz / mop (times per hour)</label>
+          <input type="number" id="spritzRate" min="0" max="6" step="1" value="0" inputmode="numeric">
+        </div>
+
+        <div class="form-group">
+          <label for="loadCount">Racks on the smoker</label>
+          <input type="number" id="loadCount" min="1" max="12" step="1" value="1" inputmode="numeric">
+        </div>
+
+        <div class="form-group">
+          <label for="windMph">Wind (mph)</label>
+          <input type="number" id="windMph" min="0" max="40" step="1" value="0" inputmode="numeric">
+        </div>
+
+        <div class="form-group">
+          <label>Wrap Method</label>
+          <div class="wrap-toggle" id="wrapToggle" role="group" aria-label="Wrap method">
+            <button data-wrap="none" class="active" type="button" aria-pressed="true">No Wrap<br><small style="font-weight:400;font-size:.8rem">Maximum bark</small></button>
+            <button data-wrap="boat" type="button" aria-pressed="false">Foil Boat<br><small style="font-weight:400;font-size:.8rem">Bark + speed</small></button>
+          </div>
         </div>
 
         <div class="form-group">
@@ -657,6 +686,7 @@
   var btnStandard = document.getElementById('btnStandard');
   var btn321 = document.getElementById('btn321');
   var methodNote = document.getElementById('methodNote');
+  var wrapToggle = document.getElementById('wrapToggle');
   var calcBtn = document.getElementById('calcBtn');
   var vmsg = document.getElementById('vmsg');
   var resultsEl = document.getElementById('results');
@@ -673,6 +703,7 @@
 
   /* ---- Method toggle state ---- */
   var method = 'standard'; // 'standard' | '321'
+  var currentWrap = 'none'; // 'none' | 'boat' — 3-2-1 always forces 'foil' (see calculate())
   var _lastPhysicsParams = null;
 
   /* ---- Helper: selected rib type ---- */
@@ -767,6 +798,9 @@
           btnStandard.classList.add('active');
           btn321.classList.remove('active');
           methodNote.classList.remove('visible');
+          // Mirror btnStandard's click handler: wrap choice is user-selectable again now
+          // that 3-2-1's forced foil phase doesn't apply.
+          wrapToggle.querySelectorAll('button').forEach(function(b) { b.disabled = false; });
         }
         beefWeightRow.classList.add('visible');
       } else {
@@ -783,6 +817,8 @@
     btnStandard.classList.add('active');
     btn321.classList.remove('active');
     methodNote.classList.remove('visible');
+    // Wrap choice is user-selectable again now that 3-2-1's forced foil phase doesn't apply.
+    wrapToggle.querySelectorAll('button').forEach(function(b) { b.disabled = false; });
     refreshVisibleResults();
   });
 
@@ -792,7 +828,27 @@
     btn321.classList.add('active');
     btnStandard.classList.remove('active');
     methodNote.classList.add('visible');
+    // 3-2-1's Phase 2 is always a tight foil wrap (see calculate()) — disable the wrap
+    // toggle rather than let the UI imply "boat" is honored during this method. The
+    // user's prior wrap choice (currentWrap) is preserved so it's restored on return
+    // to Standard; see methodNote copy above for the foil-wrap disclosure.
+    wrapToggle.querySelectorAll('button').forEach(function(b) {
+      b.disabled = true;
+    });
     refreshVisibleResults();
+  });
+
+  /* ---- Wrap toggle ---- */
+  wrapToggle.querySelectorAll('button').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      if (btn.disabled) return;
+      currentWrap = btn.dataset.wrap;
+      wrapToggle.querySelectorAll('button').forEach(function(b) {
+        b.classList.toggle('active', b === btn);
+        b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+      });
+      refreshVisibleResults();
+    });
   });
 
   /* ---- Format helpers ---- */
@@ -899,7 +955,12 @@
       weightLbs = (weightUnit === 'kg') ? rawW * 2.20462 : rawW;
     }
 
-    var wrapMethod = (method === '321' && ribKey !== 'beef') ? 'foil' : 'none';
+    var wrapMethod = (method === '321' && ribKey !== 'beef') ? 'foil' : currentWrap;
+
+    // Clamp modifier inputs to valid ranges: HTML min/max don't clamp typed values.
+    var spritz = Math.min(6, Math.max(0, parseInt(document.getElementById('spritzRate').value, 10) || 0));
+    var nPieces = Math.min(12, Math.max(1, parseInt(document.getElementById('loadCount').value, 10) || 1));
+    var windMph = Math.min(40, Math.max(0, parseInt(document.getElementById('windMph').value, 10) || 0));
 
     var result = spCompute({
       kmKey: rib.kmKey,
@@ -913,7 +974,10 @@
       tfF: rib.pullTemp,
       hasStall: true,
       wrapTriggerF: 150,
-      wrapMethod: wrapMethod
+      wrapMethod: wrapMethod,
+      spritzesPerHour: spritz,
+      nPieces: nPieces,
+      windMph: windMph
     });
 
     if (result.error) {
@@ -933,7 +997,10 @@
       tfF: rib.pullTemp,
       hasStall: true,
       wrapMethod: wrapMethod,
-      wrapTriggerF: 150
+      wrapTriggerF: 150,
+      spritzesPerHour: spritz,
+      nPieces: nPieces,
+      windMph: windMph
     };
 
     var totalCookHrs = result.totalH;
@@ -1022,8 +1089,13 @@
         { color: 'amber', time: meatOn,  label: 'Ribs go on smoker',      sub: rib.name + ', standard method' }
       ];
       if (result.t2h > 0) {
-        evs.push({ color: 'amber', time: stallStartT, label: 'Stall may begin (~' + fmtTemp(Math.round(result.T_plat || 165)) + ')', sub: 'Temperature plateaus for ' + spFmtHrs(result.t2h) + ', driven by evaporative cooling' });
-        evs.push({ color: 'amber', time: stallEndT,   label: 'Stall ends (~' + fmtTemp(Math.round(result.T_plat || 165)) + ')', sub: 'Temperature climbs again toward pull temp' });
+        var stallNote = (wrapMethod === 'boat')
+          ? 'Wrap in a foil boat now (bottom sealed, top open) for bark plus speed. Leave until pull temp.'
+          : 'Temperature plateaus for ' + spFmtHrs(result.t2h) + ', driven by evaporative cooling';
+        evs.push({ color: 'amber', time: stallStartT, label: (wrapMethod === 'boat' ? 'Stall: wrap in foil boat now' : 'Stall may begin (~' + fmtTemp(Math.round(result.T_plat || 165)) + ')'), sub: stallNote });
+        if (wrapMethod === 'none') {
+          evs.push({ color: 'amber', time: stallEndT, label: 'Stall ends (~' + fmtTemp(Math.round(result.T_plat || 165)) + ')', sub: 'Temperature climbs again toward pull temp' });
+        }
       } else {
         evs.push({ color: 'amber', time: stallStartT, label: 'Bend test / wrap check', sub: 'Check for 45\u00B0 bend test and pullback from bone' });
       }

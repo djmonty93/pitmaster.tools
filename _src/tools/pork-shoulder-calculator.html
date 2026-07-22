@@ -285,6 +285,27 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
         <label class="opt-check"><input type="checkbox" id="waterPan"> Water pan in smoker</label>
       </div>
 
+      <div class="form-group full-width">
+        <label for="spritzRate">Spritz / mop (times per hour)</label>
+        <input type="number" id="spritzRate" min="0" max="6" step="1" value="0" inputmode="numeric">
+      </div>
+      <div class="form-group full-width">
+        <label for="injectionPct">Injection (% of weight)</label>
+        <input type="number" id="injectionPct" min="0" max="25" step="1" value="0" inputmode="numeric">
+      </div>
+      <div class="form-group full-width">
+        <label for="fatCap">Fat cap thickness (in)</label>
+        <input type="number" id="fatCap" min="0" max="1" step="0.25" value="0" inputmode="decimal">
+      </div>
+      <div class="form-group">
+        <label for="loadCount">Pieces on the smoker</label>
+        <input type="number" id="loadCount" min="1" max="12" step="1" value="1" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label for="windMph">Wind (mph)</label>
+        <input type="number" id="windMph" min="0" max="40" step="1" value="0" inputmode="numeric">
+      </div>
+
       <div class="form-group">
         <label>Bone-In?</label>
         <label class="checkbox-row">
@@ -299,6 +320,7 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
         <div class="wrap-toggle" id="wrapToggle" role="group" aria-label="Wrap method">
           <button type="button" data-wrap="foil" class="active" aria-pressed="true">Foil</button>
           <button type="button" data-wrap="paper" aria-pressed="false">Butcher Paper</button>
+          <button type="button" data-wrap="boat" aria-pressed="false">Foil Boat</button>
           <button type="button" data-wrap="none" aria-pressed="false">No Wrap</button>
         </div>
       </div>
@@ -762,6 +784,14 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
 
     var cookerType = document.getElementById('cookerType').value;
     var rh = SP_COOKER_RH[cookerType] || 12;
+
+    // Clamp modifier inputs to valid ranges: HTML min/max don't clamp typed values.
+    var spritz = Math.min(6, Math.max(0, parseInt(document.getElementById('spritzRate').value, 10) || 0));
+    var injection = Math.min(25, Math.max(0, parseInt(document.getElementById('injectionPct').value, 10) || 0));
+    var fatCap = Math.min(1, Math.max(0, parseFloat(document.getElementById('fatCap').value) || 0));
+    var nPieces = Math.min(12, Math.max(1, parseInt(document.getElementById('loadCount').value, 10) || 1));
+    var windMph = Math.min(40, Math.max(0, parseInt(document.getElementById('windMph').value, 10) || 0));
+
     var physics = spCompute({
       kmKey: 'pork-butt',
       weightLbs: wLbs,
@@ -774,7 +804,12 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
       tfF: style.pullTemp,
       hasStall: true,
       wrapTriggerF: 150,
-      wrapMethod: wrap
+      wrapMethod: wrap,
+      spritzesPerHour: spritz,
+      injectionPct: injection,
+      fatCapInches: fatCap,
+      nPieces: nPieces,
+      windMph: windMph
     });
 
     if (physics.error) { showError(physics.error); return; }
@@ -794,7 +829,12 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
       hasStall: true,
       wrapMethod: wrap,
       wrapTriggerF: 150,
-      resolveScale: resolveScale
+      resolveScale: resolveScale,
+      spritzesPerHour: spritz,
+      injectionPct: injection,
+      fatCapInches: fatCap,
+      nPieces: nPieces,
+      windMph: windMph
     };
 
     var hrs = physics.totalH;
@@ -847,6 +887,7 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
     // ── Timeline ──
     var wrapNote = wrap === 'none'  ? 'No wrap: full bark development (plateau ~' + T_plat_disp + ')'
                 : wrap === 'paper' ? 'Wrap in butcher paper now. Leave wrapped until pull temp.'
+                : wrap === 'boat'  ? 'Build a foil boat now (bottom sealed, top open) for bark plus speed. Leave until pull temp.'
                 :                    'Wrap tightly in foil now. Leave wrapped until pull temp.';
     var stallSub = wrap === 'none'
       ? 'Internal approaches the ~' + T_plat_disp + ' plateau \u2014 ' + wrapNote

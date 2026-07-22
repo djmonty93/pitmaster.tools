@@ -24,6 +24,11 @@ const FULL = {
   wrap: 'paper',
   bone: 1,
   inj: 0,
+  injp: 10,
+  fat: 0.25,
+  spz: 2,
+  np: 2,
+  wind: 8,
   sz: 'normal',
   tu: 'F',
   grill: 'charcoal',
@@ -175,6 +180,22 @@ test('decode rejects an unknown brisket style and clamps thickness', () => {
   assert.equal(decodePlanParams('style=sliced').style, 'sliced');
   assert.equal(decodePlanParams('thick=99').thick, 6);   // clamp ceiling
   assert.equal(decodePlanParams('thick=abc').thick, undefined);
+});
+
+test('round-trips the M2 modifier keys (injp/fat/spz/np/wind + boat wrap)', () => {
+  const state = { wrap: 'boat', injp: 12, fat: 0.5, spz: 3, np: 4, wind: 15 };
+  assert.deepEqual(decodePlanParams(encodePlanParams(state)), state);
+});
+
+test('decode accepts boat wrap and clamps M2 modifier ranges', () => {
+  assert.equal(decodePlanParams('wrap=boat').wrap, 'boat');
+  assert.equal(decodePlanParams('injp=999').injp, 25);   // ceiling
+  assert.equal(decodePlanParams('injp=-5').injp, 0);      // floor
+  assert.equal(decodePlanParams('fat=9').fat, 1);         // ceiling
+  assert.equal(decodePlanParams('spz=99').spz, 6);        // ceiling
+  assert.equal(decodePlanParams('np=0').np, 1);           // floor
+  assert.equal(decodePlanParams('wind=999').wind, 40);    // ceiling
+  assert.equal(decodePlanParams('injp=abc').injp, undefined); // garbage dropped
 });
 
 // ── Cook-time coordinator: variable-length meat list ────────────────────────

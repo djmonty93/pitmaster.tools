@@ -9,8 +9,9 @@ export function loadPhysics(): any {
     smokePhysicsSource +
       '\n; return { spF2C, spC2F, spPSat, spPAtm, spHumidityRatio, spWetBulbC,' +
       ' spLc, spSurfaceArea, spPitWetBulbF, spPlateauTempF, spStallDwellH, spFade,' +
-      ' spStall, spCompute, spResolve, spPhase, spGetL, wetBulb_F,' +
-      ' SP_AIR_EXCHANGE, SP_CUT, SP_KM, SP_EVAP_C, SP_STALL_K, SP_STALL_START }; '
+      ' spStall, spCompute, spResolve, spPhase, spGetL, wetBulb_F, spSpritzFactor,' +
+      ' spCutParams, SP_AIR_EXCHANGE, SP_CUT, SP_KM, SP_EVAP_C, SP_STALL_K, SP_STALL_START,' +
+      ' SP_WRAP_FACTOR, SP_SPRITZ_C, SP_SPRITZ_CAP, SP_FATCAP_C }; '
   )();
 }
 
@@ -209,5 +210,82 @@ describe('spCompute / spResolve assembly', () => {
     expect(bWrap.dwellH).toBe(0);
     expect(bWrap.wrapAtF).toBe(150);
     expect(bWrap.totalH).toBeLessThan(bNone.totalH);
+  });
+});
+
+describe('stage-5 modifiers (spec §7)', () => {
+  it('wrap variants scale residual dwell: foil 0 < paper < boat < unwrapped', () => {
+    const unwrapped = compute({ wrapMethod: 'none' }).t2h; // additive dwell
+    const foil = compute({ wrapMethod: 'foil' }).t2h;
+    const paper = compute({ wrapMethod: 'paper' }).t2h;
+    const boat = compute({ wrapMethod: 'boat' }).t2h;
+    expect(foil).toBe(0);
+    expect(paper).toBeGreaterThan(0);
+    expect(boat).toBeGreaterThan(paper);
+    expect(unwrapped).toBeGreaterThan(boat);
+    expect(paper).toBeCloseTo(unwrapped * 0.45, 6);
+    expect(boat).toBeCloseTo(unwrapped * 0.70, 6);
+  });
+  it('wrapped totals order foil < paper < boat < none', () => {
+    const f = compute({ wrapMethod: 'foil' }).totalH;
+    const p = compute({ wrapMethod: 'paper' }).totalH;
+    const b = compute({ wrapMethod: 'boat' }).totalH;
+    const n = compute({ wrapMethod: 'none' }).totalH;
+    expect(f).toBeLessThan(p);
+    expect(p).toBeLessThan(b);
+    expect(b).toBeLessThan(n);
+  });
+  it('spritz lengthens the unwrapped dwell, capped at 1.5x', () => {
+    const base = compute({ spritzesPerHour: 0 }).t2h;
+    const s2 = compute({ spritzesPerHour: 2 }).t2h;
+    const s100 = compute({ spritzesPerHour: 100 }).t2h;
+    expect(s2).toBeCloseTo(base * (1 + 0.06 * 2), 6);
+    expect(s100).toBeCloseTo(base * 1.5, 6); // capped
+  });
+  it('spritz does not affect a wrapped cook (unwrapped-only)', () => {
+    expect(compute({ wrapMethod: 'foil', spritzesPerHour: 5 }).totalH)
+      .toBeCloseTo(compute({ wrapMethod: 'foil', spritzesPerHour: 0 }).totalH, 6);
+    expect(compute({ wrapMethod: 'paper', spritzesPerHour: 5 }).totalH)
+      .toBeCloseTo(compute({ wrapMethod: 'paper', spritzesPerHour: 0 }).totalH, 6);
+  });
+  it('injection raises the dwell via water fraction (Xw 0.71->0.81 ~ +14%)', () => {
+    const base = stall('offset', { injectionPct: 0 }).dwellH;
+    const inj = stall('offset', { injectionPct: 10 }).dwellH;
+    expect(inj / base).toBeCloseTo(0.81 / 0.71, 2);
+  });
+  it('fat cap lowers plateau temp and lengthens dwell', () => {
+    const base = stall('offset', { fatCapInches: 0 });
+    const fat = stall('offset', { fatCapInches: 0.5 });
+    expect(fat.Lc).toBeCloseTo(base.Lc + 0.25, 6); // +0.5*0.5 in
+    expect(fat.T_plat).toBeLessThan(base.T_plat);
+    expect(fat.dwellH).toBeGreaterThan(base.dwellH);
+  });
+  it('spResolve: paper wrap keeps partial residual dwell, foil keeps none', () => {
+    const base = { kmKey: 'brisket-packer', weightLbs: 14, pitF: 225, tiF: 38, tfF: 203,
+      hasStall: true, cookerType: 'offset', wrapTriggerF: 150, ...AMB };
+    const s = P.spStall({ ...base });
+    const belowF = Math.round(s.T_plat) - 20; // below the plateau -> full residual ahead
+    const foil = P.spResolve({ ...base, wrapMethod: 'foil', currentF: belowF }).remainingH;
+    const paper = P.spResolve({ ...base, wrapMethod: 'paper', currentF: belowF }).remainingH;
+    const climb = P.spResolve({ ...base, hasStall: false, currentF: belowF }).remainingH;
+    expect(Math.abs(foil - climb)).toBeLessThan(0.01);       // foil: no dwell
+    expect(paper - foil).toBeCloseTo(s.dwellH * 0.45, 2);    // paper: +45% residual
+  });
+  it('spResolve gates wrapped residual dwell at wrapAtF, matching spCompute (paper)', () => {
+    const base = { kmKey: 'brisket-packer', weightLbs: 14, pitF: 225, tiF: 38, tfF: 203,
+      hasStall: true, cookerType: 'offset', wrapTriggerF: 150, wrapMethod: 'paper', ...AMB };
+    const s = P.spStall({ ...base });
+    const wrapAt = Math.min(150, s.T_plat);      // 150 for brisket (T_plat > 150)
+    const residual = s.dwellH * 0.45;
+    // Just below the wrap point: the whole residual is still ahead.
+    const below = P.spResolve({ ...base, currentF: wrapAt - 5 }).remainingH;
+    const climbBelow = P.spResolve({ ...base, hasStall: false, currentF: wrapAt - 5 }).remainingH;
+    expect(below - climbBelow).toBeCloseTo(residual, 2);
+    // Just above the wrap point (but still below T_plat, ~152.3 for these params):
+    // the residual is already burned, matching spCompute's layout. A +5 probe would
+    // overshoot T_plat entirely and mask the bug, so stay inside the (wrapAt, T_plat) gap.
+    const above = P.spResolve({ ...base, currentF: wrapAt + 1 }).remainingH;
+    const climbAbove = P.spResolve({ ...base, hasStall: false, currentF: wrapAt + 1 }).remainingH;
+    expect(Math.abs(above - climbAbove)).toBeLessThan(0.05);
   });
 });
