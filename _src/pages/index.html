@@ -446,6 +446,7 @@
             <select id="wrapMethod">
               <option value="foil">Foil (Texas Crutch)</option>
               <option value="paper">Butcher Paper</option>
+              <option value="boat">Foil Boat</option>
               <option value="none">No Wrap</option>
             </select>
           </div>
@@ -458,12 +459,19 @@
             </select>
           </div>
 
-          <div class="form-group">
-            <label for="injected">Injected / Marinated?</label>
-            <select id="injected">
-              <option value="no">No</option>
-              <option value="yes">Yes</option>
-            </select>
+          <div class="form-group" id="stallModifiers" style="display:none; grid-column:1/-1;">
+            <div class="advanced-grid">
+              <div class="form-group"><label for="injectionPct">Injection (% of weight)</label>
+                <input type="number" id="injectionPct" min="0" max="25" step="1" value="0" inputmode="numeric"></div>
+              <div class="form-group"><label for="fatCap">Fat cap thickness (in)</label>
+                <input type="number" id="fatCap" min="0" max="1" step="0.25" value="0" inputmode="decimal"></div>
+              <div class="form-group"><label for="spritzRate">Spritz / mop (times per hour)</label>
+                <input type="number" id="spritzRate" min="0" max="6" step="1" value="0" inputmode="numeric"></div>
+              <div class="form-group"><label for="loadCount">Pieces on the smoker</label>
+                <input type="number" id="loadCount" min="1" max="12" step="1" value="1" inputmode="numeric"></div>
+              <div class="form-group"><label for="windMph">Wind (mph)</label>
+                <input type="number" id="windMph" min="0" max="40" step="1" value="0" inputmode="numeric"></div>
+            </div>
           </div>
 
           <div class="form-group">
@@ -1295,6 +1303,16 @@ var PHYSICS_KEYS = {
   'beef-chuck':          { kmKey: 'brisket-packer', hasStall: true  }
 };
 var _lastPhysicsParams = null;
+function isStallCut(k){ return !!(PHYSICS_KEYS[k] && D[k].cookRate !== null && PHYSICS_KEYS[k].hasStall); }
+function readStallModifiers(){
+  return {
+    spritzesPerHour: Math.min(6, Math.max(0, parseInt(document.getElementById('spritzRate').value,10) || 0)),
+    injectionPct: Math.min(25, Math.max(0, parseInt(document.getElementById('injectionPct').value,10) || 0)),
+    fatCapInches: Math.min(1, Math.max(0, parseFloat(document.getElementById('fatCap').value) || 0)),
+    nPieces: Math.min(12, Math.max(1, parseInt(document.getElementById('loadCount').value,10) || 1)),
+    windMph: Math.min(40, Math.max(0, parseInt(document.getElementById('windMph').value,10) || 0))
+  };
+}
 
 /* ============================================================
    STATE
@@ -1342,14 +1360,17 @@ function cookHrs(cut, wLbs, temp, boneIn, inj, wrap){
   return h;
 }
 
-function getPhysicsResult(cutKey, cut, wLbs, tempF, wrap, rh, cookerType, waterPan) {
+function getPhysicsResult(cutKey, cut, wLbs, tempF, wrap, rh, cookerType, waterPan, mods) {
   var pk = PHYSICS_KEYS[cutKey];
   if (!pk || cut.cookRate === null) return null; // skip flat-time & two-phase
+  mods = mods || {};
   var r = spCompute({
     kmKey: pk.kmKey, weightLbs: wLbs, thicknessIn: 0,
     pitF: tempF, rh: rh, cookerType: cookerType, waterPan: waterPan,
     tiF: 38, tfF: cut.pullTemp,
-    hasStall: pk.hasStall, wrapTriggerF: 150, wrapMethod: wrap
+    hasStall: pk.hasStall, wrapTriggerF: 150, wrapMethod: wrap,
+    spritzesPerHour: mods.spritzesPerHour, injectionPct: mods.injectionPct,
+    fatCapInches: mods.fatCapInches, nPieces: mods.nPieces, windMph: mods.windMph
   });
   return r.error ? null : r;
 }
@@ -1426,11 +1447,10 @@ function buildTL(cut, serve, hrs, wrap, grill, physicsResult){
    ============================================================ */
 function render(cut, inp){
   var rh = SP_COOKER_RH[inp.cookerType] || 12;
-  var physicsResult = getPhysicsResult(inp.cutKey, cut, inp.wLbs, inp.temp, inp.wrap, rh, inp.cookerType, inp.waterPan);
+  var physicsResult = getPhysicsResult(inp.cutKey, cut, inp.wLbs, inp.temp, inp.wrap, rh, inp.cookerType, inp.waterPan, inp.mods);
   if (physicsResult) {
     var timeFactor = 1;
     if (inp.boneIn && cut.boneInOk) timeFactor *= 1.10;
-    if (inp.inj) timeFactor *= 0.95;
     physicsResult = spScaleResult(physicsResult, timeFactor);
   }
   var h = physicsResult ? physicsResult.totalH : cookHrs(cut, inp.wLbs, inp.temp, inp.boneIn, inp.inj, inp.wrap);
@@ -1448,7 +1468,12 @@ function render(cut, inp){
       hasStall: PHYSICS_KEYS[inp.cutKey].hasStall,
       wrapMethod: inp.wrap,
       wrapTriggerF: 150,
-      resolveScale: timeFactor
+      resolveScale: timeFactor,
+      spritzesPerHour: inp.mods.spritzesPerHour,
+      injectionPct: inp.mods.injectionPct,
+      fatCapInches: inp.mods.fatCapInches,
+      nPieces: inp.mods.nPieces,
+      windMph: inp.mods.windMph
     };
     document.getElementById('liveResolve').style.display = '';
     document.getElementById('modelNote').style.display = '';
@@ -1593,6 +1618,7 @@ function updSzLabels(){
 function onMeatChange(){
   var k=document.getElementById('meatType').value, c=D[k];
   updTempOpts(c); updTP(c); updBI(k); updWrap(k);
+  document.getElementById('stallModifiers').style.display = isStallCut(k) ? '' : 'none';
 }
 /* Set a <select> only if the value matches an existing <option> (defensive:
    decoded plan values are already enum-validated, but a removed option must
@@ -1619,6 +1645,7 @@ function planState(){
   // non-two-phase plan URL isn't polluted with an inapplicable (and, in °C
   // mode, clamped) sear value.
   var twoPhase=document.getElementById('two-phase-section').classList.contains('visible');
+  var mods=readStallModifiers();
   return {
     cut: document.getElementById('meatType').value,
     wt: parseFloat(document.getElementById('weight').value),
@@ -1630,7 +1657,11 @@ function planState(){
     serve: document.getElementById('serveTime').value,
     wrap: document.getElementById('wrapMethod').value,
     bone: document.getElementById('boneIn').value==='yes' ? 1 : 0,
-    inj: document.getElementById('injected').value==='yes' ? 1 : 0,
+    injp: mods.injectionPct,
+    fat: mods.fatCapInches,
+    spz: mods.spritzesPerHour,
+    np: mods.nPieces,
+    wind: mods.windMph,
     sz: state.sz,
     tu: state.tu,
     grill: twoPhase ? document.getElementById('grillType').value : undefined,
@@ -1662,8 +1693,8 @@ function calc(){
     waterPan:document.getElementById('waterPan').checked,
     serve:sd, wrap:document.getElementById('wrapMethod').value,
     boneIn:document.getElementById('boneIn').value==='yes',
-    inj:document.getElementById('injected').value==='yes',
-    np:np, grill:document.getElementById('grillType').value
+    np:np, grill:document.getElementById('grillType').value,
+    mods:readStallModifiers()
   });
   syncUrl();
 }
@@ -1759,7 +1790,7 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
   // onMeatChange() can't reset them.
   var plan = (typeof PlanUrl !== 'undefined') ? PlanUrl.decodePlanParams(window.location.search) : {};
   var hasPlan = plan && Object.keys(plan).length > 0;
-  var hasAdvancedPlan = plan && ['ppl','ck','wp','wrap','bone','inj','sz','grill','sear'].some(function(key) {
+  var hasAdvancedPlan = plan && ['ppl','ck','wp','wrap','bone','inj','injp','fat','spz','np','wind','sz','grill','sear'].some(function(key) {
     return plan[key] != null;
   });
   if (hasAdvancedPlan) document.getElementById('advancedSettings').open = true;
@@ -1777,7 +1808,6 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
   if(plan.ck) setSelectIfOption('cookerType', plan.ck);
   if(plan.wp!=null) document.getElementById('waterPan').checked=(plan.wp==1);
   if(plan.serve) document.getElementById('serveTime').value=plan.serve;
-  if(plan.inj!=null) document.getElementById('injected').value=(plan.inj===1?'yes':'no');
   // Cut-dependent controls: onMeatChange() hides wrap (and resets it to none)
   // for no-stall cuts, hides bone-in for cuts where it's irrelevant, and shows
   // the sear phase only for two-phase cuts. Apply a URL value ONLY when the
@@ -1785,6 +1815,17 @@ document.getElementById('servingToggle').addEventListener('click',function(e){
   // a hidden field that silently changes the result.
   if(plan.wrap && document.getElementById('wrapMethod').closest('.form-group').style.display!=='none') setSelectIfOption('wrapMethod', plan.wrap);
   if(plan.bone!=null && document.getElementById('boneInGroup').style.display!=='none') document.getElementById('boneIn').value=(plan.bone===1?'yes':'no');
+  // Stall modifiers (injection %, fat cap, spritz rate, load count, wind) are
+  // only meaningful for stall cuts; #stallModifiers is hidden otherwise, so a
+  // shared link can't set an inert field. Back-compat: legacy inj=1 prefills
+  // injectionPct to 12 when the newer injp key isn't present.
+  if(document.getElementById('stallModifiers').style.display!=='none'){
+    document.getElementById('injectionPct').value = (plan.injp!=null) ? plan.injp : (plan.inj===1 ? 12 : 0);
+    if(plan.fat!=null) document.getElementById('fatCap').value=plan.fat;
+    if(plan.spz!=null) document.getElementById('spritzRate').value=plan.spz;
+    if(plan.np!=null) document.getElementById('loadCount').value=plan.np;
+    if(plan.wind!=null) document.getElementById('windMph').value=plan.wind;
+  }
   var twoPhaseShown=document.getElementById('two-phase-section').classList.contains('visible');
   if(plan.grill && twoPhaseShown) setSelectIfOption('grillType', plan.grill);
   // sear is canonical °F in the URL — convert back to the active display unit.
