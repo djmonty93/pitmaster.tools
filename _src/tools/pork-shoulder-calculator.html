@@ -818,21 +818,21 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
     // uses, so manual entry and "Use my local weather" share one derivation.
     var ambientF, ambientRh, altitudeM;
     var rawAmbTemp = document.getElementById('ambientTemp').value;
-    var ambTempParsed = parseInt(rawAmbTemp, 10);
-    if (rawAmbTemp !== '' && !isNaN(ambTempParsed)) {
-      ambientF = Math.min(250, Math.max(-40, ambTempParsed));
+    var ambTempParsed = Number(rawAmbTemp);
+    if (rawAmbTemp !== '' && isFinite(ambTempParsed)) {
+      ambientF = Math.min(250, Math.max(-40, Math.round(ambTempParsed)));
     }
     var rawAmbDew = document.getElementById('ambientDew').value;
-    var ambDewParsed = parseInt(rawAmbDew, 10);
-    if (rawAmbDew !== '' && !isNaN(ambDewParsed)) {
-      var ambDp = Math.min(120, Math.max(-40, ambDewParsed));
+    var ambDewParsed = Number(rawAmbDew);
+    if (rawAmbDew !== '' && isFinite(ambDewParsed)) {
+      var ambDp = Math.min(120, Math.max(-40, Math.round(ambDewParsed)));
       var ambTForRh = (ambientF != null) ? ambientF : 70;
       ambientRh = Math.min(100, Math.max(1, Math.round(100 * spPSat(spF2C(ambDp)) / spPSat(spF2C(ambTForRh)))));
     }
     var rawAlt = document.getElementById('altitudeFt').value;
-    var altParsed = parseInt(rawAlt, 10);
-    if (rawAlt !== '' && !isNaN(altParsed) && altParsed > 0) {
-      altitudeM = Math.round(Math.min(15000, Math.max(0, altParsed)) * 0.3048);
+    var altParsed = Number(rawAlt);
+    if (rawAlt !== '' && isFinite(altParsed) && altParsed > 0) {
+      altitudeM = Math.round(Math.min(15000, Math.max(0, Math.round(altParsed))) * 0.3048);
     }
 
     var physics = spCompute({
