@@ -666,6 +666,20 @@ test('pork shoulder timeline distinguishes wrapped and unwrapped stall events', 
   expect(errors).toEqual([]);
 });
 
+test('brisket "use my local weather" falls back to manual entry when the forecast fetch fails', async ({ page }) => {
+  const errors = [];
+  trackPageErrors(page, errors);
+
+  await page.route('**/api/forecast**', (route) => route.fulfill({ status: 500, body: '' }));
+
+  await page.goto('/brisket-calculator.html');
+  await dismissCookieBanner(page);
+  await page.locator('#useLocalWeather').click();
+
+  await expect(page.locator('#weatherMsg')).toHaveText(/could not load local weather.*enter conditions manually/i);
+  expect(errors).toEqual([]);
+});
+
 test('each calculator produces meaningful result values', async ({ browser }) => {
   const context = await newRejectedConsentContext(browser);
   const page = await context.newPage();
