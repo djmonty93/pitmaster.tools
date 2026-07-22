@@ -367,6 +367,23 @@
           <input type="number" id="windMph" min="0" max="40" step="1" value="0" inputmode="numeric">
         </div>
 
+        <div class="form-group full-width">
+          <button type="button" id="useLocalWeather" class="opt-check" style="cursor:pointer">&#x1F4CD; Use my local weather</button>
+          <span id="weatherMsg" style="font-size:.8rem;color:var(--text-muted)"></span>
+        </div>
+        <div class="form-group">
+          <label for="ambientTemp">Ambient temp (&#xB0;F)</label>
+          <input type="number" id="ambientTemp" min="-40" max="250" step="1" placeholder="70" inputmode="numeric">
+        </div>
+        <div class="form-group">
+          <label for="ambientDew">Ambient dew point (&#xB0;F)</label>
+          <input type="number" id="ambientDew" min="-40" max="120" step="1" placeholder="auto" inputmode="numeric">
+        </div>
+        <div class="form-group">
+          <label for="altitudeFt">Altitude (ft)</label>
+          <input type="number" id="altitudeFt" min="0" max="15000" step="100" value="0" inputmode="numeric">
+        </div>
+
         <div class="form-group">
           <label>Wrap Method</label>
           <div class="wrap-toggle" id="wrapToggle" role="group" aria-label="Wrap method">
@@ -659,6 +676,7 @@
 
 <!-- INJECT:site-footer-tool.html -->
 <!-- INJECT:smoke-physics.js:script -->
+<!-- INJECT:forecast-autofill.js:script -->
 <script>
 (function() {
   'use strict';
@@ -962,6 +980,30 @@
     var nPieces = Math.min(12, Math.max(1, parseInt(document.getElementById('loadCount').value, 10) || 1));
     var windMph = Math.min(40, Math.max(0, parseInt(document.getElementById('windMph').value, 10) || 0));
 
+    // Ambient temp/dewpoint/altitude are OPTIONAL: when the field is blank (or
+    // unparseable) the corresponding engine param is left undefined so
+    // spCompute/spPitWetBulbF fall back to their built-in defaults (70F/50%RH/
+    // sea level) rather than being handed a bogus 0. RH is derived from
+    // dewpoint via the same Buck pSat helpers the forecast auto-fill path
+    // uses, so manual entry and "Use my local weather" share one derivation.
+    var ambientF, ambientRh, altitudeM;
+    var rawAmbTemp = document.getElementById('ambientTemp').value;
+    var ambTempParsed = parseInt(rawAmbTemp, 10);
+    if (rawAmbTemp !== '' && !isNaN(ambTempParsed)) {
+      ambientF = Math.min(250, Math.max(-40, ambTempParsed));
+      var rawAmbDew = document.getElementById('ambientDew').value;
+      var ambDewParsed = parseInt(rawAmbDew, 10);
+      if (rawAmbDew !== '' && !isNaN(ambDewParsed)) {
+        var ambDp = Math.min(120, Math.max(-40, ambDewParsed));
+        ambientRh = Math.min(100, Math.max(1, Math.round(100 * spPSat(spF2C(ambDp)) / spPSat(spF2C(ambientF)))));
+      }
+    }
+    var rawAlt = document.getElementById('altitudeFt').value;
+    var altParsed = parseInt(rawAlt, 10);
+    if (rawAlt !== '' && !isNaN(altParsed) && altParsed > 0) {
+      altitudeM = Math.round(Math.min(15000, Math.max(0, altParsed)) * 0.3048);
+    }
+
     var result = spCompute({
       kmKey: rib.kmKey,
       weightLbs: weightLbs,
@@ -977,7 +1019,10 @@
       wrapMethod: wrapMethod,
       spritzesPerHour: spritz,
       nPieces: nPieces,
-      windMph: windMph
+      windMph: windMph,
+      ambientF: ambientF,
+      ambientRh: ambientRh,
+      altitudeM: altitudeM
     });
 
     if (result.error) {
@@ -1000,7 +1045,10 @@
       wrapTriggerF: 150,
       spritzesPerHour: spritz,
       nPieces: nPieces,
-      windMph: windMph
+      windMph: windMph,
+      ambientF: ambientF,
+      ambientRh: ambientRh,
+      altitudeM: altitudeM
     };
 
     var totalCookHrs = result.totalH;
@@ -1111,6 +1159,24 @@
   }
 
   calcBtn.addEventListener('click', calculate);
+
+  /* ---- Use my local weather ---- */
+  document.getElementById('useLocalWeather').addEventListener('click', function () {
+    var msg = document.getElementById('weatherMsg');
+    spUseLocalForecast({
+      cooker: document.getElementById('cookerType').value,
+      cut: 'spare-ribs',
+      onStart: function () { msg.textContent = 'Loading…'; },
+      onApply: function (a) {
+        if (a.ambientF != null) document.getElementById('ambientTemp').value = a.ambientF;
+        if (a.dewPointF != null) document.getElementById('ambientDew').value = a.dewPointF;
+        if (a.windMph != null) document.getElementById('windMph').value = a.windMph;
+        msg.textContent = 'Loaded local conditions.';
+        calculate();
+      },
+      onError: function (m) { msg.textContent = m; }
+    });
+  });
 
   /* ---- Modal close ---- */
   function closeModal() {
