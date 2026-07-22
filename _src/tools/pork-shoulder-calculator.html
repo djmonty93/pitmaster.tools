@@ -311,11 +311,11 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
         <span id="weatherMsg" style="font-size:.8rem;color:var(--text-muted)"></span>
       </div>
       <div class="form-group">
-        <label for="ambientTemp">Ambient temp (&#xB0;F)</label>
+        <label for="ambientTemp">Ambient temp (<span class="amb-unit">&#xB0;F</span>)</label>
         <input type="number" id="ambientTemp" min="-40" max="250" step="1" placeholder="70" inputmode="numeric">
       </div>
       <div class="form-group">
-        <label for="ambientDew">Ambient dew point (&#xB0;F)</label>
+        <label for="ambientDew">Ambient dew point (<span class="amb-unit">&#xB0;F</span>)</label>
         <input type="number" id="ambientDew" min="-40" max="120" step="1" placeholder="auto" inputmode="numeric">
       </div>
       <div class="form-group">
@@ -686,9 +686,29 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
   applyTempUnit(tempUnit);
   applyWeightUnit(weightUnit, false);
 
+  // Sync ambient unit labels to the final resolved tempUnit, once, after the
+  // localStorage/locale init path above has resolved it. Pork/rib have no
+  // plan-URL hydration, so this is the only path that sets tempUnit before render.
+  Array.prototype.forEach.call(document.querySelectorAll('.amb-unit'), function (s) {
+    s.textContent = tempUnit === 'C' ? '°C' : '°F';
+  });
+
   tempToggle.querySelectorAll('button').forEach(function(btn){
     btn.addEventListener('click', function(){
-      applyTempUnit(btn.dataset.unit);
+      var val = btn.dataset.unit;
+      if (val === tempUnit) return;
+      var toC = (val === 'C');   // switching to Celsius
+      ['ambientTemp', 'ambientDew'].forEach(function (id) {
+        var el = document.getElementById(id);
+        var n = Number(el.value);
+        if (el.value !== '' && isFinite(n)) {
+          el.value = toC ? Math.round((n - 32) * 5 / 9) : Math.round(n * 9 / 5 + 32);
+        }
+      });
+      Array.prototype.forEach.call(document.querySelectorAll('.amb-unit'), function (s) {
+        s.textContent = toC ? '°C' : '°F';
+      });
+      applyTempUnit(val);
       refreshVisibleResults();
     });
   });
@@ -820,12 +840,14 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
     var rawAmbTemp = document.getElementById('ambientTemp').value;
     var ambTempParsed = Number(rawAmbTemp);
     if (rawAmbTemp !== '' && isFinite(ambTempParsed)) {
-      ambientF = Math.min(250, Math.max(-40, Math.round(ambTempParsed)));
+      var ambTempF = tempUnit === 'C' ? (ambTempParsed * 9 / 5 + 32) : ambTempParsed;
+      ambientF = Math.min(250, Math.max(-40, Math.round(ambTempF)));
     }
     var rawAmbDew = document.getElementById('ambientDew').value;
     var ambDewParsed = Number(rawAmbDew);
     if (rawAmbDew !== '' && isFinite(ambDewParsed)) {
-      var ambDp = Math.min(120, Math.max(-40, Math.round(ambDewParsed)));
+      var ambDewF = tempUnit === 'C' ? (ambDewParsed * 9 / 5 + 32) : ambDewParsed;
+      var ambDp = Math.min(120, Math.max(-40, Math.round(ambDewF)));
       var ambTForRh = (ambientF != null) ? ambientF : 70;
       ambientRh = Math.min(100, Math.max(1, Math.round(100 * spPSat(spF2C(ambDp)) / spPSat(spF2C(ambTForRh)))));
     }
@@ -983,8 +1005,8 @@ input[type="time"].form-time:focus-visible { outline: 2px solid var(--amber); ou
       cut: 'pork-butt',
       onStart: function () { msg.textContent = 'Loading…'; btn.disabled = true; },
       onApply: function (a) {
-        document.getElementById('ambientTemp').value = (a.ambientF != null) ? a.ambientF : '';
-        document.getElementById('ambientDew').value  = (a.dewPointF != null) ? a.dewPointF : '';
+        document.getElementById('ambientTemp').value = (a.ambientF != null) ? (tempUnit === 'C' ? Math.round((a.ambientF - 32) * 5 / 9) : a.ambientF) : '';
+        document.getElementById('ambientDew').value  = (a.dewPointF != null) ? (tempUnit === 'C' ? Math.round((a.dewPointF - 32) * 5 / 9) : a.dewPointF) : '';
         document.getElementById('windMph').value     = (a.windMph != null) ? a.windMph : '';
         msg.textContent = 'Loaded local conditions.';
         btn.disabled = false;
