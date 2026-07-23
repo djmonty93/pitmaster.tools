@@ -2,14 +2,16 @@
 // See docs/superpowers/specs/2026-07-22-stall-model-v2-m3-telemetry-design.md §4.
 //
 // The fallback adapter: recognizes any CSV whose header row has a time/date
-// column and at least one temperature column. Named-brand adapters (added
-// later, once real export samples exist) run first; this catches the rest.
+// column and at least one temperature column. Named-brand adapters (combustion,
+// fireboard, thermoworks) run first; this catches the rest. Every temp column
+// becomes an `unknown`-role channel — generic CSV carries no food/pit hint, so
+// a single-channel file reduces cleanly and a multi-channel one needs a user
+// probe mapping. Values are assumed to be °F (generic CSV has no unit info).
 
-import type { CookSample, LogAdapter } from './types.js';
+import type { ChannelSample, LogAdapter, ParsedChannel, ParsedLog } from './types.js';
 
 const TIME_RE = /\b(time|timestamp|date)\b/i;
-const CORE_RE = /\b(internal|core|food|meat)\b/i;
-const TEMP_RE = /temp/i;
+const TEMP_RE = /(temp|°\s*[fc]|probe|internal|core|\bfood\b|\bmeat\b)/i;
 
 function splitRows(text: string): string[][] {
   return text
@@ -19,42 +21,55 @@ function splitRows(text: string): string[][] {
     .map((line) => line.split(',').map((cell) => cell.trim()));
 }
 
-function findColumns(headers: string[]): { timeIdx: number; coreIdx: number } {
+function findColumns(headers: string[]): { timeIdx: number; tempIdxs: number[] } {
   const timeIdx = headers.findIndex((h) => TIME_RE.test(h));
-  // Prefer an explicit internal/core column; else the first temperature column.
-  let coreIdx = headers.findIndex((h) => CORE_RE.test(h));
-  if (coreIdx === -1) coreIdx = headers.findIndex((h) => TEMP_RE.test(h));
-  return { timeIdx, coreIdx };
+  const tempIdxs: number[] = [];
+  headers.forEach((h, i) => {
+    if (i !== timeIdx && TEMP_RE.test(h)) tempIdxs.push(i);
+  });
+  return { timeIdx, tempIdxs };
 }
 
 export const genericCsvAdapter: LogAdapter = {
   name: 'generic-csv',
 
-  detect(headers: string[]): boolean {
-    const { timeIdx, coreIdx } = findColumns(headers);
-    return timeIdx !== -1 && coreIdx !== -1;
+  detect(rawText: string): boolean {
+    const rows = splitRows(rawText);
+    const headers = rows[0];
+    if (!headers) return false;
+    const { timeIdx, tempIdxs } = findColumns(headers);
+    return timeIdx !== -1 && tempIdxs.length > 0;
   },
 
-  parse(text: string): CookSample[] {
-    const rows = splitRows(text);
+  parse(rawText: string): ParsedLog {
+    const empty: ParsedLog = { format: 'generic-csv', channels: [] };
+    const rows = splitRows(rawText);
     const headers = rows[0];
-    if (!headers) return [];
-    const { timeIdx, coreIdx } = findColumns(headers);
-    if (timeIdx === -1 || coreIdx === -1) return [];
+    if (!headers) return empty;
+    const { timeIdx, tempIdxs } = findColumns(headers);
+    if (timeIdx === -1 || tempIdxs.length === 0) return empty;
 
-    const samples: CookSample[] = [];
+    const channels: ParsedChannel[] = tempIdxs.map((idx) => ({
+      id: String(idx),
+      label: headers[idx] ?? String(idx),
+      role: 'unknown',
+      samples: [] as ChannelSample[],
+    }));
+
     let t0: number | null = null;
     for (const cells of rows.slice(1)) {
       const timeCell = cells[timeIdx];
-      const coreCell = cells[coreIdx];
-      if (timeCell === undefined || coreCell === undefined) continue;
+      if (timeCell === undefined) continue;
       const t = new Date(timeCell).getTime();
       if (t0 === null) t0 = t;
-      samples.push({
-        tMin: Math.round((t - t0) / 60000),
-        coreF: parseFloat(coreCell),
+      const tMin = Math.round((t - t0) / 60000);
+      tempIdxs.forEach((idx, k) => {
+        const cell = cells[idx];
+        const channel = channels[k];
+        if (cell === undefined || cell === '' || channel === undefined) return;
+        channel.samples.push({ tMin, tempF: parseFloat(cell) });
       });
     }
-    return samples;
+    return { format: 'generic-csv', channels };
   },
 };
