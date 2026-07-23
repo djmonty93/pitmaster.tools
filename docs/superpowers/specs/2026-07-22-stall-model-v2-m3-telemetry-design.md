@@ -44,7 +44,7 @@ Every sub-project reads or writes this shape. It is the load-bearing contract be
 | `fatCapIn` | number? | |
 | `pieces` | number? | Default 1. |
 | `zip` | string | Coarse location for the weather join (§7 privacy). |
-| `cookStartedAt` | integer | Epoch seconds anchoring the cook — the absolute reference the weather join needs (§5), since B's `ParsedLog` carries only relative `tMin`. For uploads A reads it from `ParsedLog.startedAt` (the adapter decodes the raw export's first absolute timestamp / `Created:` line — §4). **Manual** submissions capture the cook's date/time in the form — a user submits days after cooking, so submission time would yield the wrong historical-weather window. |
+| `cookStartedAt` | integer | Epoch seconds anchoring the cook — the absolute reference the weather join needs (§5), since B's `ParsedLog` carries only relative `tMin`. For uploads A reads it from `ParsedLog.startedAt` (the adapter decodes the raw export's first timestamp / `Created:` line — §4); this is **naive local** for wall-clock formats, and C resolves the true timezone from the ZIP when it queries (§5). **Manual** submissions capture the cook's date/time in the form — a user submits days after cooking, so submission time would yield the wrong historical-weather window. |
 | `durationMin` | number? | Total cook length in minutes. Required for **manual** submissions (which have no series to derive `max(tMin)` from, §5); for file uploads it's derived from the series. |
 | `emailOptional` | string? | Opt-in only (§7). |
 | `consentAt` | integer | Epoch seconds; required. |
@@ -56,11 +56,12 @@ Every sub-project reads or writes this shape. It is the load-bearing contract be
 ParsedLog {
   format: string;                 // adapter id that parsed it
   channels: ParsedChannel[];
-  startedAt?: number;             // absolute epoch (s) of the first sample, when the
-                                  // format carries wall-clock time (FireBoard/ThermoWorks/
-                                  // generic) or a Created line (Combustion); the adapter
-                                  // owns this decode (§4). A forward extension to B, added
-                                  // when C is built; the source for cookStartedAt on upload.
+  startedAt?: number;             // epoch (s) of the first sample, when the format carries
+                                  // wall-clock time (FireBoard/ThermoWorks/generic) or a
+                                  // Created line (Combustion); the adapter owns this decode
+                                  // (§4). NAIVE-LOCAL basis for wall-clock formats — C pins
+                                  // the true timezone from the ZIP (§5). A forward extension
+                                  // to B, added WHEN A IS BUILT (A consumes it for uploads).
 }
 ParsedChannel {
   id: string;                     // stable channel id (port number or column index)
@@ -114,7 +115,7 @@ A cook row moves through statuses: `pending_parse` → `pending_weather` → `re
 
 ## 5. Sub-project C — Weather reanalysis join
 
-- Queued/offline enrichment. For each `pending_weather` cook older than the ERA5 lag window, call **Open-Meteo Archive** (`https://archive-api.open-meteo.com/v1/archive`, hourly `temperature_2m` + `dewpoint_2m`) at the cook's ZIP → lat/lon over its window — `[cookStartedAt, cookStartedAt + durationMin·60]` (§2's absolute anchor plus the cook length: `max(tMin)` for uploads, the form value for manual submissions) — average across the cook duration, write `ambientF`/`dewPointF`/`altitudeM` plus `era5FetchedAt` (§2) back to the row, and flip status to `ready`.
+- Queued/offline enrichment. For each `pending_weather` cook older than the ERA5 lag window, call **Open-Meteo Archive** (`https://archive-api.open-meteo.com/v1/archive`, hourly `temperature_2m` + `dewpoint_2m`) at the cook's ZIP → lat/lon over its window — `[cookStartedAt, cookStartedAt + durationMin·60]` (§2's anchor plus the cook length: `max(tMin)` for uploads, the form value for manual submissions). The ZIP also resolves the timezone, which C passes to the timezone-aware Archive API so the naive-local `cookStartedAt` maps to the correct hours; average across the cook duration, write `ambientF`/`dewPointF`/`altitudeM` plus `era5FetchedAt` (§2) back to the row, and flip status to `ready`.
 - **ERA5 lag:** the archive trails real time by roughly five days, so C only processes cooks whose end time is older than that window — a freshly submitted cook is joined on a delay, never synchronously at submit.
 - Reuses the existing `worker/src/lib/weather/` error and retry patterns (same vendor family as the live forecast, `openMeteo.ts`). Runs on a **cron** trigger alongside the existing scheduled handlers in `worker/src/index.ts`.
 
