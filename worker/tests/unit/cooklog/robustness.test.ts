@@ -339,6 +339,35 @@ describe('extractStall survives duplicate timestamps (r11 #3)', () => {
   });
 });
 
+// Codex review round 12.
+
+describe('thermoworks defers mixed-unit files (r12 #1)', () => {
+  it('does not claim a file that also has a non-TW unit column', () => {
+    expect(thermoworksAdapter.detect('Probe1 -°F,Chamber -°C,Time\n150,107,10/12/16 15:12')).toBe(false);
+    expect(normalizeLog('Probe1 -°F,Chamber -°C,Time\n150,107,10/12/16 15:12')?.format).toBe('generic-csv');
+  });
+});
+
+describe('extractStall coalesces same-time samples (r12 #2)', () => {
+  it('averages duplicate-tMin readings rather than dropping the jump', () => {
+    const curve = [
+      { tMin: 0, coreF: 70 }, { tMin: 30, coreF: 110 },
+      { tMin: 60, coreF: 150 }, { tMin: 90, coreF: 149 }, { tMin: 90, coreF: 151 }, // avg 150
+      { tMin: 120, coreF: 150 }, { tMin: 150, coreF: 150 }, { tMin: 180, coreF: 150 }, { tMin: 210, coreF: 190 },
+    ];
+    const r = extractStall(curve);
+    expect(r?.dwellHr).toBe(2);
+    expect(r?.plateauF).toBeCloseTo(150, 5);
+  });
+});
+
+describe('generic-csv treats a "Celsius" unit-word header as a temp column (r12 #3)', () => {
+  it('recognizes and converts it', () => {
+    const log = genericCsvAdapter.parse('Time,Celsius\n2026-07-01T10:00:00Z,65');
+    expect(log.channels[0]).toMatchObject({ label: 'Celsius', samples: [{ tMin: 0, tempF: 149 }] });
+  });
+});
+
 describe('combustion tolerates reordered columns (r9 #2)', () => {
   it('finds the header by required names in any order', () => {
     const file = [

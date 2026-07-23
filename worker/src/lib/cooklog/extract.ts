@@ -34,7 +34,35 @@ export interface StallObservation {
   dwellHr: number;
 }
 
-export function extractStall(samples: CookSample[]): StallObservation | null {
+/** Average readings that share a tMin (deterministic) and sort by tMin, so the
+ *  slope math sees strictly increasing time and a same-time jump is represented
+ *  by its mean rather than silently dropped. */
+function coalesceByTime(input: CookSample[]): CookSample[] {
+  const acc = new Map<number, { coreSum: number; coreN: number; pitSum: number; pitN: number }>();
+  for (const s of input) {
+    let a = acc.get(s.tMin);
+    if (!a) {
+      a = { coreSum: 0, coreN: 0, pitSum: 0, pitN: 0 };
+      acc.set(s.tMin, a);
+    }
+    a.coreSum += s.coreF;
+    a.coreN += 1;
+    if (s.pitF !== undefined) {
+      a.pitSum += s.pitF;
+      a.pitN += 1;
+    }
+  }
+  return [...acc.entries()]
+    .sort((x, y) => x[0] - y[0])
+    .map(([tMin, a]) =>
+      a.pitN > 0
+        ? { tMin, coreF: a.coreSum / a.coreN, pitF: a.pitSum / a.pitN }
+        : { tMin, coreF: a.coreSum / a.coreN },
+    );
+}
+
+export function extractStall(input: CookSample[]): StallObservation | null {
+  const samples = coalesceByTime(input);
   let bestStart = -1;
   let bestEnd = -1;
   let bestDur = 0;

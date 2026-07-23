@@ -8,7 +8,7 @@
 // first in single-probe) — so locate every column by name/shape, not index.
 // Probes are by physical port, so roles are `unknown` (needs a probe mapping).
 
-import { cToF, parseNum, splitCsvRows, utcFromParts } from './csv.js';
+import { cToF, parseNum, splitCsvRows, UNIT_MARKER_RE, utcFromParts } from './csv.js';
 import type { ChannelSample, LogAdapter, ParsedChannel, ParsedLog } from './types.js';
 
 const TW_TIME_RE = /^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/;
@@ -53,8 +53,16 @@ export const thermoworksAdapter: LogAdapter = {
     const rows = splitCsvRows(rawText);
     const raw = rows[0];
     if (!raw) return false;
-    const { timeIdx, temps } = planColumns(raw.map((h) => h.trim()));
+    const headers = raw.map((h) => h.trim());
+    const { timeIdx, temps } = planColumns(headers);
     if (timeIdx === -1 || temps.length === 0) return false;
+    // A clean ThermoWorks file has ONLY Probe<n>/Temp columns. If another
+    // column declares a unit but isn't a confirmed TW column, this is a mixed
+    // file — defer to generic-csv rather than silently dropping that column.
+    const claimed = new Set(temps.map((t) => t.idx));
+    if (headers.some((h, idx) => idx !== timeIdx && !claimed.has(idx) && UNIT_MARKER_RE.test(h))) {
+      return false;
+    }
     // Require an actual ThermoWorks-shaped timestamp so a unit-suffixed file
     // with ISO/epoch times isn't claimed and then parsed into empty channels.
     return rows.slice(1).some((r) => twTime(r[timeIdx] ?? '') !== null);

@@ -15,7 +15,7 @@ import type { ChannelSample, LogAdapter, ParsedChannel, ParsedLog } from './type
 // A column is a temperature channel if its header looks thermometric OR uses
 // the documented probe-mapping vocabulary (spec §2) — pit/food role words and
 // common cuts, which BBQ loggers use as probe names.
-const TEMP_RE = /(\btemp|°\s*[fc]|\bprobe|\binternal|\bcore|\bfood\b|\bmeat\b|\bpit\b|\bambient|\bgrill|\bsmoker|\bchamber|\bcooker|\bbrisket|\bpork\b|\bchicken|\bbeef\b|\bturkey|\bribs?\b|\bbutt\b|\bbreast|\bfish\b|\blamb)/i;
+const TEMP_RE = /(\btemp|°\s*[fc]|\bcelsius\b|\bfahrenheit\b|\bprobe|\binternal|\bcore|\bfood\b|\bmeat\b|\bpit\b|\bambient|\bgrill|\bsmoker|\bchamber|\bcooker|\bbrisket|\bpork\b|\bchicken|\bbeef\b|\bturkey|\bribs?\b|\bbutt\b|\bbreast|\bfish\b|\blamb)/i;
 
 interface TempCol {
   idx: number;
