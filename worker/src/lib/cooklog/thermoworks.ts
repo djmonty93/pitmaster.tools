@@ -21,8 +21,8 @@ const TW_COL_RE = /^(Probe\s*\d+|Temp)\s*-\s*°?\s*([FC])\s*$/i;
 function twTime(s: string): number | null {
   const m = s.trim().match(TW_TIME_RE);
   if (!m) return null;
-  let yy = Number(m[3]);
-  if (yy < 100) yy += 2000;
+  const yToken = m[3] ?? '';
+  const yy = yToken.length === 2 ? Number(yToken) + 2000 : Number(yToken);
   return utcFromParts(yy, Number(m[1]), Number(m[2]), Number(m[4]), Number(m[5]), m[6] ? Number(m[6]) : 0);
 }
 

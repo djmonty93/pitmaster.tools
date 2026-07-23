@@ -15,7 +15,7 @@ import type { ChannelSample, LogAdapter, ParsedChannel, ParsedLog } from './type
 // A column is a temperature channel if its header looks thermometric OR uses
 // the documented probe-mapping vocabulary (spec §2) — pit/food role words and
 // common cuts, which BBQ loggers use as probe names.
-const TEMP_RE = /(temp|°\s*[fc]|probe|internal|core|\bfood\b|\bmeat\b|\bpit\b|ambient|grill|smoker|chamber|cooker|brisket|\bpork\b|chicken|\bbeef\b|turkey|\brib\b|\bbutt\b|breast|\bfish\b|lamb)/i;
+const TEMP_RE = /(temp|°\s*[fc]|probe|internal|core|\bfood\b|\bmeat\b|\bpit\b|ambient|grill|smoker|chamber|cooker|brisket|\bpork\b|chicken|\bbeef\b|turkey|\bribs?\b|\bbutt\b|breast|\bfish\b|lamb)/i;
 
 interface TempCol {
   idx: number;
@@ -71,6 +71,10 @@ function rowTime(cells: string[], idxs: number[]): number | null {
   // A string that is itself a finite number (incl. `.5`, `+1`, `1e3`) is an
   // ambiguous elapsed value, not a calendar timestamp — reject before Date().
   if (Number.isFinite(Number(s))) return null;
+  // NOTE: generic-csv accepts any Date-parseable string (ISO, US, …), so an
+  // impossible date like `2026-02-30` rolls forward rather than being rejected
+  // — a tolerated 1-row artifact on this freeform fallback. The vendor adapters
+  // (fixed formats) DO reject impossible dates via utcFromParts.
   const ms = new Date(s).getTime();
   return Number.isFinite(ms) ? ms : null;
 }

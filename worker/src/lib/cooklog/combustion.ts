@@ -19,16 +19,24 @@ interface Located {
   ambIdx: number;
 }
 
-/** Find the header row and the required column indices, or null if absent. */
+const REQUIRED = ['Timestamp', 'VirtualCoreTemperature', 'VirtualAmbientTemperature'];
+
+/** Find the header row (the row containing all required names, in any order)
+ *  and the required column indices; null if absent. Columns are keyed by name,
+ *  so a reordered-but-compatible export is still accepted. */
 function locate(rows: string[][]): Located | null {
-  const headerIdx = rows.findIndex((r) => (r[0] ?? '').trim() === 'Timestamp');
+  const headerIdx = rows.findIndex((r) => {
+    const cells = new Set(r.map((c) => c.trim()));
+    return REQUIRED.every((name) => cells.has(name));
+  });
   if (headerIdx === -1) return null;
   const headers = (rows[headerIdx] ?? []).map((h) => h.trim());
-  const tsIdx = headers.indexOf('Timestamp');
-  const coreIdx = headers.indexOf('VirtualCoreTemperature');
-  const ambIdx = headers.indexOf('VirtualAmbientTemperature');
-  if (tsIdx === -1 || coreIdx === -1 || ambIdx === -1) return null;
-  return { headerIdx, tsIdx, coreIdx, ambIdx };
+  return {
+    headerIdx,
+    tsIdx: headers.indexOf('Timestamp'),
+    coreIdx: headers.indexOf('VirtualCoreTemperature'),
+    ambIdx: headers.indexOf('VirtualAmbientTemperature'),
+  };
 }
 
 export const combustionAdapter: LogAdapter = {

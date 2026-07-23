@@ -93,16 +93,18 @@ export function parseNum(cell: string | undefined): number | null {
 
 export const cToF = (c: number): number => (c * 9) / 5 + 32;
 
-// An explicit temperature unit declared in a header: °F/°C, the words
-// Celsius/Fahrenheit, a bracketed (C)/(F)/(°C), or a delimiter-separated
-// trailing C/F (e.g. "Temp C", "Temp_F"). Used to keep a unit-declaring file
-// out of the FireBoard adapter (whose real columns are bare probe names).
+// An UNAMBIGUOUS temperature unit declared in a header: °F/°C, the words
+// Celsius/Fahrenheit, or a bracketed (C)/(F)/(°C). A bare trailing letter
+// (e.g. "Temp C") is intentionally NOT a marker — it collides with real probe
+// names like "Probe C"; such ambiguous headers default to °F, and true
+// disambiguation is a user-declared unit in sub-project A. Used to keep a
+// unit-declaring file out of the FireBoard adapter (bare probe-name columns).
 export const UNIT_MARKER_RE =
-  /(°\s*[fc]\b|\b(?:celsius|fahrenheit)\b|[([]\s*°?\s*[fc]\s*[)\]]|[\s\-_]°?[fc]\s*$)/i;
+  /(°\s*[fc]\b|\b(?:celsius|fahrenheit)\b|[([]\s*°?\s*[fc]\s*[)\]])/i;
 
-/** True when a header declares Celsius specifically (a subset of UNIT_MARKER_RE). */
+/** True when a header UNAMBIGUOUSLY declares Celsius (subset of UNIT_MARKER_RE). */
 export function headerIsCelsius(header: string): boolean {
-  return /(°\s*c\b|\bcelsius\b|[([]\s*°?\s*c\s*[)\]]|[\s\-_]°?c[)\]]?\s*$)/i.test(header);
+  return /(°\s*c\b|\bcelsius\b|[([]\s*°?\s*c\s*[)\]])/i.test(header);
 }
 
 /**

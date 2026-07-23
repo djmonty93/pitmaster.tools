@@ -177,10 +177,16 @@ describe('generic-csv combines split Date + Time columns (r5 #2)', () => {
   });
 });
 
-describe('generic-csv recognizes a delimiter-separated trailing unit (r5 #3)', () => {
-  it('treats "Temp C" as Celsius and converts to °F', () => {
+describe('generic-csv unit detection uses only unambiguous markers (r5 #3 / r9 #1)', () => {
+  it('treats a bare "Temp C" as ambiguous → °F (no conversion)', () => {
+    // Bare trailing letter is not a unit marker (collides with probe names).
     const log = genericCsvAdapter.parse('Time,Temp C\n2026-07-01T10:00:00Z,65');
-    expect(log.channels[0]).toMatchObject({ label: 'Temp C', samples: [{ tMin: 0, tempF: 149 }] });
+    expect(log.channels[0]).toMatchObject({ label: 'Temp C', samples: [{ tMin: 0, tempF: 65 }] });
+  });
+
+  it('converts only when the unit is unambiguous (°C)', () => {
+    const log = genericCsvAdapter.parse('Time,Temp °C\n2026-07-01T10:00:00Z,65');
+    expect(log.channels[0]?.samples).toEqual([{ tMin: 0, tempF: 149 }]);
   });
 
   it('does not misread "Internal Temp (°F)" as Celsius', () => {
@@ -224,10 +230,16 @@ describe('timestamp regexes reject 3-digit years (r6 #3, #4)', () => {
 // Codex review round 7.
 
 describe('fireboard defers trailing-unit headers; generic requires all time cells (r7)', () => {
-  it('routes a "Temp C" trailing-unit file to generic-csv with °C conversion', () => {
-    const log = normalizeLog('Time,Temp C\n07/03/16 15:06:00,65');
+  it('routes an unambiguously °C-marked file to generic-csv with conversion', () => {
+    const log = normalizeLog('Time,Temp °C\n07/03/16 15:06:00,65');
     expect(log?.format).toBe('generic-csv');
     expect(log?.channels[0]?.samples).toEqual([{ tMin: 0, tempF: 149 }]);
+  });
+
+  it('keeps a FireBoard file with an ambiguous "Probe C" label (not deferred/converted)', () => {
+    const log = normalizeLog('Time,Probe C\n07/03/16 15:06:00,150');
+    expect(log?.format).toBe('fireboard');
+    expect(log?.channels[0]).toMatchObject({ label: 'Probe C', samples: [{ tMin: 0, tempF: 150 }] });
   });
 
   it('drops a Date,Time row whose Time cell is blank instead of parsing midnight', () => {
@@ -255,5 +267,23 @@ describe('generic-csv recognizes the mapping vocabulary (r8 #3)', () => {
     const log = genericCsvAdapter.parse('Time,Pit,Brisket\n2026-07-01T10:00:00Z,225,150');
     expect(log.channels.map((c) => c.label)).toEqual(['Pit', 'Brisket']);
     expect(log.channels[1]?.samples).toEqual([{ tMin: 0, tempF: 150 }]);
+  });
+
+  it('matches the plural "Ribs" label (r9 #5)', () => {
+    const log = genericCsvAdapter.parse('Time,Ribs\n2026-07-01T10:00:00Z,150');
+    expect(log.channels.map((c) => c.label)).toEqual(['Ribs']);
+  });
+});
+
+describe('combustion tolerates reordered columns (r9 #2)', () => {
+  it('finds the header by required names in any order', () => {
+    const file = [
+      'Combustion Inc. Probe Data',
+      'SessionID,Timestamp,VirtualAmbientTemperature,VirtualCoreTemperature',
+      '657681738,0.000,105,65',
+    ].join('\n');
+    const log = combustionAdapter.parse(file);
+    expect(log.channels[0]).toMatchObject({ role: 'core', samples: [{ tMin: 0, tempF: 149 }] });
+    expect(log.channels[1]).toMatchObject({ role: 'ambient', samples: [{ tMin: 0, tempF: 221 }] });
   });
 });

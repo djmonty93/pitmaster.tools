@@ -24,8 +24,8 @@ const FB_TIME_RE = /^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})\s+(\d{1,2}):(\d{2}):(\d
 function fbTime(s: string): number | null {
   const m = s.trim().match(FB_TIME_RE);
   if (!m) return null;
-  let yy = Number(m[3]);
-  if (yy < 100) yy += 2000;
+  const yToken = m[3] ?? '';
+  const yy = yToken.length === 2 ? Number(yToken) + 2000 : Number(yToken);
   return utcFromParts(yy, Number(m[1]), Number(m[2]), Number(m[4]), Number(m[5]), Number(m[6]));
 }
 
