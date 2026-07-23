@@ -9,7 +9,23 @@
 // Multiple `unknown` channels with no mapping are ambiguous → [] (A must
 // collect a probe mapping before this can reduce).
 
-import type { CookSample, ParsedChannel, ParsedLog, ProbeMapping } from './types.js';
+import type { ChannelSample, CookSample, ParsedChannel, ParsedLog, ProbeMapping } from './types.js';
+
+/** Average readings that share a tMin → one value per timestamp (deterministic).
+ *  Coalescing each channel independently removes duplicate-timestamp ambiguity
+ *  (incl. rows where one channel's cell was empty) before core and pit are joined. */
+function averageByTime(samples: ChannelSample[]): Map<number, number> {
+  const acc = new Map<number, { sum: number; n: number }>();
+  for (const s of samples) {
+    const a = acc.get(s.tMin) ?? { sum: 0, n: 0 };
+    a.sum += s.tempF;
+    a.n += 1;
+    acc.set(s.tMin, a);
+  }
+  const out = new Map<number, number>();
+  for (const [t, a] of acc) out.set(t, a.sum / a.n);
+  return out;
+}
 
 function byId(log: ParsedLog, id: string | undefined): ParsedChannel | undefined {
   return id === undefined ? undefined : log.channels.find((c) => c.id === id);
@@ -46,29 +62,19 @@ export function toCookSamples(log: ParsedLog, mapping?: ProbeMapping): CookSampl
   const core = pickCore(log, mapping);
   if (!core || core.samples.length === 0) return [];
 
-  // Queue pit readings per tMin so duplicate timestamps are consumed in
-  // occurrence order (a Map would collapse them to the last value, mispairing).
+  const coreByT = averageByTime(core.samples);
   const pit = pickPit(log, mapping);
-  const pitByT = new Map<number, number[]>();
-  if (pit && pit.id !== core.id) {
-    for (const s of pit.samples) {
-      const q = pitByT.get(s.tMin);
-      if (q) q.push(s.tempF);
-      else pitByT.set(s.tMin, [s.tempF]);
-    }
-  }
+  const pitByT = pit && pit.id !== core.id ? averageByTime(pit.samples) : new Map<number, number>();
 
-  // Sort by original tMin (defends against out-of-order exports) then
-  // re-baseline so tMin starts at 0 (CookSample contract) even when the core
-  // probe started reading late. Pit is looked up by the ORIGINAL tMin.
-  const ordered = [...core.samples].sort((a, b) => a.tMin - b.tMin);
-  const offset = ordered[0]?.tMin ?? 0;
-  return ordered.map((s) => {
-    const q = pitByT.get(s.tMin);
-    const pitF = q && q.length > 0 ? q.shift() : undefined;
-    const tMin = s.tMin - offset;
-    return pitF === undefined
-      ? { tMin, coreF: s.tempF }
-      : { tMin, coreF: s.tempF, pitF };
+  // Sort by tMin (defends against out-of-order exports) then re-baseline so
+  // tMin starts at 0 (CookSample contract) even when the core probe read late.
+  const tMins = [...coreByT.keys()].sort((a, b) => a - b);
+  const offset = tMins[0] ?? 0;
+  return tMins.flatMap((t) => {
+    const coreF = coreByT.get(t);
+    if (coreF === undefined) return [];
+    const pitF = pitByT.get(t);
+    const tMin = t - offset;
+    return [pitF === undefined ? { tMin, coreF } : { tMin, coreF, pitF }];
   });
 }

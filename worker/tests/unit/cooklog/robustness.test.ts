@@ -292,7 +292,7 @@ describe('reducer validates explicit mappings + duplicate-tMin pit (r10)', () =>
     expect(toCookSamples(twoUnknown, { coreId: '0', pitId: '0' })).toEqual([]);
   });
 
-  it('pairs duplicate-timestamp pit readings in order, not all to the last', () => {
+  it('coalesces duplicate-timestamp readings per channel (average), not last-wins', () => {
     const log: ParsedLog = {
       format: 'x',
       channels: [
@@ -300,10 +300,19 @@ describe('reducer validates explicit mappings + duplicate-tMin pit (r10)', () =>
         { id: 'p', label: 'p', role: 'ambient', samples: [{ tMin: 0, tempF: 220 }, { tMin: 0, tempF: 230 }] },
       ],
     };
-    expect(toCookSamples(log)).toEqual([
-      { tMin: 0, coreF: 150, pitF: 220 },
-      { tMin: 0, coreF: 151, pitF: 230 },
-    ]);
+    expect(toCookSamples(log)).toEqual([{ tMin: 0, coreF: 150.5, pitF: 225 }]);
+  });
+
+  it('aligns pit correctly when a duplicate-timestamp row had an empty pit cell (r13 #2)', () => {
+    // core has two readings at tMin 0; pit only one (the other row's cell empty).
+    const log: ParsedLog = {
+      format: 'x',
+      channels: [
+        { id: 'c', label: 'c', role: 'core', samples: [{ tMin: 0, tempF: 150 }, { tMin: 0, tempF: 152 }] },
+        { id: 'p', label: 'p', role: 'ambient', samples: [{ tMin: 0, tempF: 220 }] },
+      ],
+    };
+    expect(toCookSamples(log)).toEqual([{ tMin: 0, coreF: 151, pitF: 220 }]);
   });
 });
 
@@ -345,6 +354,11 @@ describe('thermoworks defers mixed-unit files (r12 #1)', () => {
   it('does not claim a file that also has a non-TW unit column', () => {
     expect(thermoworksAdapter.detect('Probe1 -°F,Chamber -°C,Time\n150,107,10/12/16 15:12')).toBe(false);
     expect(normalizeLog('Probe1 -°F,Chamber -°C,Time\n150,107,10/12/16 15:12')?.format).toBe('generic-csv');
+  });
+
+  it('also defers when the extra column is a bare (unit-less) probe like "Pit" (r13 #1)', () => {
+    expect(thermoworksAdapter.detect('Time,Temp -°F,Pit\n10/12/16 15:12,150,225')).toBe(false);
+    expect(normalizeLog('Time,Temp -°F,Pit\n10/12/16 15:12,150,225')?.format).toBe('generic-csv');
   });
 });
 
