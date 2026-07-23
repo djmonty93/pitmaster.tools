@@ -46,7 +46,6 @@ Every sub-project reads or writes this shape. It is the load-bearing contract be
 | `zip` | string | Coarse location for the weather join (§7 privacy). |
 | `cookStartedAt` | integer | Epoch seconds of the cook's first sample — the absolute anchor the weather join needs (§5), since the observed series carries only relative `tMin`. From the probe log where available, else the submission time. |
 | `durationMin` | number? | Total cook length in minutes. Required for **manual** submissions (which have no series to derive `max(tMin)` from, §5); for file uploads it's derived from the series. |
-| `sourceUnit` | enum? | `F` \| `C`, collected by A only for formats whose file carries no unit (FireBoard) — the per-submission analogue of `probeMapping`. Adapters use the file's own unit when present, else this, else default °F (§4). |
 | `emailOptional` | string? | Opt-in only (§7). |
 | `consentAt` | integer | Epoch seconds; required. |
 | `probeMapping` | object? | Channel → role map (see below); only needed for user-labeled formats. |
@@ -71,7 +70,7 @@ ParsedChannel {
 
 **Observed series** (reduced): `toCookSamples(parsedLog, probeMapping?) => Array<{ tMin, coreF, pitF? }>` picks the core channel (and optional pit) and yields the flat series the extractors consume.
 
-**Derived observations** (extracted by B from the reduced series): `plateauF_observed`, `dwellHr_observed`, `wrapAtMin?`.
+**Derived observations**: `plateauF_observed`, `dwellHr_observed`, `wrapAtMin?` — extracted by B from the reduced series for file uploads, or supplied directly from the form fields for manual submissions (§3).
 
 **Weather** (attached by C, delayed): `ambientF`, `dewPointF`, `altitudeM`, `era5FetchedAt`.
 
@@ -85,7 +84,7 @@ A cook row moves through statuses: `pending_parse` → `pending_weather` → `re
 - **Route** `POST /api/cook-log`, modeled on `worker/src/handlers/pinImage.ts`: same-site `Origin` allowlist, exact content-type check, a size cap (cook logs are small — target ≤1 MB), a `WEATHER_KV` per-IP soft rate-limit, and a Cloudflare WAF rate-limit rule as the authoritative control (operator step, as with `/api/pin-image`).
 - **Probe mapping step:** when the parsed log has multiple `role: 'unknown'` channels (FireBoard / ThermoWorks / multi-probe generic CSV — see §2), A must show the parsed channel labels and let the user confirm which is the food (core) probe and, optionally, which is the pit. The label heuristic pre-selects a default so the common case is one click. Fixed-role formats (Combustion) skip this step. The resulting `probeMapping` is stored on the row.
 - **Storage:** raw uploaded file → **R2** (content-addressed, mirroring the pin-image dedupe pattern); canonical metadata row → **D1** `cook_logs` (§7), created with status `pending_parse`. On submit, the worker synchronously invokes B's parser; on success it stores the derived observations and advances to `pending_weather`, else it flags a parse error for later manual review.
-- **Shippable alone:** begins accumulating the data moat with no downstream code present. Manual-entry submissions skip `pending_parse` and land at `pending_weather` directly (their observations come from the form, not a file) — the form must capture `durationMin` and `sourceUnit` (§2), which a file upload derives automatically.
+- **Shippable alone:** begins accumulating the data moat with no downstream code present. Manual-entry submissions skip `pending_parse` and land at `pending_weather` directly: their derived observations (`plateauF_observed`, `dwellHr_observed`) and `durationMin` come straight from the form fields — the coarse points a user reads off their own cook (stall temperature, stall duration, total cook time) — which a file upload instead derives via B.
 
 ## 4. Sub-project B — Log normalizer
 
@@ -98,7 +97,7 @@ A cook row moves through statuses: `pending_parse` → `pending_weather` → `re
     parse(rawText: string): ParsedLog;    // channel-oriented (§2), samples normalized to tMin + °F
   }
   ```
-  `detect` takes the raw file text because formats differ in **preamble** (Combustion has a 9-line banner before the header; FireBoard/ThermoWorks start at the header), **delimiter** (Combustion/FireBoard comma, Inkbird tab), and **header shape** — a pre-parsed `headers[]` can't sniff those. Each adapter owns its own preamble-skip, delimiter, decimal-separator, **timestamp decoding** (elapsed-seconds vs `MM/DD/YY HH:MM:SS` local-clock — see Appendix A), and **unit → °F** conversion, so `ParsedLog.channels[].samples` is always `{tMin, tempF}`. When a format carries **no unit in the file** (FireBoard), the adapter takes values as °F; the reduce/store step (A) applies the submission's `sourceUnit` (§2) when the user declared one — the °F assumption is the default, not a silent guarantee. Adapters are tried in order; first `detect` wins; no match → parse error surfaced to A.
+  `detect` takes the raw file text because formats differ in **preamble** (Combustion has a 9-line banner before the header; FireBoard/ThermoWorks start at the header), **delimiter** (Combustion/FireBoard comma, Inkbird tab), and **header shape** — a pre-parsed `headers[]` can't sniff those. Each adapter owns its own preamble-skip, delimiter, decimal-separator, **timestamp decoding** (elapsed-seconds vs `MM/DD/YY HH:MM:SS` local-clock — see Appendix A), and **unit → °F** conversion, so `ParsedLog.channels[].samples` is always `{tMin, tempF}`. When a format carries **no unit in the file** (FireBoard), the adapter takes values as °F — a documented **known limitation**: a FireBoard export recorded in °C is mis-read, and honoring it needs a user-declared unit, which is deferred to a future A-level enhancement (the file gives the adapter nothing to detect). Adapters are tried in order; first `detect` wins; no match → parse error surfaced to A.
 - **v1 adapter list** (revised — the original five did not survive format research; see Appendix A for evidence and the two removals):
   - **`combustion`** — CONFIRMED from two real exports; fixed-role, °C, elapsed-seconds, 9-line preamble.
   - **`fireboard`** — CONFIRMED from the official sample CSV; user-labeled channels, local clock, unit not in file.
@@ -159,14 +158,14 @@ Nothing here changes the shipped stall model; §6's human gate is the only path 
 
 ## Appendix A — Confirmed probe-export formats (research 2026-07-22)
 
-Grounded by five parallel research passes. Each fact is labeled CONFIRMED (a real exported file, official doc, or source code was seen) or INFERRED. **Adapters must be built only against CONFIRMED headers; do not fabricate the rest.**
+Grounded by five parallel research passes. Facts are labeled CONFIRMED (a real exported file, official doc, or source code was seen) or INFERRED; a brand whose format could not be fully confirmed is marked PARTIAL. **Adapters must be built only against CONFIRMED headers; do not fabricate the rest.**
 
 ### combustion — CONFIRMED (two real exports + parser source)
 - Preamble: **9 metadata lines + 1 blank line**, then the header on line 11. Skip the first 10 lines. Lines include `CSV version: 4`, `Sample Period: <ms>`, `Created: YYYY-MM-DD HH:MM:SS` (wall-clock origin).
 - Header (verbatim): `Timestamp,SessionID,SequenceNumber,T1,T2,T3,T4,T5,T6,T7,T8,VirtualCoreTemperature,VirtualSurfaceTemperature,VirtualAmbientTemperature,EstimatedCoreTemperature,PredictionSetPoint,VirtualCoreSensor,VirtualSurfaceSensor,VirtualAmbientSensor,PredictionState,PredictionMode,PredictionType,PredictionValueSeconds` (iOS appends a trailing `,Notes`). **Key columns by name, not index.**
 - `Timestamp` = **elapsed seconds** since start (Android decimals, iOS ints). `tMin = Timestamp / 60`.
 - Roles: `VirtualCoreTemperature` → core, `VirtualAmbientTemperature` → ambient, `VirtualSurfaceTemperature` → surface. `EstimatedCoreTemperature` is a prediction, not measured — ignore for observations.
-- Units: **°C** (no unit indicator in file; strongly inferred always-°C). Convert to °F.
+- Units: values are **°C** — CONFIRMED from the sample rows; that the export is *always* °C regardless of app display is INFERRED (no unit indicator in the file). Convert to °F.
 - Pin to `CSV version: 4`; treat a version bump as a re-verify trigger.
 - Sources: real files + parser at `github.com/mschinis/combustion-inc-analyser` (`ExampleCSV/`, `Models/CookTimelineRow.swift`); official app note `combustion.inc/pages/product-release-notes`.
 
