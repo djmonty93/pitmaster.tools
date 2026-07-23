@@ -1,6 +1,6 @@
 # Stall Model v2 — Milestone 3: Cook-log Telemetry & Calibration (umbrella design)
 
-**Status:** Design approved (owner-authored via brainstorming, 2026-07-22). Roadmap spec for four independently-planned sub-projects. **Build deferred** — this document freezes the interfaces; each sub-project gets its own spec → plan → PR later.
+**Status:** Design approved (owner-authored via brainstorming, 2026-07-22), then revised the same day after parallel probe-export format research (Appendix A) — the research changed the canonical interface (§2, channel model) and the v1 adapter list (§4, five brands → three groundable). Roadmap spec for four independently-planned sub-projects. **Build deferred** — this document sets the interfaces; each sub-project gets its own spec → plan → PR later. (Sub-project B's core — generic-CSV adapter + `extractStall` — is already implemented on branch `feat/m3-b-log-normalizer`.)
 
 **Parent:** `docs/superpowers/specs/2026-07-19-stall-model-v2-design.md` §12 (Calibration plan, Tier 3) and §0.1 line 25 ("Milestone 3 — calibration & telemetry. Mostly out of code scope … Deferred; tracked separately"). Issue #141 code work is complete (M1 + M2 Stage A/B + #144 + index parity); this is the separately-tracked remainder.
 
@@ -46,10 +46,29 @@ Every sub-project reads or writes this shape. It is the load-bearing contract be
 | `zip` | string | Coarse location for the weather join (§7 privacy). |
 | `emailOptional` | string? | Opt-in only (§7). |
 | `consentAt` | integer | Epoch seconds; required. |
+| `probeMapping` | object? | Channel → role map (see below); only needed for user-labeled formats. |
 
-**Observed series** (from the probe log, sub-project B): `Array<{ tMin: number; coreF: number; pitF?: number }>` — minutes from cook start.
+**Normalized probe log** (B's parse output — the intermediate). Format research (Appendix A) proved a flat `{tMin, coreF, pitF}` cannot be produced directly, because **most exports do not label which probe is the food vs the pit** — only Combustion self-identifies. So an adapter emits a channel-oriented shape and a separate reducer collapses it:
 
-**Derived observations** (extracted by B): `plateauF_observed`, `dwellHr_observed`, `wrapAtMin?`.
+```
+ParsedLog {
+  format: string;                 // adapter id that parsed it
+  channels: ParsedChannel[];
+}
+ParsedChannel {
+  id: string;                     // stable channel id (port number or column index)
+  label: string;                  // as written in the file ("Probe 2", "Traeger", "VirtualCoreTemperature")
+  role: 'core' | 'ambient' | 'surface' | 'unknown';
+  samples: Array<{ tMin: number; tempF: number }>;   // always normalized to minutes-from-start and °F
+}
+```
+
+- **Fixed-role formats** (Combustion): the adapter sets `role` directly from the virtual-temperature columns — no user input needed.
+- **User-labeled formats** (FireBoard, ThermoWorks, and any generic CSV with multiple probes): every channel is `role: 'unknown'`. A label heuristic proposes a default (`pit`/`grill`/`ambient`/`smoker`/cooker-brand → ambient; `brisket`/`pork`/`meat`/`food`/`internal` → core), but the authoritative mapping is the user's `probeMapping` captured in A's UI (§3).
+
+**Observed series** (reduced): `toCookSamples(parsedLog, probeMapping?) => Array<{ tMin, coreF, pitF? }>` picks the core channel (and optional pit) and yields the flat series the extractors consume.
+
+**Derived observations** (extracted by B from the reduced series): `plateauF_observed`, `dwellHr_observed`, `wrapAtMin?`.
 
 **Weather** (attached by C, delayed): `ambientF`, `dewPointF`, `altitudeM`, `era5FetchedAt`.
 
@@ -61,15 +80,30 @@ A cook row moves through statuses: `pending_parse` → `pending_weather` → `re
 
 - **Page** `submit-cook.html`: an indexable tool page carrying the full `<head>` requirements (project `CLAUDE.md`). Contains an upload control for a probe export file **and** a manual-entry fieldset (upload preferred, manual fallback), the §2 metadata fields, one **required** consent checkbox, and an **optional** email field.
 - **Route** `POST /api/cook-log`, modeled on `worker/src/handlers/pinImage.ts`: same-site `Origin` allowlist, exact content-type check, a size cap (cook logs are small — target ≤1 MB), a `WEATHER_KV` per-IP soft rate-limit, and a Cloudflare WAF rate-limit rule as the authoritative control (operator step, as with `/api/pin-image`).
+- **Probe mapping step:** when the parsed log has multiple `role: 'unknown'` channels (FireBoard / ThermoWorks / multi-probe generic CSV — see §2), A must show the parsed channel labels and let the user confirm which is the food (core) probe and, optionally, which is the pit. The label heuristic pre-selects a default so the common case is one click. Fixed-role formats (Combustion) skip this step. The resulting `probeMapping` is stored on the row.
 - **Storage:** raw uploaded file → **R2** (content-addressed, mirroring the pin-image dedupe pattern); canonical metadata row → **D1** `cook_logs` (§7), created with status `pending_parse`. On submit, the worker synchronously invokes B's parser; on success it stores the derived observations and advances to `pending_weather`, else it flags a parse error for later manual review.
 - **Shippable alone:** begins accumulating the data moat with no downstream code present. Manual-entry submissions skip `pending_parse` and land at `pending_weather` directly (their observations come from the form, not a file).
 
 ## 4. Sub-project B — Log normalizer
 
 - **Pure functions, no I/O** — the TDD core. Lives in `worker/src/lib/cooklog/` so both the worker (A's parse step) and the Node harness (D) import it.
-- **Adapter interface:** `detect(headers) => boolean` and `parse(rows) => Array<{ tMin, coreF, pitF? }>`.
-- **Named v1 adapters** (owner decision — commit to the list now): Thermoworks, FireBoard, MEATER, Combustion, Inkbird, plus a generic-CSV fallback (`timestamp + temperature column(s)`). A submitted file is matched against adapters in order; first `detect` wins; no match → parse error surfaced to A.
-- **Extractors:** `plateauF` (temperature of the longest near-flat core-temp segment) and `dwellHr` (its duration) from the canonical series; `wrapAtMin` if a wrap discontinuity is present.
+- **Adapter interface** (revised from format research — Appendix A):
+  ```
+  LogAdapter {
+    name: string;
+    detect(rawText: string): boolean;     // sees raw text, not a pre-parsed header
+    parse(rawText: string): ParsedLog;    // channel-oriented (§2), samples normalized to tMin + °F
+  }
+  ```
+  `detect` takes the raw file text because formats differ in **preamble** (Combustion has a 9-line banner before the header; FireBoard/ThermoWorks start at the header), **delimiter** (Combustion/FireBoard comma, Inkbird tab), and **header shape** — a pre-parsed `headers[]` can't sniff those. Each adapter owns its own preamble-skip, delimiter, decimal-separator, **timestamp decoding** (elapsed-seconds vs `MM/DD/YY HH:MM:SS` local-clock — see Appendix A), and **unit → °F** conversion, so `ParsedLog.channels[].samples` is always `{tMin, tempF}`. Adapters are tried in order; first `detect` wins; no match → parse error surfaced to A.
+- **v1 adapter list** (revised — the original five did not survive format research; see Appendix A for evidence and the two removals):
+  - **`combustion`** — CONFIRMED from two real exports; fixed-role, °C, elapsed-seconds, 9-line preamble.
+  - **`fireboard`** — CONFIRMED from the official sample CSV; user-labeled channels, local clock, unit not in file.
+  - **`thermoworks`** — CONFIRMED from official screenshots (2018 BBQ-app format only; RFX/Cloud unconfirmed and out of v1); numbered probes, unit in header suffix, local clock.
+  - **`generic-csv`** — fallback for `time + temperature column(s)` (already built).
+  - **Dropped: `meater`** — no file export exists at all (only a shareable graph image); structured data is available only via a live JSON API, a different ingest path, deferred as a possible future non-file source.
+  - **Deferred: `inkbird`** — CSV exists but per-probe single files and the exact BBQ header was not found in any source; build once a real IBBQ-4T export is supplied. Do not fabricate its columns.
+- **Extractors:** `plateauF` (temperature of the longest near-flat core-temp segment) and `dwellHr` (its duration) from the reduced series; `wrapAtMin` if a wrap discontinuity is present.
 
 ## 5. Sub-project C — Weather reanalysis join
 
@@ -112,7 +146,46 @@ Nothing here changes the shipped stall model; §6's human gate is the only path 
 
 ## 9. Open items to resolve at each sub-project's own brainstorming
 
-- B: exact column signatures for each named adapter (needs a real export sample per brand).
-- B: near-flat segment definition for `plateauF` (slope threshold + minimum duration).
+- B: column signatures — RESOLVED for `combustion` / `fireboard` / `thermoworks` (Appendix A); still open for `inkbird` (needs a real IBBQ-4T file).
+- B: `plateauF` segment definition — v1 pinned as "longest span with core rise-rate < 5 °F/hr for ≥ 0.5 hr" (implemented in `extract.ts`); revisit thresholds against real cooks in D.
+- B: the food/pit label heuristic vocabulary (§2) — refine against real FireBoard/ThermoWorks channel labels as they arrive.
 - C: whether a dedicated `COOK_BUCKET` R2 binding is warranted vs. reusing `PIN_BUCKET`.
 - D: regression method (grid search vs. least-squares) and the loss weighting between plateau-temp error and dwell error.
+
+---
+
+## Appendix A — Confirmed probe-export formats (research 2026-07-22)
+
+Grounded by five parallel research passes. Each fact is labeled CONFIRMED (a real exported file, official doc, or source code was seen) or INFERRED. **Adapters must be built only against CONFIRMED headers; do not fabricate the rest.**
+
+### combustion — CONFIRMED (two real exports + parser source)
+- Preamble: **9 metadata lines + 1 blank line**, then the header on line 11. Skip the first 10 lines. Lines include `CSV version: 4`, `Sample Period: <ms>`, `Created: YYYY-MM-DD HH:MM:SS` (wall-clock origin).
+- Header (verbatim): `Timestamp,SessionID,SequenceNumber,T1,T2,T3,T4,T5,T6,T7,T8,VirtualCoreTemperature,VirtualSurfaceTemperature,VirtualAmbientTemperature,EstimatedCoreTemperature,PredictionSetPoint,VirtualCoreSensor,VirtualSurfaceSensor,VirtualAmbientSensor,PredictionState,PredictionMode,PredictionType,PredictionValueSeconds` (iOS appends a trailing `,Notes`). **Key columns by name, not index.**
+- `Timestamp` = **elapsed seconds** since start (Android decimals, iOS ints). `tMin = Timestamp / 60`.
+- Roles: `VirtualCoreTemperature` → core, `VirtualAmbientTemperature` → ambient, `VirtualSurfaceTemperature` → surface. `EstimatedCoreTemperature` is a prediction, not measured — ignore for observations.
+- Units: **°C** (no unit indicator in file; strongly inferred always-°C). Convert to °F.
+- Pin to `CSV version: 4`; treat a version bump as a re-verify trigger.
+- Sources: real files + parser at `github.com/mschinis/combustion-inc-analyser` (`ExampleCSV/`, `Models/CookTimelineRow.swift`); official app note `combustion.inc/pages/product-release-notes`.
+
+### fireboard — CONFIRMED (official sample CSV)
+- No preamble; header is line 1: `Time,<label1>,<label2>,…` — temp columns are **user-assigned probe names** (up to 6), **not** fixed roles. Empty cell = probe not yet reading.
+- `Time` = `MM/DD/YY HH:MM:SS`, 24-hour, **naive local** (no TZ). `new Date()` won't reliably parse this — write a dedicated parser.
+- Roles: **unknown** — no food/pit flag in the file. Use the label heuristic + user `probeMapping`.
+- Units: **not in the file** (°F/°C is a user/account setting). Declare via user or infer from range.
+- Sources: `fireboard.io/static/FireBoard-SampleSession.csv`; `docs.fireboard.io/app/sessions.html`. (JSON API carries an explicit `degreetype` 1=°C/2=°F and ISO-UTC timestamps — different model, not the CSV.)
+
+### thermoworks — CONFIRMED (official screenshots, 2018 BBQ-app format)
+- No preamble; header is line 1. Multi-probe (Signals): `Probe1 -°F, Probe 2 -°F, Probe 3 -°F, Probe 4 -°F, Time` (`Time` **last**). Single-probe (BlueDOT): `Time, Temp -°F` (`Time` **first**). **Column order varies — locate `Time` by name.**
+- Unit is embedded in each temp header as a `-°F` / `-°C` suffix — read it per column. Match temp columns with e.g. `^Probe\s*\d+\s*-\s*°?[FC]$` or `^Temp\s*-\s*°?[FC]$`.
+- `Time` = `M/D/YY H:MM` local wall-clock, minute cadence (accept optional seconds / 4-digit year defensively).
+- Roles: **unknown** — probes are by physical port, no food/pit designation. Use heuristic + user `probeMapping`.
+- **Not confirmed:** RFX / ThermoWorks-Cloud / current-app exports — no real sample found; out of v1.
+- Sources: `help.thermoworks.com/knowledge-base/thermoworks-bbq-app/` (Signals + BlueDOT Excel screenshots).
+
+### meater — CONFIRMED: no file export
+- The app produces only an **in-app graph shareable as an image** — no CSV/TSV/JSON download. Structured data exists solely via the **public JSON REST API** (`temperature.internal`/`temperature.ambient`, °C, `updated_at` epoch — **current reading only, no history**) or a reverse-engineered private API. **No file adapter is possible.** A live-API ingest is a separate future path, not part of the file-upload normalizer.
+- Sources: `support.meater.com/.../Viewing-Previous-Cooks`; `github.com/apption-labs/meater-cloud-public-rest-api`.
+
+### inkbird — PARTIAL: mechanism confirmed, header not found
+- CSV export exists but is **per-probe single-channel files** (no combined multi-probe export); channel identity is the filename/probe-name, not a column. The app's export engine uses a `Time` / value / separate `Unit` column convention, **tab-delimited**, with a decimal-separator that is **dot (Inkbird Pro) or comma (Engbird)** depending on app/locale. The **exact BBQ temperature header was not found in any source** — do not build until a real IBBQ-4T export is supplied.
+- Sources: `inkbird.com/products/wifi-grill-thermometer-ibbq-4t`; `community.inkbird.com` threads; sibling-format parser `github.com/the-butcher/ARANET4_VIS` (`DelimitedParserInkbird.ts`).
