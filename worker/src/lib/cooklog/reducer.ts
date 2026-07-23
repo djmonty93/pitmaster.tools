@@ -39,11 +39,12 @@ export function toCookSamples(log: ParsedLog, mapping?: ProbeMapping): CookSampl
     for (const s of pit.samples) pitByT.set(s.tMin, s.tempF);
   }
 
-  // Re-baseline the output to the core's first reading so tMin starts at 0
-  // (CookSample contract) even when the core probe started reading late. Pit
-  // is looked up by the ORIGINAL tMin, then the offset is applied to the output.
-  const offset = core.samples[0]?.tMin ?? 0;
-  return core.samples.map((s) => {
+  // Sort by original tMin (defends against out-of-order exports) then
+  // re-baseline so tMin starts at 0 (CookSample contract) even when the core
+  // probe started reading late. Pit is looked up by the ORIGINAL tMin.
+  const ordered = [...core.samples].sort((a, b) => a.tMin - b.tMin);
+  const offset = ordered[0]?.tMin ?? 0;
+  return ordered.map((s) => {
     const pitF = pitByT.get(s.tMin);
     const tMin = s.tMin - offset;
     return pitF === undefined

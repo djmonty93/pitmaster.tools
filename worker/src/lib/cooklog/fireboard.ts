@@ -30,6 +30,19 @@ function fbTime(s: string): number | null {
   return utcFromParts(yy, Number(m[1]), Number(m[2]), Number(m[4]), Number(m[5]), Number(m[6]));
 }
 
+/** Probe columns = every column after `Time` with a non-empty label; the
+ *  original column index is retained so a trailing comma / blank header can't
+ *  shift data lookups or spawn a phantom channel. */
+function probeColumns(headers: string[]): Array<{ idx: number; label: string }> {
+  const out: Array<{ idx: number; label: string }> = [];
+  headers.forEach((h, idx) => {
+    if (idx === 0) return;
+    const label = h.trim();
+    if (label !== '') out.push({ idx, label });
+  });
+  return out;
+}
+
 export const fireboardAdapter: LogAdapter = {
   name: 'fireboard',
 
@@ -39,6 +52,7 @@ export const fireboardAdapter: LogAdapter = {
     if (!headers || (headers[0] ?? '').trim() !== 'Time') return false;
     // A header that declares a unit is ThermoWorks/generic, not FireBoard.
     if (headers.slice(1).some((h) => UNIT_MARKER_RE.test(h))) return false;
+    if (probeColumns(headers).length === 0) return false;
     // Recognize on the first row that carries a valid FireBoard timestamp, so a
     // single malformed early row doesn't hide an otherwise-valid file.
     return rows.slice(1).some((r) => fbTime(r[0] ?? '') !== null);
@@ -50,9 +64,10 @@ export const fireboardAdapter: LogAdapter = {
     const headers = rows[0];
     if (!headers) return empty;
 
-    const channels: ParsedChannel[] = headers
-      .slice(1)
-      .map((label, i) => ({ id: String(i + 1), label: label.trim(), role: 'unknown', samples: [] as ChannelSample[] }));
+    const cols = probeColumns(headers);
+    const channels: ParsedChannel[] = cols.map((c) => ({
+      id: String(c.idx), label: c.label, role: 'unknown', samples: [] as ChannelSample[],
+    }));
 
     let t0: number | null = null;
     for (const cells of rows.slice(1)) {
@@ -60,9 +75,10 @@ export const fireboardAdapter: LogAdapter = {
       if (t === null) continue;
       if (t0 === null) t0 = t;
       const tMin = (t - t0) / 60000;
-      channels.forEach((channel, k) => {
-        const v = parseNum(cells[k + 1]);
-        if (v !== null) channel.samples.push({ tMin, tempF: v });
+      cols.forEach((c, k) => {
+        const v = parseNum(cells[c.idx]);
+        const channel = channels[k];
+        if (v !== null && channel !== undefined) channel.samples.push({ tMin, tempF: v });
       });
     }
     return { format: 'fireboard', channels };

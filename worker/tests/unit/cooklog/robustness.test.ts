@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { parseCsvLine, utcFromParts } from '../../../src/lib/cooklog/csv.js';
 import { combustionAdapter } from '../../../src/lib/cooklog/combustion.js';
+import { fireboardAdapter } from '../../../src/lib/cooklog/fireboard.js';
 import { genericCsvAdapter } from '../../../src/lib/cooklog/genericCsv.js';
 import { normalizeLog, toCookSamples, extractStall } from '../../../src/lib/cooklog/index.js';
 import type { CookSample, ParsedLog } from '../../../src/lib/cooklog/types.js';
@@ -118,5 +119,34 @@ describe('fireboard defers unit-declaring files (r2 #4)', () => {
     const log = normalizeLog(file);
     expect(log?.format).toBe('generic-csv');
     expect(log?.channels[0]?.samples).toEqual([{ tMin: 0, tempF: 149 }]);
+  });
+});
+
+// Codex review round 3.
+
+describe('combustion detect requires a valid header (r3)', () => {
+  it('does not claim a banner-only file with no usable header', () => {
+    expect(combustionAdapter.detect('Combustion Inc. Probe Data\nfoo,bar\n1,2')).toBe(false);
+  });
+});
+
+describe('fireboard ignores blank trailing-comma header (r3)', () => {
+  it('does not spawn a phantom channel that makes a single-probe log ambiguous', () => {
+    const log = fireboardAdapter.parse('Time,Ribs,\n07/03/16 15:06:00,150,');
+    expect(log.channels).toEqual([
+      { id: '1', label: 'Ribs', role: 'unknown', samples: [{ tMin: 0, tempF: 150 }] },
+    ]);
+    expect(toCookSamples(log)).toEqual([{ tMin: 0, coreF: 150 }]);
+  });
+});
+
+describe('reducer tolerates out-of-order samples (r3)', () => {
+  it('sorts by original tMin before baselining to 0', () => {
+    const log: ParsedLog = {
+      format: 'x',
+      channels: [{ id: 'c', label: 'c', role: 'core',
+        samples: [{ tMin: 4, tempF: 151 }, { tMin: 3, tempF: 150 }] }],
+    };
+    expect(toCookSamples(log)).toEqual([{ tMin: 0, coreF: 150 }, { tMin: 1, coreF: 151 }]);
   });
 });
