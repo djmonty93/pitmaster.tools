@@ -275,6 +275,38 @@ describe('generic-csv recognizes the mapping vocabulary (r8 #3)', () => {
   });
 });
 
+describe('reducer validates explicit mappings + duplicate-tMin pit (r10)', () => {
+  const twoUnknown: ParsedLog = {
+    format: 'x',
+    channels: [
+      { id: '0', label: 'a', role: 'unknown', samples: [{ tMin: 0, tempF: 150 }] },
+      { id: '1', label: 'b', role: 'unknown', samples: [{ tMin: 0, tempF: 225 }] },
+    ],
+  };
+
+  it('returns [] when a mapping names a missing channel (no silent fallback)', () => {
+    expect(toCookSamples(twoUnknown, { coreId: 'nope' })).toEqual([]);
+  });
+
+  it('returns [] when core and pit ids are the same', () => {
+    expect(toCookSamples(twoUnknown, { coreId: '0', pitId: '0' })).toEqual([]);
+  });
+
+  it('pairs duplicate-timestamp pit readings in order, not all to the last', () => {
+    const log: ParsedLog = {
+      format: 'x',
+      channels: [
+        { id: 'c', label: 'c', role: 'core', samples: [{ tMin: 0, tempF: 150 }, { tMin: 0, tempF: 151 }] },
+        { id: 'p', label: 'p', role: 'ambient', samples: [{ tMin: 0, tempF: 220 }, { tMin: 0, tempF: 230 }] },
+      ],
+    };
+    expect(toCookSamples(log)).toEqual([
+      { tMin: 0, coreF: 150, pitF: 220 },
+      { tMin: 0, coreF: 151, pitF: 230 },
+    ]);
+  });
+});
+
 describe('combustion tolerates reordered columns (r9 #2)', () => {
   it('finds the header by required names in any order', () => {
     const file = [

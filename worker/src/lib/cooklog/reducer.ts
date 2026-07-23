@@ -29,14 +29,33 @@ function pickPit(log: ParsedLog, mapping?: ProbeMapping): ParsedChannel | undefi
   return log.channels.find((c) => c.role === 'ambient');
 }
 
+/** A supplied mapping is authoritative: reject rather than silently fall back
+ *  if any named id is missing, or if core and pit resolve to the same channel. */
+function mappingIsValid(log: ParsedLog, mapping?: ProbeMapping): boolean {
+  if (!mapping) return true;
+  const has = (id: string | undefined): boolean =>
+    id === undefined || log.channels.some((c) => c.id === id);
+  if (!has(mapping.coreId) || !has(mapping.pitId)) return false;
+  if (mapping.pitId !== undefined && mapping.pitId === mapping.coreId) return false;
+  return true;
+}
+
 export function toCookSamples(log: ParsedLog, mapping?: ProbeMapping): CookSample[] {
+  if (!mappingIsValid(log, mapping)) return [];
+
   const core = pickCore(log, mapping);
   if (!core || core.samples.length === 0) return [];
 
+  // Queue pit readings per tMin so duplicate timestamps are consumed in
+  // occurrence order (a Map would collapse them to the last value, mispairing).
   const pit = pickPit(log, mapping);
-  const pitByT = new Map<number, number>();
+  const pitByT = new Map<number, number[]>();
   if (pit && pit.id !== core.id) {
-    for (const s of pit.samples) pitByT.set(s.tMin, s.tempF);
+    for (const s of pit.samples) {
+      const q = pitByT.get(s.tMin);
+      if (q) q.push(s.tempF);
+      else pitByT.set(s.tMin, [s.tempF]);
+    }
   }
 
   // Sort by original tMin (defends against out-of-order exports) then
@@ -45,7 +64,8 @@ export function toCookSamples(log: ParsedLog, mapping?: ProbeMapping): CookSampl
   const ordered = [...core.samples].sort((a, b) => a.tMin - b.tMin);
   const offset = ordered[0]?.tMin ?? 0;
   return ordered.map((s) => {
-    const pitF = pitByT.get(s.tMin);
+    const q = pitByT.get(s.tMin);
+    const pitF = q && q.length > 0 ? q.shift() : undefined;
     const tMin = s.tMin - offset;
     return pitF === undefined
       ? { tMin, coreF: s.tempF }

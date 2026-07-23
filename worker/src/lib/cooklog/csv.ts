@@ -126,8 +126,8 @@ export function utcFromParts(
   if (hour < 0 || minute < 0 || second < 0) return null;
   const ms = Date.UTC(year, month - 1, day, hour, minute, second);
   // Round-trip to reject impossible calendar dates (e.g. 02/30, 04/31) that
-  // Date.UTC silently rolls forward into the next month.
+  // Date.UTC rolls forward, and years 0–99 which Date.UTC remaps to 1900–1999.
   const d = new Date(ms);
-  if (d.getUTCMonth() !== month - 1 || d.getUTCDate() !== day) return null;
+  if (d.getUTCFullYear() !== year || d.getUTCMonth() !== month - 1 || d.getUTCDate() !== day) return null;
   return ms;
 }
