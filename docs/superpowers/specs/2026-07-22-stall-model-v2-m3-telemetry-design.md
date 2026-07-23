@@ -44,7 +44,7 @@ Every sub-project reads or writes this shape. It is the load-bearing contract be
 | `fatCapIn` | number? | |
 | `pieces` | number? | Default 1. |
 | `zip` | string | Coarse location for the weather join (§7 privacy). |
-| `cookStartedAt` | integer | Epoch seconds anchoring the cook — the absolute reference the weather join needs (§5), since B's `ParsedLog` carries only relative `tMin`. For uploads A reads it from `ParsedLog.startedAt` (the adapter decodes the raw export's first timestamp / `Created:` line — §4); this is **naive local** for wall-clock formats, and C resolves the true timezone from the ZIP when it queries (§5). **Manual** submissions capture the cook's date/time in the form — a user submits days after cooking, so submission time would yield the wrong historical-weather window. |
+| `cookStartedAt` | integer | The cook's **local wall-clock** start, encoded as `Date.UTC(local parts)` seconds — a naive-local value, not a true UTC instant (the sources carry no timezone). It anchors the weather window (§5) that B's relative-`tMin` series can't. For uploads A reads it from `ParsedLog.startedAt` (the adapter decodes the raw export's first timestamp / `Created:` line — §4); C pairs it with the ZIP's timezone to recover the true instant when it queries (§5). **Manual** submissions capture the cook's date/time in the form — a user submits days after cooking, so submission time would yield the wrong window. |
 | `durationMin` | number? | Total cook length in minutes. Required for **manual** submissions (which have no series to derive `max(tMin)` from, §5); for file uploads it's derived from the series. |
 | `emailOptional` | string? | Opt-in only (§7). |
 | `consentAt` | integer | Epoch seconds; required. |
@@ -56,10 +56,10 @@ Every sub-project reads or writes this shape. It is the load-bearing contract be
 ParsedLog {
   format: string;                 // adapter id that parsed it
   channels: ParsedChannel[];
-  startedAt?: number;             // epoch (s) of the first sample, when the format carries
-                                  // wall-clock time (FireBoard/ThermoWorks/generic) or a
-                                  // Created line (Combustion); the adapter owns this decode
-                                  // (§4). NAIVE-LOCAL basis for wall-clock formats — C pins
+  startedAt?: number;             // the first sample's local wall-clock, encoded as
+                                  // Date.UTC(local parts) seconds (a naive-local value, not
+                                  // a true instant), from wall-clock formats or Combustion's
+                                  // Created line; the adapter owns this decode (§4). C pins
                                   // the true timezone from the ZIP (§5). A forward extension
                                   // to B, added WHEN A IS BUILT (A consumes it for uploads).
 }
