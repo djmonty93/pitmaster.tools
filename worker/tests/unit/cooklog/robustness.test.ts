@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseCsvLine } from '../../../src/lib/cooklog/csv.js';
+import { parseCsvLine, utcFromParts } from '../../../src/lib/cooklog/csv.js';
 import { combustionAdapter } from '../../../src/lib/cooklog/combustion.js';
 import { genericCsvAdapter } from '../../../src/lib/cooklog/genericCsv.js';
 import { normalizeLog, toCookSamples, extractStall } from '../../../src/lib/cooklog/index.js';
@@ -82,5 +82,41 @@ describe('extractStall ignores a steep drop (#11)', () => {
     const r = extractStall(curve);
     expect(r?.dwellHr).toBe(2); // the 60→180 plateau, not 60→270
     expect(r?.plateauF).toBeCloseTo(152, 5);
+  });
+});
+
+// Codex review round 2.
+
+describe('utcFromParts rejects impossible dates (r2 #1)', () => {
+  it('returns null for 02/30 instead of rolling into March', () => {
+    expect(utcFromParts(2018, 2, 30, 12, 0, 0)).toBeNull();
+    expect(utcFromParts(2018, 4, 31, 12, 0, 0)).toBeNull();
+    expect(utcFromParts(2018, 3, 15, 12, 0, 0)).not.toBeNull();
+  });
+});
+
+describe('generic-csv unit + elapsed-time hardening (r2 #2, #3)', () => {
+  it('converts a bracketed (C) column to °F', () => {
+    const log = genericCsvAdapter.parse('Time,Temp (C)\n2026-07-01T10:00:00Z,65\n2026-07-01T10:01:00Z,70');
+    expect(log.channels[0]?.samples).toEqual([{ tMin: 0, tempF: 149 }, { tMin: 1, tempF: 158 }]);
+  });
+
+  it('does not match a bare "C" in a label like "Core" (stays °F)', () => {
+    const log = genericCsvAdapter.parse('Time,Core\n2026-07-01T10:00:00Z,150');
+    expect(log.channels[0]?.samples).toEqual([{ tMin: 0, tempF: 150 }]);
+  });
+
+  it('skips bare-numeric time cells rather than feeding them to Date()', () => {
+    const log = genericCsvAdapter.parse('Time,Temp\n0,150\n1,151');
+    expect(log.channels[0]?.samples).toEqual([]);
+  });
+});
+
+describe('fireboard defers unit-declaring files (r2 #4)', () => {
+  it('routes a FireBoard-stamped but unit-marked file to generic-csv (with °C conversion)', () => {
+    const file = 'Time,Water Temp (°C)\n07/03/16 15:06:00,65';
+    const log = normalizeLog(file);
+    expect(log?.format).toBe('generic-csv');
+    expect(log?.channels[0]?.samples).toEqual([{ tMin: 0, tempF: 149 }]);
   });
 });

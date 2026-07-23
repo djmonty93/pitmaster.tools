@@ -14,7 +14,13 @@ import type { ChannelSample, LogAdapter, ParsedChannel, ParsedLog } from './type
 
 const TIME_RE = /\b(time|timestamp|date)\b/i;
 const TEMP_RE = /(temp|°\s*[fc]|probe|internal|core|\bfood\b|\bmeat\b)/i;
-const C_RE = /(°\s*c|\bcelsius\b)/i;
+// °C markers: a degree-C, the word celsius, or a bracketed unit token like
+// `(C)` / `[°C]`. Bare trailing "C" is intentionally NOT matched — it would
+// false-positive on labels such as "Core".
+const C_RE = /(°\s*c\b|\bcelsius\b|[([]\s*°?\s*c\s*[)\]])/i;
+// A time cell that is purely numeric is an ambiguous elapsed value, not a
+// calendar timestamp; generic-csv handles only parseable date strings.
+const BARE_NUMBER_RE = /^\d+(\.\d+)?$/;
 
 interface TempCol {
   idx: number;
@@ -55,7 +61,9 @@ export const genericCsvAdapter: LogAdapter = {
     for (const cells of rows.slice(1)) {
       const timeCell = cells[timeIdx];
       if (timeCell === undefined) continue;
-      const t = new Date(timeCell.trim()).getTime();
+      const timeStr = timeCell.trim();
+      if (timeStr === '' || BARE_NUMBER_RE.test(timeStr)) continue;
+      const t = new Date(timeStr).getTime();
       if (!Number.isFinite(t)) continue;
       if (t0 === null) t0 = t;
       const tMin = (t - t0) / 60000;

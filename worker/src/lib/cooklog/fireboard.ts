@@ -7,12 +7,19 @@
 // probe mapping downstream. `Time` is `MM/DD/YY HH:MM:SS`, naive local (no TZ),
 // which `new Date()` won't parse reliably — hence the dedicated parser below.
 // An empty cell means that probe had no reading yet. Units are NOT in the file
-// (°F/°C is a user setting); values are taken as °F.
+// (°F/°C is a user app setting), so values are taken as °F. Honoring a °C
+// FireBoard export requires the user to declare their unit — that belongs in
+// sub-project A (like the probe mapping), not here; the file itself gives the
+// adapter nothing to detect. See spec §9.
 
 import { parseNum, splitCsvRows, utcFromParts } from './csv.js';
 import type { ChannelSample, LogAdapter, ParsedChannel, ParsedLog } from './types.js';
 
 const FB_TIME_RE = /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s+(\d{1,2}):(\d{2}):(\d{2})$/;
+// An explicit unit token in a header (°F/°C, or bracketed (C)/(F)) means the
+// file is NOT FireBoard — real FireBoard columns are bare probe names. Defer
+// such files to ThermoWorks (which reads the suffix) or generic-csv.
+const UNIT_MARKER_RE = /(°\s*[fc]\b|[([]\s*°?\s*[fc]\s*[)\]])/i;
 
 /** Parse `MM/DD/YY HH:MM:SS` to epoch ms; null if malformed/out-of-range. */
 function fbTime(s: string): number | null {
@@ -30,6 +37,8 @@ export const fireboardAdapter: LogAdapter = {
     const rows = splitCsvRows(rawText);
     const headers = rows[0];
     if (!headers || (headers[0] ?? '').trim() !== 'Time') return false;
+    // A header that declares a unit is ThermoWorks/generic, not FireBoard.
+    if (headers.slice(1).some((h) => UNIT_MARKER_RE.test(h))) return false;
     // Recognize on the first row that carries a valid FireBoard timestamp, so a
     // single malformed early row doesn't hide an otherwise-valid file.
     return rows.slice(1).some((r) => fbTime(r[0] ?? '') !== null);

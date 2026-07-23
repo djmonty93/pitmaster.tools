@@ -63,5 +63,10 @@ export function utcFromParts(
   if (day < 1 || day > 31) return null;
   if (hour > 23 || minute > 59 || second > 59) return null;
   if (hour < 0 || minute < 0 || second < 0) return null;
-  return Date.UTC(year, month - 1, day, hour, minute, second);
+  const ms = Date.UTC(year, month - 1, day, hour, minute, second);
+  // Round-trip to reject impossible calendar dates (e.g. 02/30, 04/31) that
+  // Date.UTC silently rolls forward into the next month.
+  const d = new Date(ms);
+  if (d.getUTCMonth() !== month - 1 || d.getUTCDate() !== day) return null;
+  return ms;
 }
