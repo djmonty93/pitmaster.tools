@@ -85,11 +85,16 @@ export function splitCsvRows(text: string): string[][] {
   return rows;
 }
 
-/** Parse a numeric cell strictly: empty/non-finite → null (never NaN). */
+// A plain decimal number (optionally signed, with an exponent). Rejects the
+// non-decimal forms Number() would otherwise accept: hex/binary/octal literals
+// and "Infinity".
+const DECIMAL_RE = /^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/;
+
+/** Parse a numeric cell strictly: empty/non-decimal/non-finite → null (never NaN). */
 export function parseNum(cell: string | undefined): number | null {
   if (cell === undefined) return null;
   const t = cell.trim();
-  if (t === '') return null;
+  if (!DECIMAL_RE.test(t)) return null;
   const n = Number(t);
   return Number.isFinite(n) ? n : null;
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseCsvLine, splitCsvRows, utcFromParts } from '../../../src/lib/cooklog/csv.js';
+import { parseCsvLine, parseNum, splitCsvRows, utcFromParts } from '../../../src/lib/cooklog/csv.js';
 import { combustionAdapter } from '../../../src/lib/cooklog/combustion.js';
 import { fireboardAdapter } from '../../../src/lib/cooklog/fireboard.js';
 import { genericCsvAdapter } from '../../../src/lib/cooklog/genericCsv.js';
@@ -404,6 +404,20 @@ describe('generic-csv prefers an exact Time header (r14 #2)', () => {
       'Time Zone,Time,Temp\nAmerica/New_York,2026-07-01T10:00:00Z,150',
     );
     expect(log.channels.find((c) => c.label === 'Temp')?.samples).toEqual([{ tMin: 0, tempF: 150 }]);
+  });
+});
+
+// Claude gate.
+
+describe('parseNum accepts only plain decimals (claude)', () => {
+  it('parses decimals and rejects hex / Infinity / junk', () => {
+    expect(parseNum('150')).toBe(150);
+    expect(parseNum('77.6')).toBe(77.6);
+    expect(parseNum('-5')).toBe(-5);
+    expect(parseNum('0x50')).toBeNull();
+    expect(parseNum('Infinity')).toBeNull();
+    expect(parseNum('12px')).toBeNull();
+    expect(parseNum('')).toBeNull();
   });
 });
 
