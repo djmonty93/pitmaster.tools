@@ -329,13 +329,13 @@ test('homepage cold-load output stays within the frontend budget', async ({ page
     cls: window.__frontendPerformance.cls
   }));
 
-  expect(documentBytes).toBeLessThanOrEqual(200000);
+  expect(documentBytes).toBeLessThanOrEqual(210000); // raised from 200000 for homepage full-parity migration: forecast-autofill.js + new controls inlined (#141)
   // Budget raised 700 -> 760 (2026-07): the homepage grew via the food-photography
   // hero (#127) and Stage-3 imagery / wood reference photos (#130), which add
   // <picture>/<source>/<img> nodes. 760 keeps headroom while staying far under
   // the ~1500-node range where DOM size starts to hurt performance.
   expect(metrics.domNodes).toBeLessThanOrEqual(760);
-  expect(metrics.inlineScriptBytes).toBeLessThanOrEqual(108000); // raised from 100000 for the v2 stall-physics engine inlined site-wide (#138)
+  expect(metrics.inlineScriptBytes).toBeLessThanOrEqual(114000); // raised from 108000 for homepage full-parity migration: forecast-autofill.js + new controls inlined (#141)
   expect(metrics.inlineStyleBytes).toBeLessThanOrEqual(45000);
   expect(metrics.resourceTransferBytes).toBeLessThanOrEqual(150000);
   expect(metrics.lcp).toBeGreaterThan(0);
@@ -528,7 +528,7 @@ test('homepage keeps physics-backed control states honest', async ({ page }) => 
   await page.locator('#weight').fill('8');
   await page.locator('#serveTime').fill('18:00');
   await page.locator('#boneIn').selectOption('no');
-  await page.locator('#injected').selectOption('no');
+  await page.locator('#injectionPct').fill('0');
   await page.locator('#calcBtn').click();
   await expect(page.locator('#results')).toBeVisible();
   const baselineCookTime = await page.locator('#sCookTime').textContent();
