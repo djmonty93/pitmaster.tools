@@ -28,6 +28,16 @@ interface TempCol {
   unit: 'F' | 'C';
 }
 
+/** Parse a generic calendar-timestamp cell to epoch ms; null if empty, a bare
+ *  number (ambiguous elapsed value), or unparseable. */
+function parseTime(cell: string | undefined): number | null {
+  if (cell === undefined) return null;
+  const s = cell.trim();
+  if (s === '' || BARE_NUMBER_RE.test(s)) return null;
+  const t = new Date(s).getTime();
+  return Number.isFinite(t) ? t : null;
+}
+
 function planColumns(headers: string[]): { timeIdx: number; temps: TempCol[] } {
   const timeIdx = headers.findIndex((h) => TIME_RE.test(h));
   const temps: TempCol[] = [];
@@ -43,10 +53,14 @@ export const genericCsvAdapter: LogAdapter = {
   name: 'generic-csv',
 
   detect(rawText: string): boolean {
-    const raw = splitCsvRows(rawText)[0];
+    const rows = splitCsvRows(rawText);
+    const raw = rows[0];
     if (!raw) return false;
     const { timeIdx, temps } = planColumns(raw.map((h) => h.trim()));
-    return timeIdx !== -1 && temps.length > 0;
+    if (timeIdx === -1 || temps.length === 0) return false;
+    // Require at least one parseable calendar timestamp, so a file with only
+    // malformed/elapsed times isn't claimed and "normalized" into empty channels.
+    return rows.slice(1).some((r) => parseTime(r[timeIdx]) !== null);
   },
 
   parse(rawText: string): ParsedLog {
@@ -59,12 +73,8 @@ export const genericCsvAdapter: LogAdapter = {
 
     let t0: number | null = null;
     for (const cells of rows.slice(1)) {
-      const timeCell = cells[timeIdx];
-      if (timeCell === undefined) continue;
-      const timeStr = timeCell.trim();
-      if (timeStr === '' || BARE_NUMBER_RE.test(timeStr)) continue;
-      const t = new Date(timeStr).getTime();
-      if (!Number.isFinite(t)) continue;
+      const t = parseTime(cells[timeIdx]);
+      if (t === null) continue;
       if (t0 === null) t0 = t;
       const tMin = (t - t0) / 60000;
       for (const tc of temps) {

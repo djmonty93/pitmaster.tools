@@ -55,6 +55,11 @@ export const cToF = (c: number): number => (c * 9) / 5 + 32;
  * Build an epoch-ms timestamp from calendar parts, REJECTING out-of-range
  * components (so `13/45/20 25:99` fails instead of silently rolling over).
  * UTC basis — callers use only deltas, so no TZ handling is needed.
+ *
+ * Limitation: vendor exports carry naive local wall-clock with no timezone, so
+ * a cook spanning a DST transition can be off by up to an hour. Correcting that
+ * needs the submitter's timezone, which is not in the file — it comes from the
+ * submission's ZIP in sub-projects A/C, not here. See spec §9.
  */
 export function utcFromParts(
   year: number, month: number, day: number, hour: number, minute: number, second: number,

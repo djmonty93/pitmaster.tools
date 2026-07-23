@@ -150,3 +150,17 @@ describe('reducer tolerates out-of-order samples (r3)', () => {
     expect(toCookSamples(log)).toEqual([{ tMin: 0, coreF: 150 }, { tMin: 1, coreF: 151 }]);
   });
 });
+
+// Codex review round 4.
+
+describe('fireboard defers named-unit headers; generic detect requires a timestamp (r4)', () => {
+  it('routes a "…Celsius" header to generic-csv with conversion, not FireBoard', () => {
+    const log = normalizeLog('Time,Water Temperature Celsius\n07/03/16 15:06:00,65');
+    expect(log?.format).toBe('generic-csv');
+    expect(log?.channels[0]?.samples).toEqual([{ tMin: 0, tempF: 149 }]);
+  });
+
+  it('returns null (parse failure) when no row carries a parseable timestamp', () => {
+    expect(normalizeLog('Time,Temp\nnotadate,150\nalsobad,151')).toBeNull();
+  });
+});
