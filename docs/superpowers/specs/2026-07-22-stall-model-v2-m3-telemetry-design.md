@@ -8,7 +8,7 @@
 
 ## 1. Goal & scope
 
-The stall-model constants are fitted to anecdote (parent spec §7 status note, §13). Tier 3 replaces them with data-fitted values by:
+The stall-model constants are fitted to anecdote (parent spec's "Status of the numbers" note and §13 Known weaknesses). Tier 3 replaces them with data-fitted values by:
 
 1. Collecting real cook logs from users (probe-thermometer exports + cook metadata).
 2. Enriching each cook with historical weather at its coordinates and time window.
@@ -44,6 +44,7 @@ Every sub-project reads or writes this shape. It is the load-bearing contract be
 | `fatCapIn` | number? | |
 | `pieces` | number? | Default 1. |
 | `zip` | string | Coarse location for the weather join (§7 privacy). |
+| `cookStartedAt` | integer | Epoch seconds of the cook's first sample — the absolute anchor the weather join needs (§5), since the observed series carries only relative `tMin`. From the probe log where available, else the submission time. |
 | `emailOptional` | string? | Opt-in only (§7). |
 | `consentAt` | integer | Epoch seconds; required. |
 | `probeMapping` | object? | Channel → role map (see below); only needed for user-labeled formats. |
@@ -107,14 +108,14 @@ A cook row moves through statuses: `pending_parse` → `pending_weather` → `re
 
 ## 5. Sub-project C — Weather reanalysis join
 
-- Queued/offline enrichment. For each `pending_weather` cook older than the ERA5 lag window, call **Open-Meteo Archive** (`https://archive-api.open-meteo.com/v1/archive`, hourly `temperature_2m` + `dewpoint_2m`) at the cook's ZIP → lat/lon over its `[start, end]` window, average across the cook duration, write `ambientF`/`dewPointF`/`altitudeM` back to the row, and flip status to `ready`.
+- Queued/offline enrichment. For each `pending_weather` cook older than the ERA5 lag window, call **Open-Meteo Archive** (`https://archive-api.open-meteo.com/v1/archive`, hourly `temperature_2m` + `dewpoint_2m`) at the cook's ZIP → lat/lon over its window — `[cookStartedAt, cookStartedAt + max(tMin)·60]` (§2's absolute anchor plus the observed-series duration) — average across the cook duration, write `ambientF`/`dewPointF`/`altitudeM` back to the row, and flip status to `ready`.
 - **ERA5 lag:** the archive trails real time by roughly five days, so C only processes cooks whose end time is older than that window — a freshly submitted cook is joined on a delay, never synchronously at submit.
 - Reuses the existing `worker/src/lib/weather/` error and retry patterns (same vendor family as the live forecast, `openMeteo.ts`). Runs on a **cron** trigger alongside the existing scheduled handlers in `worker/src/index.ts`.
 
 ## 6. Sub-project D — Calibration harness
 
 - Local **Node script** `scripts/fit-constants.mjs`, dev-only tooling in the vein of `scripts/render-pins.mjs` / `scripts/generate-metros.js`. Never runs in the worker.
-- Pulls `ready` cooks (D1 export/dump), imports B's extractors and `_partials/smoke-physics.js`, and runs a regression that minimizes the error between `plateauF_observed` / `dwellHr_observed` and the model's predicted plateau/dwell over `SP_STALL_K`, `SP_PLAT_A/B`, `SP_EVAP_C`.
+- Pulls `ready` cooks (D1 export/dump), imports B's extractors and `_partials/smoke-physics.js`, and runs a regression that minimizes the error between `plateauF_observed` / `dwellHr_observed` and the model's predicted plateau/dwell over `SP_STALL_K`, `SP_PLAT_A/B`, `SP_EVAP_C` (and `SP_AIR_EXCHANGE` if the data supports it, per §1).
 - **Output:** a fit report — per-constant proposed value, residuals, and `n` cooks — printed and written under `docs/`. The owner reviews it and hand-edits constants into `smoke-physics.js` behind the normal PR + test gate (the existing `smoke-physics.test.ts` / `physics-parity.test.ts` suites must stay green). The harness **never** auto-commits or mutates the shipped constants.
 
 ---
@@ -125,7 +126,7 @@ A cook row moves through statuses: `pending_parse` → `pending_weather` → `re
 - **R2:** raw uploaded files, content-addressed (dedupe + immutable, mirroring `pinImage.ts`). A lifecycle rule can expire raw files once parsed if desired.
 - **Location:** ZIP is stored for the weather join. (A future tightening could snap to grid cell before storage; not v1.)
 - **Optional email** (owner decision): opt-in only, for contributor attribution / follow-up. Stored only when provided.
-- **`privacy-policy.html` MUST be updated in the sub-project A change** (project rule: any new first-party storage updates the privacy policy in the same change). It discloses: cook-data + ZIP storage and purpose; the optional-email opt-in and its purpose; and a deletion path via `contact@pitmaster.tools`. Consent timestamp is recorded per row.
+- **`_src/legal/privacy-policy.html` MUST be updated in the sub-project A change** (project rule: any new first-party storage updates the privacy policy in the same change). It discloses: cook-data + ZIP storage and purpose; the optional-email opt-in and its purpose; and a deletion path via `contact@pitmaster.tools`. Consent timestamp is recorded per row.
 
 ---
 
