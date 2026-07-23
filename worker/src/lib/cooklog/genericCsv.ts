@@ -28,10 +28,20 @@ interface TempCol {
  * column; else combines a separate `date` + `time` pair (so `Date,Time,Temp`
  * logs don't collapse to date-only); else a lone `time`/`date` column.
  */
+/** Prefer an exact header name (case-insensitive) over a fuzzy "contains" match,
+ *  so e.g. an exact `Time` column wins over `Time Zone` / `Start Time`. */
+function findTimeCol(headers: string[], exactNames: string[], fuzzy: RegExp): number {
+  for (const name of exactNames) {
+    const i = headers.findIndex((h) => h.trim().toLowerCase() === name);
+    if (i !== -1) return i;
+  }
+  return headers.findIndex((h) => fuzzy.test(h));
+}
+
 function resolveTime(headers: string[]): { idxs: number[]; cols: Set<number> } | null {
-  const combined = headers.findIndex((h) => /\b(timestamp|datetime)\b/i.test(h));
-  const dateIdx = headers.findIndex((h) => /\bdate\b/i.test(h));
-  const timeIdx = headers.findIndex((h) => /\btime\b/i.test(h));
+  const combined = findTimeCol(headers, ['timestamp', 'datetime'], /\b(timestamp|datetime)\b/i);
+  const dateIdx = findTimeCol(headers, ['date'], /\bdate\b/i);
+  const timeIdx = findTimeCol(headers, ['time'], /\btime\b/i);
   const cols = new Set<number>();
   [combined, dateIdx, timeIdx].forEach((i) => {
     if (i !== -1) cols.add(i);

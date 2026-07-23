@@ -382,6 +382,31 @@ describe('generic-csv treats a "Celsius" unit-word header as a temp column (r12 
   });
 });
 
+// Codex review round 14.
+
+describe('hyphenated -C/-F is an unambiguous unit (r14 #1)', () => {
+  it('generic converts a degree-less "Temp -C" column', () => {
+    const log = genericCsvAdapter.parse('Time,Temp -C\n2026-07-01T10:00:00Z,65');
+    expect(log.channels[0]?.samples).toEqual([{ tMin: 0, tempF: 149 }]);
+  });
+
+  it('a mixed file deferred from thermoworks still converts "Temp -C" in generic', () => {
+    const log = normalizeLog('Time,Temp -C,Pit\n2026-07-01T10:00:00Z,65,225');
+    expect(log?.format).toBe('generic-csv');
+    const tempCh = log?.channels.find((c) => c.label === 'Temp -C');
+    expect(tempCh?.samples).toEqual([{ tMin: 0, tempF: 149 }]);
+  });
+});
+
+describe('generic-csv prefers an exact Time header (r14 #2)', () => {
+  it('an exact "Time" column wins over a "Time Zone" column', () => {
+    const log = genericCsvAdapter.parse(
+      'Time Zone,Time,Temp\nAmerica/New_York,2026-07-01T10:00:00Z,150',
+    );
+    expect(log.channels.find((c) => c.label === 'Temp')?.samples).toEqual([{ tMin: 0, tempF: 150 }]);
+  });
+});
+
 describe('combustion tolerates reordered columns (r9 #2)', () => {
   it('finds the header by required names in any order', () => {
     const file = [

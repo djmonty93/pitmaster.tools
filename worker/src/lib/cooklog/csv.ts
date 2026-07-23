@@ -102,12 +102,14 @@ export const cToF = (c: number): number => (c * 9) / 5 + 32;
 // names like "Probe C"; such ambiguous headers default to °F, and true
 // disambiguation is a user-declared unit in sub-project A. Used to keep a
 // unit-declaring file out of the FireBoard adapter (bare probe-name columns).
+// The hyphenated `-C`/`-F` form (e.g. ThermoWorks' `Temp -C`) is unambiguous —
+// the hyphen separates a unit, unlike a bare space which collides with names.
 export const UNIT_MARKER_RE =
-  /(°\s*[fc]\b|\b(?:celsius|fahrenheit)\b|[([]\s*°?\s*[fc]\s*[)\]])/i;
+  /(°\s*[fc]\b|\b(?:celsius|fahrenheit)\b|[([]\s*°?\s*[fc]\s*[)\]]|-\s*°?\s*[fc]\s*$)/i;
 
 /** True when a header UNAMBIGUOUSLY declares Celsius (subset of UNIT_MARKER_RE). */
 export function headerIsCelsius(header: string): boolean {
-  return /(°\s*c\b|\bcelsius\b|[([]\s*°?\s*c\s*[)\]])/i.test(header);
+  return /(°\s*c\b|\bcelsius\b|[([]\s*°?\s*c\s*[)\]]|-\s*°?\s*c\s*$)/i.test(header);
 }
 
 /**
