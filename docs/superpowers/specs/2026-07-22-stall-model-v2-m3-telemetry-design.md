@@ -44,7 +44,7 @@ Every sub-project reads or writes this shape. It is the load-bearing contract be
 | `fatCapIn` | number? | |
 | `pieces` | number? | Default 1. |
 | `zip` | string | Coarse location for the weather join (§7 privacy). |
-| `cookStartedAt` | integer | Epoch seconds anchoring the cook — the absolute reference the weather join needs (§5), since B's `ParsedLog` carries only relative `tMin`. A reads it from the raw export's first absolute timestamp for wall-clock formats (FireBoard/ThermoWorks/generic) or the `Created:` line (Combustion). **Manual** submissions capture the cook's date/time in the form — a user submits days after cooking, so submission time would yield the wrong historical-weather window. |
+| `cookStartedAt` | integer | Epoch seconds anchoring the cook — the absolute reference the weather join needs (§5), since B's `ParsedLog` carries only relative `tMin`. For uploads A reads it from `ParsedLog.startedAt` (the adapter decodes the raw export's first absolute timestamp / `Created:` line — §4). **Manual** submissions capture the cook's date/time in the form — a user submits days after cooking, so submission time would yield the wrong historical-weather window. |
 | `durationMin` | number? | Total cook length in minutes. Required for **manual** submissions (which have no series to derive `max(tMin)` from, §5); for file uploads it's derived from the series. |
 | `emailOptional` | string? | Opt-in only (§7). |
 | `consentAt` | integer | Epoch seconds; required. |
@@ -56,6 +56,11 @@ Every sub-project reads or writes this shape. It is the load-bearing contract be
 ParsedLog {
   format: string;                 // adapter id that parsed it
   channels: ParsedChannel[];
+  startedAt?: number;             // absolute epoch (s) of the first sample, when the
+                                  // format carries wall-clock time (FireBoard/ThermoWorks/
+                                  // generic) or a Created line (Combustion); the adapter
+                                  // owns this decode (§4). A forward extension to B, added
+                                  // when C is built; the source for cookStartedAt on upload.
 }
 ParsedChannel {
   id: string;                     // stable channel id (port number or column index)
@@ -74,7 +79,7 @@ ParsedChannel {
 
 **Weather** (attached by C, delayed): `ambientF`, `dewPointF`, `altitudeM`, `era5FetchedAt`.
 
-A cook row moves through statuses: `pending_parse` → `pending_weather` → `ready` (see §3, §5).
+A cook row moves through statuses: `pending_parse` → `pending_weather` → `ready` (see §3, §5); a file that no adapter can parse goes to `parse_error` for later manual review instead.
 
 ---
 
@@ -83,7 +88,7 @@ A cook row moves through statuses: `pending_parse` → `pending_weather` → `re
 - **Page** `submit-cook.html`: an indexable tool page carrying the full `<head>` requirements (project `CLAUDE.md`). Contains an upload control for a probe export file **and** a manual-entry fieldset (upload preferred, manual fallback), the §2 metadata fields, one **required** consent checkbox, and an **optional** email field.
 - **Route** `POST /api/cook-log`, modeled on `worker/src/handlers/pinImage.ts`: same-site `Origin` allowlist, exact content-type check, a size cap (cook logs are small — target ≤1 MB), a `WEATHER_KV` per-IP soft rate-limit, and a Cloudflare WAF rate-limit rule as the authoritative control (operator step, as with `/api/pin-image`).
 - **Probe mapping step:** when the parsed log has multiple `role: 'unknown'` channels (FireBoard / ThermoWorks / multi-probe generic CSV — see §2), A must show the parsed channel labels and let the user confirm which is the food (core) probe and, optionally, which is the pit. The label heuristic pre-selects a default so the common case is one click. Fixed-role formats (Combustion) skip this step. The resulting `probeMapping` is stored on the row.
-- **Storage:** raw uploaded file → **R2** (content-addressed, mirroring the pin-image dedupe pattern); canonical metadata row → **D1** `cook_logs` (§7), created with status `pending_parse`. On submit, the worker synchronously invokes B's parser. On success it stores the parsed channels; the observations are then derived — directly for fixed-role formats, or **after** the probe-mapping step above for user-labeled ones — and the row advances to `pending_weather`. A parse failure flags the row for later manual review.
+- **Storage:** raw uploaded file → **R2** (content-addressed, mirroring the pin-image dedupe pattern); canonical metadata row → **D1** `cook_logs` (§7), created with status `pending_parse`. On submit, the worker synchronously invokes B's parser. On success it stores the parsed channels; the observations are then derived — directly for fixed-role formats, or **after** the probe-mapping step above for user-labeled ones — and the row advances to `pending_weather`. A parse failure moves the row to `parse_error` (§2) for later manual review.
 - **Shippable alone:** begins accumulating the data moat with no downstream code present. Manual-entry submissions skip `pending_parse` and land at `pending_weather` directly: their derived observations (`plateauF_observed`, `dwellHr_observed`), `durationMin`, and `cookStartedAt` come straight from the form fields — the coarse points a user reads off their own cook (stall temperature, stall duration, total cook time, and the date they cooked) — which a file upload instead derives via B.
 
 ## 4. Sub-project B — Log normalizer
@@ -97,7 +102,7 @@ A cook row moves through statuses: `pending_parse` → `pending_weather` → `re
     parse(rawText: string): ParsedLog;    // channel-oriented (§2), samples normalized to tMin + °F
   }
   ```
-  `detect` takes the raw file text because formats differ in **preamble** (Combustion has a 9-line banner before the header; FireBoard/ThermoWorks start at the header), **delimiter** (Combustion/FireBoard comma, Inkbird tab), and **header shape** — a pre-parsed `headers[]` can't sniff those. Each adapter owns its own preamble-skip, delimiter, decimal-separator, **timestamp decoding** (elapsed-seconds vs `MM/DD/YY HH:MM:SS` local-clock — see Appendix A), and **unit → °F** conversion, so `ParsedLog.channels[].samples` is always `{tMin, tempF}`. When a format carries **no unit in the file** (FireBoard), the adapter takes values as °F — a documented **known limitation**: a FireBoard export recorded in °C is mis-read, and honoring it needs a user-declared unit, which is deferred to a future A-level enhancement (the file gives the adapter nothing to detect). Adapters are tried in order; first `detect` wins; no match → parse error surfaced to A.
+  `detect` takes the raw file text because formats differ in **preamble** (Combustion has a 9-line metadata banner + a blank line before the header; FireBoard/ThermoWorks start at the header), **delimiter** (Combustion/FireBoard comma, Inkbird tab), and **header shape** — a pre-parsed `headers[]` can't sniff those. Each adapter owns its own preamble-skip, delimiter, decimal-separator, **timestamp decoding** (elapsed-seconds vs `MM/DD/YY HH:MM:SS` local-clock — see Appendix A), and **unit → °F** conversion, so `ParsedLog.channels[].samples` is always `{tMin, tempF}`. When a format carries **no unit in the file** (FireBoard), the adapter takes values as °F — a documented **known limitation**: a FireBoard export recorded in °C is mis-read, and honoring it needs a user-declared unit, which is deferred to a future A-level enhancement (the file gives the adapter nothing to detect). Adapters are tried in order; first `detect` wins; no match → parse error surfaced to A.
 - **v1 adapter list** (revised — the original five did not survive format research; see Appendix A for evidence and the two removals):
   - **`combustion`** — CONFIRMED from two real exports; fixed-role, °C, elapsed-seconds, 10-line preamble (9 metadata + 1 blank).
   - **`fireboard`** — CONFIRMED from the official sample CSV; user-labeled channels, local clock, unit not in file.
