@@ -12,7 +12,10 @@
 import { cToF, headerIsCelsius, parseNum, splitCsvRows } from './csv.js';
 import type { ChannelSample, LogAdapter, ParsedChannel, ParsedLog } from './types.js';
 
-const TEMP_RE = /(temp|°\s*[fc]|probe|internal|core|\bfood\b|\bmeat\b)/i;
+// A column is a temperature channel if its header looks thermometric OR uses
+// the documented probe-mapping vocabulary (spec §2) — pit/food role words and
+// common cuts, which BBQ loggers use as probe names.
+const TEMP_RE = /(temp|°\s*[fc]|probe|internal|core|\bfood\b|\bmeat\b|\bpit\b|ambient|grill|smoker|chamber|cooker|brisket|\bpork\b|chicken|\bbeef\b|turkey|\brib\b|\bbutt\b|breast|\bfish\b|lamb)/i;
 
 interface TempCol {
   idx: number;

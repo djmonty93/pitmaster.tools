@@ -12,8 +12,10 @@ import { cToF, parseNum, splitCsvRows, utcFromParts } from './csv.js';
 import type { ChannelSample, LogAdapter, ParsedChannel, ParsedLog } from './types.js';
 
 const TW_TIME_RE = /^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/;
-/** Temp headers end in a `-°F` / `-°C` unit suffix; captures F or C. */
-const TW_UNIT_RE = /-\s*°?\s*([FC])\s*$/i;
+/** Confirmed ThermoWorks BBQ-app temp columns only: `Probe <n> -°F/°C` (multi)
+ *  or `Temp -°F/°C` (single-probe). Group 1 = label, group 2 = unit. Anything
+ *  else falls through to generic-csv rather than being claimed here. */
+const TW_COL_RE = /^(Probe\s*\d+|Temp)\s*-\s*°?\s*([FC])\s*$/i;
 
 /** Parse `M/D/YY H:MM[:SS]` to epoch ms; null if malformed/out-of-range. */
 function twTime(s: string): number | null {
@@ -35,10 +37,10 @@ function planColumns(headers: string[]): { timeIdx: number; temps: TempCol[] } {
   const temps: TempCol[] = [];
   headers.forEach((h, idx) => {
     if (idx === timeIdx) return;
-    const m = h.match(TW_UNIT_RE);
+    const m = h.match(TW_COL_RE);
     if (!m) return;
-    const unit = (m[1] ?? 'F').toUpperCase() === 'C' ? 'C' : 'F';
-    const label = h.replace(TW_UNIT_RE, '').trim();
+    const unit = (m[2] ?? 'F').toUpperCase() === 'C' ? 'C' : 'F';
+    const label = (m[1] ?? h).trim();
     temps.push({ idx, unit, channel: { id: String(idx), label, role: 'unknown', samples: [] as ChannelSample[] } });
   });
   return { timeIdx, temps };

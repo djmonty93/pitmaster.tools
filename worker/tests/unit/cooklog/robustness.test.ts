@@ -237,3 +237,23 @@ describe('fireboard defers trailing-unit headers; generic requires all time cell
     expect(log.channels[0]?.samples).toEqual([{ tMin: 0, tempF: 150 }, { tMin: 2, tempF: 152 }]);
   });
 });
+
+// Codex review round 8.
+
+describe('thermoworks restricts to confirmed column shapes (r8 #2)', () => {
+  it('still claims Probe<n>/Temp columns', () => {
+    expect(thermoworksAdapter.detect('Probe1 -°F,Time\n150,10/12/16 15:12')).toBe(true);
+  });
+  it('does not claim an arbitrary -°C column; it falls through to generic-csv', () => {
+    expect(thermoworksAdapter.detect('Chamber -°C,Time\n107,10/12/16 15:12')).toBe(false);
+    expect(normalizeLog('Chamber -°C,Time\n107,10/12/16 15:12')?.format).toBe('generic-csv');
+  });
+});
+
+describe('generic-csv recognizes the mapping vocabulary (r8 #3)', () => {
+  it('treats Pit / Brisket probe columns as temperature channels', () => {
+    const log = genericCsvAdapter.parse('Time,Pit,Brisket\n2026-07-01T10:00:00Z,225,150');
+    expect(log.channels.map((c) => c.label)).toEqual(['Pit', 'Brisket']);
+    expect(log.channels[1]?.samples).toEqual([{ tMin: 0, tempF: 150 }]);
+  });
+});
