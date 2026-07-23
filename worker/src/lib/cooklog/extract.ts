@@ -46,11 +46,14 @@ export function extractStall(samples: CookSample[]): StallObservation | null {
     if (prev === undefined || cur === undefined) continue;
 
     const dtHr = (cur.tMin - prev.tMin) / 60;
-    const slope = dtHr > 0 ? (cur.coreF - prev.coreF) / dtHr : Infinity;
+    // A duplicate/non-increasing timestamp carries no interval — skip it without
+    // resetting the active stall run (else dtHr===0 would fragment the dwell).
+    if (dtHr <= 0) continue;
+    const slope = (cur.coreF - prev.coreF) / dtHr;
 
     // Stalled = a small-magnitude slope (excludes steep rises AND steep drops
     // like a pulled probe) across a plausible sampling interval (no huge gaps).
-    if (dtHr > 0 && dtHr <= MAX_GAP_HR && Math.abs(slope) < STALL_SLOPE_F_PER_HR) {
+    if (dtHr <= MAX_GAP_HR && Math.abs(slope) < STALL_SLOPE_F_PER_HR) {
       if (curStart === -1) curStart = i - 1;
       const start = samples[curStart];
       if (start === undefined) continue;

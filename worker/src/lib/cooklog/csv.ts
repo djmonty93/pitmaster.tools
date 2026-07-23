@@ -78,6 +78,9 @@ export function splitCsvRows(text: string): string[][] {
       cur += ch;
     }
   }
+  // An unterminated quoted field at EOF means the file is malformed — reject it
+  // rather than silently returning a partial parse of the swallowed remainder.
+  if (inQuotes) return [];
   endRow();
   return rows;
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseCsvLine, utcFromParts } from '../../../src/lib/cooklog/csv.js';
+import { parseCsvLine, splitCsvRows, utcFromParts } from '../../../src/lib/cooklog/csv.js';
 import { combustionAdapter } from '../../../src/lib/cooklog/combustion.js';
 import { fireboardAdapter } from '../../../src/lib/cooklog/fireboard.js';
 import { genericCsvAdapter } from '../../../src/lib/cooklog/genericCsv.js';
@@ -304,6 +304,38 @@ describe('reducer validates explicit mappings + duplicate-tMin pit (r10)', () =>
       { tMin: 0, coreF: 150, pitF: 220 },
       { tMin: 0, coreF: 151, pitF: 230 },
     ]);
+  });
+});
+
+// Codex review round 11.
+
+describe('generic-csv temp-column matching has token boundaries (r11 #1)', () => {
+  it('does not treat "Attempt" or "Score" as temperature columns', () => {
+    expect(genericCsvAdapter.detect('Time,Attempt,Score\n2026-07-01T10:00:00Z,1,2')).toBe(false);
+  });
+  it('still matches "Temp1"', () => {
+    const log = genericCsvAdapter.parse('Time,Temp1\n2026-07-01T10:00:00Z,150');
+    expect(log.channels.map((c) => c.label)).toEqual(['Temp1']);
+  });
+});
+
+describe('csv rejects an unterminated quoted field (r11 #2)', () => {
+  it('returns [] rather than swallowing the remainder', () => {
+    expect(splitCsvRows('a,b\n"unterminated,c\nd,e')).toEqual([]);
+  });
+});
+
+describe('extractStall survives duplicate timestamps (r11 #3)', () => {
+  it('does not fragment the dwell when a tMin repeats', () => {
+    const curve = [
+      { tMin: 0, coreF: 70 }, { tMin: 30, coreF: 110 },
+      { tMin: 60, coreF: 150 }, { tMin: 60, coreF: 150 }, // duplicate
+      { tMin: 90, coreF: 151 }, { tMin: 120, coreF: 152 },
+      { tMin: 150, coreF: 153 }, { tMin: 180, coreF: 154 }, { tMin: 210, coreF: 190 },
+    ];
+    const r = extractStall(curve);
+    expect(r?.dwellHr).toBe(2);
+    expect(r?.plateauF).toBeCloseTo(152, 5);
   });
 });
 
