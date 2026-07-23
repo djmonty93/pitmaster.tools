@@ -2,7 +2,7 @@
 
 **Status:** Design approved (owner-authored via brainstorming, 2026-07-22), then revised the same day after parallel probe-export format research (Appendix A) — the research changed the canonical interface (§2, channel model) and the v1 adapter list (§4, five brands → three groundable). Roadmap spec for four independently-planned sub-projects. **Build deferred** — this document sets the interfaces; each sub-project gets its own spec → plan → PR later. (Sub-project B's core — generic-CSV adapter + `extractStall` — is already implemented on branch `feat/m3-b-log-normalizer`.)
 
-**Parent:** `docs/superpowers/specs/2026-07-19-stall-model-v2-design.md` §12 (Calibration plan, Tier 3) and §0.1 line 25 ("Milestone 3 — calibration & telemetry. Mostly out of code scope … Deferred; tracked separately"). Issue #141 code work is complete (M1 + M2 Stage A/B + #144 + index parity); this is the separately-tracked remainder.
+**Parent:** `docs/superpowers/specs/2026-07-19-stall-model-v2-design.md` §12 (Calibration plan, Tier 3) and its §0 Milestones ("Milestone 3 — calibration & telemetry. Mostly out of code scope … Deferred; tracked separately"). Issue #141 code work is complete (M1 + M2 Stage A/B + #144 + index parity); this is the separately-tracked remainder.
 
 ---
 
@@ -44,7 +44,7 @@ Every sub-project reads or writes this shape. It is the load-bearing contract be
 | `fatCapIn` | number? | |
 | `pieces` | number? | Default 1. |
 | `zip` | string | Coarse location for the weather join (§7 privacy). |
-| `cookStartedAt` | integer | Epoch seconds of the cook's first sample — the absolute anchor the weather join needs (§5), since the observed series carries only relative `tMin`. From the probe log where available, else the submission time. |
+| `cookStartedAt` | integer | Epoch seconds anchoring the cook — the absolute reference the weather join needs (§5), since B's `ParsedLog` carries only relative `tMin`. A reads it from the raw export's first absolute timestamp for wall-clock formats (FireBoard/ThermoWorks/generic) or the `Created:` line (Combustion); elapsed-only or manual submissions fall back to the submission time. |
 | `durationMin` | number? | Total cook length in minutes. Required for **manual** submissions (which have no series to derive `max(tMin)` from, §5); for file uploads it's derived from the series. |
 | `emailOptional` | string? | Opt-in only (§7). |
 | `consentAt` | integer | Epoch seconds; required. |
@@ -70,7 +70,7 @@ ParsedChannel {
 
 **Observed series** (reduced): `toCookSamples(parsedLog, probeMapping?) => Array<{ tMin, coreF, pitF? }>` picks the core channel (and optional pit) and yields the flat series the extractors consume.
 
-**Derived observations**: `plateauF_observed`, `dwellHr_observed`, `wrapAtMin?` — extracted by B from the reduced series for file uploads, or supplied directly from the form fields for manual submissions (§3).
+**Derived observations**: `plateauF_observed`, `dwellHr_observed`, and (uploads only) `wrapAtMin?` — extracted by B from the reduced series for file uploads; for manual submissions `plateauF_observed` and `dwellHr_observed` come directly from the form fields (§3), and `wrapAtMin` is simply absent.
 
 **Weather** (attached by C, delayed): `ambientF`, `dewPointF`, `altitudeM`, `era5FetchedAt`.
 
