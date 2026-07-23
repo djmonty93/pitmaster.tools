@@ -9,13 +9,8 @@
 // Surface is intentionally not emitted (unused by the physics; available in the
 // raw file if a future consumer needs it).
 
+import { cToF, parseNum, splitCsvRows } from './csv.js';
 import type { LogAdapter, ParsedChannel, ParsedLog } from './types.js';
-
-const cToF = (c: number): number => (c * 9) / 5 + 32;
-
-function splitLine(line: string): string[] {
-  return line.split(',').map((cell) => cell.trim());
-}
 
 export const combustionAdapter: LogAdapter = {
   name: 'combustion',
@@ -26,11 +21,11 @@ export const combustionAdapter: LogAdapter = {
 
   parse(rawText: string): ParsedLog {
     const empty: ParsedLog = { format: 'combustion', channels: [] };
-    const lines = rawText.split(/\r?\n/);
-    const headerIdx = lines.findIndex((l) => splitLine(l)[0] === 'Timestamp');
+    const rows = splitCsvRows(rawText);
+    const headerIdx = rows.findIndex((r) => (r[0] ?? '').trim() === 'Timestamp');
     if (headerIdx === -1) return empty;
 
-    const headers = splitLine(lines[headerIdx] ?? '');
+    const headers = (rows[headerIdx] ?? []).map((h) => h.trim());
     const tsIdx = headers.indexOf('Timestamp');
     const coreIdx = headers.indexOf('VirtualCoreTemperature');
     const ambIdx = headers.indexOf('VirtualAmbientTemperature');
@@ -43,16 +38,14 @@ export const combustionAdapter: LogAdapter = {
       id: 'VirtualAmbientTemperature', label: 'VirtualAmbientTemperature', role: 'ambient', samples: [],
     };
 
-    for (const line of lines.slice(headerIdx + 1)) {
-      if (line.trim() === '') continue;
-      const cells = splitLine(line);
-      const tsCell = cells[tsIdx];
-      const coreCell = cells[coreIdx];
-      const ambCell = cells[ambIdx];
-      if (tsCell === undefined || coreCell === undefined || ambCell === undefined) continue;
-      const tMin = parseFloat(tsCell) / 60;
-      core.samples.push({ tMin, tempF: cToF(parseFloat(coreCell)) });
-      ambient.samples.push({ tMin, tempF: cToF(parseFloat(ambCell)) });
+    for (const cells of rows.slice(headerIdx + 1)) {
+      const tSec = parseNum(cells[tsIdx]);
+      if (tSec === null) continue;
+      const tMin = tSec / 60;
+      const c = parseNum(cells[coreIdx]);
+      if (c !== null) core.samples.push({ tMin, tempF: cToF(c) });
+      const a = parseNum(cells[ambIdx]);
+      if (a !== null) ambient.samples.push({ tMin, tempF: cToF(a) });
     }
 
     return { format: 'combustion', channels: [core, ambient] };

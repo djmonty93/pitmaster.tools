@@ -13,6 +13,14 @@ import type { CookSample } from './types.js';
 const STALL_SLOPE_F_PER_HR = 5;
 /** Ignore flat spans shorter than this (hr). */
 const MIN_DWELL_HR = 0.5;
+/** Break a stall run across a sampling gap larger than this (hr) — a gap that
+ *  big is missing data, not a continuous plateau. */
+const MAX_GAP_HR = 1;
+
+// NOTE (spec §9): a long, genuinely-flat LOW span (e.g. a post-cook hold well
+// below the stall band) could still be selected as the "longest" low-slope
+// span. A plausible-stall temperature gate is deferred to sub-project D, where
+// the plateau band is calibrated against real cooks.
 
 export interface StallObservation {
   /** Mean core temperature over the stall span, °F. */
@@ -35,7 +43,9 @@ export function extractStall(samples: CookSample[]): StallObservation | null {
     const dtHr = (cur.tMin - prev.tMin) / 60;
     const slope = dtHr > 0 ? (cur.coreF - prev.coreF) / dtHr : Infinity;
 
-    if (slope < STALL_SLOPE_F_PER_HR) {
+    // Stalled = a small-magnitude slope (excludes steep rises AND steep drops
+    // like a pulled probe) across a plausible sampling interval (no huge gaps).
+    if (dtHr > 0 && dtHr <= MAX_GAP_HR && Math.abs(slope) < STALL_SLOPE_F_PER_HR) {
       if (curStart === -1) curStart = i - 1;
       const start = samples[curStart];
       if (start === undefined) continue;

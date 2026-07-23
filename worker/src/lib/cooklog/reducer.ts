@@ -31,7 +31,7 @@ function pickPit(log: ParsedLog, mapping?: ProbeMapping): ParsedChannel | undefi
 
 export function toCookSamples(log: ParsedLog, mapping?: ProbeMapping): CookSample[] {
   const core = pickCore(log, mapping);
-  if (!core) return [];
+  if (!core || core.samples.length === 0) return [];
 
   const pit = pickPit(log, mapping);
   const pitByT = new Map<number, number>();
@@ -39,10 +39,15 @@ export function toCookSamples(log: ParsedLog, mapping?: ProbeMapping): CookSampl
     for (const s of pit.samples) pitByT.set(s.tMin, s.tempF);
   }
 
+  // Re-baseline the output to the core's first reading so tMin starts at 0
+  // (CookSample contract) even when the core probe started reading late. Pit
+  // is looked up by the ORIGINAL tMin, then the offset is applied to the output.
+  const offset = core.samples[0]?.tMin ?? 0;
   return core.samples.map((s) => {
     const pitF = pitByT.get(s.tMin);
+    const tMin = s.tMin - offset;
     return pitF === undefined
-      ? { tMin: s.tMin, coreF: s.tempF }
-      : { tMin: s.tMin, coreF: s.tempF, pitF };
+      ? { tMin, coreF: s.tempF }
+      : { tMin, coreF: s.tempF, pitF };
   });
 }

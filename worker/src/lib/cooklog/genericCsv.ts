@@ -6,70 +6,65 @@
 // fireboard, thermoworks) run first; this catches the rest. Every temp column
 // becomes an `unknown`-role channel — generic CSV carries no food/pit hint, so
 // a single-channel file reduces cleanly and a multi-channel one needs a user
-// probe mapping. Values are assumed to be °F (generic CSV has no unit info).
+// probe mapping. A column whose header marks °C is converted to °F; otherwise
+// values are taken as °F.
 
+import { cToF, parseNum, splitCsvRows } from './csv.js';
 import type { ChannelSample, LogAdapter, ParsedChannel, ParsedLog } from './types.js';
 
 const TIME_RE = /\b(time|timestamp|date)\b/i;
 const TEMP_RE = /(temp|°\s*[fc]|probe|internal|core|\bfood\b|\bmeat\b)/i;
+const C_RE = /(°\s*c|\bcelsius\b)/i;
 
-function splitRows(text: string): string[][] {
-  return text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0)
-    .map((line) => line.split(',').map((cell) => cell.trim()));
+interface TempCol {
+  idx: number;
+  channel: ParsedChannel;
+  unit: 'F' | 'C';
 }
 
-function findColumns(headers: string[]): { timeIdx: number; tempIdxs: number[] } {
+function planColumns(headers: string[]): { timeIdx: number; temps: TempCol[] } {
   const timeIdx = headers.findIndex((h) => TIME_RE.test(h));
-  const tempIdxs: number[] = [];
-  headers.forEach((h, i) => {
-    if (i !== timeIdx && TEMP_RE.test(h)) tempIdxs.push(i);
+  const temps: TempCol[] = [];
+  headers.forEach((h, idx) => {
+    if (idx === timeIdx || !TEMP_RE.test(h)) return;
+    const unit = C_RE.test(h) ? 'C' : 'F';
+    temps.push({ idx, unit, channel: { id: String(idx), label: h, role: 'unknown', samples: [] as ChannelSample[] } });
   });
-  return { timeIdx, tempIdxs };
+  return { timeIdx, temps };
 }
 
 export const genericCsvAdapter: LogAdapter = {
   name: 'generic-csv',
 
   detect(rawText: string): boolean {
-    const rows = splitRows(rawText);
-    const headers = rows[0];
-    if (!headers) return false;
-    const { timeIdx, tempIdxs } = findColumns(headers);
-    return timeIdx !== -1 && tempIdxs.length > 0;
+    const raw = splitCsvRows(rawText)[0];
+    if (!raw) return false;
+    const { timeIdx, temps } = planColumns(raw.map((h) => h.trim()));
+    return timeIdx !== -1 && temps.length > 0;
   },
 
   parse(rawText: string): ParsedLog {
     const empty: ParsedLog = { format: 'generic-csv', channels: [] };
-    const rows = splitRows(rawText);
-    const headers = rows[0];
-    if (!headers) return empty;
-    const { timeIdx, tempIdxs } = findColumns(headers);
-    if (timeIdx === -1 || tempIdxs.length === 0) return empty;
-
-    const channels: ParsedChannel[] = tempIdxs.map((idx) => ({
-      id: String(idx),
-      label: headers[idx] ?? String(idx),
-      role: 'unknown',
-      samples: [] as ChannelSample[],
-    }));
+    const rows = splitCsvRows(rawText);
+    const raw = rows[0];
+    if (!raw) return empty;
+    const { timeIdx, temps } = planColumns(raw.map((h) => h.trim()));
+    if (timeIdx === -1 || temps.length === 0) return empty;
 
     let t0: number | null = null;
     for (const cells of rows.slice(1)) {
       const timeCell = cells[timeIdx];
       if (timeCell === undefined) continue;
-      const t = new Date(timeCell).getTime();
+      const t = new Date(timeCell.trim()).getTime();
+      if (!Number.isFinite(t)) continue;
       if (t0 === null) t0 = t;
-      const tMin = Math.round((t - t0) / 60000);
-      tempIdxs.forEach((idx, k) => {
-        const cell = cells[idx];
-        const channel = channels[k];
-        if (cell === undefined || cell === '' || channel === undefined) return;
-        channel.samples.push({ tMin, tempF: parseFloat(cell) });
-      });
+      const tMin = (t - t0) / 60000;
+      for (const tc of temps) {
+        const v = parseNum(cells[tc.idx]);
+        if (v === null) continue;
+        tc.channel.samples.push({ tMin, tempF: tc.unit === 'C' ? cToF(v) : v });
+      }
     }
-    return { format: 'generic-csv', channels };
+    return { format: 'generic-csv', channels: temps.map((t) => t.channel) };
   },
 };

@@ -8,27 +8,20 @@
 // first in single-probe) — so locate every column by name/shape, not index.
 // Probes are by physical port, so roles are `unknown` (needs a probe mapping).
 
+import { cToF, parseNum, splitCsvRows, utcFromParts } from './csv.js';
 import type { ChannelSample, LogAdapter, ParsedChannel, ParsedLog } from './types.js';
 
 const TW_TIME_RE = /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/;
 /** Temp headers end in a `-°F` / `-°C` unit suffix; captures F or C. */
 const TW_UNIT_RE = /-\s*°?\s*([FC])\s*$/i;
 
-/** Parse `M/D/YY H:MM[:SS]` to epoch ms (UTC basis — only deltas are used). */
+/** Parse `M/D/YY H:MM[:SS]` to epoch ms; null if malformed/out-of-range. */
 function twTime(s: string): number | null {
-  const m = s.match(TW_TIME_RE);
+  const m = s.trim().match(TW_TIME_RE);
   if (!m) return null;
   let yy = Number(m[3]);
   if (yy < 100) yy += 2000;
-  return Date.UTC(yy, Number(m[1]) - 1, Number(m[2]), Number(m[4]), Number(m[5]), m[6] ? Number(m[6]) : 0);
-}
-
-function splitRows(text: string): string[][] {
-  return text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0)
-    .map((line) => line.split(',').map((cell) => cell.trim()));
+  return utcFromParts(yy, Number(m[1]), Number(m[2]), Number(m[4]), Number(m[5]), m[6] ? Number(m[6]) : 0);
 }
 
 interface TempCol {
@@ -55,18 +48,22 @@ export const thermoworksAdapter: LogAdapter = {
   name: 'thermoworks',
 
   detect(rawText: string): boolean {
-    const headers = splitRows(rawText)[0];
-    if (!headers) return false;
-    const { timeIdx, temps } = planColumns(headers);
-    return timeIdx !== -1 && temps.length > 0;
+    const rows = splitCsvRows(rawText);
+    const raw = rows[0];
+    if (!raw) return false;
+    const { timeIdx, temps } = planColumns(raw.map((h) => h.trim()));
+    if (timeIdx === -1 || temps.length === 0) return false;
+    // Require an actual ThermoWorks-shaped timestamp so a unit-suffixed file
+    // with ISO/epoch times isn't claimed and then parsed into empty channels.
+    return rows.slice(1).some((r) => twTime(r[timeIdx] ?? '') !== null);
   },
 
   parse(rawText: string): ParsedLog {
     const empty: ParsedLog = { format: 'thermoworks', channels: [] };
-    const rows = splitRows(rawText);
-    const headers = rows[0];
-    if (!headers) return empty;
-    const { timeIdx, temps } = planColumns(headers);
+    const rows = splitCsvRows(rawText);
+    const raw = rows[0];
+    if (!raw) return empty;
+    const { timeIdx, temps } = planColumns(raw.map((h) => h.trim()));
     if (timeIdx === -1 || temps.length === 0) return empty;
 
     let t0: number | null = null;
@@ -74,12 +71,11 @@ export const thermoworksAdapter: LogAdapter = {
       const t = twTime(cells[timeIdx] ?? '');
       if (t === null) continue;
       if (t0 === null) t0 = t;
-      const tMin = Math.round((t - t0) / 60000);
+      const tMin = (t - t0) / 60000;
       for (const tc of temps) {
-        const cell = cells[tc.idx];
-        if (cell === undefined || cell === '') continue;
-        const val = parseFloat(cell);
-        tc.channel.samples.push({ tMin, tempF: tc.unit === 'C' ? (val * 9) / 5 + 32 : val });
+        const v = parseNum(cells[tc.idx]);
+        if (v === null) continue;
+        tc.channel.samples.push({ tMin, tempF: tc.unit === 'C' ? cToF(v) : v });
       }
     }
     return { format: 'thermoworks', channels: temps.map((t) => t.channel) };

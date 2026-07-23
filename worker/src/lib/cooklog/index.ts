@@ -17,11 +17,14 @@ export { toCookSamples } from './reducer.js';
 export { extractStall } from './extract.js';
 export type { StallObservation } from './extract.js';
 
-/** Registered adapters, in detect() precedence order (most specific first). */
+/** Registered adapters, in detect() precedence order (most specific first).
+ *  ThermoWorks precedes FireBoard: a Time-first ThermoWorks file whose stamps
+ *  include seconds would also satisfy FireBoard's signature, but only
+ *  ThermoWorks reads the per-column °F/°C unit — so it must win. */
 export const ADAPTERS: readonly LogAdapter[] = [
   combustionAdapter,
-  fireboardAdapter,
   thermoworksAdapter,
+  fireboardAdapter,
   genericCsvAdapter,
 ];
 
