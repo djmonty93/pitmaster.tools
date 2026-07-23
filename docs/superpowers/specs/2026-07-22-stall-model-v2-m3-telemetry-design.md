@@ -66,7 +66,7 @@ ParsedChannel {
 ```
 
 - **Fixed-role formats** (Combustion): the adapter sets `role` directly from the virtual-temperature columns — no user input needed.
-- **User-labeled formats** (FireBoard, ThermoWorks, and any generic CSV with multiple probes): every channel is `role: 'unknown'`. A label heuristic proposes a default (`pit`/`grill`/`ambient`/`smoker`/cooker-brand → ambient; `brisket`/`pork`/`meat`/`food`/`internal` → core), but the authoritative mapping is the user's `probeMapping` captured in A's UI (§3).
+- **User-labeled formats** (FireBoard, ThermoWorks, and any generic CSV): every channel is `role: 'unknown'`. A **single** unknown channel (e.g. a single-probe ThermoWorks BlueDOT export) is taken as the core with no mapping — `toCookSamples` uses the sole channel directly. Only when **two or more** unknown channels must be disambiguated is a mapping required: a label heuristic proposes a default (`pit`/`grill`/`ambient`/`smoker`/cooker-brand → ambient; `brisket`/`pork`/`meat`/`food`/`internal` → core), and the authoritative choice is the user's `probeMapping` captured in A's UI (§3).
 
 **Observed series** (reduced): `toCookSamples(parsedLog, probeMapping?) => Array<{ tMin, coreF, pitF? }>` picks the core channel (and optional pit) and yields the flat series the extractors consume.
 
