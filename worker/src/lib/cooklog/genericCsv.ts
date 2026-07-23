@@ -9,16 +9,10 @@
 // probe mapping. A column whose header marks °C is converted to °F; otherwise
 // values are taken as °F.
 
-import { cToF, parseNum, splitCsvRows } from './csv.js';
+import { cToF, headerIsCelsius, parseNum, splitCsvRows } from './csv.js';
 import type { ChannelSample, LogAdapter, ParsedChannel, ParsedLog } from './types.js';
 
 const TEMP_RE = /(temp|°\s*[fc]|probe|internal|core|\bfood\b|\bmeat\b)/i;
-// °C markers: a degree-C, the word celsius, or a bracketed unit token like
-// `(C)` / `[°C]`. Bare mid-label "C" is not matched — it would false-positive
-// on labels such as "Core".
-const C_RE = /(°\s*c\b|\bcelsius\b|[([]\s*°?\s*c\s*[)\]])/i;
-// A delimiter-separated trailing unit token, e.g. `Temp C`, `Temp - C`, `Temp[C]`.
-const C_SUFFIX_RE = /[\s\-_([]°?\s*c[)\]]?\s*$/i;
 
 interface TempCol {
   idx: number;
@@ -49,7 +43,7 @@ function resolveTime(headers: string[]): { idxs: number[]; cols: Set<number> } |
 }
 
 function unitOf(header: string): 'F' | 'C' {
-  return C_RE.test(header) || C_SUFFIX_RE.test(header) ? 'C' : 'F';
+  return headerIsCelsius(header) ? 'C' : 'F';
 }
 
 function planColumns(headers: string[]): { time: number[] | null; temps: TempCol[] } {
@@ -66,10 +60,14 @@ function planColumns(headers: string[]): { time: number[] | null; temps: TempCol
 /** Join the time source cells into one string and parse to epoch ms; null if
  *  empty, a bare number (ambiguous elapsed), or unparseable. */
 function rowTime(cells: string[], idxs: number[]): number | null {
-  const s = idxs.map((i) => (cells[i] ?? '').trim()).filter((x) => x !== '').join(' ');
+  const parts = idxs.map((i) => (cells[i] ?? '').trim());
+  // Every selected time cell must be present — a split Date+Time row missing its
+  // Time must NOT fall back to date-only (which would parse as midnight).
+  if (parts.some((p) => p === '')) return null;
+  const s = parts.join(' ');
   // A string that is itself a finite number (incl. `.5`, `+1`, `1e3`) is an
   // ambiguous elapsed value, not a calendar timestamp — reject before Date().
-  if (s === '' || Number.isFinite(Number(s))) return null;
+  if (Number.isFinite(Number(s))) return null;
   const ms = new Date(s).getTime();
   return Number.isFinite(ms) ? ms : null;
 }

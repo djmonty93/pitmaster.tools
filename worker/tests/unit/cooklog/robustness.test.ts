@@ -220,3 +220,20 @@ describe('timestamp regexes reject 3-digit years (r6 #3, #4)', () => {
     expect(thermoworksAdapter.detect('Probe1 -°F,Time\n150,10/12/999 15:12')).toBe(false);
   });
 });
+
+// Codex review round 7.
+
+describe('fireboard defers trailing-unit headers; generic requires all time cells (r7)', () => {
+  it('routes a "Temp C" trailing-unit file to generic-csv with °C conversion', () => {
+    const log = normalizeLog('Time,Temp C\n07/03/16 15:06:00,65');
+    expect(log?.format).toBe('generic-csv');
+    expect(log?.channels[0]?.samples).toEqual([{ tMin: 0, tempF: 149 }]);
+  });
+
+  it('drops a Date,Time row whose Time cell is blank instead of parsing midnight', () => {
+    const log = genericCsvAdapter.parse(
+      'Date,Time,Temp\n2026-07-01,10:00:00,150\n2026-07-01,,151\n2026-07-01,10:02:00,152',
+    );
+    expect(log.channels[0]?.samples).toEqual([{ tMin: 0, tempF: 150 }, { tMin: 2, tempF: 152 }]);
+  });
+});

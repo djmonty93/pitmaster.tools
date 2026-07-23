@@ -12,14 +12,13 @@
 // sub-project A (like the probe mapping), not here; the file itself gives the
 // adapter nothing to detect. See spec §9.
 
-import { parseNum, splitCsvRows, utcFromParts } from './csv.js';
+import { parseNum, splitCsvRows, UNIT_MARKER_RE, utcFromParts } from './csv.js';
 import type { ChannelSample, LogAdapter, ParsedChannel, ParsedLog } from './types.js';
 
 const FB_TIME_RE = /^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})$/;
-// An explicit unit token in a header (°F/°C, or bracketed (C)/(F)) means the
-// file is NOT FireBoard — real FireBoard columns are bare probe names. Defer
-// such files to ThermoWorks (which reads the suffix) or generic-csv.
-const UNIT_MARKER_RE = /(°\s*[fc]\b|[([]\s*°?\s*[fc]\s*[)\]]|\b(celsius|fahrenheit)\b)/i;
+// A header that declares an explicit unit (via UNIT_MARKER_RE) means the file
+// is NOT FireBoard — real FireBoard columns are bare probe names. Defer such
+// files to ThermoWorks (which reads the suffix) or generic-csv.
 
 /** Parse `MM/DD/YY HH:MM:SS` to epoch ms; null if malformed/out-of-range. */
 function fbTime(s: string): number | null {
