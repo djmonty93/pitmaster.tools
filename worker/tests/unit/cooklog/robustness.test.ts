@@ -334,6 +334,17 @@ describe('csv rejects an unterminated quoted field (r11 #2)', () => {
   });
 });
 
+describe('csv rejects malformed quoting (codex re-review)', () => {
+  it('rejects a quote after unquoted content and content after a closing quote', () => {
+    expect(splitCsvRows('1"5"0,x')).toEqual([]);
+    expect(splitCsvRows('"15"0,x')).toEqual([]);
+  });
+  it('still accepts well-formed quoted fields', () => {
+    expect(splitCsvRows('"a,b",c')).toEqual([['a,b', 'c']]);
+    expect(splitCsvRows('"a""b",c')).toEqual([['a"b', 'c']]);
+  });
+});
+
 describe('extractStall survives duplicate timestamps (r11 #3)', () => {
   it('does not fragment the dwell when a tMin repeats', () => {
     const curve = [

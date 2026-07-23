@@ -43,10 +43,15 @@ export function splitCsvRows(text: string): string[][] {
   let row: string[] = [];
   let cur = '';
   let inQuotes = false;
+  let quotedField = false; // the current field opened with a quote
+  let closedQuote = false; // that quoted field's closing quote was seen
+  let malformed = false;
 
   const endField = (): void => {
     row.push(cur);
     cur = '';
+    quotedField = false;
+    closedQuote = false;
   };
   const endRow = (): void => {
     endField();
@@ -54,8 +59,9 @@ export function splitCsvRows(text: string): string[][] {
     row = [];
   };
 
-  for (let i = 0; i < text.length; i++) {
+  for (let i = 0; i < text.length && !malformed; i++) {
     const ch = text[i];
+    if (ch === undefined) continue;
     if (inQuotes) {
       if (ch === '"') {
         if (text[i + 1] === '"') {
@@ -63,24 +69,34 @@ export function splitCsvRows(text: string): string[][] {
           i++;
         } else {
           inQuotes = false;
+          closedQuote = true;
         }
       } else {
         cur += ch;
       }
     } else if (ch === '"') {
-      inQuotes = true;
+      // A quote is only valid at the very start of a field.
+      if (cur === '' && !quotedField) {
+        inQuotes = true;
+        quotedField = true;
+      } else {
+        malformed = true;
+      }
     } else if (ch === ',') {
       endField();
     } else if (ch === '\n' || ch === '\r') {
       if (ch === '\r' && text[i + 1] === '\n') i++;
       endRow();
+    } else if (closedQuote && ch.trim() !== '') {
+      // Non-whitespace content after a closing quote is malformed.
+      malformed = true;
     } else {
       cur += ch;
     }
   }
-  // An unterminated quoted field at EOF means the file is malformed — reject it
-  // rather than silently returning a partial parse of the swallowed remainder.
-  if (inQuotes) return [];
+  // An unterminated quoted field at EOF, or any malformed quoting, means the
+  // file is corrupt — reject it rather than returning a silently-mangled parse.
+  if (inQuotes || malformed) return [];
   endRow();
   return rows;
 }
