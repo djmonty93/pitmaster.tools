@@ -432,6 +432,16 @@ describe('parseNum accepts only plain decimals (claude)', () => {
   });
 });
 
+describe('generic-csv recognizes unit-only headers (codex re-review)', () => {
+  it('treats "Sensor 1 (C)" and "Channel 1 -F" as temperature columns', () => {
+    const c = normalizeLog('Time,Sensor 1 (C)\n2026-07-01T10:00:00Z,65');
+    expect(c?.format).toBe('generic-csv');
+    expect(c?.channels[0]?.samples).toEqual([{ tMin: 0, tempF: 149 }]);
+    const f = normalizeLog('Time,Channel 1 -F\n2026-07-01T10:00:00Z,150');
+    expect(f?.channels[0]?.samples).toEqual([{ tMin: 0, tempF: 150 }]);
+  });
+});
+
 describe('combustion tolerates reordered columns (r9 #2)', () => {
   it('finds the header by required names in any order', () => {
     const file = [

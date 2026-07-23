@@ -9,7 +9,7 @@
 // probe mapping. A column whose header marks °C is converted to °F; otherwise
 // values are taken as °F.
 
-import { cToF, headerIsCelsius, parseNum, splitCsvRows } from './csv.js';
+import { cToF, headerIsCelsius, parseNum, splitCsvRows, UNIT_MARKER_RE } from './csv.js';
 import type { ChannelSample, LogAdapter, ParsedChannel, ParsedLog } from './types.js';
 
 // A column is a temperature channel if its header looks thermometric OR uses
@@ -64,7 +64,9 @@ function planColumns(headers: string[]): { time: number[] | null; temps: TempCol
   const timeCols = t?.cols ?? new Set<number>();
   const temps: TempCol[] = [];
   headers.forEach((h, idx) => {
-    if (timeCols.has(idx) || !TEMP_RE.test(h)) return;
+    // A column is a temperature channel if it reads thermometric / uses the
+    // mapping vocabulary, OR declares an explicit unit (e.g. "Sensor 1 (C)").
+    if (timeCols.has(idx) || (!TEMP_RE.test(h) && !UNIT_MARKER_RE.test(h))) return;
     temps.push({ idx, unit: unitOf(h), channel: { id: String(idx), label: h, role: 'unknown', samples: [] as ChannelSample[] } });
   });
   return { time: t ? t.idxs : null, temps };
