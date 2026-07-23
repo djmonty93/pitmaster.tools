@@ -86,7 +86,8 @@ export const thermoworksAdapter: LogAdapter = {
       for (const tc of temps) {
         const v = parseNum(cells[tc.idx]);
         if (v === null) continue;
-        tc.channel.samples.push({ tMin, tempF: tc.unit === 'C' ? cToF(v) : v });
+        const tempF = tc.unit === 'C' ? cToF(v) : v;
+        if (Number.isFinite(tempF)) tc.channel.samples.push({ tMin, tempF });
       }
     }
     return { format: 'thermoworks', channels: temps.map((t) => t.channel) };

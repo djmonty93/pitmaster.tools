@@ -65,12 +65,18 @@ export const combustionAdapter: LogAdapter = {
 
     for (const cells of rows.slice(loc.headerIdx + 1)) {
       const tSec = parseNum(cells[loc.tsIdx]);
-      if (tSec === null) continue;
+      if (tSec === null || tSec < 0) continue; // elapsed seconds are never negative
       const tMin = tSec / 60;
       const c = parseNum(cells[loc.coreIdx]);
-      if (c !== null) core.samples.push({ tMin, tempF: cToF(c) });
+      if (c !== null) {
+        const f = cToF(c);
+        if (Number.isFinite(f)) core.samples.push({ tMin, tempF: f });
+      }
       const a = parseNum(cells[loc.ambIdx]);
-      if (a !== null) ambient.samples.push({ tMin, tempF: cToF(a) });
+      if (a !== null) {
+        const f = cToF(a);
+        if (Number.isFinite(f)) ambient.samples.push({ tMin, tempF: f });
+      }
     }
 
     return { format: 'combustion', channels: [core, ambient] };

@@ -442,6 +442,20 @@ describe('generic-csv recognizes unit-only headers (codex re-review)', () => {
   });
 });
 
+describe('combustion skips negative elapsed timestamps (codex re-review)', () => {
+  it('drops a row with tSec < 0', () => {
+    const file = [
+      'Combustion Inc. Probe Data',
+      'Timestamp,VirtualCoreTemperature,VirtualAmbientTemperature',
+      '-5.000,65,105',
+      '0.000,65,105',
+      '60.000,70,110',
+    ].join('\n');
+    const log = combustionAdapter.parse(file);
+    expect(log.channels[0]?.samples).toEqual([{ tMin: 0, tempF: 149 }, { tMin: 1, tempF: 158 }]);
+  });
+});
+
 describe('combustion tolerates reordered columns (r9 #2)', () => {
   it('finds the header by required names in any order', () => {
     const file = [
