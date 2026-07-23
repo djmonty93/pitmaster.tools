@@ -45,6 +45,8 @@ Every sub-project reads or writes this shape. It is the load-bearing contract be
 | `pieces` | number? | Default 1. |
 | `zip` | string | Coarse location for the weather join (§7 privacy). |
 | `cookStartedAt` | integer | Epoch seconds of the cook's first sample — the absolute anchor the weather join needs (§5), since the observed series carries only relative `tMin`. From the probe log where available, else the submission time. |
+| `durationMin` | number? | Total cook length in minutes. Required for **manual** submissions (which have no series to derive `max(tMin)` from, §5); for file uploads it's derived from the series. |
+| `sourceUnit` | enum? | `F` \| `C`, collected by A only for formats whose file carries no unit (FireBoard) — the per-submission analogue of `probeMapping`. Adapters use the file's own unit when present, else this, else default °F (§4). |
 | `emailOptional` | string? | Opt-in only (§7). |
 | `consentAt` | integer | Epoch seconds; required. |
 | `probeMapping` | object? | Channel → role map (see below); only needed for user-labeled formats. |
@@ -83,7 +85,7 @@ A cook row moves through statuses: `pending_parse` → `pending_weather` → `re
 - **Route** `POST /api/cook-log`, modeled on `worker/src/handlers/pinImage.ts`: same-site `Origin` allowlist, exact content-type check, a size cap (cook logs are small — target ≤1 MB), a `WEATHER_KV` per-IP soft rate-limit, and a Cloudflare WAF rate-limit rule as the authoritative control (operator step, as with `/api/pin-image`).
 - **Probe mapping step:** when the parsed log has multiple `role: 'unknown'` channels (FireBoard / ThermoWorks / multi-probe generic CSV — see §2), A must show the parsed channel labels and let the user confirm which is the food (core) probe and, optionally, which is the pit. The label heuristic pre-selects a default so the common case is one click. Fixed-role formats (Combustion) skip this step. The resulting `probeMapping` is stored on the row.
 - **Storage:** raw uploaded file → **R2** (content-addressed, mirroring the pin-image dedupe pattern); canonical metadata row → **D1** `cook_logs` (§7), created with status `pending_parse`. On submit, the worker synchronously invokes B's parser; on success it stores the derived observations and advances to `pending_weather`, else it flags a parse error for later manual review.
-- **Shippable alone:** begins accumulating the data moat with no downstream code present. Manual-entry submissions skip `pending_parse` and land at `pending_weather` directly (their observations come from the form, not a file).
+- **Shippable alone:** begins accumulating the data moat with no downstream code present. Manual-entry submissions skip `pending_parse` and land at `pending_weather` directly (their observations come from the form, not a file) — the form must capture `durationMin` and `sourceUnit` (§2), which a file upload derives automatically.
 
 ## 4. Sub-project B — Log normalizer
 
@@ -96,7 +98,7 @@ A cook row moves through statuses: `pending_parse` → `pending_weather` → `re
     parse(rawText: string): ParsedLog;    // channel-oriented (§2), samples normalized to tMin + °F
   }
   ```
-  `detect` takes the raw file text because formats differ in **preamble** (Combustion has a 9-line banner before the header; FireBoard/ThermoWorks start at the header), **delimiter** (Combustion/FireBoard comma, Inkbird tab), and **header shape** — a pre-parsed `headers[]` can't sniff those. Each adapter owns its own preamble-skip, delimiter, decimal-separator, **timestamp decoding** (elapsed-seconds vs `MM/DD/YY HH:MM:SS` local-clock — see Appendix A), and **unit → °F** conversion, so `ParsedLog.channels[].samples` is always `{tMin, tempF}`. Adapters are tried in order; first `detect` wins; no match → parse error surfaced to A.
+  `detect` takes the raw file text because formats differ in **preamble** (Combustion has a 9-line banner before the header; FireBoard/ThermoWorks start at the header), **delimiter** (Combustion/FireBoard comma, Inkbird tab), and **header shape** — a pre-parsed `headers[]` can't sniff those. Each adapter owns its own preamble-skip, delimiter, decimal-separator, **timestamp decoding** (elapsed-seconds vs `MM/DD/YY HH:MM:SS` local-clock — see Appendix A), and **unit → °F** conversion, so `ParsedLog.channels[].samples` is always `{tMin, tempF}`. When a format carries **no unit in the file** (FireBoard), the adapter takes values as °F; the reduce/store step (A) applies the submission's `sourceUnit` (§2) when the user declared one — the °F assumption is the default, not a silent guarantee. Adapters are tried in order; first `detect` wins; no match → parse error surfaced to A.
 - **v1 adapter list** (revised — the original five did not survive format research; see Appendix A for evidence and the two removals):
   - **`combustion`** — CONFIRMED from two real exports; fixed-role, °C, elapsed-seconds, 9-line preamble.
   - **`fireboard`** — CONFIRMED from the official sample CSV; user-labeled channels, local clock, unit not in file.
@@ -108,7 +110,7 @@ A cook row moves through statuses: `pending_parse` → `pending_weather` → `re
 
 ## 5. Sub-project C — Weather reanalysis join
 
-- Queued/offline enrichment. For each `pending_weather` cook older than the ERA5 lag window, call **Open-Meteo Archive** (`https://archive-api.open-meteo.com/v1/archive`, hourly `temperature_2m` + `dewpoint_2m`) at the cook's ZIP → lat/lon over its window — `[cookStartedAt, cookStartedAt + max(tMin)·60]` (§2's absolute anchor plus the observed-series duration) — average across the cook duration, write `ambientF`/`dewPointF`/`altitudeM` back to the row, and flip status to `ready`.
+- Queued/offline enrichment. For each `pending_weather` cook older than the ERA5 lag window, call **Open-Meteo Archive** (`https://archive-api.open-meteo.com/v1/archive`, hourly `temperature_2m` + `dewpoint_2m`) at the cook's ZIP → lat/lon over its window — `[cookStartedAt, cookStartedAt + durationMin·60]` (§2's absolute anchor plus the cook length: `max(tMin)` for uploads, the form value for manual submissions) — average across the cook duration, write `ambientF`/`dewPointF`/`altitudeM` back to the row, and flip status to `ready`.
 - **ERA5 lag:** the archive trails real time by roughly five days, so C only processes cooks whose end time is older than that window — a freshly submitted cook is joined on a delay, never synchronously at submit.
 - Reuses the existing `worker/src/lib/weather/` error and retry patterns (same vendor family as the live forecast, `openMeteo.ts`). Runs on a **cron** trigger alongside the existing scheduled handlers in `worker/src/index.ts`.
 
@@ -185,7 +187,7 @@ Grounded by five parallel research passes. Each fact is labeled CONFIRMED (a rea
 
 ### meater — CONFIRMED: no file export
 - The app produces only an **in-app graph shareable as an image** — no CSV/TSV/JSON download. Structured data exists solely via the **public JSON REST API** (`temperature.internal`/`temperature.ambient`, °C, `updated_at` epoch — **current reading only, no history**) or a reverse-engineered private API. **No file adapter is possible.** A live-API ingest is a separate future path, not part of the file-upload normalizer.
-- Sources: `support.meater.com/.../Viewing-Previous-Cooks`; `github.com/apption-labs/meater-cloud-public-rest-api`.
+- Sources: `support.meater.com/hc/en-us/articles/36518839665563-Viewing-Previous-Cooks`; `github.com/apption-labs/meater-cloud-public-rest-api`.
 
 ### inkbird — PARTIAL: mechanism confirmed, header not found
 - CSV export exists but is **per-probe single-channel files** (no combined multi-probe export); channel identity is the filename/probe-name, not a column. The app's export engine uses a `Time` / value / separate `Unit` column convention, **tab-delimited**, with a decimal-separator that is **dot (Inkbird Pro) or comma (Engbird)** depending on app/locale. The **exact BBQ temperature header was not found in any source** — do not build until a real IBBQ-4T export is supplied.
