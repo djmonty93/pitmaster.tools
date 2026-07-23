@@ -19,9 +19,6 @@ const TEMP_RE = /(temp|°\s*[fc]|probe|internal|core|\bfood\b|\bmeat\b)/i;
 const C_RE = /(°\s*c\b|\bcelsius\b|[([]\s*°?\s*c\s*[)\]])/i;
 // A delimiter-separated trailing unit token, e.g. `Temp C`, `Temp - C`, `Temp[C]`.
 const C_SUFFIX_RE = /[\s\-_([]°?\s*c[)\]]?\s*$/i;
-// A time cell that is purely numeric is an ambiguous elapsed value, not a
-// calendar timestamp; generic-csv handles only parseable date strings.
-const BARE_NUMBER_RE = /^\d+(\.\d+)?$/;
 
 interface TempCol {
   idx: number;
@@ -70,7 +67,9 @@ function planColumns(headers: string[]): { time: number[] | null; temps: TempCol
  *  empty, a bare number (ambiguous elapsed), or unparseable. */
 function rowTime(cells: string[], idxs: number[]): number | null {
   const s = idxs.map((i) => (cells[i] ?? '').trim()).filter((x) => x !== '').join(' ');
-  if (s === '' || BARE_NUMBER_RE.test(s)) return null;
+  // A string that is itself a finite number (incl. `.5`, `+1`, `1e3`) is an
+  // ambiguous elapsed value, not a calendar timestamp — reject before Date().
+  if (s === '' || Number.isFinite(Number(s))) return null;
   const ms = new Date(s).getTime();
   return Number.isFinite(ms) ? ms : null;
 }

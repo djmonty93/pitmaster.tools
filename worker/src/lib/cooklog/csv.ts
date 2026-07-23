@@ -32,12 +32,54 @@ export function parseCsvLine(line: string): string[] {
   return out;
 }
 
-/** Split raw text into non-empty, quote-aware CSV rows. */
+/**
+ * Split raw text into non-empty CSV rows, honoring quoted fields — including
+ * quoted fields that span physical newlines (RFC 4180), so an embedded newline
+ * in e.g. a Notes column doesn't spawn a spurious data row. A row is emitted
+ * only if at least one of its fields is non-blank.
+ */
 export function splitCsvRows(text: string): string[][] {
-  return text
-    .split(/\r?\n/)
-    .filter((line) => line.trim().length > 0)
-    .map(parseCsvLine);
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cur = '';
+  let inQuotes = false;
+
+  const endField = (): void => {
+    row.push(cur);
+    cur = '';
+  };
+  const endRow = (): void => {
+    endField();
+    if (row.some((f) => f.trim() !== '')) rows.push(row);
+    row = [];
+  };
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (text[i + 1] === '"') {
+          cur += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        cur += ch;
+      }
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === ',') {
+      endField();
+    } else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && text[i + 1] === '\n') i++;
+      endRow();
+    } else {
+      cur += ch;
+    }
+  }
+  endRow();
+  return rows;
 }
 
 /** Parse a numeric cell strictly: empty/non-finite → null (never NaN). */

@@ -11,7 +11,7 @@
 import { cToF, parseNum, splitCsvRows, utcFromParts } from './csv.js';
 import type { ChannelSample, LogAdapter, ParsedChannel, ParsedLog } from './types.js';
 
-const TW_TIME_RE = /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/;
+const TW_TIME_RE = /^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/;
 /** Temp headers end in a `-°F` / `-°C` unit suffix; captures F or C. */
 const TW_UNIT_RE = /-\s*°?\s*([FC])\s*$/i;
 

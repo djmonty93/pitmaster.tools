@@ -3,6 +3,7 @@ import { parseCsvLine, utcFromParts } from '../../../src/lib/cooklog/csv.js';
 import { combustionAdapter } from '../../../src/lib/cooklog/combustion.js';
 import { fireboardAdapter } from '../../../src/lib/cooklog/fireboard.js';
 import { genericCsvAdapter } from '../../../src/lib/cooklog/genericCsv.js';
+import { thermoworksAdapter } from '../../../src/lib/cooklog/thermoworks.js';
 import { normalizeLog, toCookSamples, extractStall } from '../../../src/lib/cooklog/index.js';
 import type { CookSample, ParsedLog } from '../../../src/lib/cooklog/types.js';
 
@@ -185,5 +186,37 @@ describe('generic-csv recognizes a delimiter-separated trailing unit (r5 #3)', (
   it('does not misread "Internal Temp (°F)" as Celsius', () => {
     const log = genericCsvAdapter.parse('Time,Internal Temp (°F)\n2026-07-01T10:00:00Z,150');
     expect(log.channels[0]?.samples).toEqual([{ tMin: 0, tempF: 150 }]);
+  });
+});
+
+// Codex review round 6.
+
+describe('csv parser handles quoted multiline fields (r6 #1)', () => {
+  it('keeps an embedded newline inside quotes as one field, not a spurious row', () => {
+    // parseCsvLine is line-level; splitCsvRows spans records. Exercise via an
+    // adapter: the quoted Notes newline must not create an extra data row.
+    const log = combustionAdapter.parse(
+      'Combustion Inc. Probe Data\nTimestamp,VirtualCoreTemperature,VirtualAmbientTemperature,Notes\n0.000,65,105,"line1\nline2"\n60.000,70,110,ok',
+    );
+    expect(log.channels[0]?.samples).toEqual([{ tMin: 0, tempF: 149 }, { tMin: 1, tempF: 158 }]);
+  });
+});
+
+describe('generic-csv rejects numeric elapsed forms (r6 #2)', () => {
+  it('skips .5 / 1e3 style time cells instead of parsing them as dates', () => {
+    const log = genericCsvAdapter.parse('Time,Temp\n.5,150\n1e3,151');
+    expect(log.channels[0]?.samples).toEqual([]);
+  });
+});
+
+describe('timestamp regexes reject 3-digit years (r6 #3, #4)', () => {
+  it('fireboard: 2- or 4-digit year detects, 3-digit does not', () => {
+    expect(fireboardAdapter.detect('Time,Ribs\n07/03/16 15:06:00,150')).toBe(true);
+    expect(fireboardAdapter.detect('Time,Ribs\n07/03/999 15:06:00,150')).toBe(false);
+  });
+
+  it('thermoworks: 3-digit year is not accepted', () => {
+    expect(thermoworksAdapter.detect('Probe1 -°F,Time\n150,10/12/16 15:12')).toBe(true);
+    expect(thermoworksAdapter.detect('Probe1 -°F,Time\n150,10/12/999 15:12')).toBe(false);
   });
 });

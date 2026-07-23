@@ -15,7 +15,7 @@
 import { parseNum, splitCsvRows, utcFromParts } from './csv.js';
 import type { ChannelSample, LogAdapter, ParsedChannel, ParsedLog } from './types.js';
 
-const FB_TIME_RE = /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s+(\d{1,2}):(\d{2}):(\d{2})$/;
+const FB_TIME_RE = /^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})$/;
 // An explicit unit token in a header (°F/°C, or bracketed (C)/(F)) means the
 // file is NOT FireBoard — real FireBoard columns are bare probe names. Defer
 // such files to ThermoWorks (which reads the suffix) or generic-csv.
