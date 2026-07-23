@@ -108,7 +108,7 @@ A cook row moves through statuses: `pending_parse` → `pending_weather` → `re
   - **`combustion`** — CONFIRMED from two real exports; fixed-role, °C, elapsed-seconds, 10-line preamble (9 metadata + 1 blank).
   - **`fireboard`** — CONFIRMED from the official sample CSV; user-labeled channels, local clock, unit not in file.
   - **`thermoworks`** — CONFIRMED from official screenshots (2018 BBQ-app format only; RFX/Cloud unconfirmed and out of v1); numbered probes, unit in header suffix, local clock.
-  - **`generic-csv`** — fallback for `time + temperature column(s)` (already built).
+  - **`generic-csv`** — fallback for a **calendar-timestamp** time column (bare all-numeric/elapsed values are rejected, so a generic upload always yields a wall-clock `startedAt`) + temperature column(s) (already built).
   - **Dropped: `meater`** — no file export exists at all (only a shareable graph image); structured data is available only via a live JSON API, a different ingest path, deferred as a possible future non-file source.
   - **Deferred: `inkbird`** — CSV exists but per-probe single files and the exact BBQ header was not found in any source; build once a real IBBQ-4T export is supplied. Do not fabricate its columns.
 - **Extractors:** `plateauF` (temperature of the longest near-flat core-temp segment) and `dwellHr` (its duration) from the reduced series; `wrapAtMin` if a wrap discontinuity is present.
