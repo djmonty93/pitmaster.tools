@@ -164,3 +164,26 @@ describe('fireboard defers named-unit headers; generic detect requires a timesta
     expect(normalizeLog('Time,Temp\nnotadate,150\nalsobad,151')).toBeNull();
   });
 });
+
+// Codex review round 5.
+
+describe('generic-csv combines split Date + Time columns (r5 #2)', () => {
+  it('does not collapse a Date,Time,Temp log to identical tMin', () => {
+    const log = genericCsvAdapter.parse(
+      'Date,Time,Temp\n2026-07-01,10:00:00,150\n2026-07-01,10:01:00,151',
+    );
+    expect(log.channels[0]?.samples).toEqual([{ tMin: 0, tempF: 150 }, { tMin: 1, tempF: 151 }]);
+  });
+});
+
+describe('generic-csv recognizes a delimiter-separated trailing unit (r5 #3)', () => {
+  it('treats "Temp C" as Celsius and converts to °F', () => {
+    const log = genericCsvAdapter.parse('Time,Temp C\n2026-07-01T10:00:00Z,65');
+    expect(log.channels[0]).toMatchObject({ label: 'Temp C', samples: [{ tMin: 0, tempF: 149 }] });
+  });
+
+  it('does not misread "Internal Temp (°F)" as Celsius', () => {
+    const log = genericCsvAdapter.parse('Time,Internal Temp (°F)\n2026-07-01T10:00:00Z,150');
+    expect(log.channels[0]?.samples).toEqual([{ tMin: 0, tempF: 150 }]);
+  });
+});

@@ -17,10 +17,15 @@ const MIN_DWELL_HR = 0.5;
  *  big is missing data, not a continuous plateau. */
 const MAX_GAP_HR = 1;
 
-// NOTE (spec §9): a long, genuinely-flat LOW span (e.g. a post-cook hold well
-// below the stall band) could still be selected as the "longest" low-slope
-// span. A plausible-stall temperature gate is deferred to sub-project D, where
-// the plateau band is calibrated against real cooks.
+// NOTE (spec §9): two known limitations of this simple longest-low-slope
+// heuristic are deferred to sub-project D, where the algorithm is calibrated
+// against real cooks:
+//   1. A long, genuinely-flat LOW span (e.g. a post-cook hold below the stall
+//      band) could still be selected — a plausible-stall temperature gate is
+//      the fix, but its band is exactly what D calibrates.
+//   2. Slope is computed between adjacent samples, so high-frequency /
+//      quantized probe noise can fragment a real stall — smoothing or a
+//      rolling-window slope is a tuning choice that also belongs in D.
 
 export interface StallObservation {
   /** Mean core temperature over the stall span, °F. */
