@@ -1,0 +1,104 @@
+// Observation extractors for stall-model M3 sub-project B (log normalizer).
+// See docs/superpowers/specs/2026-07-22-stall-model-v2-m3-telemetry-design.md §4, §9.
+//
+// From a normalized CookSample series, derive the observed stall: the longest
+// contiguous span where the core-temp rise rate stays below STALL_SLOPE, lasting
+// at least MIN_DWELL_HR. These observed values are what the calibration harness
+// (sub-project D) fits SP_STALL_K / SP_PLAT_A|B against. Thresholds are v1
+// placeholders (spec §9 open item) — adjustable without changing the contract.
+
+import type { CookSample } from './types.js';
+
+/** Core rising slower than this (°F/hr) counts as stalled. */
+const STALL_SLOPE_F_PER_HR = 5;
+/** Ignore flat spans shorter than this (hr). */
+const MIN_DWELL_HR = 0.5;
+/** Break a stall run across a sampling gap larger than this (hr) — a gap that
+ *  big is missing data, not a continuous plateau. */
+const MAX_GAP_HR = 1;
+
+// NOTE (spec §9): two known limitations of this simple longest-low-slope
+// heuristic are deferred to sub-project D, where the algorithm is calibrated
+// against real cooks:
+//   1. A long, genuinely-flat LOW span (e.g. a post-cook hold below the stall
+//      band) could still be selected — a plausible-stall temperature gate is
+//      the fix, but its band is exactly what D calibrates.
+//   2. Slope is computed between adjacent samples, so high-frequency /
+//      quantized probe noise can fragment a real stall — smoothing or a
+//      rolling-window slope is a tuning choice that also belongs in D.
+
+export interface StallObservation {
+  /** Mean core temperature over the stall span, °F. */
+  plateauF: number;
+  /** Duration of the stall span, hours. */
+  dwellHr: number;
+}
+
+/** Average readings that share a tMin (deterministic) and sort by tMin, so the
+ *  slope math sees strictly increasing time and a same-time jump is represented
+ *  by its mean rather than silently dropped. */
+function coalesceByTime(input: CookSample[]): CookSample[] {
+  const acc = new Map<number, { coreSum: number; coreN: number; pitSum: number; pitN: number }>();
+  for (const s of input) {
+    let a = acc.get(s.tMin);
+    if (!a) {
+      a = { coreSum: 0, coreN: 0, pitSum: 0, pitN: 0 };
+      acc.set(s.tMin, a);
+    }
+    a.coreSum += s.coreF;
+    a.coreN += 1;
+    if (s.pitF !== undefined) {
+      a.pitSum += s.pitF;
+      a.pitN += 1;
+    }
+  }
+  return [...acc.entries()]
+    .sort((x, y) => x[0] - y[0])
+    .map(([tMin, a]) =>
+      a.pitN > 0
+        ? { tMin, coreF: a.coreSum / a.coreN, pitF: a.pitSum / a.pitN }
+        : { tMin, coreF: a.coreSum / a.coreN },
+    );
+}
+
+export function extractStall(input: CookSample[]): StallObservation | null {
+  const samples = coalesceByTime(input);
+  let bestStart = -1;
+  let bestEnd = -1;
+  let bestDur = 0;
+  let curStart = -1;
+
+  for (let i = 1; i < samples.length; i++) {
+    const prev = samples[i - 1];
+    const cur = samples[i];
+    if (prev === undefined || cur === undefined) continue;
+
+    const dtHr = (cur.tMin - prev.tMin) / 60;
+    // A duplicate/non-increasing timestamp carries no interval — skip it without
+    // resetting the active stall run (else dtHr===0 would fragment the dwell).
+    if (dtHr <= 0) continue;
+    const slope = (cur.coreF - prev.coreF) / dtHr;
+
+    // Stalled = a small-magnitude slope (excludes steep rises AND steep drops
+    // like a pulled probe) across a plausible sampling interval (no huge gaps).
+    if (dtHr <= MAX_GAP_HR && Math.abs(slope) < STALL_SLOPE_F_PER_HR) {
+      if (curStart === -1) curStart = i - 1;
+      const start = samples[curStart];
+      if (start === undefined) continue;
+      const dur = (cur.tMin - start.tMin) / 60;
+      if (dur > bestDur) {
+        bestDur = dur;
+        bestStart = curStart;
+        bestEnd = i;
+      }
+    } else {
+      curStart = -1;
+    }
+  }
+
+  if (bestStart === -1 || bestDur < MIN_DWELL_HR) return null;
+
+  const span = samples.slice(bestStart, bestEnd + 1);
+  const plateauF = span.reduce((sum, s) => sum + s.coreF, 0) / span.length;
+  return { plateauF, dwellHr: bestDur };
+}
